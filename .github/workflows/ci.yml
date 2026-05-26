@@ -88,13 +88,32 @@ jobs:
       - name: Compile RCS JSON Schema (draft-07)
         run: bash scripts/validate-rcs-schema.sh
 
+  no-unwrap:
+    name: No unwrap in library code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject unwrap and expect outside tests
+        run: bash scripts/check-no-unwrap.sh
+
   function-length:
     name: Function length check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Placeholder (Sprint 2 enforces max 50 lines)
-        run: echo "Function length enforcement active from Sprint 2"
+      - name: Enforce max 40 lines per function
+        run: bash scripts/check-function-length.sh
+
+  doc:
+    name: Rustdoc build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build docs without warnings
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc --workspace --no-deps
 
   structure-check:
     name: Directory structure
