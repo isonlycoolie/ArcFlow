@@ -5,11 +5,11 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 use crate::agent::AgentRuntime;
-use crate::error::RuntimeError;
 use crate::rcs::types::{AgentDefinition, WorkflowDefinition};
 
 use super::record::WorkflowExecutionRecord;
 use super::run::run_sorted_steps;
+use super::run_error::WorkflowRunError;
 use super::validation::validate_workflow;
 
 pub struct WorkflowEngine {
@@ -29,12 +29,16 @@ impl WorkflowEngine {
         }
     }
 
+    /// Validates the definition, then runs steps in ascending `order`.
+    ///
+    /// On agent failure after one or more steps complete, returns [`WorkflowRunError::Failed`]
+    /// with the partial [`WorkflowExecutionRecord`].
     pub fn execute(
         &self,
         workflow: &WorkflowDefinition,
         agents: &HashMap<Uuid, AgentDefinition>,
         run_input: &str,
-    ) -> Result<WorkflowExecutionRecord, RuntimeError> {
+    ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
         validate_workflow(workflow, agents)?;
         run_sorted_steps(&self.agent_runtime, workflow, agents, run_input)
     }
@@ -49,6 +53,7 @@ mod tests {
     use super::WorkflowEngine;
     use crate::error::RuntimeError;
     use crate::rcs::types::{AgentDefinition, StepDefinition, WorkflowDefinition};
+    use crate::workflow::WorkflowRunError;
 
     fn agent(id: Uuid) -> AgentDefinition {
         AgentDefinition {
@@ -74,7 +79,7 @@ mod tests {
             .unwrap_err();
         assert!(matches!(
             err,
-            RuntimeError::InvalidWorkflowDefinition { .. }
+            WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition { .. })
         ));
     }
 
@@ -96,7 +101,10 @@ mod tests {
         let err = WorkflowEngine::new()
             .execute(&wf, &HashMap::new(), "in")
             .unwrap_err();
-        assert!(matches!(err, RuntimeError::AgentNotFound { .. }));
+        assert!(matches!(
+            err,
+            WorkflowRunError::Aborted(RuntimeError::AgentNotFound { .. })
+        ));
     }
 
     #[test]
@@ -127,7 +135,7 @@ mod tests {
         let err = WorkflowEngine::new().execute(&wf, &m, "in").unwrap_err();
         assert!(matches!(
             err,
-            RuntimeError::InvalidWorkflowDefinition { .. }
+            WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition { .. })
         ));
     }
 }
