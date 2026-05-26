@@ -134,4 +134,17 @@ mod tests {
         engine.commit(out.clone()).unwrap();
         assert_eq!(engine.step_output(sid), Some(&out));
     }
+
+    #[test]
+    fn committed_state_is_not_mutable_after_commit() {
+        let mut engine = StateEngine::new();
+        let sid = Uuid::new_v4();
+        engine.commit(sample_output(sid)).unwrap();
+        assert_eq!(engine.snapshot().steps.len(), 1);
+
+        let mut snap = engine.snapshot();
+        snap.steps.clear();
+        assert!(snap.steps.is_empty());
+        assert_eq!(engine.snapshot().steps.len(), 1);
+    }
 }
