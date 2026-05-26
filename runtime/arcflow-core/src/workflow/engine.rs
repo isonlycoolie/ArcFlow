@@ -35,6 +35,7 @@ impl WorkflowEngine {
     ///
     /// On agent failure after one or more steps complete, returns [`WorkflowRunError::Failed`]
     /// with the partial [`WorkflowExecutionRecord`].
+    #[allow(clippy::result_large_err)] // `Failed` carries partial record by design (ADR-002)
     pub fn execute(
         &self,
         workflow: &WorkflowDefinition,
