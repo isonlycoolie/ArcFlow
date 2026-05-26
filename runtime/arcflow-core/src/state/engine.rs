@@ -65,3 +65,67 @@ impl StateEngine {
         self.committed_steps.iter().find(|s| s.step_id == step_id)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use uuid::Uuid;
+
+    fn sample_output(step_id: Uuid) -> ExecutionStepOutput {
+        ExecutionStepOutput {
+            step_id,
+            agent_id: Uuid::new_v4(),
+            content: "x".into(),
+            status: ExecutionStatus::Completed,
+        }
+    }
+
+    #[test]
+    fn new_state_engine_has_no_committed_steps() {
+        let engine = StateEngine::new();
+        assert!(engine.snapshot().steps.is_empty());
+    }
+
+    #[test]
+    fn commit_adds_step_to_state() {
+        let mut engine = StateEngine::new();
+        let sid = Uuid::new_v4();
+        engine.commit(sample_output(sid)).unwrap();
+        assert_eq!(engine.snapshot().steps.len(), 1);
+    }
+
+    #[test]
+    fn snapshot_reflects_all_committed_steps() {
+        let mut engine = StateEngine::new();
+        let a = Uuid::new_v4();
+        let b = Uuid::new_v4();
+        engine.commit(sample_output(a)).unwrap();
+        engine.commit(sample_output(b)).unwrap();
+        let snap = engine.snapshot();
+        assert_eq!(snap.steps.len(), 2);
+    }
+
+    #[test]
+    fn commit_returns_error_on_duplicate_step_id() {
+        let mut engine = StateEngine::new();
+        let sid = Uuid::new_v4();
+        engine.commit(sample_output(sid)).unwrap();
+        let err = engine.commit(sample_output(sid)).unwrap_err();
+        assert_eq!(err, StateError::DuplicateCommit { step_id: sid });
+    }
+
+    #[test]
+    fn step_output_returns_none_for_unknown_step() {
+        let engine = StateEngine::new();
+        assert!(engine.step_output(Uuid::new_v4()).is_none());
+    }
+
+    #[test]
+    fn step_output_returns_correct_output_for_known_step() {
+        let mut engine = StateEngine::new();
+        let sid = Uuid::new_v4();
+        let out = sample_output(sid);
+        engine.commit(out.clone()).unwrap();
+        assert_eq!(engine.step_output(sid), Some(&out));
+    }
+}
