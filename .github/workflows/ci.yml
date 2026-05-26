@@ -58,6 +58,25 @@ jobs:
       - name: Enforce per-commit code line limit
         run: bash scripts/check-commit-size.sh
 
+  secrets-scan:
+    name: Secret pattern scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Block obvious hardcoded secrets
+        run: |
+          set -euo pipefail
+          # Exit 0 from git grep means matches were found.
+          if git grep -nE 'sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}' -- . ':(exclude)target' ':(exclude).git' 2>/dev/null; then
+            echo "::error::Possible API key or AWS access key id pattern in tree"
+            exit 1
+          fi
+          if git grep -nE 'BEGIN (RSA|OPENSSH|EC) PRIVATE KEY' -- . ':(exclude)target' ':(exclude).git' 2>/dev/null; then
+            echo "::error::Possible PEM private key material in tree"
+            exit 1
+          fi
+          echo "OK: no blocked secret-like patterns"
+
   validate-contracts:
     name: Validate RCS schema
     runs-on: ubuntu-latest
