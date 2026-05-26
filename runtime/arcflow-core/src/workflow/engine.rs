@@ -140,4 +140,28 @@ mod tests {
             WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition { .. })
         ));
     }
+
+    #[test]
+    fn execute_with_empty_workflow_name_returns_invalid_definition_error() {
+        let aid = Uuid::new_v4();
+        let sid = Uuid::new_v4();
+        let mut m = HashMap::new();
+        m.insert(aid, agent(aid));
+        let wf = WorkflowDefinition {
+            id: Uuid::new_v4(),
+            name: "   ".into(),
+            steps: vec![StepDefinition {
+                id: sid,
+                agent_id: aid,
+                order: 1,
+                fallback_step_id: None,
+            }],
+            retry_policy: None,
+        };
+        let err = WorkflowEngine::new().execute(&wf, &m, "in").unwrap_err();
+        assert!(matches!(
+            err,
+            WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition { .. })
+        ));
+    }
 }
