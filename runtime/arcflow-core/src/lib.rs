@@ -18,16 +18,13 @@ pub mod rcs;
 /// Typed runtime errors for orchestration (Sprint 2).
 pub mod error;
 
-/// Workflow execution engine.
-/// Implemented in Sprint 2.
+/// Workflow execution engine (Sprint 2 — `WorkflowEngine`, deterministic stub agents).
 pub mod workflow;
 
-/// Agent runtime and lifecycle management.
-/// Implemented in Sprint 2.
+/// Agent runtime and lifecycle management (Sprint 2 — `AgentRuntime` stub).
 pub mod agent;
 
-/// Execution state management.
-/// Implemented in Sprint 2.
+/// Execution state management (Sprint 2 — `StateEngine`).
 pub mod state;
 
 /// Memory subsystem — session, shared, persistent, vector.

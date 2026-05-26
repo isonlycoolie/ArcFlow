@@ -16,6 +16,12 @@ pub struct WorkflowEngine {
     agent_runtime: AgentRuntime,
 }
 
+impl Default for WorkflowEngine {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl WorkflowEngine {
     pub fn new() -> Self {
         Self {

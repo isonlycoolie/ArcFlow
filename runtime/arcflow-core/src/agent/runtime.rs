@@ -8,6 +8,12 @@ use crate::state::{ExecutionStepOutput, StateSnapshot};
 /// Invokes agents without provider I/O; output is derived from role and input.
 pub struct AgentRuntime;
 
+impl Default for AgentRuntime {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AgentRuntime {
     /// Builds a stub runtime (stateless).
     pub fn new() -> Self {

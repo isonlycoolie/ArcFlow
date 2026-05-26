@@ -30,6 +30,12 @@ pub struct StateEngine {
     committed_steps: Vec<ExecutionStepOutput>,
 }
 
+impl Default for StateEngine {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl StateEngine {
     /// Starts with no committed steps.
     pub fn new() -> Self {
