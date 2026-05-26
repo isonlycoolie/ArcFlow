@@ -12,6 +12,7 @@ use super::run::run_sorted_steps;
 use super::run_error::WorkflowRunError;
 use super::validation::validate_workflow;
 
+/// Runs a workflow definition sequentially with state handoff between steps.
 pub struct WorkflowEngine {
     agent_runtime: AgentRuntime,
 }
@@ -23,6 +24,7 @@ impl Default for WorkflowEngine {
 }
 
 impl WorkflowEngine {
+    /// Builds an engine with the default deterministic stub [`AgentRuntime`].
     pub fn new() -> Self {
         Self {
             agent_runtime: AgentRuntime::new(),

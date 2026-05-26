@@ -24,7 +24,7 @@ pub mod workflow;
 /// Agent runtime and lifecycle management (Sprint 2 — `AgentRuntime` stub).
 pub mod agent;
 
-/// Execution state management (Sprint 2 — `StateEngine`).
+/// Execution state management (Sprint 2 — see `crate::state::StateEngine`).
 pub mod state;
 
 /// Memory subsystem — session, shared, persistent, vector.

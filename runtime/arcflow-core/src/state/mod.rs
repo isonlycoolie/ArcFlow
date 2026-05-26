@@ -1,4 +1,4 @@
-//! Execution state management — one [`StateEngine`] per workflow run (Sprint 2).
+//! Execution state management — one `StateEngine` per workflow run (Sprint 2).
 
 mod engine;
 
