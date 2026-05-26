@@ -181,3 +181,46 @@ pub struct ProviderConfig {
     /// Optional provider-specific parameters.
     pub params: Option<Value>,
 }
+
+/// Agent role, instructions, and optional tool/memory configuration.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct AgentDefinition {
+    /// Unique agent identifier.
+    pub id: Uuid,
+    /// Human-readable agent name.
+    pub name: String,
+    /// Role label used in prompts and traces.
+    pub role: String,
+    /// System or task instructions for the agent.
+    pub instructions: String,
+    /// Tools available to this agent.
+    pub tools: Option<Vec<ToolDefinition>>,
+    /// Memory configuration for this agent.
+    pub memory_config: Option<MemoryConfig>,
+}
+
+/// Single step within a workflow definition.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct StepDefinition {
+    /// Unique step identifier.
+    pub id: Uuid,
+    /// Agent that executes this step.
+    pub agent_id: Uuid,
+    /// Execution order relative to other steps.
+    pub order: u32,
+    /// Optional fallback step when this step fails.
+    pub fallback_step_id: Option<Uuid>,
+}
+
+/// Complete workflow specification submitted by an SDK.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct WorkflowDefinition {
+    /// Unique workflow identifier (UUID v4).
+    pub id: Uuid,
+    /// Human-readable workflow name (max 256 chars at validation).
+    pub name: String,
+    /// Steps comprising the workflow.
+    pub steps: Vec<StepDefinition>,
+    /// Optional default retry policy for all steps.
+    pub retry_policy: Option<RetryPolicy>,
+}
