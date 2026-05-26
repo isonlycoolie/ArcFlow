@@ -1,0 +1,47 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "arcflow"
+version = "0.3.0"
+description = "AI workflow orchestration runtime — structured, observable, reusable."
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "mypy>=1.0",
+    "black>=23.0",
+    "ruff>=0.1",
+    "maturin>=1.0",
+]
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "arcflow._arcflow_binding"
+
+[tool.black]
+line-length = 88
+target-version = ["py39"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+select = ["E", "F", "W", "I", "N", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+packages = ["arcflow"]
+enable_error_code = ["import-untyped"]
+
+[[tool.mypy.overrides]]
+module = "arcflow._arcflow_binding"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

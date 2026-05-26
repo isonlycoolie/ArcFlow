@@ -1,0 +1,17 @@
+[package]
+name = "arcflow-python"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "PyO3 bindings for the ArcFlow Python SDK"
+
+[lib]
+name = "_arcflow_binding"
+crate-type = ["cdylib"]
+
+[dependencies]
+arcflow-core = { path = "../runtime/arcflow-core" }
+pyo3 = { workspace = true }
+uuid = { workspace = true }

@@ -1,0 +1,23 @@
+"""Workflow execution result types."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class WorkflowResult:
+    """Output of a completed workflow run."""
+
+    output: str
+    run_id: str
+    step_count: int
+
+    def __repr__(self) -> str:
+        preview = self.output[:50]
+        suffix = "..." if len(self.output) > 50 else ""
+        return (
+            f"WorkflowResult(run_id={self.run_id!r}, "
+            f"step_count={self.step_count}, "
+            f"output={preview!r}{suffix})"
+        )

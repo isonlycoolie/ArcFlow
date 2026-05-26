@@ -2,6 +2,7 @@
 [workspace]
 members = [
     "runtime/arcflow-core",
+    "sdk-python",
 ]
 resolver = "2"
 
@@ -21,3 +22,4 @@ thiserror = "1"
 uuid = { version = "1", features = ["v4", "serde"] }
 tracing = "0.1"
 chrono = { version = "0.4", features = ["serde"] }
+pyo3 = { version = "0.22", features = ["extension-module"] }

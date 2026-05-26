@@ -1,0 +1,50 @@
+name: SDK Python
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "sdk-python/**"
+      - "runtime/arcflow-core/**"
+      - "Cargo.toml"
+      - ".github/workflows/sdk-python.yml"
+  pull_request:
+    branches: [main, master]
+    paths:
+      - "sdk-python/**"
+      - "runtime/arcflow-core/**"
+      - "Cargo.toml"
+      - ".github/workflows/sdk-python.yml"
+
+jobs:
+  sdk-python:
+    name: Python ${{ matrix.python }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install tools
+        run: pip install maturin pytest mypy black ruff
+      - name: Build and install extension
+        working-directory: sdk-python
+        run: maturin develop --release
+      - name: Ruff
+        working-directory: sdk-python
+        run: ruff check arcflow tests
+      - name: Black
+        working-directory: sdk-python
+        run: black --check arcflow tests
+      - name: Mypy
+        working-directory: sdk-python
+        run: mypy arcflow
+      - name: Pytest
+        working-directory: sdk-python
+        run: pytest tests/ -v
