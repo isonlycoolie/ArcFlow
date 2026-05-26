@@ -41,13 +41,24 @@ fi
 
 # PR / branch mode: check all commits not on base
 BASE_REF="${GITHUB_BASE_REF:-main}"
+RANGE=""
 if git rev-parse "origin/${BASE_REF}" >/dev/null 2>&1; then
   RANGE="origin/${BASE_REF}..HEAD"
-else
-  RANGE="HEAD"
+elif git rev-parse "origin/master" >/dev/null 2>&1; then
+  RANGE="origin/master..HEAD"
+elif [[ -n "${COMMIT_SIZE_BASE:-}" ]]; then
+  RANGE="${COMMIT_SIZE_BASE}..HEAD"
 fi
 
-COMMITS=$(git rev-list --no-merges "$RANGE" 2>/dev/null || true)
+if [[ -n "$RANGE" ]]; then
+  COMMITS=$(git rev-list --no-merges "$RANGE" 2>/dev/null || true)
+else
+  # Without a remote tracking branch, `git rev-list HEAD` walks the entire
+  # history (false failures on legacy commits). Check only the tip commit
+  # unless COMMIT_SIZE_BASE is set above.
+  echo "Note: no origin/${BASE_REF} or origin/master; checking only HEAD (set COMMIT_SIZE_BASE=<sha> for a range)."
+  COMMITS=$(git rev-list -n 1 HEAD 2>/dev/null || true)
+fi
 if [[ -z "$COMMITS" ]]; then
   echo "No commits to check in range ${RANGE}"
   exit 0
