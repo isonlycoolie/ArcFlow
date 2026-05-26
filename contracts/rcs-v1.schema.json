@@ -164,6 +164,105 @@
       },
       "required": ["provider_id", "model", "api_key_env"],
       "additionalProperties": false
+    },
+    "AgentDefinition": {
+      "type": "object",
+      "description": "Agent role and capabilities referenced by workflow steps. Sprint 2–6.",
+      "properties": {
+        "id": { "$ref": "#/$defs/Uuid" },
+        "name": {
+          "type": "string",
+          "description": "Human-readable agent name. Sprint 2–3 SDK binding."
+        },
+        "role": {
+          "type": "string",
+          "description": "Role label used in prompts. Sprint 2–3."
+        },
+        "instructions": {
+          "type": "string",
+          "description": "System or task instructions. Sprint 2–3, Sprint 6 provider calls."
+        },
+        "tools": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ToolDefinition" },
+          "description": "Tools available to the agent. Sprint 4."
+        },
+        "memory_config": {
+          "$ref": "#/$defs/MemoryConfig",
+          "description": "Optional memory configuration. Sprint 4."
+        }
+      },
+      "required": ["id", "name", "role", "instructions"],
+      "additionalProperties": false
+    },
+    "StepDefinition": {
+      "type": "object",
+      "description": "Ordered step within a workflow. Sprint 2 execution.",
+      "properties": {
+        "id": { "$ref": "#/$defs/Uuid" },
+        "agent_id": {
+          "$ref": "#/$defs/Uuid",
+          "description": "Agent that executes this step. Sprint 2–3."
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Execution order among steps. Sprint 2."
+        },
+        "fallback_step_id": {
+          "$ref": "#/$defs/Uuid",
+          "description": "Optional fallback step on failure. Sprint 7."
+        }
+      },
+      "required": ["id", "agent_id", "order"],
+      "additionalProperties": false
+    },
+    "WorkflowDefinition": {
+      "type": "object",
+      "description": "Complete workflow registered with the runtime. Sprint 2–3, Sprint 7 retry.",
+      "properties": {
+        "id": { "$ref": "#/$defs/Uuid" },
+        "name": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Human-readable workflow name for traces and errors. Sprint 2–3."
+        },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/StepDefinition" },
+          "description": "Steps comprising the workflow. Sprint 2–3."
+        },
+        "retry_policy": {
+          "$ref": "#/$defs/RetryPolicy",
+          "description": "Default retry policy for all steps. Sprint 7."
+        }
+      },
+      "required": ["id", "name", "steps"],
+      "additionalProperties": false
+    },
+    "RunRequest": {
+      "type": "object",
+      "description": "Instruction to execute a registered workflow. Sprint 2–3, Sprint 5–6.",
+      "properties": {
+        "workflow_id": {
+          "$ref": "#/$defs/Uuid",
+          "description": "Registered workflow id. Sprint 2–3."
+        },
+        "input": {
+          "type": "string",
+          "description": "Caller input text for the run. Sprint 2–3."
+        },
+        "trace_id": {
+          "$ref": "#/$defs/Uuid",
+          "description": "Correlation id for observability. Sprint 5."
+        },
+        "provider_config": {
+          "$ref": "#/$defs/ProviderConfig",
+          "description": "Optional provider override. Sprint 6."
+        }
+      },
+      "required": ["workflow_id", "input", "trace_id"],
+      "additionalProperties": false
     }
   }
 }
