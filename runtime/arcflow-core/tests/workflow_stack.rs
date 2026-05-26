@@ -80,7 +80,11 @@ fn execution_order_sorts_by_step_order_field() {
         .collect();
     assert_eq!(got, vec![s1, s2, s3]);
     let e = WorkflowEngine::new();
-    let c1 = e.execute(&wf, &m, "z").unwrap().step_outputs[0].content.clone();
-    let c2 = e.execute(&wf, &m, "z").unwrap().step_outputs[0].content.clone();
+    let c1 = e.execute(&wf, &m, "z").unwrap().step_outputs[0]
+        .content
+        .clone();
+    let c2 = e.execute(&wf, &m, "z").unwrap().step_outputs[0]
+        .content
+        .clone();
     assert_eq!(c1, c2);
 }
