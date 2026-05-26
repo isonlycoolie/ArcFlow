@@ -15,6 +15,9 @@
 /// This module is fully implemented in Sprint 1.
 pub mod rcs;
 
+/// Typed runtime errors for orchestration (Sprint 2).
+pub mod error;
+
 /// Workflow execution engine.
 /// Implemented in Sprint 2.
 pub mod workflow;
