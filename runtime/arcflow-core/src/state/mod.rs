@@ -1,7 +1,5 @@
-// Execution state management — Sprint 2
-//
-// This module will hold execution state, step transitions, and persistence
-// hooks for the workflow engine.
-// See: ArcFlow Sprint Plan, Sprint 2 — Rust Runtime Core.
-//
-// DO NOT add implementation code to this module before Sprint 2.
+//! Execution state management — one [`StateEngine`] per workflow run (Sprint 2).
+
+mod engine;
+
+pub use engine::{ExecutionStepOutput, StateEngine, StateSnapshot};
