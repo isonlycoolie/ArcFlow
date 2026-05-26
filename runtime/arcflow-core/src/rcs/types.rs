@@ -131,3 +131,53 @@ pub enum ProviderId {
     /// Custom provider implementation.
     Custom,
 }
+
+use chrono::{DateTime, Utc};
+use serde_json::Value;
+use uuid::Uuid;
+
+/// Retry policy applied at workflow or step level.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RetryPolicy {
+    /// Maximum number of attempts including the first run.
+    pub max_attempts: u32,
+    /// Initial backoff delay in milliseconds.
+    pub backoff_ms: u64,
+    /// Upper bound on backoff delay in milliseconds.
+    pub max_backoff_ms: u64,
+}
+
+/// Agent memory access configuration (Sprint 4).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MemoryConfig {
+    /// Memory backend kind.
+    pub memory_type: MemoryType,
+    /// Scope boundary for reads and writes.
+    pub scope: MemoryScope,
+    /// Optional time-to-live in seconds.
+    pub ttl_seconds: Option<u64>,
+}
+
+/// External tool specification embedded in agent definitions.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ToolDefinition {
+    /// Tool name used for dispatch.
+    pub name: String,
+    /// JSON Schema describing tool inputs.
+    pub input_schema: Value,
+    /// Permission strings required to invoke the tool.
+    pub permissions: Option<Vec<String>>,
+}
+
+/// LLM provider configuration for a run (Sprint 6).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ProviderConfig {
+    /// Provider identifier.
+    pub provider_id: ProviderId,
+    /// Model name passed to the provider API.
+    pub model: String,
+    /// Environment variable name holding the API key.
+    pub api_key_env: String,
+    /// Optional provider-specific parameters.
+    pub params: Option<Value>,
+}
