@@ -36,8 +36,7 @@ mod tests {
             timestamp: Utc.with_ymd_and_hms(2025, 1, 1, 0, 0, 0).unwrap(),
             payload: serde_json::json!({"workflow_id": Uuid::new_v4()}),
         };
-        let json =
-            serde_json::to_string(&original).expect("MessageEnvelope must serialize");
+        let json = serde_json::to_string(&original).expect("MessageEnvelope must serialize");
         let deserialized: MessageEnvelope =
             serde_json::from_str(&json).expect("MessageEnvelope must deserialize");
         assert_eq!(original, deserialized);

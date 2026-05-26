@@ -305,8 +305,7 @@ mod tests {
     where
         T: Serialize + for<'de> Deserialize<'de> + PartialEq + std::fmt::Debug,
     {
-        let json =
-            serde_json::to_string(original).expect("value must serialize to JSON");
+        let json = serde_json::to_string(original).expect("value must serialize to JSON");
         let deserialized: T =
             serde_json::from_str(&json).expect("value must deserialize from JSON");
         assert_eq!(original, &deserialized, "round-trip must preserve value");
