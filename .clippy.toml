@@ -1,0 +1,3 @@
+# Enforce documentation on all public items
+# This is also configured via RUSTFLAGS in CI
+msrv = "1.75"

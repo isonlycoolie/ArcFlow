@@ -1,0 +1,38 @@
+# ArcFlow — git tracks code and machine contracts only
+
+# Documentation pipeline
+/docs/
+
+# Sprint working plans (local only — never commit)
+arcflow_sprint01.md
+arcflow_sprint*.md
+
+# Cursor IDE — local agent skills, rules, settings (never commit)
+.cursor/
+
+# GitHub — only workflow YAML is tracked; templates, scripts, etc. stay local
+.github/*
+!.github/workflows/
+!.github/workflows/**
+
+# Rust build
+/target/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+*.swp
+*.swo
+.DS_Store
+
+# Future SDK / tooling artifacts (stubs may add these later)
+__pycache__/
+*.pyc
+node_modules/
+dist/
+.gradle/
+build/
+*.class
