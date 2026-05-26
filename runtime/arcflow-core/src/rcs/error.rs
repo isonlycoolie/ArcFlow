@@ -44,3 +44,48 @@ pub enum RcsError {
         reason: String,
     },
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn unsupported_version_error_is_descriptive() {
+        let error = RcsError::UnsupportedVersion {
+            version: "99.0".to_string(),
+        };
+        assert!(error.to_string().contains("99.0"));
+    }
+
+    #[test]
+    fn missing_envelope_field_error_is_descriptive() {
+        let error = RcsError::MissingEnvelopeField {
+            field: "trace_id".to_string(),
+        };
+        assert!(error.to_string().contains("trace_id"));
+    }
+
+    #[test]
+    fn invalid_message_type_error_is_descriptive() {
+        let error = RcsError::InvalidMessageType {
+            message_type: "Unknown".to_string(),
+        };
+        assert!(error.to_string().contains("Unknown"));
+    }
+
+    #[test]
+    fn payload_deserialization_failed_error_is_descriptive() {
+        let error = RcsError::PayloadDeserializationFailed {
+            reason: "bad json".to_string(),
+        };
+        assert!(error.to_string().contains("bad json"));
+    }
+
+    #[test]
+    fn invalid_workflow_definition_error_is_descriptive() {
+        let error = RcsError::InvalidWorkflowDefinition {
+            reason: "empty steps".to_string(),
+        };
+        assert!(error.to_string().contains("empty steps"));
+    }
+}
