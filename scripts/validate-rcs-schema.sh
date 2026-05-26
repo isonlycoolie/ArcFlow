@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Compile RCS JSON Schema (draft-07) — fails if schema is invalid.
 # Requires Node.js and npx (CI and local dev).
+#
+# Note: `ajv validate` without `-d` is not applicable — this file is $defs-only
+# (no root schema document). Use `ajv compile` here; instance validation is a
+# separate step when a concrete root + data file exist.
 
 set -euo pipefail
 
