@@ -4,7 +4,7 @@
 // orchestration engine, state management, memory system, tool runtime,
 // observability engine, and provider abstraction layer.
 //
-// Architecture: ADR-001 (docs pipeline — URL in contracts/sprint1-acceptance-evidence.md)
+// Architecture: ADR-001 (docs pipeline — see docs/architecture/ADR-001.md locally)
 // Contract: See contracts/rcs-v1.schema.json
 //
 // Public API surface: Only types in the `rcs` module are public across

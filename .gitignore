@@ -15,6 +15,10 @@ arcflow_sprint*.md
 !.github/workflows/
 !.github/workflows/**
 
+# Sprint acceptance evidence — not in git (share via Slack / internal tooling only)
+contracts/sprint1-acceptance-evidence.md
+contracts/sprint*-acceptance-evidence.md
+
 # Rust build
 /target/
 
