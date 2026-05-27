@@ -1,6 +1,12 @@
-// Tool execution runtime — Sprint 4
-//
-// External capability invocation, permission checks, and tool lifecycle.
-// See: ArcFlow Sprint Plan, Sprint 4.
-//
-// DO NOT add implementation code to this module before Sprint 4.
+//! Tool execution runtime (Sprint 4).
+
+mod error;
+mod executor;
+mod registry;
+mod runtime;
+mod validation;
+
+pub use error::ToolError;
+pub use executor::ToolInvoker;
+pub use registry::{RegisteredTool, ToolRegistry};
+pub use runtime::ToolRuntime;

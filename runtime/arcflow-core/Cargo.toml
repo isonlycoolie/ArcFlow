@@ -15,6 +15,21 @@ thiserror = { workspace = true }
 uuid = { workspace = true }
 chrono = { workspace = true }
 tracing = { workspace = true }
+jsonschema = "0.26"
+sha2 = "0.10"
+tokio = { workspace = true }
+sqlx = { version = "0.8", default-features = false, features = [
+    "runtime-tokio",
+    "postgres",
+    "uuid",
+    "chrono",
+] }
+qdrant-client = "1.12"
+async-trait = "0.1"
+
+[features]
+default = []
+integration-memory = []
 
 [lib]
 name = "arcflow_core"
