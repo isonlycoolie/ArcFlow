@@ -18,6 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
+          toolchain: stable
           components: rustfmt
       - run: cargo fmt --check
 
@@ -37,6 +38,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
       - run: cargo test --workspace
 
   audit:
@@ -45,6 +48,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
       - run: cargo install cargo-audit
       - run: cargo audit
 
@@ -110,6 +115,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
       - name: Build docs without warnings
         env:
           RUSTDOCFLAGS: -D warnings

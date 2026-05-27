@@ -46,6 +46,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
       - name: Run in-process memory tests
         run: cargo test -p arcflow-core sprint4_memory -- --test-threads=1
       - name: Run Docker-backed memory tests
