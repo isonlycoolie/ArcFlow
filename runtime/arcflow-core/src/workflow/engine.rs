@@ -1,11 +1,13 @@
 //! Sequential step execution with state handoff.
 
 use std::collections::HashMap;
+use std::sync::Arc;
 
 use uuid::Uuid;
 
 use crate::agent::AgentRuntime;
 use crate::rcs::types::{AgentDefinition, WorkflowDefinition};
+use crate::tools::{ToolInvoker, ToolRuntime};
 
 use super::record::WorkflowExecutionRecord;
 use super::run::run_sorted_steps;
@@ -43,7 +45,35 @@ impl WorkflowEngine {
         run_input: &str,
     ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
         validate_workflow(workflow, agents)?;
-        run_sorted_steps(&self.agent_runtime, workflow, agents, run_input)
+        run_sorted_steps(
+            &self.agent_runtime,
+            workflow,
+            agents,
+            run_input,
+            None,
+            None,
+        )
+    }
+
+    /// Executes with optional tool runtime and invoker (Sprint 4).
+    #[allow(clippy::result_large_err)]
+    pub fn execute_with_tools(
+        &self,
+        workflow: &WorkflowDefinition,
+        agents: &HashMap<Uuid, AgentDefinition>,
+        run_input: &str,
+        tool_runtime: Option<&ToolRuntime>,
+        tool_invoker: Option<Arc<dyn ToolInvoker>>,
+    ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
+        validate_workflow(workflow, agents)?;
+        run_sorted_steps(
+            &self.agent_runtime,
+            workflow,
+            agents,
+            run_input,
+            tool_runtime,
+            tool_invoker,
+        )
     }
 }
 

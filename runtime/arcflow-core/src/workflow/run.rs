@@ -3,11 +3,17 @@ use std::collections::HashMap;
 use tracing::{debug, error, info};
 use uuid::Uuid;
 
+use std::sync::Arc;
+
 use crate::agent::AgentRuntime;
 use crate::error::{RuntimeError, StateError};
+use crate::memory::MemoryCoordinator;
 use crate::rcs::types::{AgentDefinition, StepDefinition, WorkflowDefinition};
 use crate::state::{ExecutionStepOutput, StateEngine};
+use crate::tools::{ToolInvoker, ToolRuntime};
+use crate::tracing::TraceEmitter;
 
+use super::context::ExecutionContext;
 use super::record::WorkflowExecutionRecord;
 use super::run_error::WorkflowRunError;
 
@@ -34,6 +40,7 @@ fn run_one_step(
     loop_ctx: &mut RunLoop<'_>,
     step: &StepDefinition,
     agent: &AgentDefinition,
+    exec_ctx: Option<&mut ExecutionContext<'_>>,
 ) -> Result<(), WorkflowRunError> {
     debug!(
         run_id = %loop_ctx.run_id,
@@ -42,11 +49,12 @@ fn run_one_step(
         "step execution started"
     );
 
-    let out = match agent_runtime.execute(
+    let out = match agent_runtime.execute_with_context(
         agent,
         step.id,
         &loop_ctx.state.snapshot(),
         loop_ctx.run_input,
+        exec_ctx,
     ) {
         Ok(output) => output,
         Err(err) => {
@@ -90,9 +98,14 @@ pub(super) fn run_sorted_steps(
     workflow: &WorkflowDefinition,
     agents: &HashMap<Uuid, AgentDefinition>,
     run_input: &str,
+    tool_runtime: Option<&ToolRuntime>,
+    tool_invoker: Option<Arc<dyn ToolInvoker>>,
 ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
     let run_id = Uuid::new_v4();
     let mut state = StateEngine::new();
+    let mut memory = MemoryCoordinator::new(run_id);
+    let mut trace = TraceEmitter::new(run_id);
+    trace.workflow_started();
     info!(run_id = %run_id, workflow_id = %workflow.id, "workflow execution started");
     let mut steps = workflow.steps.clone();
     steps.sort_by_key(|s| s.order);
@@ -112,9 +125,22 @@ pub(super) fn run_sorted_steps(
                 step_id: step.id,
             }));
         };
-        run_one_step(agent_runtime, &mut loop_ctx, step, agent)?;
+        let mut exec_ctx = ExecutionContext {
+            tool_runtime,
+            tool_invoker: tool_invoker.clone(),
+            memory: &mut memory,
+            trace: &mut trace,
+        };
+        run_one_step(
+            agent_runtime,
+            &mut loop_ctx,
+            step,
+            agent,
+            Some(&mut exec_ctx),
+        )?;
     }
 
+    trace.workflow_completed();
     info!(run_id = %run_id, "workflow execution completed");
     Ok(WorkflowExecutionRecord {
         run_id,

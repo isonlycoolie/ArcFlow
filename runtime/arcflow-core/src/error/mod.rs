@@ -29,4 +29,16 @@ pub enum RuntimeError {
     /// Stub agent execution failed (reserved for future non-stub paths).
     #[error("agent execution failed for step '{step_id}': {reason}")]
     AgentExecutionFailed { step_id: Uuid, reason: String },
+
+    /// Tool invocation failed during a step.
+    #[error("tool '{tool_name}' failed for step '{step_id}': {reason}")]
+    ToolExecutionFailed {
+        tool_name: String,
+        step_id: Uuid,
+        reason: String,
+    },
+
+    /// Memory operation failed.
+    #[error("memory operation failed: {reason}")]
+    MemoryOperationFailed { reason: String },
 }

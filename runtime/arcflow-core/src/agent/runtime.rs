@@ -1,10 +1,13 @@
 //! Deterministic stub agent execution (Sprint 2 — no LLM).
 
+use serde_json::json;
 use uuid::Uuid;
 
 use crate::error::RuntimeError;
 use crate::rcs::types::{AgentDefinition, ExecutionStatus};
 use crate::state::{ExecutionStepOutput, StateSnapshot};
+use crate::tools::ToolError;
+use crate::workflow::ExecutionContext;
 
 use super::stub::STUB_FAIL_ROLE;
 
@@ -33,6 +36,21 @@ impl AgentRuntime {
         state: &StateSnapshot,
         run_input: &str,
     ) -> Result<ExecutionStepOutput, RuntimeError> {
+        self.execute_with_context(agent, step_id, state, run_input, None)
+    }
+
+    /// Like [`Self::execute`] with optional tools, memory, and trace context.
+    pub fn execute_with_context(
+        &self,
+        agent: &AgentDefinition,
+        step_id: Uuid,
+        state: &StateSnapshot,
+        run_input: &str,
+        ctx: Option<&mut ExecutionContext<'_>>,
+    ) -> Result<ExecutionStepOutput, RuntimeError> {
+        if let Some(ctx) = ctx {
+            self.run_tools_if_configured(agent, step_id, run_input, ctx)?;
+        }
         if agent.role == STUB_FAIL_ROLE {
             return Err(RuntimeError::AgentExecutionFailed {
                 step_id,
@@ -54,6 +72,53 @@ impl AgentRuntime {
             content,
             status: ExecutionStatus::Completed,
         })
+    }
+
+    fn run_tools_if_configured(
+        &self,
+        agent: &AgentDefinition,
+        step_id: Uuid,
+        run_input: &str,
+        ctx: &mut ExecutionContext<'_>,
+    ) -> Result<(), RuntimeError> {
+        let Some(tools) = agent.tools.as_ref() else {
+            return Ok(());
+        };
+        if tools.is_empty() {
+            return Ok(());
+        }
+        let Some(runtime) = ctx.tool_runtime else {
+            return Ok(());
+        };
+        let Some(invoker) = ctx.tool_invoker.clone() else {
+            return Ok(());
+        };
+        let rt = tokio::runtime::Runtime::new().map_err(|e| RuntimeError::ToolExecutionFailed {
+            tool_name: "runtime".into(),
+            step_id,
+            reason: e.to_string(),
+        })?;
+        for def in tools {
+            let input = json!({ "message": run_input });
+            if let Err(err) = rt.block_on(runtime.execute_tool(
+                &def.name,
+                input,
+                invoker.clone(),
+                ctx.trace,
+                Some(step_id),
+            )) {
+                return Err(map_tool_error(def.name.clone(), step_id, err));
+            }
+        }
+        Ok(())
+    }
+}
+
+fn map_tool_error(name: String, step_id: Uuid, err: ToolError) -> RuntimeError {
+    RuntimeError::ToolExecutionFailed {
+        tool_name: name,
+        step_id,
+        reason: err.to_string(),
     }
 }
 
