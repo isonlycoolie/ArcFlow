@@ -35,11 +35,13 @@ def run_workflow(
     step_rows: list[tuple[str, str, int]] = []
     for index, agent in enumerate(steps, start=1):
         step_rows.append((str(uuid4()), str(agent.agent_id), index))
+    tool_executors = [tool.execute for agent in steps for tool in agent.tools]
     native = execute_workflow(
         workflow_name,
         str(uuid4()),
         agent_rows,
         step_rows,
         run_input,
+        tool_executors,
     )
     return _to_result(native)

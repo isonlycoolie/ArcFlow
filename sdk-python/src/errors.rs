@@ -43,6 +43,16 @@ fn runtime_config_message(err: &RuntimeError) -> String {
         RuntimeError::AgentExecutionFailed { step_id, reason } => {
             format!("Agent execution failed for step '{step_id}': {reason}.")
         }
+        RuntimeError::ToolExecutionFailed {
+            tool_name,
+            step_id,
+            reason,
+        } => format!(
+            "Tool '{tool_name}' failed for step '{step_id}': {reason}."
+        ),
+        RuntimeError::MemoryOperationFailed { reason } => {
+            format!("Memory operation failed: {reason}.")
+        }
     })
 }
 
@@ -61,6 +71,14 @@ fn runtime_execution_message(err: &RuntimeError) -> String {
         }
         RuntimeError::AgentNotFound { .. } => {
             "Execution stopped because a step references an unknown agent.".into()
+        }
+        RuntimeError::ToolExecutionFailed {
+            tool_name,
+            reason,
+            ..
+        } => format!("Tool '{tool_name}' failed: {reason}."),
+        RuntimeError::MemoryOperationFailed { reason } => {
+            format!("Memory operation failed: {reason}.")
         }
     })
 }

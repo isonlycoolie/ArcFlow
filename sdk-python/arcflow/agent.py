@@ -5,6 +5,8 @@ from __future__ import annotations
 from uuid import UUID, uuid4
 
 from arcflow.exceptions import WorkflowConfigurationError
+from arcflow.memory import MemoryConfig
+from arcflow.tool import Tool
 
 
 def _require_non_empty(field: str, value: str) -> str:
@@ -26,21 +28,39 @@ class Agent:
         role: str,
         instructions: str,
         model: str = "default",
+        tools: tuple[Tool, ...] = (),
+        memory: MemoryConfig | None = None,
     ) -> None:
         self.name = _require_non_empty("name", name)
         self.role = _require_non_empty("role", role)
         self.instructions = _require_non_empty("instructions", instructions)
         self.model = model.strip() or "default"
+        self.tools = tuple(tools)
+        self.memory = memory
+        self._validate_tools()
         self.agent_id: UUID = uuid4()
 
     def __repr__(self) -> str:
         return f"Agent(name={self.name!r}, role={self.role!r})"
 
-    def binding_tuple(self) -> tuple[str, str, str, str]:
+    def _validate_tools(self) -> None:
+        seen: set[str] = set()
+        for tool in self.tools:
+            if tool.name in seen:
+                raise WorkflowConfigurationError(
+                    f"[ArcFlow] Duplicate tool name '{tool.name}' on agent '{self.name}'."
+                )
+            seen.add(tool.name)
+
+    def binding_tuple(self) -> tuple[str, str, str, str, list[tuple[str, str, str, float]], str | None]:
         """Serializes agent fields for the native binding layer."""
+        tool_rows = [t.binding_spec() for t in self.tools]
+        memory_json = self.memory.binding_json() if self.memory else None
         return (
             str(self.agent_id),
             self.name,
             self.role,
             self.instructions,
+            tool_rows,
+            memory_json,
         )

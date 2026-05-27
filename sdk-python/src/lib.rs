@@ -3,6 +3,7 @@
 #![allow(clippy::useless_conversion)] // PyO3 `PyResult<T>` triggers a false positive on some toolchains
 
 mod errors;
+mod tools;
 mod types;
 mod workflow;
 
