@@ -75,6 +75,7 @@ jobs:
           if [ -f ".venv/bin/activate" ]; then source .venv/bin/activate; else source .venv/Scripts/activate; fi
           mypy arcflow
       - name: Pytest
+        working-directory: sdk-python
         shell: bash
         run: |
           if [ -f ".venv/bin/activate" ]; then source .venv/bin/activate; else source .venv/Scripts/activate; fi
