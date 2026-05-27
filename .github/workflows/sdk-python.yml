@@ -43,7 +43,7 @@ jobs:
         run: |
           if [ -f ".venv/bin/activate" ]; then source .venv/bin/activate; else source .venv/Scripts/activate; fi
           python -m pip install --upgrade pip
-          pip install maturin pytest mypy black ruff
+          pip install maturin pytest "mypy<1.19" black ruff
       - name: Build wheel
         working-directory: sdk-python
         shell: bash
