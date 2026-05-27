@@ -28,6 +28,9 @@ contracts/sprint*-acceptance-evidence.md
 .env.*
 !.env.example
 
+# Local GitHub Actions runner (nektos/act) — binaries, secrets, events (never commit)
+.local/
+
 # Editor / OS
 *.swp
 *.swo
