@@ -48,11 +48,14 @@ class Agent:
         for tool in self.tools:
             if tool.name in seen:
                 raise WorkflowConfigurationError(
-                    f"[ArcFlow] Duplicate tool name '{tool.name}' on agent '{self.name}'."
+                    f"[ArcFlow] Duplicate tool name '{tool.name}' "
+                    f"on agent '{self.name}'."
                 )
             seen.add(tool.name)
 
-    def binding_tuple(self) -> tuple[str, str, str, str, list[tuple[str, str, str, float]], str | None]:
+    def binding_tuple(
+        self,
+    ) -> tuple[str, str, str, str, list[tuple[str, str, str, float]], str | None]:
         """Serializes agent fields for the native binding layer."""
         tool_rows = [t.binding_spec() for t in self.tools]
         memory_json = self.memory.binding_json() if self.memory else None
