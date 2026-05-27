@@ -19,10 +19,7 @@ pub enum MemoryError {
 
     /// Persistent or vector backend unavailable.
     #[error("infrastructure unavailable: {backend} — {suggestion}")]
-    InfrastructureUnavailable {
-        backend: String,
-        suggestion: String,
-    },
+    InfrastructureUnavailable { backend: String, suggestion: String },
 
     /// Namespace required for durable backends.
     #[error("namespace is required for persistent and vector memory")]

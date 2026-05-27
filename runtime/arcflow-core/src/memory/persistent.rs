@@ -91,15 +91,14 @@ impl PersistentMemory {
     ) -> Result<Option<Vec<u8>>, MemoryError> {
         let key = durable_key(namespace, logical_key);
         let pool = self.pool().await?;
-        let row: Option<(Vec<u8>,)> = sqlx::query_as(
-            "SELECT value FROM arcflow_memory WHERE storage_key = $1",
-        )
-        .bind(&key)
-        .fetch_optional(pool)
-        .await
-        .map_err(|e| MemoryError::OperationFailed {
-            reason: e.to_string(),
-        })?;
+        let row: Option<(Vec<u8>,)> =
+            sqlx::query_as("SELECT value FROM arcflow_memory WHERE storage_key = $1")
+                .bind(&key)
+                .fetch_optional(pool)
+                .await
+                .map_err(|e| MemoryError::OperationFailed {
+                    reason: e.to_string(),
+                })?;
         Ok(row.map(|r| r.0))
     }
 }

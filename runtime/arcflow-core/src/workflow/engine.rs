@@ -45,14 +45,7 @@ impl WorkflowEngine {
         run_input: &str,
     ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
         validate_workflow(workflow, agents)?;
-        run_sorted_steps(
-            &self.agent_runtime,
-            workflow,
-            agents,
-            run_input,
-            None,
-            None,
-        )
+        run_sorted_steps(&self.agent_runtime, workflow, agents, run_input, None, None)
     }
 
     /// Executes with optional tool runtime and invoker (Sprint 4).

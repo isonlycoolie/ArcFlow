@@ -77,12 +77,7 @@ impl ToolRuntime {
             }),
         };
         let status = if result.is_ok() { "ok" } else { "failed" };
-        trace.tool_executed(
-            step_id,
-            name,
-            status,
-            started.elapsed().as_millis() as u64,
-        );
+        trace.tool_executed(step_id, name, status, started.elapsed().as_millis() as u64);
         result.map_err(|e| match e {
             ToolError::ExecutionFailed {
                 name: n,

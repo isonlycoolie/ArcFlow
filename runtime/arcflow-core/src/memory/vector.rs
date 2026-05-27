@@ -41,10 +41,7 @@ impl Default for QdrantVectorStore {
 impl QdrantVectorStore {
     /// Creates a store with vector dimension `dim`.
     pub fn new(dim: usize) -> Self {
-        Self {
-            client: None,
-            dim,
-        }
+        Self { client: None, dim }
     }
 
     async fn client(&mut self) -> Result<&Qdrant, MemoryError> {
@@ -55,12 +52,12 @@ impl QdrantVectorStore {
                     suggestion: "Set ARCFLOW_QDRANT_URL and start Qdrant.".into(),
                 }
             })?;
-            let client = Qdrant::from_url(&url)
-                .build()
-                .map_err(|e| MemoryError::InfrastructureUnavailable {
+            let client = Qdrant::from_url(&url).build().map_err(|e| {
+                MemoryError::InfrastructureUnavailable {
                     backend: "qdrant".into(),
                     suggestion: e.to_string(),
-                })?;
+                }
+            })?;
             let _ = client
                 .create_collection(CreateCollection {
                     collection_name: COLLECTION.into(),

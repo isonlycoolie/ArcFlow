@@ -30,7 +30,8 @@ mod tests {
 
     #[test]
     fn valid_object_passes() {
-        let schema = json!({"type": "object", "properties": {"q": {"type": "string"}}, "required": ["q"]});
+        let schema =
+            json!({"type": "object", "properties": {"q": {"type": "string"}}, "required": ["q"]});
         let input = json!({"q": "hello"});
         validate_tool_input("t", &schema, &input).unwrap();
     }

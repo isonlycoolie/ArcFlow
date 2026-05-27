@@ -28,8 +28,5 @@ pub enum ToolError {
 
     /// Wall-clock timeout exceeded.
     #[error("tool '{name}' timed out after {timeout_secs} seconds")]
-    Timeout {
-        name: String,
-        timeout_secs: u64,
-    },
+    Timeout { name: String, timeout_secs: u64 },
 }

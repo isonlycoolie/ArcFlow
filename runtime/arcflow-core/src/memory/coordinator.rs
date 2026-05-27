@@ -73,7 +73,9 @@ impl MemoryCoordinator {
         trace: &mut TraceEmitter,
         step_id: Option<Uuid>,
     ) -> Result<Option<Vec<u8>>, MemoryError> {
-        let out = self.session.read(self.run_id, agent_id, agent_id, logical_key)?;
+        let out = self
+            .session
+            .read(self.run_id, agent_id, agent_id, logical_key)?;
         trace.memory_read(step_id, "session", logical_key.len());
         Ok(out)
     }
@@ -116,9 +118,7 @@ impl MemoryCoordinator {
         if reader_config.scope != MemoryScope::Workflow {
             return Err(MemoryError::ScopeDenied);
         }
-        let out = self
-            .shared
-            .read(self.run_id, owner_agent_id, logical_key)?;
+        let out = self.shared.read(self.run_id, owner_agent_id, logical_key)?;
         trace.memory_read(step_id, "shared", logical_key.len());
         Ok(out)
     }
@@ -135,11 +135,12 @@ impl MemoryCoordinator {
         if namespace.is_empty() {
             return Err(MemoryError::NamespaceRequired);
         }
-        self.runtime()?.block_on(
-            self.persistent
-                .borrow_mut()
-                .write(namespace, logical_key, value),
-        )?;
+        self.runtime()?
+            .block_on(
+                self.persistent
+                    .borrow_mut()
+                    .write(namespace, logical_key, value),
+            )?;
         trace.memory_write(step_id, "persistent", value.len());
         Ok(())
     }
@@ -155,11 +156,9 @@ impl MemoryCoordinator {
         if namespace.is_empty() {
             return Err(MemoryError::NamespaceRequired);
         }
-        let out = self.runtime()?.block_on(
-            self.persistent
-                .borrow_mut()
-                .read(namespace, logical_key),
-        )?;
+        let out = self
+            .runtime()?
+            .block_on(self.persistent.borrow_mut().read(namespace, logical_key))?;
         trace.memory_read(step_id, "persistent", logical_key.len());
         Ok(out)
     }
@@ -218,12 +217,8 @@ mod tests {
         let b = Uuid::new_v4();
         let coord = MemoryCoordinator::new(run);
         let mut trace = TraceEmitter::new(Uuid::new_v4());
-        coord
-            .write_session(a, "k", b"1", &mut trace, None)
-            .unwrap();
-        let err = SessionMemory::default()
-            .read(run, b, a, "k")
-            .unwrap_err();
+        coord.write_session(a, "k", b"1", &mut trace, None).unwrap();
+        let err = SessionMemory::default().read(run, b, a, "k").unwrap_err();
         assert_eq!(err, MemoryError::SessionIsolationViolation);
     }
 
@@ -241,7 +236,9 @@ mod tests {
         coord
             .write_shared(a, "k", b"v", &cfg, &mut trace, None)
             .unwrap();
-        let err = coord.read_shared(&cfg, a, "k", &mut trace, None).unwrap_err();
+        let err = coord
+            .read_shared(&cfg, a, "k", &mut trace, None)
+            .unwrap_err();
         assert_eq!(err, MemoryError::ScopeDenied);
     }
 }

@@ -47,9 +47,12 @@ impl SessionMemory {
             return Err(MemoryError::SessionIsolationViolation);
         }
         let key = session_key(run_id, owner_agent_id, logical_key);
-        let guard = self.store.lock().map_err(|_| MemoryError::OperationFailed {
-            reason: "session lock poisoned".into(),
-        })?;
+        let guard = self
+            .store
+            .lock()
+            .map_err(|_| MemoryError::OperationFailed {
+                reason: "session lock poisoned".into(),
+            })?;
         Ok(guard.get(&key).cloned())
     }
 }

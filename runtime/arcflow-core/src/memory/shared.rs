@@ -43,9 +43,12 @@ impl SharedMemory {
         logical_key: &str,
     ) -> Result<Option<Vec<u8>>, MemoryError> {
         let key = session_key(run_id, owner_agent_id, logical_key);
-        let guard = self.store.lock().map_err(|_| MemoryError::OperationFailed {
-            reason: "shared lock poisoned".into(),
-        })?;
+        let guard = self
+            .store
+            .lock()
+            .map_err(|_| MemoryError::OperationFailed {
+                reason: "shared lock poisoned".into(),
+            })?;
         Ok(guard.get(&key).cloned())
     }
 }

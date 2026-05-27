@@ -67,9 +67,7 @@ fn persistent_survives_new_coordinator() {
         .write_persistent(&ns, "k", b"v", &mut trace, None)
         .unwrap();
     let coord2 = MemoryCoordinator::new(Uuid::new_v4());
-    let got = coord2
-        .read_persistent(&ns, "k", &mut trace, None)
-        .unwrap();
+    let got = coord2.read_persistent(&ns, "k", &mut trace, None).unwrap();
     assert_eq!(got.as_deref(), Some(b"v".as_ref()));
 }
 
@@ -83,8 +81,6 @@ fn vector_store_and_search_stub() {
     coord
         .write_vector(&ns, "doc", b"payload", &mut trace, None)
         .unwrap();
-    let got = coord
-        .read_vector(&ns, "doc", &mut trace, None)
-        .unwrap();
+    let got = coord.read_vector(&ns, "doc", &mut trace, None).unwrap();
     assert_eq!(got.as_deref(), Some(b"payload".as_ref()));
 }

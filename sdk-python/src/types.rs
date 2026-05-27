@@ -58,9 +58,8 @@ fn parse_tool_row(item: Bound<'_, PyAny>) -> PyResult<ToolInput> {
         ));
     }
     let schema_json: String = tuple.get_item(2)?.extract()?;
-    let schema: Value = serde_json::from_str(&schema_json).map_err(|e| {
-        configuration_error(format!("Tool input_schema is not valid JSON: {e}"))
-    })?;
+    let schema: Value = serde_json::from_str(&schema_json)
+        .map_err(|e| configuration_error(format!("Tool input_schema is not valid JSON: {e}")))?;
     let timeout: f64 = tuple.get_item(3)?.extract()?;
     Ok(ToolInput {
         name: tuple.get_item(0)?.extract()?,
@@ -89,9 +88,7 @@ fn parse_memory_json(raw: &str) -> PyResult<MemoryInput> {
         Some("Agent") => MemoryScope::Agent,
         Some("Workflow") => MemoryScope::Workflow,
         Some("Global") => MemoryScope::Global,
-        other => {
-            return Err(configuration_error(format!("Unknown scope: {:?}", other)))
-        }
+        other => return Err(configuration_error(format!("Unknown scope: {:?}", other))),
     };
     Ok(MemoryInput {
         memory_type,

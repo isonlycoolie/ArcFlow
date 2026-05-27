@@ -35,13 +35,11 @@ impl ToolInvoker for PyToolInvoker {
 }
 
 fn invoke_tool_py(py: Python<'_>, name: &str, input: &Value) -> Result<String, ToolError> {
-    let guard = registry()
-        .lock()
-        .map_err(|_| ToolError::ExecutionFailed {
-            name: name.to_string(),
-            step_id: None,
-            reason: "tool registry lock poisoned".into(),
-        })?;
+    let guard = registry().lock().map_err(|_| ToolError::ExecutionFailed {
+        name: name.to_string(),
+        step_id: None,
+        reason: "tool registry lock poisoned".into(),
+    })?;
     let Some(callable) = guard.get(name) else {
         return Err(ToolError::NotRegistered {
             name: name.to_string(),
@@ -59,11 +57,13 @@ fn invoke_tool_py(py: Python<'_>, name: &str, input: &Value) -> Result<String, T
     let result = callable
         .call1(py, (py_input,))
         .map_err(|e| map_py_err(name, e))?;
-    result.extract::<String>(py).map_err(|e| ToolError::ExecutionFailed {
-        name: name.to_string(),
-        step_id: None,
-        reason: e.to_string(),
-    })
+    result
+        .extract::<String>(py)
+        .map_err(|e| ToolError::ExecutionFailed {
+            name: name.to_string(),
+            step_id: None,
+            reason: e.to_string(),
+        })
 }
 
 fn map_py_err(name: &str, err: PyErr) -> ToolError {
@@ -73,4 +73,3 @@ fn map_py_err(name: &str, err: PyErr) -> ToolError {
         reason: err.to_string(),
     }
 }
-
