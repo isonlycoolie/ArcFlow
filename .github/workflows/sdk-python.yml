@@ -33,129 +33,55 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - name: Create virtualenv
-        working-directory: sdk-python
-        shell: bash
-        run: python -m venv .venv
       - name: Install tools
         working-directory: sdk-python
         shell: bash
         run: |
           set -euo pipefail
-          if [ -f ".venv/Scripts/python.exe" ]; then
-            VPY=".venv/Scripts/python.exe"
-          elif [ -f ".venv/bin/python" ]; then
-            VPY=".venv/bin/python"
-          else
-            echo "::error::venv python not found under sdk-python/.venv"
-            ls -la .venv || true
-            ls -la .venv/Scripts || true
-            exit 1
-          fi
-          "$VPY" -m pip install --upgrade pip
-          "$VPY" -m pip install maturin pytest "mypy<1.19" black ruff
+          python -m pip install --upgrade pip
+          python -m pip install maturin pytest "mypy<1.19" black ruff
       - name: Build wheel
         working-directory: sdk-python
         shell: bash
         run: |
           set -euo pipefail
-          if [ -f ".venv/Scripts/python.exe" ]; then
-            VPY=".venv/Scripts/python.exe"
-          elif [ -f ".venv/bin/python" ]; then
-            VPY=".venv/bin/python"
-          else
-            echo "::error::venv python not found under sdk-python/.venv"
-            ls -la .venv || true
-            ls -la .venv/Scripts || true
-            exit 1
-          fi
-          "$VPY" -m maturin build --release --out dist
+          python -m maturin build --release --out dist
       - name: Install built package
         working-directory: sdk-python
         shell: bash
         run: |
           set -euo pipefail
-          if [ -f ".venv/Scripts/python.exe" ]; then
-            VPY=".venv/Scripts/python.exe"
-          elif [ -f ".venv/bin/python" ]; then
-            VPY=".venv/bin/python"
-          else
-            echo "::error::venv python not found under sdk-python/.venv"
-            ls -la .venv || true
-            ls -la .venv/Scripts || true
-            exit 1
-          fi
-          WHEEL="$("$VPY" -c 'from pathlib import Path; ws=sorted(Path("dist").glob("arcflow-*.whl")); print(ws[-1] if ws else "")')"
+          WHEEL="$(python -c 'from pathlib import Path; ws=sorted(Path("dist").glob("arcflow-*.whl")); print(ws[-1] if ws else "")')"
           if [ -z "$WHEEL" ]; then
             echo "::error::No built wheel found in sdk-python/dist"
             ls -la dist || true
             exit 1
           fi
-          "$VPY" -m pip install "$WHEEL"
+          python -m pip install "$WHEEL"
       - name: Ruff
         working-directory: sdk-python
         shell: bash
         run: |
           set -euo pipefail
-          if [ -f ".venv/Scripts/python.exe" ]; then
-            VPY=".venv/Scripts/python.exe"
-          elif [ -f ".venv/bin/python" ]; then
-            VPY=".venv/bin/python"
-          else
-            echo "::error::venv python not found under sdk-python/.venv"
-            ls -la .venv || true
-            ls -la .venv/Scripts || true
-            exit 1
-          fi
-          "$VPY" -m ruff check arcflow tests
+          python -m ruff check arcflow tests
       - name: Black
         working-directory: sdk-python
         shell: bash
         run: |
           set -euo pipefail
-          if [ -f ".venv/Scripts/python.exe" ]; then
-            VPY=".venv/Scripts/python.exe"
-          elif [ -f ".venv/bin/python" ]; then
-            VPY=".venv/bin/python"
-          else
-            echo "::error::venv python not found under sdk-python/.venv"
-            ls -la .venv || true
-            ls -la .venv/Scripts || true
-            exit 1
-          fi
-          "$VPY" -m black --check arcflow tests
+          python -m black --check arcflow tests
       - name: Mypy
         working-directory: sdk-python
         shell: bash
         run: |
           set -euo pipefail
-          if [ -f ".venv/Scripts/python.exe" ]; then
-            VPY=".venv/Scripts/python.exe"
-          elif [ -f ".venv/bin/python" ]; then
-            VPY=".venv/bin/python"
-          else
-            echo "::error::venv python not found under sdk-python/.venv"
-            ls -la .venv || true
-            ls -la .venv/Scripts || true
-            exit 1
-          fi
-          "$VPY" -m mypy arcflow
+          python -m mypy arcflow
       - name: Pytest
         working-directory: sdk-python
         shell: bash
         run: |
           set -euo pipefail
-          if [ -f ".venv/Scripts/python.exe" ]; then
-            VPY=".venv/Scripts/python.exe"
-          elif [ -f ".venv/bin/python" ]; then
-            VPY=".venv/bin/python"
-          else
-            echo "::error::venv python not found under sdk-python/.venv"
-            ls -la .venv || true
-            ls -la .venv/Scripts || true
-            exit 1
-          fi
           # Run from a temp dir so local `sdk-python/arcflow/` doesn't shadow the installed wheel.
-          tmpdir="$(mktemp -d 2>/dev/null || "$VPY" -c "import tempfile; print(tempfile.mkdtemp())")"
+          tmpdir="$(mktemp -d 2>/dev/null || python -c "import tempfile; print(tempfile.mkdtemp())")"
           cd "$tmpdir"
-          "$VPY" -m pytest "$GITHUB_WORKSPACE/sdk-python/tests" -v
+          python -m pytest "$GITHUB_WORKSPACE/sdk-python/tests" -v
