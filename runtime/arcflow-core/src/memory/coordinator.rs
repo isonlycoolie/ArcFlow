@@ -38,9 +38,15 @@ impl MemoryCoordinator {
         }
     }
 
-    fn runtime(&self) -> &Runtime {
-        self.rt.get_or_init(|| {
-            Runtime::new().expect("tokio runtime for memory backends")
+    fn runtime(&self) -> Result<&Runtime, MemoryError> {
+        if self.rt.get().is_none() {
+            let rt = Runtime::new().map_err(|e| MemoryError::OperationFailed {
+                reason: format!("tokio runtime for memory: {e}"),
+            })?;
+            let _ = self.rt.set(rt);
+        }
+        self.rt.get().ok_or(MemoryError::OperationFailed {
+            reason: "tokio runtime unavailable".into(),
         })
     }
 
@@ -129,7 +135,7 @@ impl MemoryCoordinator {
         if namespace.is_empty() {
             return Err(MemoryError::NamespaceRequired);
         }
-        self.runtime().block_on(
+        self.runtime()?.block_on(
             self.persistent
                 .borrow_mut()
                 .write(namespace, logical_key, value),
@@ -149,7 +155,7 @@ impl MemoryCoordinator {
         if namespace.is_empty() {
             return Err(MemoryError::NamespaceRequired);
         }
-        let out = self.runtime().block_on(
+        let out = self.runtime()?.block_on(
             self.persistent
                 .borrow_mut()
                 .read(namespace, logical_key),
@@ -170,7 +176,7 @@ impl MemoryCoordinator {
         if namespace.is_empty() {
             return Err(MemoryError::NamespaceRequired);
         }
-        self.runtime().block_on(
+        self.runtime()?.block_on(
             self.vector
                 .borrow_mut()
                 .write(namespace, logical_key, value),
@@ -191,7 +197,7 @@ impl MemoryCoordinator {
             return Err(MemoryError::NamespaceRequired);
         }
         let out = self
-            .runtime()
+            .runtime()?
             .block_on(self.vector.borrow_mut().read(namespace, logical_key))?;
         trace.memory_read(step_id, "vector", logical_key.len());
         Ok(out)

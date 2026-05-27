@@ -55,7 +55,9 @@ impl PersistentMemory {
             })?;
             self.pool = Some(pool);
         }
-        Ok(self.pool.as_ref().expect("pool initialized"))
+        self.pool.as_ref().ok_or(MemoryError::OperationFailed {
+            reason: "postgresql pool missing after connect".into(),
+        })
     }
 
     /// Upserts a value under namespace.

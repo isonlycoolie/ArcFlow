@@ -78,7 +78,9 @@ impl QdrantVectorStore {
                 .await;
             self.client = Some(client);
         }
-        Ok(self.client.as_ref().expect("client initialized"))
+        self.client.as_ref().ok_or(MemoryError::OperationFailed {
+            reason: "qdrant client missing after connect".into(),
+        })
     }
 }
 
