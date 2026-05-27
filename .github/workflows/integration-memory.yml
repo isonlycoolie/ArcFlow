@@ -1,0 +1,54 @@
+name: Integration Memory
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "runtime/arcflow-core/**"
+      - "docker/**"
+      - ".github/workflows/integration-memory.yml"
+  pull_request:
+    branches: [main, master]
+    paths:
+      - "runtime/arcflow-core/**"
+      - "docker/**"
+      - ".github/workflows/integration-memory.yml"
+
+jobs:
+  memory-backends:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: arcflow
+          POSTGRES_PASSWORD: arcflow
+          POSTGRES_DB: arcflow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U arcflow -d arcflow"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+      qdrant:
+        image: qdrant/qdrant:v1.12.5
+        ports:
+          - 6333:6333
+        options: >-
+          --health-cmd "curl -f http://localhost:6333/readyz"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      ARCFLOW_POSTGRESQL_URL: postgresql://arcflow:arcflow@localhost:5432/arcflow
+      ARCFLOW_QDRANT_URL: http://localhost:6333
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run in-process memory tests
+        run: cargo test -p arcflow-core sprint4_memory -- --test-threads=1
+      - name: Run Docker-backed memory tests
+        run: cargo test -p arcflow-core sprint4_memory -- --ignored --test-threads=1
+      - name: Run Sprint 4 tool workflow test
+        run: cargo test -p arcflow-core sprint4_tools
