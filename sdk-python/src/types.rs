@@ -25,6 +25,7 @@ pub struct AgentInput {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)] // description reserved until RCS ToolDefinition gains a field
 pub struct ToolInput {
     pub name: String,
     pub description: String,
@@ -33,6 +34,7 @@ pub struct ToolInput {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)] // namespace reserved until runtime wires durable backends on agent path
 pub struct MemoryInput {
     pub memory_type: MemoryType,
     pub scope: MemoryScope,

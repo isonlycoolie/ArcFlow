@@ -39,6 +39,7 @@ fn record_to_py(record: WorkflowExecutionRecord) -> PyWorkflowResult {
 
 #[pyfunction]
 #[pyo3(signature = (workflow_name, workflow_id, agents, steps, run_input, tool_executors))]
+#[allow(clippy::result_large_err)] // WorkflowRunError carries partial record by design (ADR-002)
 pub fn execute_workflow(
     py: Python<'_>,
     workflow_name: String,
