@@ -41,42 +41,42 @@ jobs:
         working-directory: sdk-python
         shell: bash
         run: |
-          source .venv/bin/activate
+          if [ -f ".venv/bin/activate" ]; then source .venv/bin/activate; else source .venv/Scripts/activate; fi
           python -m pip install --upgrade pip
           pip install maturin pytest mypy black ruff
       - name: Build wheel
         working-directory: sdk-python
         shell: bash
         run: |
-          source .venv/bin/activate
+          if [ -f ".venv/bin/activate" ]; then source .venv/bin/activate; else source .venv/Scripts/activate; fi
           maturin build --release --out dist
       - name: Install built package
         working-directory: sdk-python
         shell: bash
         run: |
-          source .venv/bin/activate
+          if [ -f ".venv/bin/activate" ]; then source .venv/bin/activate; else source .venv/Scripts/activate; fi
           pip install dist/arcflow-*.whl
       - name: Ruff
         working-directory: sdk-python
         shell: bash
         run: |
-          source .venv/bin/activate
+          if [ -f ".venv/bin/activate" ]; then source .venv/bin/activate; else source .venv/Scripts/activate; fi
           ruff check arcflow tests
       - name: Black
         working-directory: sdk-python
         shell: bash
         run: |
-          source .venv/bin/activate
+          if [ -f ".venv/bin/activate" ]; then source .venv/bin/activate; else source .venv/Scripts/activate; fi
           black --check arcflow tests
       - name: Mypy
         working-directory: sdk-python
         shell: bash
         run: |
-          source .venv/bin/activate
+          if [ -f ".venv/bin/activate" ]; then source .venv/bin/activate; else source .venv/Scripts/activate; fi
           mypy arcflow
       - name: Pytest
         working-directory: sdk-python
         shell: bash
         run: |
-          source .venv/bin/activate
+          if [ -f ".venv/bin/activate" ]; then source .venv/bin/activate; else source .venv/Scripts/activate; fi
           pytest tests/ -v
