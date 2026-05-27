@@ -60,4 +60,25 @@ run_step "structure-check" bash -c '
 '
 
 echo ""
+echo "=== sdk-python (mirror .github/workflows/sdk-python.yml) ==="
+(
+  set -euo pipefail
+  cd "$ROOT/sdk-python"
+  python -m pip install -q maturin pytest "mypy<1.19" black ruff
+  python -m maturin build --release --out dist
+  WHEEL="$(python -c 'from pathlib import Path; ws=sorted(Path("dist").glob("arcflow-*.whl")); print(ws[-1] if ws else "")')"
+  if [ -z "$WHEEL" ]; then
+    echo "ERROR: No wheel built in sdk-python/dist"
+    exit 1
+  fi
+  python -m pip install -q --force-reinstall "$WHEEL"
+  python -m ruff check arcflow tests
+  python -m black --check arcflow tests
+  python -m mypy arcflow
+  tmpdir="$(mktemp -d 2>/dev/null || python -c "import tempfile; print(tempfile.mkdtemp())")"
+  cd "$tmpdir"
+  PYTHONPATH="" python -m pytest "$ROOT/sdk-python/tests" -v
+)
+
+echo ""
 echo "ci-local: all steps passed"

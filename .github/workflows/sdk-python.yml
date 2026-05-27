@@ -99,6 +99,8 @@ jobs:
       - name: Pytest
         working-directory: sdk-python
         shell: bash
+        env:
+          PYTHONPATH: ""
         run: |
           set -euo pipefail
           # Run from a temp dir so local `sdk-python/arcflow/` doesn't shadow the installed wheel.
