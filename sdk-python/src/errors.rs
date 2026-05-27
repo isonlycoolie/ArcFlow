@@ -14,7 +14,7 @@ fn prefix(msg: &str) -> String {
 }
 
 fn import_exceptions(py: Python<'_>) -> PyResult<Bound<'_, PyModule>> {
-    py.import_bound("arcflow.exceptions")
+    py.import("arcflow.exceptions")
 }
 
 pub fn workflow_run_error_to_py(err: WorkflowRunError) -> PyErr {
@@ -72,7 +72,7 @@ fn raise_configuration(py: Python<'_>, message: String) -> PyErr {
         cls.call1((message,))
     })();
     match built {
-        Ok(value) => PyErr::from_value_bound(value),
+        Ok(value) => PyErr::from_value(value),
         Err(err) => err,
     }
 }
@@ -89,7 +89,7 @@ fn raise_execution(
         cls.call1((message, run_id, failed_step))
     })();
     match built {
-        Ok(value) => PyErr::from_value_bound(value),
+        Ok(value) => PyErr::from_value(value),
         Err(err) => err,
     }
 }
