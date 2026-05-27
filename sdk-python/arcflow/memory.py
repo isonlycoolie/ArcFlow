@@ -27,6 +27,8 @@ class MemoryScope(str, Enum):
 class MemoryConfig:
     """Configures how an agent uses memory during a workflow run."""
 
+    namespace: str | None
+
     def __init__(
         self,
         memory_type: MemoryType,
