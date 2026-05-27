@@ -75,8 +75,10 @@ jobs:
           if [ -f ".venv/bin/activate" ]; then source .venv/bin/activate; else source .venv/Scripts/activate; fi
           mypy arcflow
       - name: Pytest
-        working-directory: sdk-python
         shell: bash
         run: |
           if [ -f ".venv/bin/activate" ]; then source .venv/bin/activate; else source .venv/Scripts/activate; fi
-          pytest tests/ -v
+          # Run from a temp dir so local `sdk-python/arcflow/` doesn't shadow the installed wheel.
+          tmpdir="$(mktemp -d 2>/dev/null || python -c \"import tempfile; print(tempfile.mkdtemp())\")"
+          cd "$tmpdir"
+          pytest "$GITHUB_WORKSPACE/sdk-python/tests" -v
