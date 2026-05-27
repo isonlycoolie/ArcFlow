@@ -32,3 +32,45 @@ class WorkflowExecutionError(ArcFlowError):
         self.run_id = run_id
         self.failed_step = failed_step
         return self
+
+
+class ToolConfigurationError(ArcFlowError):
+    """Raised when a tool is mis-configured before execution."""
+
+
+class ToolExecutionError(ArcFlowError):
+    """Raised when a tool invocation fails during a workflow run."""
+
+    def __init__(
+        self,
+        message: str,
+        tool_name: str | None = None,
+        run_id: str | None = None,
+        failed_step: str | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.tool_name = tool_name
+        self.run_id = run_id
+        self.failed_step = failed_step
+
+
+class MemoryConfigurationError(ArcFlowError):
+    """Raised when memory configuration violates ArcFlow rules."""
+
+
+class MemoryOperationError(ArcFlowError):
+    """Raised when a memory read or write fails."""
+
+
+class InfrastructureUnavailableError(ArcFlowError):
+    """Raised when an optional memory backend is unreachable or unset."""
+
+    def __init__(
+        self,
+        message: str,
+        backend: str | None = None,
+        suggestion: str | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.backend = backend
+        self.suggestion = suggestion
