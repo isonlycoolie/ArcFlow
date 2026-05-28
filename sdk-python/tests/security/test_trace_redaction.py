@@ -2,18 +2,50 @@
 
 from __future__ import annotations
 
-from arcflow import Agent, Workflow
-from arcflow._internal.runtime import get_trace
+from arcflow import Agent, Tool, Workflow
+from arcflow._arcflow_binding import get_execution_trace_json
 
 
-def test_trace_json_has_no_raw_user_input_values() -> None:
+def _trace_blob(run_id: str) -> str:
+    return get_execution_trace_json(run_id)
+
+
+def test_trace_does_not_contain_agent_instructions() -> None:
+    secret = "super-secret-agent-instructions-xyzzy"
+    wf = Workflow("redaction-instructions")
+    wf.step(Agent(name="a", role="researcher", instructions=secret))
+    result = wf.run("hello")
+    assert secret not in _trace_blob(result.run_id)
+
+
+def test_trace_does_not_contain_workflow_input() -> None:
     secret = "super-secret-user-input-xyzzy"
-    wf = Workflow("redaction")
+    wf = Workflow("redaction-input")
     wf.step(Agent(name="a", role="researcher", instructions="work"))
     result = wf.run(secret)
-    raw = get_trace(result.run_id)
-    blob = raw.summary() + str(raw.steps)
-    assert secret not in blob
-    for step in raw.steps:
-        for mem in step.memory_operations:
-            assert secret not in mem.key or mem.key != secret
+    assert secret not in _trace_blob(result.run_id)
+
+
+def test_tool_output_not_in_trace() -> None:
+    secret = "super-secret-tool-output-xyzzy"
+
+    def echo(_payload: dict) -> str:
+        return secret
+
+    tool = Tool(
+        name="echo",
+        description="echo",
+        input_schema={
+            "type": "object",
+            "properties": {"message": {"type": "string"}},
+        },
+        execute=echo,
+    )
+    agent = Agent(
+        name="worker",
+        role="researcher",
+        instructions="run tool",
+        tools=(tool,),
+    )
+    result = Workflow("redaction-tool").step(agent).run("trigger")
+    assert secret not in _trace_blob(result.run_id)
