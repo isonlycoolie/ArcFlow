@@ -44,6 +44,21 @@ impl TraceStore {
         true
     }
 
+    /// Events for a run in emission order.
+    pub fn get_events(&self, run_id: &str) -> Option<&[TraceEvent]> {
+        self.traces
+            .get(run_id)
+            .map(|buffer| buffer.events.as_slice())
+    }
+
+    /// Drops recorded for a single run when the per-run cap is exceeded.
+    pub fn events_dropped_for_run(&self, run_id: &str) -> u32 {
+        self.traces
+            .get(run_id)
+            .map(|buffer| buffer.events_dropped)
+            .unwrap_or(0)
+    }
+
     /// Marks a run trace complete for eviction ordering.
     pub fn mark_complete(&mut self, run_id: &str) {
         if let Some(buffer) = self.traces.get_mut(run_id) {

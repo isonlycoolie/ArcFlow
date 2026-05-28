@@ -34,8 +34,8 @@ pub struct TraceEvent {
 }
 
 impl TraceEvent {
-    #[allow(dead_code)] // Sprint 5 Phase 3: TraceEventEmitter::emit
-    pub(crate) fn new(trace_id: String, sequence: u64, kind: TraceEventKind) -> Self {
+    /// Creates an event (used by `TraceEventEmitter` and integration tests).
+    pub fn new(trace_id: String, sequence: u64, kind: TraceEventKind) -> Self {
         Self {
             trace_id,
             timestamp: Utc::now(),
