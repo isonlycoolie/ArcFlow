@@ -8,6 +8,7 @@ use crate::memory::MemoryError;
 use crate::rcs::types::{AgentDefinition, ExecutionStatus, MemoryScope, MemoryType};
 use crate::state::{ExecutionStepOutput, StateSnapshot};
 use crate::tools::ToolError;
+use crate::tracing::tokens_consumed;
 use crate::workflow::ExecutionContext;
 
 use super::stub::STUB_FAIL_ROLE;
@@ -47,15 +48,16 @@ impl AgentRuntime {
         step_id: Uuid,
         state: &StateSnapshot,
         run_input: &str,
-        mut ctx: Option<&mut ExecutionContext<'_>>,
+        mut ctx: Option<&mut ExecutionContext<'_, '_>>,
     ) -> Result<ExecutionStepOutput, RuntimeError> {
         let memory_note = if let Some(ctx) = ctx.as_mut() {
             self.run_memory_if_configured(agent, step_id, state, run_input, ctx)?
         } else {
             None
         };
-        if let Some(ctx) = ctx {
+        if let Some(ctx) = ctx.as_mut() {
             self.run_tools_if_configured(agent, step_id, run_input, ctx)?;
+            tokens_consumed(ctx.sprint5, &ctx.run_id, step_id, &agent.name);
         }
         if agent.role == STUB_FAIL_ROLE {
             return Err(RuntimeError::AgentExecutionFailed {
@@ -88,7 +90,7 @@ impl AgentRuntime {
         agent: &AgentDefinition,
         step_id: Uuid,
         run_input: &str,
-        ctx: &mut ExecutionContext<'_>,
+        ctx: &mut ExecutionContext<'_, '_>,
     ) -> Result<(), RuntimeError> {
         let Some(tools) = agent.tools.as_ref() else {
             return Ok(());
@@ -113,7 +115,9 @@ impl AgentRuntime {
                 &def.name,
                 input,
                 invoker.clone(),
-                ctx.trace,
+                ctx.legacy,
+                ctx.sprint5,
+                &ctx.run_id,
                 Some(step_id),
             )) {
                 return Err(map_tool_error(def.name.clone(), step_id, err));
@@ -129,7 +133,7 @@ impl AgentRuntime {
         step_id: Uuid,
         state: &StateSnapshot,
         run_input: &str,
-        ctx: &mut ExecutionContext<'_>,
+        ctx: &mut ExecutionContext<'_, '_>,
     ) -> Result<Option<String>, RuntimeError> {
         let Some(config) = agent.memory_config.as_ref() else {
             return Ok(None);
@@ -139,10 +143,27 @@ impl AgentRuntime {
             MemoryType::Session => {
                 let prior = ctx
                     .memory
-                    .read_session(agent.id, STUB_MEMORY_KEY, ctx.trace, Some(step_id))
+                    .read_session(
+                        agent.id,
+                        STUB_MEMORY_KEY,
+                        &agent.name,
+                        ctx.legacy,
+                        ctx.sprint5,
+                        &ctx.run_id,
+                        Some(step_id),
+                    )
                     .map_err(|e| map_memory_error(step_id, e))?;
                 ctx.memory
-                    .write_session(agent.id, STUB_MEMORY_KEY, value, ctx.trace, Some(step_id))
+                    .write_session(
+                        agent.id,
+                        STUB_MEMORY_KEY,
+                        value,
+                        &agent.name,
+                        ctx.legacy,
+                        ctx.sprint5,
+                        &ctx.run_id,
+                        Some(step_id),
+                    )
                     .map_err(|e| map_memory_error(step_id, e))?;
                 prior
             }
@@ -150,7 +171,16 @@ impl AgentRuntime {
                 let owner = state.steps.last().map(|s| s.agent_id).unwrap_or(agent.id);
                 let prior = if config.scope == MemoryScope::Workflow {
                     ctx.memory
-                        .read_shared(config, owner, STUB_MEMORY_KEY, ctx.trace, Some(step_id))
+                        .read_shared(
+                            config,
+                            owner,
+                            STUB_MEMORY_KEY,
+                            &agent.name,
+                            ctx.legacy,
+                            ctx.sprint5,
+                            &ctx.run_id,
+                            Some(step_id),
+                        )
                         .map_err(|e| map_memory_error(step_id, e))?
                 } else {
                     None
@@ -161,7 +191,10 @@ impl AgentRuntime {
                         STUB_MEMORY_KEY,
                         value,
                         config,
-                        ctx.trace,
+                        &agent.name,
+                        ctx.legacy,
+                        ctx.sprint5,
+                        &ctx.run_id,
                         Some(step_id),
                     )
                     .map_err(|e| map_memory_error(step_id, e))?;
@@ -171,10 +204,27 @@ impl AgentRuntime {
                 let ns = require_namespace(config, step_id)?;
                 let prior = ctx
                     .memory
-                    .read_persistent(ns, STUB_MEMORY_KEY, ctx.trace, Some(step_id))
+                    .read_persistent(
+                        ns,
+                        STUB_MEMORY_KEY,
+                        &agent.name,
+                        ctx.legacy,
+                        ctx.sprint5,
+                        &ctx.run_id,
+                        Some(step_id),
+                    )
                     .map_err(|e| map_memory_error(step_id, e))?;
                 ctx.memory
-                    .write_persistent(ns, STUB_MEMORY_KEY, value, ctx.trace, Some(step_id))
+                    .write_persistent(
+                        ns,
+                        STUB_MEMORY_KEY,
+                        value,
+                        &agent.name,
+                        ctx.legacy,
+                        ctx.sprint5,
+                        &ctx.run_id,
+                        Some(step_id),
+                    )
                     .map_err(|e| map_memory_error(step_id, e))?;
                 prior
             }
@@ -182,10 +232,27 @@ impl AgentRuntime {
                 let ns = require_namespace(config, step_id)?;
                 let prior = ctx
                     .memory
-                    .read_vector(ns, STUB_MEMORY_KEY, ctx.trace, Some(step_id))
+                    .read_vector(
+                        ns,
+                        STUB_MEMORY_KEY,
+                        &agent.name,
+                        ctx.legacy,
+                        ctx.sprint5,
+                        &ctx.run_id,
+                        Some(step_id),
+                    )
                     .map_err(|e| map_memory_error(step_id, e))?;
                 ctx.memory
-                    .write_vector(ns, STUB_MEMORY_KEY, value, ctx.trace, Some(step_id))
+                    .write_vector(
+                        ns,
+                        STUB_MEMORY_KEY,
+                        value,
+                        &agent.name,
+                        ctx.legacy,
+                        ctx.sprint5,
+                        &ctx.run_id,
+                        Some(step_id),
+                    )
                     .map_err(|e| map_memory_error(step_id, e))?;
                 prior
             }
