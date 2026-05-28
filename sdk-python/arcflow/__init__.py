@@ -8,8 +8,18 @@ from arcflow.exceptions import (
     MemoryOperationError,
     ToolConfigurationError,
     ToolExecutionError,
+    TraceNotFoundError,
+    TraceStorageWarning,
     WorkflowConfigurationError,
     WorkflowExecutionError,
+)
+from arcflow.trace import (
+    MemoryOperationTrace,
+    StepError,
+    StepTrace,
+    TokenUsage,
+    ToolCallTrace,
+    TraceResult,
 )
 from arcflow.memory import MemoryConfig, MemoryScope, MemoryType
 from arcflow.result import WorkflowResult
@@ -28,6 +38,14 @@ __all__ = [
     "Tool",
     "ToolConfigurationError",
     "ToolExecutionError",
+    "TokenUsage",
+    "ToolCallTrace",
+    "TraceNotFoundError",
+    "TraceResult",
+    "TraceStorageWarning",
+    "StepError",
+    "StepTrace",
+    "MemoryOperationTrace",
     "Workflow",
     "WorkflowConfigurationError",
     "WorkflowExecutionError",
