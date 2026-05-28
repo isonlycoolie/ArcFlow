@@ -10,6 +10,7 @@ pub mod emitter;
 pub mod error;
 pub mod events;
 pub mod otel;
+pub mod otel_export;
 pub mod registry;
 pub mod sprint5_emitter;
 pub mod store;

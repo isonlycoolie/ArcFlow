@@ -12,8 +12,8 @@ use crate::rcs::types::{AgentDefinition, StepDefinition, WorkflowDefinition};
 use crate::state::{ExecutionStepOutput, StateEngine};
 use crate::tools::{ToolInvoker, ToolRuntime};
 use crate::tracing::{
-    emitter::TraceEmitter, events::TraceEventKind, sprint5_emitter::TraceEventEmitter, with_store,
-    TokenUsage,
+    emitter::TraceEmitter, events::TraceEventKind, otel_export::maybe_export_trace,
+    sprint5_emitter::TraceEventEmitter, with_store, TokenUsage,
 };
 
 use super::context::ExecutionContext;
@@ -223,6 +223,7 @@ pub(super) fn run_sorted_steps(
         drop(sprint5);
 
         store.mark_complete(&run_key);
+        maybe_export_trace(&run_key);
         Ok(WorkflowExecutionRecord {
             run_id,
             workflow_id: workflow.id,
