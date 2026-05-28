@@ -12,10 +12,8 @@ use crate::rcs::types::{AgentDefinition, StepDefinition, WorkflowDefinition};
 use crate::state::{ExecutionStepOutput, StateEngine};
 use crate::tools::{ToolInvoker, ToolRuntime};
 use crate::tracing::{
-    emitter::TraceEmitter,
-    events::TraceEventKind,
-    sprint5_emitter::TraceEventEmitter,
-    with_store, TokenUsage,
+    emitter::TraceEmitter, events::TraceEventKind, sprint5_emitter::TraceEventEmitter, with_store,
+    TokenUsage,
 };
 
 use super::context::ExecutionContext;

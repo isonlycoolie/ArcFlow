@@ -4,13 +4,13 @@ use std::collections::HashMap;
 use std::env;
 
 use async_trait::async_trait;
-use sha2::{Digest, Sha256};
-use uuid::Uuid;
 use qdrant_client::qdrant::{
     CreateCollection, Distance, PointStruct, SearchPoints, UpsertPoints, Value as QdrantValue,
     VectorParams, VectorsConfig,
 };
 use qdrant_client::Qdrant;
+use sha2::{Digest, Sha256};
+use uuid::Uuid;
 
 use super::error::MemoryError;
 use super::namespace::durable_key;

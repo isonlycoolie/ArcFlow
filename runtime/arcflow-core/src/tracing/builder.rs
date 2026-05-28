@@ -39,9 +39,12 @@ impl ExecutionTraceBuilder {
             steps.push(step);
         }
         if total_tokens.total_tokens == 0 && !steps.is_empty() {
-            total_tokens = steps.iter().fold(TokenUsage::default(), |acc, s| acc.add(&s.tokens));
+            total_tokens = steps
+                .iter()
+                .fold(TokenUsage::default(), |acc, s| acc.add(&s.tokens));
         }
-        let duration_ms = completed_at.map(|end| (end - started_at).num_milliseconds().max(0) as u64);
+        let duration_ms =
+            completed_at.map(|end| (end - started_at).num_milliseconds().max(0) as u64);
 
         ExecutionTrace {
             run_id: run_id.to_string(),
@@ -71,11 +74,17 @@ fn apply_event(
     current: &mut Option<StepTrace>,
 ) {
     match &event.kind {
-        TraceEventKind::WorkflowStarted { workflow_name: name, .. } => {
+        TraceEventKind::WorkflowStarted {
+            workflow_name: name,
+            ..
+        } => {
             *workflow_name = name.clone();
             *started_at = event.timestamp;
         }
-        TraceEventKind::WorkflowCompleted { total_tokens: tokens, .. } => {
+        TraceEventKind::WorkflowCompleted {
+            total_tokens: tokens,
+            ..
+        } => {
             *status = ExecutionStatus::Completed;
             *completed_at = Some(event.timestamp);
             *total_tokens = tokens.clone();
@@ -109,7 +118,11 @@ fn apply_event(
                 error: None,
             });
         }
-        TraceEventKind::StepCompleted { duration_ms, tokens, .. } => {
+        TraceEventKind::StepCompleted {
+            duration_ms,
+            tokens,
+            ..
+        } => {
             if let Some(ref mut step) = current {
                 step.completed_at = Some(event.timestamp);
                 step.duration_ms = Some(*duration_ms);
@@ -168,7 +181,10 @@ fn apply_event(
             }
         }
         TraceEventKind::MemoryWrite {
-            memory_type, key, duration_ms, ..
+            memory_type,
+            key,
+            duration_ms,
+            ..
         } => {
             if let Some(ref mut step) = current {
                 step.memory_operations.push(MemoryOperationTrace {

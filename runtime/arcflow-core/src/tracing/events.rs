@@ -24,7 +24,10 @@ pub enum TraceEventKind {
         failed_step_index: Option<usize>,
         error_code: String,
     },
-    WorkflowValidationFailed { run_id: String, reason: String },
+    WorkflowValidationFailed {
+        run_id: String,
+        reason: String,
+    },
     StepStarted {
         run_id: String,
         step_id: String,

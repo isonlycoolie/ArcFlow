@@ -25,7 +25,9 @@ fn session_write_read_same_agent() {
     let coord = MemoryCoordinator::new(run);
     with_trace(run, |legacy, sprint5, run_key| {
         coord
-            .write_session(agent, "note", b"hello", "agent", legacy, sprint5, run_key, None)
+            .write_session(
+                agent, "note", b"hello", "agent", legacy, sprint5, run_key, None,
+            )
             .unwrap();
         let got = coord
             .read_session(agent, "note", "agent", legacy, sprint5, run_key, None)
@@ -49,10 +51,14 @@ fn shared_agent_b_reads_agent_a_write() {
         };
         let read_cfg = write_cfg.clone();
         coord
-            .write_shared(a, "token", b"42", &write_cfg, "agent-a", legacy, sprint5, run_key, None)
+            .write_shared(
+                a, "token", b"42", &write_cfg, "agent-a", legacy, sprint5, run_key, None,
+            )
             .unwrap();
         let got = coord
-            .read_shared(&read_cfg, a, "token", "agent-b", legacy, sprint5, run_key, None)
+            .read_shared(
+                &read_cfg, a, "token", "agent-b", legacy, sprint5, run_key, None,
+            )
             .unwrap();
         assert_eq!(got.as_deref(), Some(b"42".as_ref()));
         let _ = b;
@@ -105,7 +111,9 @@ fn vector_store_and_search_stub() {
     with_trace(run, |legacy, sprint5, run_key| {
         let coord = MemoryCoordinator::new(run);
         coord
-            .write_vector(&ns, "doc", b"payload", "agent", legacy, sprint5, run_key, None)
+            .write_vector(
+                &ns, "doc", b"payload", "agent", legacy, sprint5, run_key, None,
+            )
             .unwrap();
         let got = coord
             .read_vector(&ns, "doc", "agent", legacy, sprint5, run_key, None)

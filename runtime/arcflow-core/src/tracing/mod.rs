@@ -16,11 +16,11 @@ pub mod store;
 pub mod types;
 
 pub use builder::ExecutionTraceBuilder;
-pub use dual::{memory_read, memory_write, tool_finished, tool_started, tokens_consumed};
-pub use registry::{get_execution_trace, with_store};
+pub use dual::{memory_read, memory_write, tokens_consumed, tool_finished, tool_started};
 pub use emitter::TraceEmitter;
-pub use sprint5_emitter::TraceEventEmitter;
 pub use error::TracingError;
 pub use events::TraceEventKind;
+pub use registry::{get_execution_trace, with_store};
+pub use sprint5_emitter::TraceEventEmitter;
 pub use store::TraceStore;
 pub use types::{ExecutionTrace, StepTrace, TokenUsage, TraceEvent};

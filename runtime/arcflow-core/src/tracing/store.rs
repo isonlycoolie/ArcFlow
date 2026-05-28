@@ -28,13 +28,14 @@ impl TraceStore {
 
     /// Appends an event; returns false if the per-run cap was exceeded.
     pub fn append(&mut self, run_id: &str, event: TraceEvent) -> bool {
-        let buffer = self.traces.entry(run_id.to_string()).or_insert_with(|| {
-            BoundedEventBuffer {
+        let buffer = self
+            .traces
+            .entry(run_id.to_string())
+            .or_insert_with(|| BoundedEventBuffer {
                 events: Vec::new(),
                 events_dropped: 0,
                 is_complete: false,
-            }
-        });
+            });
         if buffer.events.len() >= MAX_TRACE_EVENTS_PER_RUN as usize {
             buffer.events_dropped += 1;
             self.total_events_dropped += 1;
