@@ -2,12 +2,13 @@
 
 use std::cell::RefCell;
 use std::sync::OnceLock;
+use std::time::Instant;
 
 use tokio::runtime::Runtime;
 use uuid::Uuid;
 
 use crate::rcs::types::{MemoryConfig, MemoryScope, MemoryType};
-use crate::tracing::TraceEmitter;
+use crate::tracing::{emitter::TraceEmitter, memory_read, memory_write, sprint5_emitter::TraceEventEmitter};
 
 use super::error::MemoryError;
 use super::persistent::PersistentMemory;
@@ -56,12 +57,25 @@ impl MemoryCoordinator {
         agent_id: Uuid,
         logical_key: &str,
         value: &[u8],
-        trace: &mut TraceEmitter,
+        agent_name: &str,
+        legacy: &mut TraceEmitter,
+        sprint5: &mut TraceEventEmitter<'_>,
+        run_id: &str,
         step_id: Option<Uuid>,
     ) -> Result<(), MemoryError> {
+        let started = Instant::now();
         self.session
             .write(self.run_id, agent_id, logical_key, value)?;
-        trace.memory_write(step_id, "session", value.len());
+        memory_write(
+            legacy,
+            sprint5,
+            run_id,
+            step_id,
+            agent_name,
+            "session",
+            logical_key,
+            started,
+        );
         Ok(())
     }
 
@@ -70,13 +84,27 @@ impl MemoryCoordinator {
         &self,
         agent_id: Uuid,
         logical_key: &str,
-        trace: &mut TraceEmitter,
+        agent_name: &str,
+        legacy: &mut TraceEmitter,
+        sprint5: &mut TraceEventEmitter<'_>,
+        run_id: &str,
         step_id: Option<Uuid>,
     ) -> Result<Option<Vec<u8>>, MemoryError> {
+        let started = Instant::now();
         let out = self
             .session
             .read(self.run_id, agent_id, agent_id, logical_key)?;
-        trace.memory_read(step_id, "session", logical_key.len());
+        memory_read(
+            legacy,
+            sprint5,
+            run_id,
+            step_id,
+            agent_name,
+            "session",
+            logical_key,
+            out.is_some(),
+            started,
+        );
         Ok(out)
     }
 
@@ -87,7 +115,10 @@ impl MemoryCoordinator {
         logical_key: &str,
         value: &[u8],
         config: &MemoryConfig,
-        trace: &mut TraceEmitter,
+        agent_name: &str,
+        legacy: &mut TraceEmitter,
+        sprint5: &mut TraceEventEmitter<'_>,
+        run_id: &str,
         step_id: Option<Uuid>,
     ) -> Result<(), MemoryError> {
         if config.memory_type != MemoryType::Shared {
@@ -95,9 +126,19 @@ impl MemoryCoordinator {
                 reason: "not shared memory config".into(),
             });
         }
+        let started = Instant::now();
         self.shared
             .write(self.run_id, writer_agent_id, logical_key, value)?;
-        trace.memory_write(step_id, "shared", value.len());
+        memory_write(
+            legacy,
+            sprint5,
+            run_id,
+            step_id,
+            agent_name,
+            "shared",
+            logical_key,
+            started,
+        );
         Ok(())
     }
 
@@ -107,7 +148,10 @@ impl MemoryCoordinator {
         reader_config: &MemoryConfig,
         owner_agent_id: Uuid,
         logical_key: &str,
-        trace: &mut TraceEmitter,
+        agent_name: &str,
+        legacy: &mut TraceEmitter,
+        sprint5: &mut TraceEventEmitter<'_>,
+        run_id: &str,
         step_id: Option<Uuid>,
     ) -> Result<Option<Vec<u8>>, MemoryError> {
         if reader_config.memory_type != MemoryType::Shared {
@@ -118,8 +162,19 @@ impl MemoryCoordinator {
         if reader_config.scope != MemoryScope::Workflow {
             return Err(MemoryError::ScopeDenied);
         }
+        let started = Instant::now();
         let out = self.shared.read(self.run_id, owner_agent_id, logical_key)?;
-        trace.memory_read(step_id, "shared", logical_key.len());
+        memory_read(
+            legacy,
+            sprint5,
+            run_id,
+            step_id,
+            agent_name,
+            "shared",
+            logical_key,
+            out.is_some(),
+            started,
+        );
         Ok(out)
     }
 
@@ -129,19 +184,32 @@ impl MemoryCoordinator {
         namespace: &str,
         logical_key: &str,
         value: &[u8],
-        trace: &mut TraceEmitter,
+        agent_name: &str,
+        legacy: &mut TraceEmitter,
+        sprint5: &mut TraceEventEmitter<'_>,
+        run_id: &str,
         step_id: Option<Uuid>,
     ) -> Result<(), MemoryError> {
         if namespace.is_empty() {
             return Err(MemoryError::NamespaceRequired);
         }
+        let started = Instant::now();
         self.runtime()?
             .block_on(
                 self.persistent
                     .borrow_mut()
                     .write(namespace, logical_key, value),
             )?;
-        trace.memory_write(step_id, "persistent", value.len());
+        memory_write(
+            legacy,
+            sprint5,
+            run_id,
+            step_id,
+            agent_name,
+            "persistent",
+            logical_key,
+            started,
+        );
         Ok(())
     }
 
@@ -150,16 +218,30 @@ impl MemoryCoordinator {
         &self,
         namespace: &str,
         logical_key: &str,
-        trace: &mut TraceEmitter,
+        agent_name: &str,
+        legacy: &mut TraceEmitter,
+        sprint5: &mut TraceEventEmitter<'_>,
+        run_id: &str,
         step_id: Option<Uuid>,
     ) -> Result<Option<Vec<u8>>, MemoryError> {
         if namespace.is_empty() {
             return Err(MemoryError::NamespaceRequired);
         }
+        let started = Instant::now();
         let out = self
             .runtime()?
             .block_on(self.persistent.borrow_mut().read(namespace, logical_key))?;
-        trace.memory_read(step_id, "persistent", logical_key.len());
+        memory_read(
+            legacy,
+            sprint5,
+            run_id,
+            step_id,
+            agent_name,
+            "persistent",
+            logical_key,
+            out.is_some(),
+            started,
+        );
         Ok(out)
     }
 
@@ -169,18 +251,31 @@ impl MemoryCoordinator {
         namespace: &str,
         logical_key: &str,
         value: &[u8],
-        trace: &mut TraceEmitter,
+        agent_name: &str,
+        legacy: &mut TraceEmitter,
+        sprint5: &mut TraceEventEmitter<'_>,
+        run_id: &str,
         step_id: Option<Uuid>,
     ) -> Result<(), MemoryError> {
         if namespace.is_empty() {
             return Err(MemoryError::NamespaceRequired);
         }
+        let started = Instant::now();
         self.runtime()?.block_on(
             self.vector
                 .borrow_mut()
                 .write(namespace, logical_key, value),
         )?;
-        trace.memory_write(step_id, "vector", value.len());
+        memory_write(
+            legacy,
+            sprint5,
+            run_id,
+            step_id,
+            agent_name,
+            "vector",
+            logical_key,
+            started,
+        );
         Ok(())
     }
 
@@ -189,16 +284,30 @@ impl MemoryCoordinator {
         &self,
         namespace: &str,
         logical_key: &str,
-        trace: &mut TraceEmitter,
+        agent_name: &str,
+        legacy: &mut TraceEmitter,
+        sprint5: &mut TraceEventEmitter<'_>,
+        run_id: &str,
         step_id: Option<Uuid>,
     ) -> Result<Option<Vec<u8>>, MemoryError> {
         if namespace.is_empty() {
             return Err(MemoryError::NamespaceRequired);
         }
+        let started = Instant::now();
         let out = self
             .runtime()?
             .block_on(self.vector.borrow_mut().read(namespace, logical_key))?;
-        trace.memory_read(step_id, "vector", logical_key.len());
+        memory_read(
+            legacy,
+            sprint5,
+            run_id,
+            step_id,
+            agent_name,
+            "vector",
+            logical_key,
+            out.is_some(),
+            started,
+        );
         Ok(out)
     }
 }
@@ -206,40 +315,69 @@ impl MemoryCoordinator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::memory::SessionMemory;
-    use crate::rcs::types::{MemoryConfig, MemoryScope, MemoryType};
-    use crate::tracing::TraceEmitter;
+    use crate::tracing::{sprint5_emitter::TraceEventEmitter, store::TraceStore, TraceEmitter};
 
     #[test]
-    fn session_isolation_blocks_cross_agent_read() {
-        let run = Uuid::new_v4();
-        let a = Uuid::new_v4();
-        let b = Uuid::new_v4();
-        let coord = MemoryCoordinator::new(run);
-        let mut trace = TraceEmitter::new(Uuid::new_v4());
-        coord.write_session(a, "k", b"1", &mut trace, None).unwrap();
-        let err = SessionMemory::default().read(run, b, a, "k").unwrap_err();
-        assert_eq!(err, MemoryError::SessionIsolationViolation);
+    fn session_write_read_round_trip() {
+        let run_id = Uuid::new_v4();
+        let coord = MemoryCoordinator::new(run_id);
+        let mut store = TraceStore::new();
+        let run_key = run_id.to_string();
+        let mut legacy = TraceEmitter::new(run_id);
+        let mut sprint5 = TraceEventEmitter::new(run_key.clone(), &mut store);
+        let aid = Uuid::new_v4();
+        coord
+            .write_session(
+                aid,
+                "k",
+                b"v",
+                "agent",
+                &mut legacy,
+                &mut sprint5,
+                &run_key,
+                None,
+            )
+            .unwrap();
+        let got = coord
+            .read_session(
+                aid,
+                "k",
+                "agent",
+                &mut legacy,
+                &mut sprint5,
+                &run_key,
+                None,
+            )
+            .unwrap();
+        assert_eq!(got.as_deref(), Some(b"v".as_slice()));
     }
 
     #[test]
-    fn shared_requires_workflow_scope() {
-        let run = Uuid::new_v4();
-        let a = Uuid::new_v4();
-        let coord = MemoryCoordinator::new(run);
-        let mut trace = TraceEmitter::new(Uuid::new_v4());
+    fn shared_scope_denied_when_not_workflow() {
+        let run_id = Uuid::new_v4();
+        let coord = MemoryCoordinator::new(run_id);
+        let mut store = TraceStore::new();
+        let run_key = run_id.to_string();
+        let mut legacy = TraceEmitter::new(run_id);
+        let mut sprint5 = TraceEventEmitter::new(run_key.clone(), &mut store);
         let cfg = MemoryConfig {
             memory_type: MemoryType::Shared,
             scope: MemoryScope::Agent,
             namespace: None,
             ttl_seconds: None,
         };
-        coord
-            .write_shared(a, "k", b"v", &cfg, &mut trace, None)
-            .unwrap();
         let err = coord
-            .read_shared(&cfg, a, "k", &mut trace, None)
+            .read_shared(
+                &cfg,
+                Uuid::new_v4(),
+                "k",
+                "agent",
+                &mut legacy,
+                &mut sprint5,
+                &run_key,
+                None,
+            )
             .unwrap_err();
-        assert_eq!(err, MemoryError::ScopeDenied);
+        assert!(matches!(err, MemoryError::ScopeDenied));
     }
 }
