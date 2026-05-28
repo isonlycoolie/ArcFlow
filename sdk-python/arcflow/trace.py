@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Iterator
 
 
@@ -83,3 +84,40 @@ class TraceResult:
 
     def __len__(self) -> int:
         return len(self.steps)
+
+    @classmethod
+    def from_json(cls, raw: str) -> TraceResult:
+        data = json.loads(raw)
+        steps = tuple(_parse_step(s) for s in data.get("steps", []))
+        tokens = data.get("total_tokens", {})
+        dropped = int(data.get("events_dropped", 0))
+        warnings: list[str] = []
+        if dropped:
+            warnings.append(f"{dropped} trace events dropped (store capacity)")
+        duration_ms = data.get("duration_ms")
+        return cls(
+            run_id=str(data["run_id"]),
+            workflow_name=str(data.get("workflow_name", "unknown")),
+            status=_status_str(data.get("status")),
+            started_at=_parse_ts(data["started_at"]),
+            completed_at=_parse_ts(data["completed_at"])
+            if data.get("completed_at")
+            else None,
+            total_duration_seconds=(duration_ms or 0) / 1000.0,
+            total_tokens_consumed=int(tokens.get("total_tokens", 0)),
+            steps=steps,
+            warnings=tuple(warnings),
+        )
+
+
+def _status_str(value: object) -> str:
+    if isinstance(value, str):
+        if value.startswith("{"):
+            return "partial"
+        return value.lower()
+    return "partial"
+
+
+def _parse_ts(value: object) -> datetime:
+    text = str(value).replace("Z", "+00:00")
+    return datetime.fromisoformat(text).astimezone(timezone.utc)
