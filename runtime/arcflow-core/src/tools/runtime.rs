@@ -6,7 +6,7 @@ use std::time::Duration;
 use serde_json::Value;
 use uuid::Uuid;
 
-use crate::tracing::TraceEmitter;
+use crate::tracing::{emitter::TraceEmitter, sprint5_emitter::TraceEventEmitter, tool_finished, tool_started};
 
 use super::error::ToolError;
 use tokio::time::timeout;
@@ -56,7 +56,9 @@ impl ToolRuntime {
         name: &str,
         input: Value,
         invoker: Arc<dyn ToolInvoker>,
-        trace: &mut TraceEmitter,
+        legacy: &mut TraceEmitter,
+        sprint5: &mut TraceEventEmitter<'_>,
+        run_id: &str,
         step_id: Option<Uuid>,
     ) -> Result<String, ToolError> {
         let Some(tool) = self.registry.get(name) else {
@@ -65,6 +67,9 @@ impl ToolRuntime {
             });
         };
         validate_tool_input(name, &tool.input_schema, &input)?;
+        if let Some(sid) = step_id {
+            tool_started(sprint5, run_id, sid, name);
+        }
         let started = std::time::Instant::now();
         let duration = Duration::from_secs(tool.timeout_secs.max(1));
         let fut = spawn_invoke(invoker, name.to_string(), input);
@@ -76,8 +81,20 @@ impl ToolRuntime {
                 timeout_secs: tool.timeout_secs,
             }),
         };
-        let status = if result.is_ok() { "ok" } else { "failed" };
-        trace.tool_executed(step_id, name, status, started.elapsed().as_millis() as u64);
+        let ok = result.is_ok();
+        let duration_ms = started.elapsed().as_millis() as u64;
+        let out_len = result.as_ref().map(|s| s.len()).unwrap_or(0);
+        tool_finished(
+            legacy,
+            sprint5,
+            run_id,
+            step_id,
+            name,
+            ok,
+            duration_ms,
+            out_len,
+            if ok { None } else { Some("tool_failed") },
+        );
         result.map_err(|e| match e {
             ToolError::ExecutionFailed {
                 name: n,
@@ -96,7 +113,7 @@ impl ToolRuntime {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tracing::TraceEmitter;
+    use crate::tracing::store::TraceStore;
     use serde_json::json;
 
     struct EchoInvoker;
@@ -120,18 +137,24 @@ mod tests {
             timeout_secs: 5,
         })
         .unwrap();
-        let mut trace = TraceEmitter::new(Uuid::new_v4());
+        let run_id = Uuid::new_v4();
+        let mut store = TraceStore::new();
+        let run_key = run_id.to_string();
+        let mut legacy = TraceEmitter::new(run_id);
+        let mut sprint5 = TraceEventEmitter::new(run_key.clone(), &mut store);
         let out = rt
             .execute_tool(
                 "echo",
                 json!({"q": "hi"}),
                 Arc::new(EchoInvoker),
-                &mut trace,
+                &mut legacy,
+                &mut sprint5,
+                &run_key,
                 None,
             )
             .await
             .unwrap();
         assert_eq!(out, "hi");
-        assert!(!trace.events().is_empty());
+        assert!(!legacy.events().is_empty());
     }
 }
