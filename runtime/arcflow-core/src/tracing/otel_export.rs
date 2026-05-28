@@ -27,10 +27,7 @@ fn export_trace_blocking(trace: &ExecutionTrace) -> Result<(), String> {
     tracer.in_span(format!("workflow/{}", trace.workflow_name), |cx| {
         let span = cx.span();
         span.set_attribute(KeyValue::new("run_id", trace.run_id.clone()));
-        span.set_attribute(KeyValue::new(
-            "workflow_name",
-            trace.workflow_name.clone(),
-        ));
+        span.set_attribute(KeyValue::new("workflow_name", trace.workflow_name.clone()));
         span.set_attribute(KeyValue::new("status", format!("{:?}", trace.status)));
         for step in &trace.steps {
             tracer.in_span(format!("step/{}", step.step_index), |step_cx| {

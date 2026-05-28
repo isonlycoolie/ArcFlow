@@ -12,12 +12,27 @@ fn store() -> &'static Mutex<TraceStore> {
     TRACE_STORE.get_or_init(|| Mutex::new(TraceStore::new()))
 }
 
+/// Trace lookup failed because the store mutex is poisoned.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TraceLookupError {
+    StoreLockFailed,
+}
+
 /// Returns a built execution trace for `run_id`, if still retained.
 pub fn get_execution_trace(run_id: &str) -> Option<ExecutionTrace> {
-    let guard = store().lock().ok()?;
-    let events = guard.get_events(run_id)?;
+    try_get_execution_trace(run_id).unwrap_or_default()
+}
+
+/// Like [`get_execution_trace`] but surfaces store lock failures.
+pub fn try_get_execution_trace(run_id: &str) -> Result<Option<ExecutionTrace>, TraceLookupError> {
+    let guard = store()
+        .lock()
+        .map_err(|_| TraceLookupError::StoreLockFailed)?;
+    let Some(events) = guard.get_events(run_id) else {
+        return Ok(None);
+    };
     let dropped = guard.events_dropped_for_run(run_id);
-    Some(ExecutionTraceBuilder::build(run_id, events, dropped))
+    Ok(Some(ExecutionTraceBuilder::build(run_id, events, dropped)))
 }
 
 /// Mutable access for workflow execution (single-threaded embedded mode).

@@ -56,7 +56,9 @@ fn failed_step_emits_step_failed_then_workflow_failed() {
         },
     );
 
-    let err = WorkflowEngine::new().execute(&wf, &agents, "in").unwrap_err();
+    let err = WorkflowEngine::new()
+        .execute(&wf, &agents, "in")
+        .unwrap_err();
     let run_id = match err {
         WorkflowRunError::Failed { partial, .. } => partial.run_id.to_string(),
         other => panic!("expected Failed, got {other:?}"),
@@ -81,5 +83,8 @@ fn failed_step_emits_step_failed_then_workflow_failed() {
     assert!(step_fail.is_some());
     assert!(wf_fail.is_some());
     assert_eq!(wf_fail, step_fail.map(|i| i + 1));
-    assert_eq!(trace.status, arcflow_core::tracing::types::ExecutionStatus::Failed);
+    assert_eq!(
+        trace.status,
+        arcflow_core::tracing::types::ExecutionStatus::Failed
+    );
 }
