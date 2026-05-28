@@ -113,5 +113,30 @@ export ARCFLOW_QDRANT_URL=http://localhost:6333
 | `MemoryConfigurationError` | Invalid memory config on an agent |
 | `MemoryOperationError` | Memory read/write failed |
 | `InfrastructureUnavailableError` | Postgres/Qdrant unreachable or URL unset |
+| `TraceNotFoundError` | No trace for last run (call `run()` first) or run evicted from store |
+| `TraceStorageWarning` | Trace store dropped events at capacity |
 
 Messages use the format `[ArcFlow] <what happened>. <what to do>.`
+
+## Observability (Sprint 5)
+
+```python
+from arcflow import Agent, Workflow
+
+wf = Workflow("demo")
+wf.step(Agent(name="researcher", role="researcher", instructions="Research."))
+result = wf.run("Analyze renewable energy trends")
+trace = wf.trace()
+print(trace.summary())
+print(trace.status)
+print(trace.failed_step())
+```
+
+```bash
+# From repo root (in-process store; same process as the SDK run)
+cargo run -p arcflow-cli -- trace <run-id> --format json --verbose
+```
+
+Optional OTLP export: set `ARCFLOW_OTLP_ENDPOINT` before running workflows.
+
+See [contracts/observability-traces.md](../contracts/observability-traces.md) and [contracts/observability/](../contracts/observability/).
