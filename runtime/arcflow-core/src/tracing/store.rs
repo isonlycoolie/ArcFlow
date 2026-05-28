@@ -1,0 +1,67 @@
+//! Bounded in-process trace storage (Sprint 5 Phase 3).
+
+use std::collections::HashMap;
+
+use crate::constants::{MAX_CONCURRENT_TRACES, MAX_TRACE_EVENTS_PER_RUN};
+use crate::tracing::types::TraceEvent;
+
+#[derive(Debug)]
+struct BoundedEventBuffer {
+    events: Vec<TraceEvent>,
+    events_dropped: u32,
+    is_complete: bool,
+}
+
+/// In-process store for workflow trace events.
+#[derive(Debug, Default)]
+pub struct TraceStore {
+    traces: HashMap<String, BoundedEventBuffer>,
+    completion_order: Vec<String>,
+    total_events_dropped: u32,
+}
+
+impl TraceStore {
+    /// Creates an empty store.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Appends an event; returns false if the per-run cap was exceeded.
+    pub fn append(&mut self, run_id: &str, event: TraceEvent) -> bool {
+        let buffer = self.traces.entry(run_id.to_string()).or_insert_with(|| {
+            BoundedEventBuffer {
+                events: Vec::new(),
+                events_dropped: 0,
+                is_complete: false,
+            }
+        });
+        if buffer.events.len() >= MAX_TRACE_EVENTS_PER_RUN as usize {
+            buffer.events_dropped += 1;
+            self.total_events_dropped += 1;
+            return false;
+        }
+        buffer.events.push(event);
+        true
+    }
+
+    /// Marks a run trace complete for eviction ordering.
+    pub fn mark_complete(&mut self, run_id: &str) {
+        if let Some(buffer) = self.traces.get_mut(run_id) {
+            buffer.is_complete = true;
+            if !self.completion_order.iter().any(|id| id == run_id) {
+                self.completion_order.push(run_id.to_string());
+            }
+        }
+        self.evict_if_needed();
+    }
+
+    fn evict_if_needed(&mut self) {
+        while self.traces.len() > MAX_CONCURRENT_TRACES {
+            let Some(oldest) = self.completion_order.first().cloned() else {
+                break;
+            };
+            self.traces.remove(&oldest);
+            self.completion_order.retain(|id| id != &oldest);
+        }
+    }
+}
