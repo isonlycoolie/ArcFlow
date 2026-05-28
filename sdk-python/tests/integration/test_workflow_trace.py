@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from arcflow import Agent, TraceNotFoundError, Workflow
+from arcflow.exceptions import WorkflowExecutionError
+from arcflow._internal.runtime import get_trace
 from arcflow.trace import TraceResult
 
 
@@ -27,3 +29,20 @@ def test_trace_before_run_raises() -> None:
         raise AssertionError("expected TraceNotFoundError")
     except TraceNotFoundError:
         pass
+
+
+def test_failed_workflow_trace_reports_failed_step() -> None:
+    wf = Workflow("fail-trace")
+    wf.step(Agent(name="ok", role="researcher", instructions="work"))
+    wf.step(Agent(name="fail", role="__fail__", instructions="fail"))
+    run_id: str | None = None
+    try:
+        wf.run("trigger failure")
+    except WorkflowExecutionError as err:
+        run_id = err.run_id
+    assert run_id is not None
+    trace = get_trace(run_id)
+    assert trace.status == "failed"
+    failed = trace.failed_step()
+    assert failed is not None
+    assert failed.status == "failed"
