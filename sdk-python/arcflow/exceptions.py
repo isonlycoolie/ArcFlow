@@ -95,6 +95,26 @@ class TraceStorageWarning(ArcFlowError):  # noqa: N818
         self.run_id = run_id
 
 
+class ProviderConfigurationError(ArcFlowError):
+    """Raised when a provider is incorrectly configured before execution."""
+
+
+class ProviderExecutionError(ArcFlowError):
+    """Raised when an LLM provider call fails during a workflow run."""
+
+    def __init__(
+        self,
+        message: str,
+        provider_id: str | None = None,
+        run_id: str | None = None,
+        failed_step: str | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.provider_id = provider_id
+        self.run_id = run_id
+        self.failed_step = failed_step
+
+
 class InfrastructureUnavailableError(ArcFlowError):
     """Raised when an optional memory backend is unreachable or unset."""
 

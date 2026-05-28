@@ -6,6 +6,8 @@ from arcflow.exceptions import (
     InfrastructureUnavailableError,
     MemoryConfigurationError,
     MemoryOperationError,
+    ProviderConfigurationError,
+    ProviderExecutionError,
     ToolConfigurationError,
     ToolExecutionError,
     TraceNotFoundError,
@@ -14,6 +16,7 @@ from arcflow.exceptions import (
     WorkflowExecutionError,
 )
 from arcflow.memory import MemoryConfig, MemoryScope, MemoryType
+from arcflow.provider import Anthropic, Gemini, OpenAI
 from arcflow.result import WorkflowResult
 from arcflow.tool import Tool
 from arcflow.trace import (
@@ -46,6 +49,11 @@ __all__ = [
     "StepError",
     "StepTrace",
     "MemoryOperationTrace",
+    "OpenAI",
+    "Anthropic",
+    "Gemini",
+    "ProviderConfigurationError",
+    "ProviderExecutionError",
     "Workflow",
     "WorkflowConfigurationError",
     "WorkflowExecutionError",

@@ -66,6 +66,19 @@ fn raise_for_runtime_error(
                  Check memory configuration and backend connectivity."
             )),
         ),
+        RuntimeError::ProviderCallFailed {
+            provider_id,
+            step_id,
+            reason,
+        } => raise_provider_execution(
+            py,
+            prefix(&format!(
+                "Provider '{provider_id}' failed for step '{step_id}': {reason}."
+            )),
+            Some(provider_id.clone()),
+            Some(run_id),
+            Some(step_id.to_string()),
+        ),
         _ => {
             let failed = partial.step_outputs.last().map(|o| o.agent_id.to_string());
             raise_execution(py, runtime_execution_message(err), Some(run_id), failed)
@@ -101,6 +114,11 @@ fn runtime_config_message(err: &RuntimeError) -> String {
             suggestion,
             step_id,
         } => format!("Infrastructure unavailable ({backend}) for step '{step_id}': {suggestion}."),
+        RuntimeError::ProviderCallFailed {
+            provider_id,
+            step_id,
+            reason,
+        } => format!("Provider '{provider_id}' failed for step '{step_id}': {reason}."),
     })
 }
 
@@ -131,6 +149,11 @@ fn runtime_execution_message(err: &RuntimeError) -> String {
             suggestion,
             step_id,
         } => format!("Infrastructure unavailable ({backend}) for step '{step_id}': {suggestion}."),
+        RuntimeError::ProviderCallFailed {
+            provider_id,
+            reason,
+            ..
+        } => format!("Provider '{provider_id}' failed: {reason}."),
     })
 }
 
@@ -203,6 +226,24 @@ fn raise_infrastructure(
         let exc_mod = import_exceptions(py)?;
         let cls = exc_mod.getattr("InfrastructureUnavailableError")?;
         cls.call1((message, backend, suggestion))
+    })();
+    match built {
+        Ok(value) => PyErr::from_value(value),
+        Err(err) => err,
+    }
+}
+
+fn raise_provider_execution(
+    py: Python<'_>,
+    message: String,
+    provider_id: Option<String>,
+    run_id: Option<String>,
+    failed_step: Option<String>,
+) -> PyErr {
+    let built: PyResult<Bound<'_, PyAny>> = (|| {
+        let exc_mod = import_exceptions(py)?;
+        let cls = exc_mod.getattr("ProviderExecutionError")?;
+        cls.call1((message, provider_id, run_id, failed_step))
     })();
     match built {
         Ok(value) => PyErr::from_value(value),
