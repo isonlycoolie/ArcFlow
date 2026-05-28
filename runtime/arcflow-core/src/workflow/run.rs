@@ -52,6 +52,7 @@ fn run_one_step(
     run_key: &str,
     tool_runtime: Option<&ToolRuntime>,
     tool_invoker: Option<Arc<dyn ToolInvoker>>,
+    workflow_started: Instant,
 ) -> Result<(), WorkflowRunError> {
     debug!(
         run_id = %loop_ctx.run_id,
@@ -103,6 +104,12 @@ fn run_one_step(
                 duration_ms: step_started.elapsed().as_millis() as u64,
                 error_code: "step_failed".into(),
                 error_message: err.to_string(),
+            });
+            sprint5.emit(TraceEventKind::WorkflowFailed {
+                run_id: run_key.to_string(),
+                duration_ms: workflow_started.elapsed().as_millis() as u64,
+                failed_step_index: Some(step_index),
+                error_code: "step_failed".into(),
             });
             return Err(WorkflowRunError::Failed {
                 error: err,
@@ -200,6 +207,7 @@ pub(super) fn run_sorted_steps(
                 &run_key,
                 tool_runtime,
                 tool_invoker.clone(),
+                workflow_started,
             )?;
         }
 
