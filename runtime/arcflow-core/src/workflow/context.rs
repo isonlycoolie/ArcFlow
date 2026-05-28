@@ -23,4 +23,7 @@ pub struct ExecutionContext<'a, 's> {
     pub run_id: String,
     /// Optional LLM provider for this run (Sprint 6).
     pub provider: Option<Arc<dyn ModelProvider>>,
+    /// Provider generation limits when a provider is active.
+    pub provider_max_tokens: u32,
+    pub provider_temperature: f32,
 }

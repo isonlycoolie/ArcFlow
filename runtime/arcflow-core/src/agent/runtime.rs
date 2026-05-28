@@ -122,12 +122,17 @@ impl AgentRuntime {
         ctx: &mut ExecutionContext<'_, '_>,
         provider: std::sync::Arc<dyn crate::providers::ModelProvider>,
     ) -> Result<(String, TokenUsage), RuntimeError> {
-        let request = build_agent_request(
-            &agent.instructions,
-            run_input,
-            default_max_tokens(),
-            default_temperature(),
-        );
+        let max_tokens = if ctx.provider.is_some() {
+            ctx.provider_max_tokens
+        } else {
+            default_max_tokens()
+        };
+        let temperature = if ctx.provider.is_some() {
+            ctx.provider_temperature
+        } else {
+            default_temperature()
+        };
+        let request = build_agent_request(&agent.instructions, run_input, max_tokens, temperature);
         let prompt_size = request.prompt_size_bytes();
         let step_id_str = step_id.to_string();
 

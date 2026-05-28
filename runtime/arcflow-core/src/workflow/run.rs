@@ -55,6 +55,8 @@ fn run_one_step(
     tool_invoker: Option<Arc<dyn ToolInvoker>>,
     workflow_started: Instant,
     provider: Option<Arc<dyn ModelProvider>>,
+    provider_max_tokens: u32,
+    provider_temperature: f32,
 ) -> Result<(), WorkflowRunError> {
     debug!(
         run_id = %loop_ctx.run_id,
@@ -81,6 +83,8 @@ fn run_one_step(
             sprint5,
             run_id: run_key.to_string(),
             provider: provider.clone(),
+            provider_max_tokens,
+            provider_temperature,
         };
         agent_runtime.execute_with_context(
             agent,
@@ -160,6 +164,8 @@ pub(super) fn run_sorted_steps(
     tool_runtime: Option<&ToolRuntime>,
     tool_invoker: Option<Arc<dyn ToolInvoker>>,
     provider: Option<Arc<dyn ModelProvider>>,
+    provider_max_tokens: u32,
+    provider_temperature: f32,
 ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
     let run_id = Uuid::new_v4();
     let run_key = run_id.to_string();
@@ -213,6 +219,8 @@ pub(super) fn run_sorted_steps(
                 tool_invoker.clone(),
                 workflow_started,
                 provider.clone(),
+                provider_max_tokens,
+                provider_temperature,
             )?;
         }
 

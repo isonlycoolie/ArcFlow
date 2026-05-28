@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from arcflow.agent import Agent
 from arcflow.exceptions import TraceNotFoundError, WorkflowConfigurationError
+from arcflow.provider import ProviderConfig
 from arcflow.result import WorkflowResult
 from arcflow.trace import TraceResult
 
@@ -31,7 +32,12 @@ class Workflow:
         self._steps.append(agent)
         return self
 
-    def run(self, input: str) -> WorkflowResult:
+    def run(
+        self,
+        input: str,
+        *,
+        provider: ProviderConfig | None = None,
+    ) -> WorkflowResult:
         trimmed = input.strip()
         if not trimmed:
             raise WorkflowConfigurationError(
@@ -45,7 +51,8 @@ class Workflow:
             )
         from arcflow._internal import runtime
 
-        result = runtime.run_workflow(self._name, self._steps, trimmed)
+        provider_row = provider.binding_tuple() if provider is not None else None
+        result = runtime.run_workflow(self._name, self._steps, trimmed, provider_row)
         self._last_run_id = result.run_id
         return result
 

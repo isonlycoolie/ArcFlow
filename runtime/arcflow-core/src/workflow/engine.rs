@@ -6,7 +6,7 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::agent::AgentRuntime;
-use crate::providers::ModelProvider;
+use crate::providers::{default_max_tokens, default_temperature, ModelProvider};
 use crate::rcs::types::{AgentDefinition, WorkflowDefinition};
 use crate::tools::{ToolInvoker, ToolRuntime};
 
@@ -54,6 +54,8 @@ impl WorkflowEngine {
             None,
             None,
             None,
+            default_max_tokens(),
+            default_temperature(),
         )
     }
 
@@ -67,6 +69,8 @@ impl WorkflowEngine {
         tool_runtime: Option<&ToolRuntime>,
         tool_invoker: Option<Arc<dyn ToolInvoker>>,
         provider: Option<Arc<dyn ModelProvider>>,
+        provider_max_tokens: u32,
+        provider_temperature: f32,
     ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
         validate_workflow(workflow, agents)?;
         run_sorted_steps(
@@ -77,6 +81,8 @@ impl WorkflowEngine {
             tool_runtime,
             tool_invoker,
             provider,
+            provider_max_tokens,
+            provider_temperature,
         )
     }
 }

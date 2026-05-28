@@ -42,6 +42,7 @@ def run_workflow(
     workflow_name: str,
     steps: list[Agent],
     run_input: str,
+    provider: tuple[str, str, int, float] | None = None,
 ) -> WorkflowResult:
     """Delegates execution to the Rust runtime via PyO3."""
     agent_rows = [agent.binding_tuple() for agent in steps]
@@ -56,6 +57,7 @@ def run_workflow(
         step_rows,
         run_input,
         tool_executors,
+        provider,
     )
     return _to_result(native)
 
