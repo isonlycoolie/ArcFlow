@@ -65,12 +65,32 @@ class MemoryOperationError(ArcFlowError):
 class TraceNotFoundError(ArcFlowError):
     """No trace for the requested run / last run."""
 
+    def __init__(self, message: str | None = None) -> None:
+        super().__init__(
+            message
+            or (
+                "[ArcFlow] No trace found for this workflow run. "
+                "Call workflow.run() before trace(), or verify the run id."
+            )
+        )
 
-class TraceStorageWarning(ArcFlowError):
+
+class TraceStorageWarning(ArcFlowError):  # noqa: N818
     """Trace store dropped events for a run."""
 
-    def __init__(self, message: str, events_dropped: int = 0, run_id: str | None = None) -> None:
-        super().__init__(message)
+    def __init__(
+        self,
+        message: str | None = None,
+        events_dropped: int = 0,
+        run_id: str | None = None,
+    ) -> None:
+        super().__init__(
+            message
+            or (
+                f"[ArcFlow] Trace store dropped {events_dropped} events for run "
+                f"{run_id or 'unknown'}. Reduce trace volume or increase store limits."
+            )
+        )
         self.events_dropped = events_dropped
         self.run_id = run_id
 
