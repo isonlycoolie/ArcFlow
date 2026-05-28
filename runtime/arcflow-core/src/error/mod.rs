@@ -39,6 +39,14 @@ pub enum RuntimeError {
     },
 
     /// Memory operation failed.
-    #[error("memory operation failed: {reason}")]
-    MemoryOperationFailed { reason: String },
+    #[error("memory operation failed for step '{step_id}': {reason}")]
+    MemoryOperationFailed { step_id: Uuid, reason: String },
+
+    /// Required memory backend is unreachable.
+    #[error("infrastructure unavailable ({backend}) for step '{step_id}': {suggestion}")]
+    InfrastructureUnavailable {
+        backend: String,
+        suggestion: String,
+        step_id: Uuid,
+    },
 }

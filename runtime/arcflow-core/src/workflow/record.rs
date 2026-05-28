@@ -2,6 +2,7 @@
 
 use uuid::Uuid;
 
+use crate::rcs::types::TraceEvent;
 use crate::state::{ExecutionStepOutput, StateSnapshot};
 
 /// Record returned when a workflow run finishes or halts mid-run.
@@ -15,4 +16,6 @@ pub struct WorkflowExecutionRecord {
     pub step_outputs: Vec<ExecutionStepOutput>,
     /// Committed state after the last successful step.
     pub final_state: StateSnapshot,
+    /// Observability events collected during the run (metadata only).
+    pub trace_events: Vec<TraceEvent>,
 }

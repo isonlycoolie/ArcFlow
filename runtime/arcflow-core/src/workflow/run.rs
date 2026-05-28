@@ -25,22 +25,27 @@ struct RunLoop<'a> {
     run_input: &'a str,
 }
 
-fn partial_record(loop_ctx: &RunLoop<'_>) -> WorkflowExecutionRecord {
+fn partial_record(loop_ctx: &RunLoop<'_>, trace: &TraceEmitter) -> WorkflowExecutionRecord {
     WorkflowExecutionRecord {
         run_id: loop_ctx.run_id,
         workflow_id: loop_ctx.workflow_id,
         step_outputs: loop_ctx.step_outputs.clone(),
         final_state: loop_ctx.state.snapshot(),
+        trace_events: trace.events().to_vec(),
     }
 }
 
 #[allow(clippy::result_large_err)] // partial record is intentional for halt diagnostics (ADR-002)
+#[allow(clippy::too_many_arguments)] // step runner needs full execution context
 fn run_one_step(
     agent_runtime: &AgentRuntime,
     loop_ctx: &mut RunLoop<'_>,
     step: &StepDefinition,
     agent: &AgentDefinition,
-    exec_ctx: Option<&mut ExecutionContext<'_>>,
+    memory: &mut MemoryCoordinator,
+    trace: &mut TraceEmitter,
+    tool_runtime: Option<&ToolRuntime>,
+    tool_invoker: Option<Arc<dyn ToolInvoker>>,
 ) -> Result<(), WorkflowRunError> {
     debug!(
         run_id = %loop_ctx.run_id,
@@ -49,13 +54,23 @@ fn run_one_step(
         "step execution started"
     );
 
-    let out = match agent_runtime.execute_with_context(
-        agent,
-        step.id,
-        &loop_ctx.state.snapshot(),
-        loop_ctx.run_input,
-        exec_ctx,
-    ) {
+    let out = {
+        let mut exec_ctx = ExecutionContext {
+            tool_runtime,
+            tool_invoker,
+            memory,
+            trace,
+        };
+        agent_runtime.execute_with_context(
+            agent,
+            step.id,
+            &loop_ctx.state.snapshot(),
+            loop_ctx.run_input,
+            Some(&mut exec_ctx),
+        )
+    };
+
+    let out = match out {
         Ok(output) => output,
         Err(err) => {
             error!(
@@ -66,7 +81,7 @@ fn run_one_step(
             );
             return Err(WorkflowRunError::Failed {
                 error: err,
-                partial: partial_record(loop_ctx),
+                partial: partial_record(loop_ctx, trace),
             });
         }
     };
@@ -79,7 +94,7 @@ fn run_one_step(
                 step_id: step.id,
                 reason: e.to_string(),
             },
-            partial: partial_record(loop_ctx),
+            partial: partial_record(loop_ctx, trace),
         })?;
 
     debug!(
@@ -125,27 +140,26 @@ pub(super) fn run_sorted_steps(
                 step_id: step.id,
             }));
         };
-        let mut exec_ctx = ExecutionContext {
-            tool_runtime,
-            tool_invoker: tool_invoker.clone(),
-            memory: &mut memory,
-            trace: &mut trace,
-        };
         run_one_step(
             agent_runtime,
             &mut loop_ctx,
             step,
             agent,
-            Some(&mut exec_ctx),
+            &mut memory,
+            &mut trace,
+            tool_runtime,
+            tool_invoker.clone(),
         )?;
     }
 
     trace.workflow_completed();
     info!(run_id = %run_id, "workflow execution completed");
+    let trace_events = trace.events().to_vec();
     Ok(WorkflowExecutionRecord {
         run_id,
         workflow_id: workflow.id,
         step_outputs,
         final_state: state.snapshot(),
+        trace_events,
     })
 }

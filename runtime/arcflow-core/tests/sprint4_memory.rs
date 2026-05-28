@@ -28,6 +28,7 @@ fn shared_agent_b_reads_agent_a_write() {
     let write_cfg = MemoryConfig {
         memory_type: MemoryType::Shared,
         scope: MemoryScope::Workflow,
+        namespace: None,
         ttl_seconds: None,
     };
     let read_cfg = write_cfg.clone();

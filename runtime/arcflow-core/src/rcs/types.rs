@@ -154,6 +154,8 @@ pub struct MemoryConfig {
     pub memory_type: MemoryType,
     /// Scope boundary for reads and writes.
     pub scope: MemoryScope,
+    /// Namespace for persistent and vector backends.
+    pub namespace: Option<String>,
     /// Optional time-to-live in seconds.
     pub ttl_seconds: Option<u64>,
 }
@@ -361,6 +363,7 @@ mod tests {
         round_trip(&MemoryConfig {
             memory_type: MemoryType::Vector,
             scope: MemoryScope::Agent,
+            namespace: Some("ns".into()),
             ttl_seconds: Some(3600),
         });
     }

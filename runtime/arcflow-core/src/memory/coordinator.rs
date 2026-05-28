@@ -231,6 +231,7 @@ mod tests {
         let cfg = MemoryConfig {
             memory_type: MemoryType::Shared,
             scope: MemoryScope::Agent,
+            namespace: None,
             ttl_seconds: None,
         };
         coord

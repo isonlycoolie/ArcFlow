@@ -4,7 +4,8 @@ use serde_json::json;
 use uuid::Uuid;
 
 use crate::error::RuntimeError;
-use crate::rcs::types::{AgentDefinition, ExecutionStatus};
+use crate::memory::MemoryError;
+use crate::rcs::types::{AgentDefinition, ExecutionStatus, MemoryScope, MemoryType};
 use crate::state::{ExecutionStepOutput, StateSnapshot};
 use crate::tools::ToolError;
 use crate::workflow::ExecutionContext;
@@ -46,8 +47,13 @@ impl AgentRuntime {
         step_id: Uuid,
         state: &StateSnapshot,
         run_input: &str,
-        ctx: Option<&mut ExecutionContext<'_>>,
+        mut ctx: Option<&mut ExecutionContext<'_>>,
     ) -> Result<ExecutionStepOutput, RuntimeError> {
+        let memory_note = if let Some(ctx) = ctx.as_mut() {
+            self.run_memory_if_configured(agent, step_id, state, run_input, ctx)?
+        } else {
+            None
+        };
         if let Some(ctx) = ctx {
             self.run_tools_if_configured(agent, step_id, run_input, ctx)?;
         }
@@ -58,13 +64,16 @@ impl AgentRuntime {
             });
         }
         let prior = state.steps.len();
-        let content = format!(
+        let mut content = format!(
             "[{role}] processed: {run_input} (step: {step_id}, prior_steps: {prior})",
             role = agent.role,
             run_input = run_input,
             step_id = step_id,
             prior = prior,
         );
+        if let Some(note) = memory_note {
+            content.push_str(&format!(" memory_read={note:?}"));
+        }
 
         Ok(ExecutionStepOutput {
             step_id,
@@ -112,6 +121,77 @@ impl AgentRuntime {
         }
         Ok(())
     }
+
+    /// Reads prior stub context, writes current input, returns prior value for output annotation.
+    fn run_memory_if_configured(
+        &self,
+        agent: &AgentDefinition,
+        step_id: Uuid,
+        state: &StateSnapshot,
+        run_input: &str,
+        ctx: &mut ExecutionContext<'_>,
+    ) -> Result<Option<String>, RuntimeError> {
+        let Some(config) = agent.memory_config.as_ref() else {
+            return Ok(None);
+        };
+        let value = run_input.as_bytes();
+        let prior = match config.memory_type {
+            MemoryType::Session => {
+                let prior = ctx
+                    .memory
+                    .read_session(agent.id, STUB_MEMORY_KEY, ctx.trace, Some(step_id))
+                    .map_err(|e| map_memory_error(step_id, e))?;
+                ctx.memory
+                    .write_session(agent.id, STUB_MEMORY_KEY, value, ctx.trace, Some(step_id))
+                    .map_err(|e| map_memory_error(step_id, e))?;
+                prior
+            }
+            MemoryType::Shared => {
+                let owner = state.steps.last().map(|s| s.agent_id).unwrap_or(agent.id);
+                let prior = if config.scope == MemoryScope::Workflow {
+                    ctx.memory
+                        .read_shared(config, owner, STUB_MEMORY_KEY, ctx.trace, Some(step_id))
+                        .map_err(|e| map_memory_error(step_id, e))?
+                } else {
+                    None
+                };
+                ctx.memory
+                    .write_shared(
+                        agent.id,
+                        STUB_MEMORY_KEY,
+                        value,
+                        config,
+                        ctx.trace,
+                        Some(step_id),
+                    )
+                    .map_err(|e| map_memory_error(step_id, e))?;
+                prior
+            }
+            MemoryType::Persistent => {
+                let ns = require_namespace(config, step_id)?;
+                let prior = ctx
+                    .memory
+                    .read_persistent(ns, STUB_MEMORY_KEY, ctx.trace, Some(step_id))
+                    .map_err(|e| map_memory_error(step_id, e))?;
+                ctx.memory
+                    .write_persistent(ns, STUB_MEMORY_KEY, value, ctx.trace, Some(step_id))
+                    .map_err(|e| map_memory_error(step_id, e))?;
+                prior
+            }
+            MemoryType::Vector => {
+                let ns = require_namespace(config, step_id)?;
+                let prior = ctx
+                    .memory
+                    .read_vector(ns, STUB_MEMORY_KEY, ctx.trace, Some(step_id))
+                    .map_err(|e| map_memory_error(step_id, e))?;
+                ctx.memory
+                    .write_vector(ns, STUB_MEMORY_KEY, value, ctx.trace, Some(step_id))
+                    .map_err(|e| map_memory_error(step_id, e))?;
+                prior
+            }
+        };
+        Ok(bytes_to_note(prior))
+    }
 }
 
 fn map_tool_error(name: String, step_id: Uuid, err: ToolError) -> RuntimeError {
@@ -120,6 +200,41 @@ fn map_tool_error(name: String, step_id: Uuid, err: ToolError) -> RuntimeError {
         step_id,
         reason: err.to_string(),
     }
+}
+
+const STUB_MEMORY_KEY: &str = "arcflow.stub.context";
+
+fn bytes_to_note(bytes: Option<Vec<u8>>) -> Option<String> {
+    bytes.and_then(|b| String::from_utf8(b).ok())
+}
+
+fn map_memory_error(step_id: Uuid, err: MemoryError) -> RuntimeError {
+    match err {
+        MemoryError::InfrastructureUnavailable {
+            backend,
+            suggestion,
+        } => RuntimeError::InfrastructureUnavailable {
+            backend,
+            suggestion,
+            step_id,
+        },
+        other => RuntimeError::MemoryOperationFailed {
+            step_id,
+            reason: other.to_string(),
+        },
+    }
+}
+
+fn require_namespace(
+    config: &crate::rcs::types::MemoryConfig,
+    step_id: Uuid,
+) -> Result<&str, RuntimeError> {
+    config.namespace.as_deref().filter(|s| !s.is_empty()).ok_or(
+        RuntimeError::MemoryOperationFailed {
+            step_id,
+            reason: "namespace is required for persistent and vector memory".into(),
+        },
+    )
 }
 
 #[cfg(test)]

@@ -4,7 +4,8 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use arcflow_core::rcs::types::{
-    AgentDefinition, ExecutionStatus, StepDefinition, ToolDefinition, WorkflowDefinition,
+    AgentDefinition, ExecutionStatus, MemoryConfig, MemoryScope, MemoryType, StepDefinition,
+    ToolDefinition, TraceEventKind, WorkflowDefinition,
 };
 use arcflow_core::tools::{RegisteredTool, ToolError, ToolInvoker, ToolRuntime};
 use arcflow_core::workflow::WorkflowEngine;
@@ -74,4 +75,47 @@ fn workflow_runs_agent_with_tool() {
         .unwrap();
     assert_eq!(record.step_outputs.len(), 1);
     assert_eq!(record.step_outputs[0].status, ExecutionStatus::Completed);
+}
+
+#[test]
+fn workflow_with_session_memory_records_trace_events() {
+    let aid = Uuid::new_v4();
+    let sid = Uuid::new_v4();
+    let mut agents = HashMap::new();
+    agents.insert(
+        aid,
+        AgentDefinition {
+            id: aid,
+            name: "mem".into(),
+            role: "researcher".into(),
+            instructions: "i".into(),
+            tools: None,
+            memory_config: Some(MemoryConfig {
+                memory_type: MemoryType::Session,
+                scope: MemoryScope::Agent,
+                namespace: None,
+                ttl_seconds: None,
+            }),
+        },
+    );
+    let wf = WorkflowDefinition {
+        id: Uuid::new_v4(),
+        name: "mem-wf".into(),
+        steps: vec![StepDefinition {
+            id: sid,
+            agent_id: aid,
+            order: 1,
+            fallback_step_id: None,
+        }],
+        retry_policy: None,
+    };
+    let record = WorkflowEngine::new()
+        .execute_with_tools(&wf, &agents, "remember", None, None)
+        .unwrap();
+    assert!(record.trace_events.iter().any(|e| {
+        matches!(
+            e.event_kind,
+            TraceEventKind::MemoryWrite | TraceEventKind::MemoryRead
+        )
+    }));
 }
