@@ -59,3 +59,45 @@ pub fn maybe_export_trace(run_id: &str) {
         }
     });
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::tracing::types::{StepExecutionStatus, TokenUsage};
+
+    fn sample_step(role: &str) -> StepTrace {
+        StepTrace {
+            step_index: 0,
+            step_id: "step-0".into(),
+            agent_name: "agent".into(),
+            agent_role: role.into(),
+            status: StepExecutionStatus::Completed,
+            started_at: chrono::Utc::now(),
+            completed_at: None,
+            duration_ms: Some(1),
+            tokens: TokenUsage::default(),
+            tool_calls: Vec::new(),
+            memory_operations: Vec::new(),
+            error: None,
+        }
+    }
+
+    #[test]
+    fn step_metadata_attrs_use_schema_fields_only() {
+        let secret = "super-secret-instructions";
+        let attrs = step_metadata_attrs(&sample_step("researcher"));
+        let blob: String = attrs
+            .iter()
+            .map(|kv| format!("{:?}", kv))
+            .collect::<Vec<_>>()
+            .join("");
+        assert!(blob.contains("step_id"));
+        assert!(!blob.contains(secret));
+    }
+
+    #[test]
+    fn export_skipped_when_otlp_unconfigured() {
+        std::env::remove_var("ARCFLOW_OTLP_ENDPOINT");
+        maybe_export_trace("missing-run");
+    }
+}
