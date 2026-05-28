@@ -33,6 +33,8 @@ run_step "doc" env RUSTDOCFLAGS=-D warnings cargo doc --workspace --no-deps
 
 run_step "no-unwrap" bash scripts/check-no-unwrap.sh
 
+run_step "no-sql-interpolation" bash scripts/check-no-sql-interpolation.sh
+
 run_step "function-length" bash scripts/check-function-length.sh
 
 run_step "secrets-scan" bash -c '

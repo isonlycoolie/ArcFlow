@@ -102,6 +102,14 @@ jobs:
       - name: Reject unwrap and expect outside tests
         run: bash scripts/check-no-unwrap.sh
 
+  no-sql-interpolation:
+    name: No SQL string interpolation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject dynamic SQL in memory backends
+        run: bash scripts/check-no-sql-interpolation.sh
+
   function-length:
     name: Function length check
     runs-on: ubuntu-latest
