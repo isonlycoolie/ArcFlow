@@ -29,10 +29,17 @@ async-trait = "0.1"
 opentelemetry = { version = "0.27", features = ["trace"] }
 opentelemetry_sdk = { version = "0.27", features = ["trace"] }
 opentelemetry-otlp = { version = "0.27", features = ["grpc-tonic"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+futures-util = "0.3"
+eventsource-stream = "0.2"
 
 [features]
 default = []
 integration-memory = []
+
+[dev-dependencies]
+criterion = "0.5"
+wiremock = "0.6"
 
 [lib]
 name = "arcflow_core"
@@ -41,6 +48,3 @@ path = "src/lib.rs"
 [[bench]]
 name = "trace_overhead"
 harness = false
-
-[dev-dependencies]
-criterion = "0.5"
