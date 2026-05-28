@@ -43,6 +43,19 @@ jobs:
           toolchain: stable
       - run: cargo test --workspace
 
+  trace-performance:
+    name: Trace overhead budget
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+      - name: Bench trace emit path
+        run: |
+          cargo bench -p arcflow-core --bench trace_overhead -- --noplot 2>&1 | tee /tmp/bench.txt
+          python3 scripts/assert_trace_overhead.py < /tmp/bench.txt
+
   audit:
     name: Security audit
     runs-on: ubuntu-latest
