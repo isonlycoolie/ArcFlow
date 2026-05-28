@@ -34,3 +34,10 @@ integration-memory = []
 [lib]
 name = "arcflow_core"
 path = "src/lib.rs"
+
+[[bench]]
+name = "trace_overhead"
+harness = false
+
+[dev-dependencies]
+criterion = "0.5"
