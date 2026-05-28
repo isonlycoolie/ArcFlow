@@ -44,7 +44,7 @@ jobs:
           --health-retries 5
     env:
       ARCFLOW_POSTGRESQL_URL: postgresql://arcflow:arcflow@localhost:5432/arcflow
-      ARCFLOW_QDRANT_URL: http://localhost:6333
+      ARCFLOW_QDRANT_URL: http://localhost:6334
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable

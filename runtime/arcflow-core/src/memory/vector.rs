@@ -4,6 +4,8 @@ use std::collections::HashMap;
 use std::env;
 
 use async_trait::async_trait;
+use sha2::{Digest, Sha256};
+use uuid::Uuid;
 use qdrant_client::qdrant::{
     CreateCollection, Distance, PointStruct, SearchPoints, UpsertPoints, Value as QdrantValue,
     VectorParams, VectorsConfig,
@@ -15,6 +17,14 @@ use super::namespace::durable_key;
 use super::provider::VectorStoreProvider;
 
 const COLLECTION: &str = "arcflow_memory";
+
+/// Qdrant point ids must be valid UUIDs; derive deterministically from storage key.
+fn point_id_from_key(storage_key: &str) -> String {
+    let digest = Sha256::digest(storage_key.as_bytes());
+    let mut id_bytes = [0u8; 16];
+    id_bytes.copy_from_slice(&digest[..16]);
+    Uuid::from_bytes(id_bytes).to_string()
+}
 
 fn map_qdrant_client_error(err: impl std::fmt::Display) -> MemoryError {
     let reason = err.to_string();
@@ -70,9 +80,10 @@ impl QdrantVectorStore {
                 }
             })?;
             let client = Qdrant::from_url(&url)
+                .skip_compatibility_check()
                 .build()
                 .map_err(map_qdrant_client_error)?;
-            client
+            let create_result = client
                 .create_collection(CreateCollection {
                     collection_name: COLLECTION.into(),
                     vectors_config: Some(VectorsConfig {
@@ -86,8 +97,13 @@ impl QdrantVectorStore {
                     }),
                     ..Default::default()
                 })
-                .await
-                .map_err(map_qdrant_client_error)?;
+                .await;
+            if let Err(ref err) = create_result {
+                let msg = err.to_string().to_lowercase();
+                if !msg.contains("already exists") {
+                    return Err(map_qdrant_client_error(err));
+                }
+            }
             self.client = Some(client);
         }
         self.client.as_ref().ok_or(MemoryError::OperationFailed {
@@ -111,7 +127,8 @@ impl VectorStoreProvider for QdrantVectorStore {
             "payload".to_string(),
             QdrantValue::from(String::from_utf8_lossy(payload).to_string()),
         );
-        let point = PointStruct::new(point_id.to_string(), vector.to_vec(), payload_map);
+        let qdrant_id = point_id_from_key(point_id);
+        let point = PointStruct::new(qdrant_id, vector.to_vec(), payload_map);
         client
             .upsert_points(UpsertPoints {
                 collection_name: collection.into(),
