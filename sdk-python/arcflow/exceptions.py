@@ -62,6 +62,19 @@ class MemoryOperationError(ArcFlowError):
     """Raised when a memory read or write fails."""
 
 
+class TraceNotFoundError(ArcFlowError):
+    """No trace for the requested run / last run."""
+
+
+class TraceStorageWarning(ArcFlowError):
+    """Trace store dropped events for a run."""
+
+    def __init__(self, message: str, events_dropped: int = 0, run_id: str | None = None) -> None:
+        super().__init__(message)
+        self.events_dropped = events_dropped
+        self.run_id = run_id
+
+
 class InfrastructureUnavailableError(ArcFlowError):
     """Raised when an optional memory backend is unreachable or unset."""
 
