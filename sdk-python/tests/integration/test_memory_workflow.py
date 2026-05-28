@@ -63,6 +63,25 @@ def test_unreachable_postgres_raises_infrastructure_unavailable(
     assert exc_info.value.backend == "postgresql"
 
 
+def test_unreachable_qdrant_raises_infrastructure_unavailable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("ARCFLOW_QDRANT_URL", "http://127.0.0.1:59999")
+    agent = Agent(
+        name="vector_agent",
+        role="researcher",
+        instructions="Use vector memory.",
+        memory=MemoryConfig(
+            MemoryType.VECTOR,
+            MemoryScope.GLOBAL,
+            namespace="qdrant_failure_test",
+        ),
+    )
+    with pytest.raises(InfrastructureUnavailableError) as exc_info:
+        Workflow("qdrant-infra-wf").step(agent).run("test input")
+    assert exc_info.value.backend == "qdrant"
+
+
 @pytest.mark.skipif(
     os.environ.get("ARCFLOW_RUN_SLOW_TOOL_TESTS") != "1",
     reason="Set ARCFLOW_RUN_SLOW_TOOL_TESTS=1 to run timeout test",
