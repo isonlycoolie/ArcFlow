@@ -15,6 +15,9 @@
 /// This module is fully implemented in Sprint 1.
 pub mod rcs;
 
+/// Named limits shared across runtime subsystems (Sprint 5).
+pub mod constants;
+
 /// Typed runtime errors for orchestration (Sprint 2).
 pub mod error;
 
