@@ -3,6 +3,7 @@
 members = [
     "runtime/arcflow-core",
     "sdk-python",
+    "cli/arcflow-cli",
 ]
 resolver = "2"
 
