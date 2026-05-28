@@ -222,3 +222,20 @@ pub fn parse_uuid(field: &str, value: &str) -> Result<Uuid, PyErr> {
 pub fn configuration_error(message: impl Into<String>) -> PyErr {
     Python::with_gil(|py| raise_configuration(py, prefix(&message.into())))
 }
+
+pub fn trace_not_found(run_id: &str) -> PyErr {
+    Python::with_gil(|py| {
+        let built: PyResult<Bound<'_, PyAny>> = (|| {
+            let exc_mod = import_exceptions(py)?;
+            let cls = exc_mod.getattr("TraceNotFoundError")?;
+            cls.call1((prefix(&format!(
+                "No trace found for run '{run_id}'. \
+                 Run workflow.run() first or the trace may have been evicted."
+            )),))
+        })();
+        match built {
+            Ok(value) => PyErr::from_value(value),
+            Err(err) => err,
+        }
+    })
+}

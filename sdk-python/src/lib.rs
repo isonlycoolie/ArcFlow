@@ -9,12 +9,13 @@ mod workflow;
 
 use pyo3::prelude::*;
 
-use workflow::{execute_workflow, PyWorkflowResult};
+use workflow::{execute_workflow, get_execution_trace_json, PyWorkflowResult};
 
 /// Native extension module (import as `arcflow._arcflow_binding`).
 #[pymodule]
 fn _arcflow_binding(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(execute_workflow, m)?)?;
+    m.add_function(wrap_pyfunction!(get_execution_trace_json, m)?)?;
     m.add_class::<PyWorkflowResult>()?;
     Ok(())
 }

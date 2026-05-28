@@ -2,6 +2,7 @@
 
 use std::sync::Arc;
 
+use arcflow_core::get_execution_trace;
 use arcflow_core::workflow::{WorkflowEngine, WorkflowExecutionRecord};
 use pyo3::prelude::*;
 use pyo3::types::PyList;
@@ -106,4 +107,16 @@ pub fn execute_workflow(
         Err(err) => return Err(workflow_run_error_to_py(err)),
     };
     Ok(record_to_py(record))
+}
+
+#[pyfunction]
+pub fn get_execution_trace_json(run_id: String) -> PyResult<String> {
+    match get_execution_trace(&run_id) {
+        Some(trace) => serde_json::to_string(&trace).map_err(|e| {
+            PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
+                "[ArcFlow] Failed to serialize trace: {e}"
+            ))
+        }),
+        None => Err(crate::errors::trace_not_found(&run_id)),
+    }
 }
