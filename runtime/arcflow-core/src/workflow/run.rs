@@ -8,6 +8,7 @@ use uuid::Uuid;
 use crate::agent::AgentRuntime;
 use crate::error::{RuntimeError, StateError};
 use crate::memory::MemoryCoordinator;
+use crate::providers::ModelProvider;
 use crate::rcs::types::{AgentDefinition, StepDefinition, WorkflowDefinition};
 use crate::state::{ExecutionStepOutput, StateEngine};
 use crate::tools::{ToolInvoker, ToolRuntime};
@@ -53,6 +54,7 @@ fn run_one_step(
     tool_runtime: Option<&ToolRuntime>,
     tool_invoker: Option<Arc<dyn ToolInvoker>>,
     workflow_started: Instant,
+    provider: Option<Arc<dyn ModelProvider>>,
 ) -> Result<(), WorkflowRunError> {
     debug!(
         run_id = %loop_ctx.run_id,
@@ -78,6 +80,7 @@ fn run_one_step(
             legacy,
             sprint5,
             run_id: run_key.to_string(),
+            provider: provider.clone(),
         };
         agent_runtime.execute_with_context(
             agent,
@@ -156,6 +159,7 @@ pub(super) fn run_sorted_steps(
     run_input: &str,
     tool_runtime: Option<&ToolRuntime>,
     tool_invoker: Option<Arc<dyn ToolInvoker>>,
+    provider: Option<Arc<dyn ModelProvider>>,
 ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
     let run_id = Uuid::new_v4();
     let run_key = run_id.to_string();
@@ -208,6 +212,7 @@ pub(super) fn run_sorted_steps(
                 tool_runtime,
                 tool_invoker.clone(),
                 workflow_started,
+                provider.clone(),
             )?;
         }
 

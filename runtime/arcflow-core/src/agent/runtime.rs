@@ -5,10 +5,16 @@ use uuid::Uuid;
 
 use crate::error::RuntimeError;
 use crate::memory::MemoryError;
+use crate::providers::async_bridge::block_on_provider;
+use crate::providers::{
+    build_agent_request, default_max_tokens, default_temperature, ProviderCallError,
+};
 use crate::rcs::types::{AgentDefinition, ExecutionStatus, MemoryScope, MemoryType};
 use crate::state::{ExecutionStepOutput, StateSnapshot};
 use crate::tools::ToolError;
+use crate::tracing::events::TraceEventKind;
 use crate::tracing::tokens_consumed;
+use crate::tracing::TokenUsage;
 use crate::workflow::ExecutionContext;
 
 use super::stub::STUB_FAIL_ROLE;
@@ -65,16 +71,39 @@ impl AgentRuntime {
                 reason: "stub agent configured to fail".into(),
             });
         }
+
+        let step_tokens = if let Some(ctx) = ctx.as_mut() {
+            if let Some(provider) = ctx.provider.clone() {
+                Some(self.execute_with_provider(agent, step_id, run_input, ctx, provider)?)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
         let prior = state.steps.len();
-        let mut content = format!(
-            "[{role}] processed: {run_input} (step: {step_id}, prior_steps: {prior})",
-            role = agent.role,
-            run_input = run_input,
-            step_id = step_id,
-            prior = prior,
-        );
+        let (mut content, _tokens_for_step) = if let Some((text, tokens)) = step_tokens {
+            (text, Some(tokens))
+        } else {
+            (
+                format!(
+                    "[{role}] processed: {run_input} (step: {step_id}, prior_steps: {prior})",
+                    role = agent.role,
+                    run_input = run_input,
+                    step_id = step_id,
+                    prior = prior,
+                ),
+                None,
+            )
+        };
+
         if let Some(note) = memory_note {
             content.push_str(&format!(" memory_read={note:?}"));
+        }
+
+        if let Some(ctx) = ctx.as_mut() {
+            tokens_consumed(ctx.sprint5, &ctx.run_id, step_id, &agent.name);
         }
 
         Ok(ExecutionStepOutput {
@@ -83,6 +112,67 @@ impl AgentRuntime {
             content,
             status: ExecutionStatus::Completed,
         })
+    }
+
+    fn execute_with_provider(
+        &self,
+        agent: &AgentDefinition,
+        step_id: Uuid,
+        run_input: &str,
+        ctx: &mut ExecutionContext<'_, '_>,
+        provider: std::sync::Arc<dyn crate::providers::ModelProvider>,
+    ) -> Result<(String, TokenUsage), RuntimeError> {
+        let request = build_agent_request(
+            &agent.instructions,
+            run_input,
+            default_max_tokens(),
+            default_temperature(),
+        );
+        let prompt_size = request.prompt_size_bytes();
+        let step_id_str = step_id.to_string();
+
+        ctx.sprint5.emit(TraceEventKind::ProviderRequestSent {
+            run_id: ctx.run_id.clone(),
+            step_id: step_id_str.clone(),
+            provider_id: provider.provider_id().to_string(),
+            model_id: provider.model_id().to_string(),
+            max_tokens: request.max_tokens,
+            prompt_size_bytes: prompt_size,
+        });
+
+        let started = std::time::Instant::now();
+        let result = block_on_provider(provider.complete(request));
+
+        match result {
+            Ok(response) => {
+                let latency_ms = started.elapsed().as_millis() as u64;
+                ctx.sprint5.emit(TraceEventKind::ProviderResponseReceived {
+                    run_id: ctx.run_id.clone(),
+                    step_id: step_id_str.clone(),
+                    provider_id: provider.provider_id().to_string(),
+                    model_id: response.model_id.clone(),
+                    tokens: response.tokens.clone(),
+                    latency_ms,
+                });
+                ctx.sprint5.emit(TraceEventKind::AgentResponseReceived {
+                    run_id: ctx.run_id.clone(),
+                    step_id: step_id_str.clone(),
+                    agent_name: agent.name.clone(),
+                    output_size_bytes: response.content_size_bytes(),
+                });
+                ctx.sprint5.emit(TraceEventKind::TokensConsumed {
+                    run_id: ctx.run_id.clone(),
+                    step_id: step_id_str,
+                    agent_name: agent.name.clone(),
+                    tokens: response.tokens.clone(),
+                });
+                Ok((response.content, response.tokens))
+            }
+            Err(err) => {
+                emit_provider_error(ctx, &step_id_str, &err);
+                Err(map_provider_error(step_id, err))
+            }
+        }
     }
 
     fn run_tools_if_configured(
@@ -302,6 +392,42 @@ fn require_namespace(
             reason: "namespace is required for persistent and vector memory".into(),
         },
     )
+}
+
+fn map_provider_error(step_id: Uuid, err: ProviderCallError) -> RuntimeError {
+    RuntimeError::ProviderCallFailed {
+        provider_id: err.provider_id().to_string(),
+        step_id,
+        reason: err.to_string(),
+    }
+}
+
+fn emit_provider_error(
+    ctx: &mut ExecutionContext<'_, '_>,
+    step_id: &str,
+    err: &ProviderCallError,
+) {
+    match err {
+        ProviderCallError::RateLimited {
+            retry_after_seconds, ..
+        } => {
+            ctx.sprint5.emit(TraceEventKind::ProviderRateLimited {
+                run_id: ctx.run_id.clone(),
+                step_id: step_id.to_string(),
+                provider_id: err.provider_id().to_string(),
+                retry_after_seconds: *retry_after_seconds,
+            });
+        }
+        _ => {
+            ctx.sprint5.emit(TraceEventKind::ProviderError {
+                run_id: ctx.run_id.clone(),
+                step_id: step_id.to_string(),
+                provider_id: err.provider_id().to_string(),
+                error_code: "provider_call_failed".into(),
+                error_message: err.to_string(),
+            });
+        }
+    }
 }
 
 #[cfg(test)]

@@ -42,6 +42,14 @@ pub enum RuntimeError {
     #[error("memory operation failed for step '{step_id}': {reason}")]
     MemoryOperationFailed { step_id: Uuid, reason: String },
 
+    /// LLM provider call failed during agent execution.
+    #[error("provider '{provider_id}' failed for step '{step_id}': {reason}")]
+    ProviderCallFailed {
+        provider_id: String,
+        step_id: Uuid,
+        reason: String,
+    },
+
     /// Required memory backend is unreachable.
     #[error("infrastructure unavailable ({backend}) for step '{step_id}': {suggestion}")]
     InfrastructureUnavailable {

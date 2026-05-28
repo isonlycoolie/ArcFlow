@@ -6,6 +6,7 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::agent::AgentRuntime;
+use crate::providers::ModelProvider;
 use crate::rcs::types::{AgentDefinition, WorkflowDefinition};
 use crate::tools::{ToolInvoker, ToolRuntime};
 
@@ -45,10 +46,18 @@ impl WorkflowEngine {
         run_input: &str,
     ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
         validate_workflow(workflow, agents)?;
-        run_sorted_steps(&self.agent_runtime, workflow, agents, run_input, None, None)
+        run_sorted_steps(
+            &self.agent_runtime,
+            workflow,
+            agents,
+            run_input,
+            None,
+            None,
+            None,
+        )
     }
 
-    /// Executes with optional tool runtime and invoker (Sprint 4).
+    /// Executes with optional tool runtime, invoker, and LLM provider (Sprint 6).
     #[allow(clippy::result_large_err)]
     pub fn execute_with_tools(
         &self,
@@ -57,6 +66,7 @@ impl WorkflowEngine {
         run_input: &str,
         tool_runtime: Option<&ToolRuntime>,
         tool_invoker: Option<Arc<dyn ToolInvoker>>,
+        provider: Option<Arc<dyn ModelProvider>>,
     ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
         validate_workflow(workflow, agents)?;
         run_sorted_steps(
@@ -66,6 +76,7 @@ impl WorkflowEngine {
             run_input,
             tool_runtime,
             tool_invoker,
+            provider,
         )
     }
 }

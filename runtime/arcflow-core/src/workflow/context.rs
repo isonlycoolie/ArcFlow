@@ -3,6 +3,7 @@
 use std::sync::Arc;
 
 use crate::memory::MemoryCoordinator;
+use crate::providers::ModelProvider;
 use crate::tools::{ToolInvoker, ToolRuntime};
 use crate::tracing::{emitter::TraceEmitter, sprint5_emitter::TraceEventEmitter};
 
@@ -20,4 +21,6 @@ pub struct ExecutionContext<'a, 's> {
     pub sprint5: &'a mut TraceEventEmitter<'s>,
     /// Run id for Sprint 5 payloads.
     pub run_id: String,
+    /// Optional LLM provider for this run (Sprint 6).
+    pub provider: Option<Arc<dyn ModelProvider>>,
 }

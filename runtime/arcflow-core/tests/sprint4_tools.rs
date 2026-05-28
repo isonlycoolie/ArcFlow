@@ -71,7 +71,7 @@ fn workflow_runs_agent_with_tool() {
         .unwrap();
     let invoker = Arc::new(EchoInvoker);
     let record = WorkflowEngine::new()
-        .execute_with_tools(&wf, &agents, "hi", Some(&runtime), Some(invoker))
+        .execute_with_tools(&wf, &agents, "hi", Some(&runtime), Some(invoker), None)
         .unwrap();
     assert_eq!(record.step_outputs.len(), 1);
     assert_eq!(record.step_outputs[0].status, ExecutionStatus::Completed);
@@ -110,7 +110,7 @@ fn workflow_with_session_memory_records_trace_events() {
         retry_policy: None,
     };
     let record = WorkflowEngine::new()
-        .execute_with_tools(&wf, &agents, "remember", None, None)
+        .execute_with_tools(&wf, &agents, "remember", None, None, None)
         .unwrap();
     assert!(record.trace_events.iter().any(|e| {
         matches!(

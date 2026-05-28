@@ -100,6 +100,7 @@ pub fn execute_workflow(
                 None
             },
             invoker,
+            None,
         )
     });
     let record = match record {
