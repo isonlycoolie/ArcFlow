@@ -171,6 +171,7 @@ pub fn build_workflow(
         let memory_config = a.memory.as_ref().map(|m| MemoryConfig {
             memory_type: m.memory_type,
             scope: m.scope,
+            namespace: m.namespace.clone(),
             ttl_seconds: m.ttl_seconds,
         });
         agent_map.insert(

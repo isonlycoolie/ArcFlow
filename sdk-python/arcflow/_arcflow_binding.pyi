@@ -6,6 +6,7 @@ class WorkflowResult:
     output: str
     run_id: str
     step_count: int
+    trace_events_json: str
 
 def execute_workflow(
     workflow_name: str,

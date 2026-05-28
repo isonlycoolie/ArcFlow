@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -12,6 +14,7 @@ class WorkflowResult:
     output: str
     run_id: str
     step_count: int
+    trace_events: tuple[dict[str, Any], ...] = ()
 
     def __repr__(self) -> str:
         preview = self.output[:50]

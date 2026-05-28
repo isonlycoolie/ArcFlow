@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+from typing import Any
 from uuid import uuid4
 
 from arcflow.agent import Agent
@@ -17,11 +19,21 @@ except ImportError as exc:  # pragma: no cover - built by maturin
     ) from exc
 
 
+def _parse_trace_events(raw: str) -> tuple[dict[str, Any], ...]:
+    if not raw or raw == "[]":
+        return ()
+    parsed = json.loads(raw)
+    if not isinstance(parsed, list):
+        return ()
+    return tuple(item for item in parsed if isinstance(item, dict))
+
+
 def _to_result(native: NativeWorkflowResult) -> WorkflowResult:
     return WorkflowResult(
         output=native.output,
         run_id=native.run_id,
         step_count=native.step_count,
+        trace_events=_parse_trace_events(native.trace_events_json),
     )
 
 

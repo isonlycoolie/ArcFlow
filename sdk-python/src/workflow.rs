@@ -22,6 +22,8 @@ pub struct PyWorkflowResult {
     pub run_id: String,
     #[pyo3(get)]
     pub step_count: usize,
+    #[pyo3(get)]
+    pub trace_events_json: String,
 }
 
 fn record_to_py(record: WorkflowExecutionRecord) -> PyWorkflowResult {
@@ -30,10 +32,13 @@ fn record_to_py(record: WorkflowExecutionRecord) -> PyWorkflowResult {
         .last()
         .map(|s| s.content.clone())
         .unwrap_or_default();
+    let trace_events_json =
+        serde_json::to_string(&record.trace_events).unwrap_or_else(|_| "[]".to_string());
     PyWorkflowResult {
         output,
         run_id: record.run_id.to_string(),
         step_count: record.step_outputs.len(),
+        trace_events_json,
     }
 }
 
