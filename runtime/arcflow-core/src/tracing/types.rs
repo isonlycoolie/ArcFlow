@@ -53,6 +53,27 @@ pub enum ExecutionStatus {
     Partial,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum StepExecutionStatus {
+    InProgress,
+    Completed,
+    Failed,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum ToolCallStatus {
+    Success,
+    Failed,
+    TimedOut,
+    ValidationFailed,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum MemoryOperation {
+    Read,
+    Write,
+}
+
 /// Complete trace for one workflow run (assembled by ExecutionTraceBuilder).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ExecutionTrace {
@@ -69,13 +90,44 @@ pub struct ExecutionTrace {
     pub events_dropped: u32,
 }
 
-/// Per-step summary (populated by builder in Phase 4).
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+/// Per-step trace assembled from events.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StepTrace {
     pub step_index: usize,
     pub step_id: String,
     pub agent_name: String,
     pub agent_role: String,
+    pub status: StepExecutionStatus,
+    pub started_at: DateTime<Utc>,
+    pub completed_at: Option<DateTime<Utc>>,
     pub duration_ms: Option<u64>,
     pub tokens: TokenUsage,
+    pub tool_calls: Vec<ToolCallTrace>,
+    pub memory_operations: Vec<MemoryOperationTrace>,
+    pub error: Option<StepError>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ToolCallTrace {
+    pub tool_name: String,
+    pub status: ToolCallStatus,
+    pub duration_ms: u64,
+    pub input_schema_hash: String,
+    pub output_size_bytes: Option<usize>,
+    pub error_code: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MemoryOperationTrace {
+    pub operation: MemoryOperation,
+    pub memory_type: String,
+    pub key: String,
+    pub hit: Option<bool>,
+    pub duration_ms: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StepError {
+    pub error_code: String,
+    pub message: String,
 }
