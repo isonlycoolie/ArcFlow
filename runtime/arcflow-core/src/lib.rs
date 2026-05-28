@@ -47,3 +47,6 @@ pub use tracing::get_execution_trace;
 /// LLM provider abstraction layer.
 /// Implemented in Sprint 6.
 pub mod providers;
+
+/// Internal streaming engine (Sprint 6).
+pub mod streaming;
