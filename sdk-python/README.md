@@ -73,6 +73,8 @@ Workflow("demo").step(agent).run("query text")
 
 Tool inputs are validated in Rust (`jsonschema`). Execution stays in the native runtime; Python supplies callables only.
 
+`WorkflowResult.trace_events` exposes metadata-only RCS trace events (`ToolExecuted`, `MemoryRead`, `MemoryWrite`, workflow lifecycle). Payload values are never included.
+
 ## Memory (Sprint 4)
 
 ```python
