@@ -13,6 +13,9 @@ from arcflow.exceptions import (
     WorkflowConfigurationError,
     WorkflowExecutionError,
 )
+from arcflow.memory import MemoryConfig, MemoryScope, MemoryType
+from arcflow.result import WorkflowResult
+from arcflow.tool import Tool
 from arcflow.trace import (
     MemoryOperationTrace,
     StepError,
@@ -21,9 +24,6 @@ from arcflow.trace import (
     ToolCallTrace,
     TraceResult,
 )
-from arcflow.memory import MemoryConfig, MemoryScope, MemoryType
-from arcflow.result import WorkflowResult
-from arcflow.tool import Tool
 from arcflow.workflow import Workflow
 
 __all__ = [

@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 from arcflow import Agent, TraceNotFoundError, Workflow
-from arcflow.exceptions import WorkflowExecutionError
 from arcflow._internal.runtime import get_trace
+from arcflow.exceptions import WorkflowExecutionError
 from arcflow.trace import TraceResult
 
 
