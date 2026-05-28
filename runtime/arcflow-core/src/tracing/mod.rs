@@ -9,11 +9,13 @@ pub mod emitter;
 pub mod error;
 pub mod events;
 pub mod otel;
+pub mod sprint5_emitter;
 pub mod store;
 pub mod types;
 
 pub use builder::ExecutionTraceBuilder;
 pub use emitter::TraceEmitter;
+pub use sprint5_emitter::TraceEventEmitter;
 pub use error::TracingError;
 pub use events::TraceEventKind;
 pub use store::TraceStore;
