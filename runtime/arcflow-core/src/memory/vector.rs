@@ -16,6 +16,23 @@ use super::provider::VectorStoreProvider;
 
 const COLLECTION: &str = "arcflow_memory";
 
+fn map_qdrant_client_error(err: impl std::fmt::Display) -> MemoryError {
+    let reason = err.to_string();
+    let lower = reason.to_lowercase();
+    if lower.contains("connect")
+        || lower.contains("connection refused")
+        || lower.contains("transport")
+        || lower.contains("unavailable")
+    {
+        MemoryError::InfrastructureUnavailable {
+            backend: "qdrant".into(),
+            suggestion: reason,
+        }
+    } else {
+        MemoryError::OperationFailed { reason }
+    }
+}
+
 /// Deterministic stub embedding from key bytes (Sprint 4 — no external API).
 pub fn stub_embedding(seed: &[u8], dim: usize) -> Vec<f32> {
     let mut out = vec![0.0_f32; dim];
@@ -52,13 +69,10 @@ impl QdrantVectorStore {
                     suggestion: "Set ARCFLOW_QDRANT_URL and start Qdrant.".into(),
                 }
             })?;
-            let client = Qdrant::from_url(&url).build().map_err(|e| {
-                MemoryError::InfrastructureUnavailable {
-                    backend: "qdrant".into(),
-                    suggestion: e.to_string(),
-                }
-            })?;
-            let _ = client
+            let client = Qdrant::from_url(&url)
+                .build()
+                .map_err(map_qdrant_client_error)?;
+            client
                 .create_collection(CreateCollection {
                     collection_name: COLLECTION.into(),
                     vectors_config: Some(VectorsConfig {
@@ -72,7 +86,8 @@ impl QdrantVectorStore {
                     }),
                     ..Default::default()
                 })
-                .await;
+                .await
+                .map_err(map_qdrant_client_error)?;
             self.client = Some(client);
         }
         self.client.as_ref().ok_or(MemoryError::OperationFailed {
@@ -104,9 +119,7 @@ impl VectorStoreProvider for QdrantVectorStore {
                 ..Default::default()
             })
             .await
-            .map_err(|e| MemoryError::OperationFailed {
-                reason: e.to_string(),
-            })?;
+            .map_err(map_qdrant_client_error)?;
         Ok(())
     }
 
@@ -126,9 +139,7 @@ impl VectorStoreProvider for QdrantVectorStore {
                 ..Default::default()
             })
             .await
-            .map_err(|e| MemoryError::OperationFailed {
-                reason: e.to_string(),
-            })?;
+            .map_err(map_qdrant_client_error)?;
         let mut out = Vec::new();
         for point in results.result {
             if let Some(payload) = point.payload.get("payload") {
