@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import uuid
 
 import pytest
 
@@ -80,6 +81,35 @@ def test_unreachable_qdrant_raises_infrastructure_unavailable(
     with pytest.raises(InfrastructureUnavailableError) as exc_info:
         Workflow("qdrant-infra-wf").step(agent).run("test input")
     assert exc_info.value.backend == "qdrant"
+
+
+@pytest.mark.skipif(
+    not os.environ.get("ARCFLOW_POSTGRESQL_URL"),
+    reason="Set ARCFLOW_POSTGRESQL_URL for persistent cross-run test",
+)
+def test_persistent_memory_survives_new_workflow_run() -> None:
+    namespace = f"py-persist-{uuid.uuid4()}"
+    memory = MemoryConfig(
+        MemoryType.PERSISTENT,
+        MemoryScope.GLOBAL,
+        namespace=namespace,
+    )
+    writer = Agent(
+        name="writer",
+        role="researcher",
+        instructions="Store in persistent memory.",
+        memory=memory,
+    )
+    Workflow("persist-write-wf").step(writer).run("stored-value")
+
+    reader = Agent(
+        name="reader",
+        role="researcher",
+        instructions="Read persistent memory.",
+        memory=memory,
+    )
+    result = Workflow("persist-read-wf").step(reader).run("second-run")
+    assert 'memory_read="stored-value"' in result.output
 
 
 @pytest.mark.skipif(

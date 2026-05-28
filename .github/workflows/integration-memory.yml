@@ -5,12 +5,14 @@ on:
     branches: [main, master]
     paths:
       - "runtime/arcflow-core/**"
+      - "sdk-python/**"
       - "docker/**"
       - ".github/workflows/integration-memory.yml"
   pull_request:
     branches: [main, master]
     paths:
       - "runtime/arcflow-core/**"
+      - "sdk-python/**"
       - "docker/**"
       - ".github/workflows/integration-memory.yml"
 
@@ -54,3 +56,18 @@ jobs:
         run: cargo test -p arcflow-core sprint4_memory -- --ignored --test-threads=1
       - name: Run Sprint 4 tool workflow test
         run: cargo test -p arcflow-core sprint4_tools
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run SDK persistent memory integration test
+        shell: bash
+        working-directory: sdk-python
+        env:
+          PYTHONPATH: ""
+        run: |
+          set -euo pipefail
+          python -m pip install -q maturin pytest
+          python -m maturin develop
+          tmpdir="$(mktemp -d)"
+          cd "$tmpdir"
+          python -m pytest "$GITHUB_WORKSPACE/sdk-python/tests/integration/test_memory_workflow.py::test_persistent_memory_survives_new_workflow_run" -v
