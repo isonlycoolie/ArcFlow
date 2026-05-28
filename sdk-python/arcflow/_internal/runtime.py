@@ -8,10 +8,11 @@ from uuid import uuid4
 
 from arcflow.agent import Agent
 from arcflow.result import WorkflowResult
+from arcflow.trace import TraceResult
 
 try:
     from arcflow._arcflow_binding import WorkflowResult as NativeWorkflowResult
-    from arcflow._arcflow_binding import execute_workflow
+    from arcflow._arcflow_binding import execute_workflow, get_execution_trace_json
 except ImportError as exc:  # pragma: no cover - built by maturin
     raise ImportError(
         "[ArcFlow] Native extension not installed. "
@@ -57,3 +58,8 @@ def run_workflow(
         tool_executors,
     )
     return _to_result(native)
+
+
+def get_trace(run_id: str) -> TraceResult:
+    """Loads a structured trace from the in-process Rust store."""
+    return TraceResult.from_json(get_execution_trace_json(run_id))

@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from arcflow.agent import Agent
 from arcflow.exceptions import WorkflowConfigurationError
+from arcflow.exceptions import TraceNotFoundError
 from arcflow.result import WorkflowResult
+from arcflow.trace import TraceResult
 
 
 class Workflow:
@@ -19,6 +21,7 @@ class Workflow:
             )
         self._name = trimmed
         self._steps: list[Agent] = []
+        self._last_run_id: str | None = None
 
     def step(self, agent: Agent) -> Workflow:
         if not isinstance(agent, Agent):
@@ -43,4 +46,16 @@ class Workflow:
             )
         from arcflow._internal import runtime
 
-        return runtime.run_workflow(self._name, self._steps, trimmed)
+        result = runtime.run_workflow(self._name, self._steps, trimmed)
+        self._last_run_id = result.run_id
+        return result
+
+    def trace(self) -> TraceResult:
+        """Returns the trace of the most recent ``run()`` on this workflow."""
+        if not self._last_run_id:
+            raise TraceNotFoundError(
+                "[ArcFlow] No workflow run yet. Call workflow.run() before trace()."
+            )
+        from arcflow._internal import runtime
+
+        return runtime.get_trace(self._last_run_id)
