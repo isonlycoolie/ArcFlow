@@ -3,6 +3,7 @@
 use std::collections::HashMap;
 
 use crate::constants::{MAX_CONCURRENT_TRACES, MAX_TRACE_EVENTS_PER_RUN};
+use crate::tracing::events::TraceEventKind;
 use crate::tracing::types::TraceEvent;
 
 #[derive(Debug)]
@@ -37,6 +38,15 @@ impl TraceStore {
                 is_complete: false,
             });
         if buffer.events.len() >= MAX_TRACE_EVENTS_PER_RUN as usize {
+            if matches!(&event.kind, TraceEventKind::TraceStorageWarning { .. })
+                && !buffer
+                    .events
+                    .iter()
+                    .any(|stored| matches!(stored.kind, TraceEventKind::TraceStorageWarning { .. }))
+            {
+                buffer.events.push(event);
+                return true;
+            }
             buffer.events_dropped += 1;
             self.total_events_dropped += 1;
             return false;

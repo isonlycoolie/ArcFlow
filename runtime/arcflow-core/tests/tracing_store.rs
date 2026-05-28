@@ -36,3 +36,31 @@ fn test_store_get_events_returns_none_for_unknown_run() {
     let store = TraceStore::new();
     assert!(store.get_events("missing").is_none());
 }
+
+#[test]
+fn emitter_emits_one_trace_storage_warning_at_cap() {
+    use arcflow_core::tracing::sprint5_emitter::TraceEventEmitter;
+
+    let mut store = TraceStore::new();
+    let run_id = "run-warning";
+    let limit = MAX_TRACE_EVENTS_PER_RUN as usize;
+
+    for seq in 0..limit {
+        assert!(store.append(run_id, sample_event(run_id, seq as u64)));
+    }
+
+    let mut emitter = TraceEventEmitter::new(run_id.to_string(), &mut store);
+    emitter.emit(TraceEventKind::WorkflowStarted {
+        run_id: run_id.to_string(),
+        workflow_name: "overflow".into(),
+        step_count: 1,
+    });
+
+    let events = store.get_events(run_id).expect("run present");
+    let warnings = events
+        .iter()
+        .filter(|event| matches!(event.kind, TraceEventKind::TraceStorageWarning { .. }))
+        .count();
+    assert_eq!(warnings, 1);
+    assert_eq!(store.events_dropped_for_run(run_id), 1);
+}
