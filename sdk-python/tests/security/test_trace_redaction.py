@@ -14,6 +14,6 @@ def test_trace_json_has_no_raw_user_input_values() -> None:
     raw = get_trace(result.run_id)
     blob = raw.summary() + str(raw.steps)
     assert secret not in blob
-    for step in trace.steps:
+    for step in raw.steps:
         for mem in step.memory_operations:
             assert secret not in mem.key or mem.key != secret

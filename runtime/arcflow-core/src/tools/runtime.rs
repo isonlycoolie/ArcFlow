@@ -6,7 +6,9 @@ use std::time::Duration;
 use serde_json::Value;
 use uuid::Uuid;
 
-use crate::tracing::{emitter::TraceEmitter, sprint5_emitter::TraceEventEmitter, tool_finished, tool_started};
+use crate::tracing::{
+    emitter::TraceEmitter, sprint5_emitter::TraceEventEmitter, tool_finished, tool_started,
+};
 
 use super::error::ToolError;
 use tokio::time::timeout;
@@ -51,6 +53,7 @@ impl ToolRuntime {
     }
 
     /// Validates and executes one tool, emitting trace metadata.
+    #[allow(clippy::too_many_arguments)]
     pub async fn execute_tool(
         &self,
         name: &str,

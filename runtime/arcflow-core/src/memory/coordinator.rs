@@ -1,5 +1,7 @@
 //! Coordinates session, shared, persistent, and vector memory for a run.
 
+#![allow(clippy::too_many_arguments)] // dual trace emission shares legacy, sprint5, and run_id
+
 use std::cell::RefCell;
 use std::sync::OnceLock;
 use std::time::Instant;
@@ -8,7 +10,9 @@ use tokio::runtime::Runtime;
 use uuid::Uuid;
 
 use crate::rcs::types::{MemoryConfig, MemoryScope, MemoryType};
-use crate::tracing::{emitter::TraceEmitter, memory_read, memory_write, sprint5_emitter::TraceEventEmitter};
+use crate::tracing::{
+    emitter::TraceEmitter, memory_read, memory_write, sprint5_emitter::TraceEventEmitter,
+};
 
 use super::error::MemoryError;
 use super::persistent::PersistentMemory;
@@ -339,15 +343,7 @@ mod tests {
             )
             .unwrap();
         let got = coord
-            .read_session(
-                aid,
-                "k",
-                "agent",
-                &mut legacy,
-                &mut sprint5,
-                &run_key,
-                None,
-            )
+            .read_session(aid, "k", "agent", &mut legacy, &mut sprint5, &run_key, None)
             .unwrap();
         assert_eq!(got.as_deref(), Some(b"v".as_slice()));
     }

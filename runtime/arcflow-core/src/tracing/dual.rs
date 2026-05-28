@@ -1,5 +1,7 @@
 //! Dual emission to Sprint 4 RCS trace and Sprint 5 store.
 
+#![allow(clippy::too_many_arguments)]
+
 use std::time::Instant;
 use uuid::Uuid;
 
