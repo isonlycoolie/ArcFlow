@@ -121,3 +121,70 @@ def _status_str(value: object) -> str:
 def _parse_ts(value: object) -> datetime:
     text = str(value).replace("Z", "+00:00")
     return datetime.fromisoformat(text).astimezone(timezone.utc)
+
+
+def _parse_step(raw: dict[str, object]) -> StepTrace:
+    tools = tuple(_parse_tool(t) for t in raw.get("tool_calls", []) if isinstance(t, dict))
+    mem_ops = tuple(
+        _parse_memory(m) for m in raw.get("memory_operations", []) if isinstance(m, dict)
+    )
+    err_raw = raw.get("error")
+    err = None
+    if isinstance(err_raw, dict):
+        err = StepError(
+            error_code=str(err_raw.get("error_code", "")),
+            message=str(err_raw.get("message", "")),
+        )
+    tokens = raw.get("tokens", {})
+    step_status = str(raw.get("status", "Completed"))
+    if "InProgress" in step_status:
+        step_status = "completed"
+    else:
+        step_status = step_status.lower().replace("inprogress", "completed")
+    duration_ms = raw.get("duration_ms")
+    return StepTrace(
+        step_index=int(raw.get("step_index", 0)),
+        agent_name=str(raw.get("agent_name", "")),
+        agent_role=str(raw.get("agent_role", "")),
+        status=step_status if step_status in ("completed", "failed") else "completed",
+        started_at=_parse_ts(raw["started_at"]),
+        completed_at=_parse_ts(raw["completed_at"])
+        if raw.get("completed_at")
+        else None,
+        duration_seconds=(duration_ms or 0) / 1000.0,
+        tokens_consumed=TokenUsage(
+            int(tokens.get("prompt_tokens", 0)),
+            int(tokens.get("completion_tokens", 0)),
+            int(tokens.get("total_tokens", 0)),
+        ),
+        tools_called=tools,
+        memory_operations=mem_ops,
+        error=err,
+    )
+
+
+def _parse_tool(raw: dict[str, object]) -> ToolCallTrace:
+    status = str(raw.get("status", "Success"))
+    if "Success" in status:
+        status = "success"
+    else:
+        status = status.lower()
+    return ToolCallTrace(
+        tool_name=str(raw.get("tool_name", "")),
+        status=status,
+        duration_seconds=int(raw.get("duration_ms", 0)) / 1000.0,
+        input_schema_hash=str(raw.get("input_schema_hash", "")),
+        output_size_bytes=raw.get("output_size_bytes"),
+        error_code=raw.get("error_code"),  # type: ignore[arg-type]
+    )
+
+
+def _parse_memory(raw: dict[str, object]) -> MemoryOperationTrace:
+    op = str(raw.get("operation", "Read"))
+    return MemoryOperationTrace(
+        operation="read" if "Read" in op else "write",
+        memory_type=str(raw.get("memory_type", "")),
+        key=str(raw.get("key", "")),
+        hit=raw.get("hit"),  # type: ignore[arg-type]
+        duration_seconds=int(raw.get("duration_ms", 0)) / 1000.0,
+    )
