@@ -5,3 +5,6 @@ pub const MAX_TRACE_EVENTS_PER_RUN: u32 = 10_000;
 
 /// Maximum completed run traces held in the in-process store at once.
 pub const MAX_CONCURRENT_TRACES: usize = 100;
+
+/// OTLP export timeout in milliseconds (best-effort after run completes).
+pub const OTLP_EXPORT_TIMEOUT_MS: u64 = 5_000;

@@ -42,6 +42,8 @@ pub mod tools;
 /// Implemented in Sprint 5.
 pub mod tracing;
 
+pub use tracing::get_execution_trace;
+
 /// LLM provider abstraction layer.
 /// Implemented in Sprint 6.
 pub mod providers;

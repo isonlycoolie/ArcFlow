@@ -5,15 +5,19 @@
 //! existing workflow runs.
 
 pub mod builder;
+pub mod dual;
 pub mod emitter;
 pub mod error;
 pub mod events;
 pub mod otel;
+pub mod registry;
 pub mod sprint5_emitter;
 pub mod store;
 pub mod types;
 
 pub use builder::ExecutionTraceBuilder;
+pub use dual::{memory_read, memory_write, tool_finished, tool_started, tokens_consumed};
+pub use registry::{get_execution_trace, with_store};
 pub use emitter::TraceEmitter;
 pub use sprint5_emitter::TraceEventEmitter;
 pub use error::TracingError;
