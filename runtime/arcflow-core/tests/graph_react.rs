@@ -98,3 +98,30 @@ fn react_cycle_respects_max_iterations() {
         ],
         retry_policy: None,
         execution_mode: ExecutionMode::Graph,
+        graph: Some(graph),
+    };
+
+    let mut agents = HashMap::new();
+    agents.insert(a_think, agent(a_think, "think"));
+    agents.insert(a_act, agent(a_act, "act"));
+    agents.insert(a_observe, agent(a_observe, "observe"));
+
+    let err = WorkflowEngine::new()
+        .execute_with_config(
+            &workflow,
+            &agents,
+            "task",
+            None,
+            None,
+            None,
+            256,
+            0.0,
+            &ExecutionConfig::default(),
+        )
+        .unwrap_err();
+
+    match err {
+        WorkflowRunError::Aborted(_) => {}
+        other => panic!("expected iteration limit abort, got {other:?}"),
+    }
+}
