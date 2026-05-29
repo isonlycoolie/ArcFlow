@@ -41,6 +41,7 @@ pub(crate) struct RunLoop<'a> {
     pub(crate) state: &'a mut StateEngine,
     pub(crate) step_outputs: &'a mut Vec<ExecutionStepOutput>,
     pub(crate) run_input: &'a str,
+    pub(crate) test_config: Option<crate::workflow::TestConfig>,
 }
 
 pub(crate) fn check_workflow_timeout(
@@ -165,6 +166,9 @@ fn execute_agent_for_step(
         retry_config,
         step_timeout,
         workflow_deadline,
+        step_order: step.order,
+        test_config: loop_ctx.test_config.clone(),
+        test_attempt: 1,
     };
     agent_runtime.execute_with_context(
         agent,
@@ -508,6 +512,7 @@ pub(crate) fn run_sorted_steps(
             state: &mut state,
             step_outputs: &mut step_outputs,
             run_input: effective_input,
+            test_config: exec_config.test.clone(),
         };
 
         for (step_index, step) in steps.iter().enumerate() {

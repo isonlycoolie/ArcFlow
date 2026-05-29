@@ -439,6 +439,50 @@ class Workflow:
         self._has_run = True
         return result
 
+    def test(self, cases: list[dict[str, object]]) -> list[dict[str, object]]:
+        """Run deterministic stub cases without real LLM calls (Phase 2.3)."""
+        from arcflow._internal.exec_config import build_exec_config_json
+        from arcflow._internal import runtime
+
+        results: list[dict[str, object]] = []
+        agents, step_rows = self._agents_and_steps()
+        steps = [agent for agent in agents]
+        for case in cases:
+            name = str(case.get("name", "case"))
+            run_input = str(case.get("input", ""))
+            stub_responses = case.get("stub_responses")
+            if stub_responses is None and "expected_output" in case:
+                stub_responses = {"step_1": {"output": case["expected_output"]}}
+            test_block = {"stub_responses": stub_responses or {}}
+            exec_json = build_exec_config_json(
+                retry=self._retry,
+                workflow_timeout_seconds=self._workflow_timeout_seconds,
+                step_timeout_seconds=self._step_timeout_seconds,
+                recovery_enabled=False,
+                test=test_block,
+            )
+            workflow_id = str(uuid4())
+            result = runtime.run_workflow(
+                self._name,
+                workflow_id,
+                steps,
+                step_rows,
+                run_input,
+                None,
+                exec_json,
+                self._graph_payload() if self._graph_mode else None,
+            )
+            expected = case.get("expected_output")
+            passed = expected is None or result.output == expected
+            results.append(
+                {
+                    "name": name,
+                    "passed": passed,
+                    "output": result.output,
+                }
+            )
+        return results
+
     def trace(self) -> TraceResult:
         if not self._last_run_id:
             raise TraceNotFoundError(

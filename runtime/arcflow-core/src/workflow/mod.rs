@@ -7,10 +7,12 @@ mod graph;
 mod record;
 mod run;
 mod run_error;
+mod test_config;
 mod validation;
 
 pub use context::ExecutionContext;
 pub use execution_config::ExecutionConfig;
+pub use test_config::{resolve_key, TestConfig, TestStubStep};
 
 pub use engine::WorkflowEngine;
 pub use record::WorkflowExecutionRecord;
