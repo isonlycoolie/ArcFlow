@@ -284,3 +284,103 @@ export class Workflow {
     if (!this.graphMode) {
       return undefined;
     }
+    if (!this.entryNode) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] Graph workflow has no entry node.",
+      );
+    }
+    return buildGraphJson({
+      entryNode: this.entryNode,
+      maxIterations: this.maxIterations,
+      nodes: [...this.graphNodes.values()].map((n) => ({
+        id: n.nodeId,
+        stepId: n.stepId,
+      })),
+      edges: this.graphEdges,
+    });
+  }
+
+  async resume(runId: string): Promise<WorkflowResult> {
+    if (!this.recoveryEnabled) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] workflow.resume() requires enableRecovery().",
+      );
+    }
+    if (!runId.trim()) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] resume() requires a non-empty run_id.",
+      );
+    }
+    if (!this.workflowId) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] Cannot resume — no prior run on this workflow instance.",
+      );
+    }
+    const native = loadNative();
+    const { agents, steps } = this.agentsAndSteps();
+    try {
+      const result = await native.executeResumeWorkflow(
+        this.name,
+        this.workflowId,
+        agents.map((agent) => agent.bindingRow()),
+        steps,
+        runId.trim(),
+        undefined,
+        this.execConfigJson(),
+      );
+      this.lastRunId = result.runId;
+      return toWorkflowResult(result);
+    } catch (err) {
+      throw mapNativeError(err);
+    }
+  }
+
+  buildRunPayload(input: string, execConfigJson?: string): Record<string, unknown> {
+    const { agents, steps } = this.agentsAndSteps();
+    const workflowId = this.workflowId ?? randomUUID();
+    this.workflowId = workflowId;
+    const workflowBody: Record<string, unknown> = {
+      id: workflowId,
+      name: this.name,
+      steps: steps.map((s) => ({
+        id: s.stepId,
+        agent_id: s.agentId,
+        order: s.order,
+      })),
+      execution_mode: this.graphMode ? "graph" : "linear",
+    };
+    if (this.graphMode) {
+      workflowBody.graph = JSON.parse(this.graphJson()!);
+    }
+    const payload: Record<string, unknown> = {
+      workflow: workflowBody,
+      agents: agents.map((agent) => ({
+        id: agent.agentId,
+        name: agent.name,
+        role: agent.role,
+        instructions: agent.instructions,
+      })),
+      input,
+    };
+    if (execConfigJson) {
+      payload.exec_config = JSON.parse(execConfigJson);
+    }
+    return payload;
+  }
+
+  async run(input: string, options: RunOptions = {}): Promise<WorkflowResult> {
+    const trimmed = input.trim();
+    if (!trimmed) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] Workflow input must be a non-empty string.",
+      );
+    }
+    if (this.graphMode) {
+      if (this.graphNodes.size === 0) {
+        throw new WorkflowConfigurationError(
+          "[ArcFlow] Cannot run a graph workflow with no nodes.",
+        );
+      }
+    } else if (this.steps.length === 0) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] Cannot run a workflow with no steps.",
