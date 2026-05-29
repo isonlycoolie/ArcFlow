@@ -98,3 +98,103 @@ pub fn run_graph_loop(
         WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
             reason: "graph block missing for graph execution_mode".into(),
         })
+    })?;
+
+    let retry_config = exec_config
+        .retry
+        .clone()
+        .or_else(|| workflow.retry_policy.as_ref().map(RetryConfig::from_rcs));
+    if let Some(ref r) = retry_config {
+        r.validate().map_err(WorkflowRunError::Aborted)?;
+    }
+    exec_config.validate().map_err(WorkflowRunError::Aborted)?;
+
+    let step_timeout = exec_config.timeouts.step_timeout;
+    let workflow_timeout = exec_config.timeouts.workflow_timeout;
+    let run_id = Uuid::new_v4();
+    let run_key = run_id.to_string();
+    let workflow_started = Instant::now();
+    let workflow_deadline = workflow_timeout.map(|wt| workflow_started + wt);
+
+    let step_by_id: HashMap<Uuid, &StepDefinition> =
+        workflow.steps.iter().map(|s| (s.id, s)).collect();
+    let node_to_step: HashMap<&str, &StepDefinition> = graph
+        .nodes
+        .iter()
+        .filter_map(|n| step_by_id.get(&n.step_ref).map(|s| (n.id.as_str(), *s)))
+        .collect();
+
+    let mut executor = GraphExecutor::new(graph.clone()).with_parallel();
+    let mut join_gate = JoinGate::new(&graph.join_nodes);
+    let mut pending: Vec<String> = vec![graph.entry_node.clone()];
+    let mut graph_step_index = 0usize;
+
+    with_store(|store| {
+        let mut sprint5 = TraceEventEmitter::new(run_key.clone(), store);
+        let mut legacy = TraceEmitter::new(run_id);
+        sprint5.emit(TraceEventKind::WorkflowStarted {
+            run_id: run_key.clone(),
+            workflow_name: workflow.name.clone(),
+            step_count: graph.nodes.len(),
+        });
+
+        let mut state = StateEngine::new();
+        let mut memory = MemoryCoordinator::new(run_id);
+        let mut step_outputs = Vec::new();
+        let mut loop_ctx = RunLoop {
+            run_id,
+            workflow_id: workflow.id,
+            state: &mut state,
+            step_outputs: &mut step_outputs,
+            run_input,
+        };
+
+        while let Some(current) = pending.pop() {
+            if join_gate.is_join(&current) && !join_gate.is_ready(&current) {
+                continue;
+            }
+
+            if let Err(err) = check_workflow_timeout(
+                workflow_timeout,
+                workflow_started,
+                &run_key,
+                &mut sprint5,
+            ) {
+                return Err(WorkflowRunError::Failed {
+                    error: err,
+                    partial: partial_record(&loop_ctx, &legacy),
+                });
+            }
+
+            executor
+                .record_visit(&current)
+                .map_err(WorkflowRunError::Aborted)?;
+
+            let Some(step) = node_to_step.get(current.as_str()) else {
+                return Err(WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
+                    reason: format!("graph node '{current}' has no step mapping"),
+                }));
+            };
+            let Some(agent) = agents.get(&step.agent_id) else {
+                return Err(WorkflowRunError::Aborted(RuntimeError::AgentNotFound {
+                    agent_id: step.agent_id,
+                    step_id: step.id,
+                }));
+            };
+
+            run_one_step(
+                agent_runtime,
+                &mut loop_ctx,
+                step,
+                graph_step_index,
+                agent,
+                &workflow.steps,
+                agents,
+                &mut memory,
+                &mut legacy,
+                &mut sprint5,
+                &run_key,
+                tool_runtime,
+                tool_invoker.clone(),
+                workflow_started,
+                provider.clone(),
