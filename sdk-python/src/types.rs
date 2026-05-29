@@ -3,8 +3,8 @@
 use std::collections::HashMap;
 
 use arcflow_core::rcs::types::{
-    AgentDefinition, MemoryConfig, MemoryScope, MemoryType, StepDefinition, ToolDefinition,
-    WorkflowDefinition,
+    AgentDefinition, HitlConfig, MemoryConfig, MemoryScope, MemoryType, StepDefinition,
+    ToolDefinition, WorkflowDefinition,
 };
 use pyo3::prelude::*;
 use pyo3::types::{PyList, PyTuple};
@@ -49,6 +49,7 @@ pub struct StepInput {
     pub agent_id: Uuid,
     pub order: u32,
     pub fallback_step_id: Option<Uuid>,
+    pub hitl_json: Option<String>,
 }
 
 fn parse_tool_row(item: Bound<'_, PyAny>) -> PyResult<ToolInput> {
@@ -132,19 +133,24 @@ pub fn parse_agent_tuple(item: Bound<'_, PyAny>) -> PyResult<AgentInput> {
 
 pub fn parse_step_tuple(item: Bound<'_, PyAny>) -> PyResult<StepInput> {
     let tuple = item.downcast::<PyTuple>()?;
-    if tuple.len() != 3 && tuple.len() != 4 {
+    if tuple.len() < 3 || tuple.len() > 5 {
         return Err(configuration_error(
-            "Internal step tuple must have three or four fields (step_id, agent_id, order, fallback_step_id?).",
+            "Internal step tuple must have 3–5 fields (step_id, agent_id, order, fallback_step_id?, hitl_json?).",
         ));
     }
     let step_id = parse_uuid("step_id", tuple.get_item(0)?.extract::<String>()?.as_str())?;
     let agent_id = parse_uuid("agent_id", tuple.get_item(1)?.extract::<String>()?.as_str())?;
     let order: u32 = tuple.get_item(2)?.extract()?;
-    let fallback_step_id = if tuple.len() == 4 {
+    let fallback_step_id = if tuple.len() >= 4 {
         match tuple.get_item(3)?.extract::<Option<String>>()? {
             Some(raw) if !raw.is_empty() => Some(parse_uuid("fallback_step_id", raw.as_str())?),
             _ => None,
         }
+    } else {
+        None
+    };
+    let hitl_json = if tuple.len() == 5 {
+        tuple.get_item(4)?.extract::<Option<String>>()?
     } else {
         None
     };
@@ -153,6 +159,30 @@ pub fn parse_step_tuple(item: Bound<'_, PyAny>) -> PyResult<StepInput> {
         agent_id,
         order,
         fallback_step_id,
+        hitl_json,
+    })
+}
+
+fn parse_hitl_json(raw: &str) -> PyResult<HitlConfig> {
+    let v: Value = serde_json::from_str(raw)
+        .map_err(|e| configuration_error(format!("Invalid HITL JSON: {e}")))?;
+    let approval_key = v
+        .get("approval_key")
+        .and_then(|x| x.as_str())
+        .ok_or_else(|| configuration_error("HITL config requires approval_key"))?
+        .to_string();
+    let timeout_seconds = v
+        .get("timeout_seconds")
+        .and_then(|x| x.as_u64())
+        .unwrap_or(3600);
+    let interrupt = v
+        .get("interrupt")
+        .and_then(|x| x.as_bool())
+        .unwrap_or(true);
+    Ok(HitlConfig {
+        approval_key,
+        timeout_seconds,
+        interrupt,
     })
 }
 
@@ -198,18 +228,27 @@ pub fn build_workflow(
     }
     let step_defs: Vec<StepDefinition> = steps
         .into_iter()
-        .map(|s| StepDefinition {
-            id: s.step_id,
-            agent_id: s.agent_id,
-            order: s.order,
-            fallback_step_id: s.fallback_step_id,
+        .map(|s| {
+            let hitl = match s.hitl_json.as_deref() {
+                Some(raw) if !raw.is_empty() => Some(parse_hitl_json(raw)?),
+                _ => None,
+            };
+            Ok(StepDefinition {
+                id: s.step_id,
+                agent_id: s.agent_id,
+                order: s.order,
+                fallback_step_id: s.fallback_step_id,
+                hitl,
+            })
         })
-        .collect();
+        .collect::<PyResult<Vec<_>>>()?;
     let workflow = WorkflowDefinition {
         id: workflow_id,
         name: workflow_name,
         steps: step_defs,
         retry_policy: None,
+        execution_mode: arcflow_core::rcs::types::ExecutionMode::Linear,
+        graph: None,
     };
     Ok((workflow, agent_map))
 }
