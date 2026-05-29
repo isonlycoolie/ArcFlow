@@ -40,6 +40,7 @@ def build_exec_config_json(
     workflow_timeout_seconds: float | None,
     step_timeout_seconds: float | None,
     recovery_enabled: bool,
+    test: dict[str, Any] | None = None,
 ) -> str | None:
     payload: dict[str, Any] = {}
     if retry is not None:
@@ -54,6 +55,8 @@ def build_exec_config_json(
         payload["step_timeout_secs"] = step_timeout_seconds
     if recovery_enabled:
         payload["recovery_enabled"] = True
+    if test is not None:
+        payload["test"] = test
     if not payload:
         return None
     return json.dumps(payload)

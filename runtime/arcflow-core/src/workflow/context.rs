@@ -34,4 +34,10 @@ pub struct ExecutionContext<'a, 's> {
     pub step_timeout: Option<std::time::Duration>,
     /// Absolute deadline for the whole workflow run (Sprint 7).
     pub workflow_deadline: Option<Instant>,
+    /// Step order for test stub lookup (Phase 2.3).
+    pub step_order: u32,
+    /// Test stub configuration when running workflow.test().
+    pub test_config: Option<crate::workflow::TestConfig>,
+    /// Current attempt within retry loop (1-based).
+    pub test_attempt: u32,
 }

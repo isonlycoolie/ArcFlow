@@ -147,6 +147,7 @@ pub fn run_graph_loop(
             state: &mut state,
             step_outputs: &mut step_outputs,
             run_input,
+            test_config: exec_config.test.clone(),
         };
 
         while let Some(current) = pending.pop() {

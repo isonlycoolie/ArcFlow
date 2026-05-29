@@ -120,6 +120,32 @@ impl AgentRuntime {
             });
         }
 
+        if let Some(ctx) = ctx.as_ref() {
+            if let Some(ref test) = ctx.test_config {
+                let key = crate::workflow::resolve_key(
+                    ctx.step_order,
+                    &step_id.to_string(),
+                    test,
+                );
+                if let Some(stub_key) = key {
+                    if test.should_fail(&stub_key, ctx.test_attempt) {
+                        return Err(RuntimeError::AgentExecutionFailed {
+                            step_id,
+                            reason: format!("test stub failure for {stub_key}"),
+                        });
+                    }
+                    if let Some(output) = test.stub_output(&stub_key, ctx.test_attempt) {
+                        return Ok(ExecutionStepOutput {
+                            step_id,
+                            agent_id: agent.id,
+                            content: output,
+                            status: ExecutionStatus::Completed,
+                        });
+                    }
+                }
+            }
+        }
+
         let step_tokens = if let Some(ctx) = ctx.as_mut() {
             if let Some(provider) = ctx.provider.clone() {
                 Some(self.execute_with_provider(agent, step_id, run_input, ctx, provider)?)

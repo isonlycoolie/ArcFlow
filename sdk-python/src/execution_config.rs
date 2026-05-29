@@ -3,7 +3,7 @@
 use std::time::Duration;
 
 use arcflow_core::retry::{BackoffStrategy, RetryConfig};
-use arcflow_core::workflow::ExecutionConfig;
+use arcflow_core::workflow::{ExecutionConfig, TestConfig};
 use arcflow_core::retry::TimeoutConfig as RetryTimeoutConfig;
 use serde::Deserialize;
 
@@ -13,6 +13,7 @@ struct ExecConfigJson {
     workflow_timeout_secs: Option<f64>,
     step_timeout_secs: Option<f64>,
     recovery_enabled: Option<bool>,
+    test: Option<TestConfig>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -97,5 +98,6 @@ pub fn parse_execution_config(raw: Option<&str>) -> Result<ExecutionConfig, Stri
         timeouts,
         recovery_enabled: parsed.recovery_enabled.unwrap_or(false),
         run_id: None,
+        test: parsed.test,
     })
 }
