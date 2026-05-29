@@ -1,0 +1,8 @@
+export const OPENAI_API_KEY_ENV = "OPENAI_API_KEY";
+export const ANTHROPIC_API_KEY_ENV = "ANTHROPIC_API_KEY";
+export const GEMINI_API_KEY_ENV = "GEMINI_API_KEY";
+
+export const PROVIDER_DEFAULT_MAX_TOKENS = 4096;
+export const PROVIDER_DEFAULT_TEMPERATURE = 0.7;
+
+export const VERSION = "0.1.0";
