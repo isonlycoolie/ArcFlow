@@ -1,7 +1,7 @@
 //! Parse graph workflow metadata from SDK JSON.
 
 use arcflow_core::rcs::types::{
-    ExecutionMode, GraphDefinition, GraphEdge, GraphNode, WorkflowDefinition,
+    ExecutionMode, GraphDefinition, GraphEdge, GraphNode, JoinNode, WorkflowDefinition,
 };
 use serde::Deserialize;
 use uuid::Uuid;
@@ -12,6 +12,13 @@ struct GraphPayload {
     max_iterations: Option<u32>,
     nodes: Vec<GraphNodePayload>,
     edges: Vec<GraphEdgePayload>,
+    join_nodes: Option<Vec<JoinNodePayload>>,
+}
+
+#[derive(Debug, Deserialize)]
+struct JoinNodePayload {
+    id: String,
+    wait_for: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -59,7 +66,15 @@ pub fn apply_graph_json(workflow: &mut WorkflowDefinition, raw: &str) -> Result<
         max_iterations: payload.max_iterations.unwrap_or(100),
         nodes: nodes?,
         edges,
-        join_nodes: vec![],
+        join_nodes: payload
+            .join_nodes
+            .unwrap_or_default()
+            .into_iter()
+            .map(|j| JoinNode {
+                id: j.id,
+                wait_for: j.wait_for,
+            })
+            .collect(),
     });
     Ok(())
 }

@@ -16,6 +16,7 @@ export interface GraphPayload {
   max_iterations: number;
   nodes: Array<{ id: string; step_id: string }>;
   edges: Array<{ from: string; to?: string | null; condition?: string | null }>;
+  join_nodes?: Array<{ id: string; wait_for: string[] }>;
 }
 
 export function buildGraphJson(options: {
@@ -23,6 +24,7 @@ export function buildGraphJson(options: {
   maxIterations: number;
   nodes: GraphNodeSpec[];
   edges: GraphEdgeSpec[];
+  joinNodes?: Array<{ id: string; waitFor: string[] }>;
 }): string {
   const payload: GraphPayload = {
     entry_node: options.entryNode,
@@ -34,5 +36,11 @@ export function buildGraphJson(options: {
       condition: e.condition ?? null,
     })),
   };
+  if (options.joinNodes?.length) {
+    payload.join_nodes = options.joinNodes.map((j) => ({
+      id: j.id,
+      wait_for: j.waitFor,
+    }));
+  }
   return JSON.stringify(payload);
 }

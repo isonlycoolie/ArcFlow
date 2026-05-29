@@ -22,6 +22,7 @@ def main() -> None:
         .add_edge("router", "search_docs")
         .add_edge("search_web", "synthesize")
         .add_edge("search_docs", "synthesize")
+        .join_node("synthesize", ["search_web", "search_docs"])
         .add_edge("synthesize", None)
     )
 

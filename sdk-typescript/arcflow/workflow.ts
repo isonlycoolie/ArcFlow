@@ -90,6 +90,7 @@ export class Workflow {
     to?: string | null;
     condition?: string | null;
   }> = [];
+  private readonly graphJoins: Array<{ id: string; waitFor: string[] }> = [];
   private entryNode: string | null = null;
   private maxIterations = 100;
   private workflowId: string | null = null;
@@ -179,6 +180,30 @@ export class Workflow {
       from: fromId.trim(),
       to: toId ?? null,
       condition: options.condition ?? null,
+    });
+    return this;
+  }
+
+  joinNode(joinId: string, waitFor: string[]): this {
+    if (!this.graphMode) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] joinNode() requires Workflow({ graph: true }).",
+      );
+    }
+    const trimmed = joinId.trim();
+    if (!this.graphNodes.has(trimmed)) {
+      throw new WorkflowConfigurationError(
+        `[ArcFlow] Join node '${trimmed}' is not registered.`,
+      );
+    }
+    if (!waitFor.length) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] joinNode waitFor must list at least one branch node.",
+      );
+    }
+    this.graphJoins.push({
+      id: trimmed,
+      waitFor: waitFor.map((id) => id.trim()),
     });
     return this;
   }
@@ -299,6 +324,7 @@ export class Workflow {
         stepId: n.stepId,
       })),
       edges: this.graphEdges,
+      joinNodes: this.graphJoins,
     });
   }
 

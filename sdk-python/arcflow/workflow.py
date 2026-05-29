@@ -31,6 +31,7 @@ class Workflow:
         self._step_rows: list[tuple[str, str, int, str | None, str | None]] = []
         self._graph_nodes: dict[str, tuple[Agent, str]] = {}
         self._graph_edges: list[tuple[str, str | None, str | None]] = []
+        self._graph_joins: list[tuple[str, list[str]]] = []
         self._entry_node: str | None = None
         self._max_iterations = 100
         self._workflow_id: str | None = None
@@ -127,6 +128,27 @@ class Workflow:
         self._graph_edges.append((from_id.strip(), to_id, condition))
         return self
 
+    def join_node(self, join_id: str, wait_for: list[str]) -> Workflow:
+        if not self._graph_mode:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] join_node() requires Workflow(graph=True)."
+            )
+        trimmed = join_id.strip()
+        if not trimmed:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] join_node id must be a non-empty string."
+            )
+        if trimmed not in self._graph_nodes:
+            raise WorkflowConfigurationError(
+                f"[ArcFlow] Join node '{trimmed}' is not registered."
+            )
+        if not wait_for:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] join_node wait_for must list at least one branch node."
+            )
+        self._graph_joins.append((trimmed, [b.strip() for b in wait_for]))
+        return self
+
     def set_entry(self, node_id: str) -> Workflow:
         if not self._graph_mode:
             raise WorkflowConfigurationError(
@@ -215,14 +237,18 @@ class Workflow:
             {"from": f, "to": t, "condition": c}
             for f, t, c in self._graph_edges
         ]
-        return json.dumps(
-            {
-                "entry_node": self._entry_node,
-                "max_iterations": self._max_iterations,
-                "nodes": nodes,
-                "edges": edges,
-            }
-        )
+        payload: dict[str, object] = {
+            "entry_node": self._entry_node,
+            "max_iterations": self._max_iterations,
+            "nodes": nodes,
+            "edges": edges,
+        }
+        if self._graph_joins:
+            payload["join_nodes"] = [
+                {"id": join_id, "wait_for": branches}
+                for join_id, branches in self._graph_joins
+            ]
+        return json.dumps(payload)
 
     def _agents_and_steps(self) -> tuple[list[Agent], list[tuple[str, str, int, str | None]]]:
         if self._graph_mode:
