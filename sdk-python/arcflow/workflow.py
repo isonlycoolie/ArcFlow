@@ -409,3 +409,15 @@ class Workflow:
             exec_json,
             graph_json,
         )
+        self._last_run_id = result.run_id
+        self._has_run = True
+        return result
+
+    def trace(self) -> TraceResult:
+        if not self._last_run_id:
+            raise TraceNotFoundError(
+                "[ArcFlow] No workflow run yet. Call workflow.run() before trace()."
+            )
+        from arcflow._internal import runtime
+
+        return runtime.get_trace(self._last_run_id)
