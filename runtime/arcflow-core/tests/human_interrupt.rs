@@ -98,3 +98,49 @@ fn hitl_interrupt_and_resume_completes() {
 
     let exec_config = ExecutionConfig {
         recovery_enabled: true,
+        ..ExecutionConfig::default()
+    };
+    let engine = WorkflowEngine::new();
+    let interrupted = engine
+        .execute_with_config(&wf, &agents, "expense:100", None, None, None, 1024, 0.7, &exec_config)
+        .unwrap_err();
+    let (partial, approval_key) = match interrupted {
+        WorkflowRunError::Interrupted {
+            approval_key,
+            partial,
+            ..
+        } => (partial, approval_key),
+        other => panic!("expected Interrupted, got {other:?}"),
+    };
+    assert_eq!(approval_key, "manager_approval");
+    assert_eq!(partial.step_outputs.len(), 1);
+
+    let original_run_id = partial.run_id.to_string();
+    let approval = ApprovalResult {
+        approved: true,
+        data: serde_json::json!({"manager_id": "mgr-42"}),
+    };
+    let record = resume_workflow_with_approval(
+        &arcflow_core::agent::AgentRuntime::new(),
+        &wf,
+        &agents,
+        &original_run_id,
+        "manager_approval",
+        approval,
+        None,
+        None,
+        None,
+        1024,
+        0.7,
+        &exec_config,
+        true,
+    )
+    .expect("resume after approval");
+    assert_eq!(record.step_outputs.len(), 3);
+    assert!(
+        record
+            .step_outputs
+            .iter()
+            .all(|s| s.status == ExecutionStatus::Completed)
+    );
+}
