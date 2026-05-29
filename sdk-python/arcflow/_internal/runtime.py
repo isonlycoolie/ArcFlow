@@ -4,15 +4,17 @@ from __future__ import annotations
 
 import json
 from typing import Any
-from uuid import uuid4
-
 from arcflow.agent import Agent
 from arcflow.result import WorkflowResult
 from arcflow.trace import TraceResult
 
 try:
     from arcflow._arcflow_binding import WorkflowResult as NativeWorkflowResult
-    from arcflow._arcflow_binding import execute_workflow, get_execution_trace_json
+    from arcflow._arcflow_binding import (
+        execute_resume_workflow,
+        execute_workflow,
+        get_execution_trace_json,
+    )
 except ImportError as exc:  # pragma: no cover - built by maturin
     raise ImportError(
         "[ArcFlow] Native extension not installed. "
@@ -40,24 +42,57 @@ def _to_result(native: NativeWorkflowResult) -> WorkflowResult:
 
 def run_workflow(
     workflow_name: str,
+    workflow_id: str,
     steps: list[Agent],
+    step_rows: list[tuple[str, str, int, str | None]],
     run_input: str,
     provider: tuple[str, str, int, float] | None = None,
+    exec_config_json: str | None = None,
 ) -> WorkflowResult:
     """Delegates execution to the Rust runtime via PyO3."""
     agent_rows = [agent.binding_tuple() for agent in steps]
-    step_rows: list[tuple[str, str, int]] = []
-    for index, agent in enumerate(steps, start=1):
-        step_rows.append((str(uuid4()), str(agent.agent_id), index))
+    binding_steps = [
+        (sid, aid, order, fb or "")
+        for sid, aid, order, fb in step_rows
+    ]
     tool_executors = [tool.execute for agent in steps for tool in agent.tools]
     native = execute_workflow(
         workflow_name,
-        str(uuid4()),
+        workflow_id,
         agent_rows,
-        step_rows,
+        binding_steps,
         run_input,
         tool_executors,
         provider,
+        exec_config_json,
+    )
+    return _to_result(native)
+
+
+def resume_workflow(
+    workflow_name: str,
+    workflow_id: str,
+    steps: list[Agent],
+    step_rows: list[tuple[str, str, int, str | None]],
+    original_run_id: str,
+    exec_config_json: str | None = None,
+) -> WorkflowResult:
+    """Resumes a failed workflow from PostgreSQL recovery state."""
+    agent_rows = [agent.binding_tuple() for agent in steps]
+    binding_steps = [
+        (sid, aid, order, fb or "")
+        for sid, aid, order, fb in step_rows
+    ]
+    tool_executors = [tool.execute for agent in steps for tool in agent.tools]
+    native = execute_resume_workflow(
+        workflow_name,
+        workflow_id,
+        agent_rows,
+        binding_steps,
+        original_run_id,
+        tool_executors,
+        None,
+        exec_config_json,
     )
     return _to_result(native)
 
