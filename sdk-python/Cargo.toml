@@ -14,5 +14,6 @@ crate-type = ["cdylib"]
 [dependencies]
 arcflow-core = { path = "../runtime/arcflow-core" }
 pyo3 = { workspace = true }
+serde = { workspace = true }
 serde_json = { workspace = true }
 uuid = { workspace = true }
