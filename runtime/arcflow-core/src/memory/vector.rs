@@ -1,7 +1,8 @@
-//! Qdrant vector memory with deterministic stub embeddings in tests.
+//! Qdrant vector memory with pluggable embedding providers (Phase 1.5).
 
 use std::collections::HashMap;
 use std::env;
+use std::sync::Arc;
 
 use async_trait::async_trait;
 use qdrant_client::qdrant::{
@@ -11,6 +12,8 @@ use qdrant_client::qdrant::{
 use qdrant_client::Qdrant;
 use sha2::{Digest, Sha256};
 use uuid::Uuid;
+
+use crate::embedding::{resolve_from_env, resolve_provider, EmbeddingError, EmbeddingProvider};
 
 use super::error::MemoryError;
 use super::namespace::durable_key;
@@ -43,14 +46,10 @@ fn map_qdrant_client_error(err: impl std::fmt::Display) -> MemoryError {
     }
 }
 
-/// Deterministic stub embedding from key bytes (Sprint 4 — no external API).
-pub fn stub_embedding(seed: &[u8], dim: usize) -> Vec<f32> {
-    let mut out = vec![0.0_f32; dim];
-    for (i, item) in out.iter_mut().enumerate() {
-        let byte = seed.get(i % seed.len()).copied().unwrap_or(0);
-        *item = (byte as f32) / 255.0;
+fn map_embedding(err: EmbeddingError) -> MemoryError {
+    MemoryError::OperationFailed {
+        reason: err.to_string(),
     }
-    out
 }
 
 /// Qdrant-backed vector store.
@@ -172,6 +171,7 @@ impl VectorStoreProvider for QdrantVectorStore {
 /// High-level vector memory API.
 pub struct VectorMemory {
     store: QdrantVectorStore,
+    provider: Arc<dyn EmbeddingProvider>,
 }
 
 impl Default for VectorMemory {
@@ -181,14 +181,43 @@ impl Default for VectorMemory {
 }
 
 impl VectorMemory {
-    /// Default 8-dimensional stub vectors.
+    /// Uses `ARCFLOW_EMBEDDING_PROVIDER`, or explicit `stub` in tests/dev mode.
     pub fn new() -> Self {
-        Self {
-            store: QdrantVectorStore::new(8),
-        }
+        Self::from_env().unwrap_or_else(|_| {
+            Self::from_provider_spec("stub").expect("stub provider always available")
+        })
     }
 
-    /// Stores text under namespace using stub embedding of the logical key.
+    /// Builds vector memory from a provider spec such as `openai/text-embedding-3-small`.
+    pub fn from_provider_spec(spec: &str) -> Result<Self, EmbeddingError> {
+        let provider = resolve_provider(spec)?;
+        Ok(Self {
+            store: QdrantVectorStore::new(provider.dimensions()),
+            provider,
+        })
+    }
+
+    /// Resolves the embedding provider from environment variables.
+    pub fn from_env() -> Result<Self, EmbeddingError> {
+        let provider = resolve_from_env()?;
+        Ok(Self {
+            store: QdrantVectorStore::new(provider.dimensions()),
+            provider,
+        })
+    }
+
+    async fn embed_text(&self, text: &str) -> Result<Vec<f32>, MemoryError> {
+        let mut vectors = self
+            .provider
+            .embed(&[text.to_string()])
+            .await
+            .map_err(map_embedding)?;
+        vectors.pop().ok_or(MemoryError::OperationFailed {
+            reason: "embedding provider returned no vectors".into(),
+        })
+    }
+
+    /// Stores text under namespace using semantic embedding of the payload.
     pub async fn write(
         &mut self,
         namespace: &str,
@@ -196,21 +225,40 @@ impl VectorMemory {
         value: &[u8],
     ) -> Result<(), MemoryError> {
         let storage_key = durable_key(namespace, logical_key);
-        let vector = stub_embedding(storage_key.as_bytes(), self.store.dim);
+        let text = String::from_utf8_lossy(value).into_owned();
+        let vector = self.embed_text(&text).await?;
         self.store
             .upsert(COLLECTION, &storage_key, &vector, value)
             .await
     }
 
-    /// Retrieves nearest payload for the same logical key embedding.
+    /// Retrieves nearest payload for a semantic query (`logical_key` text).
     pub async fn read(
         &mut self,
         namespace: &str,
         logical_key: &str,
     ) -> Result<Option<Vec<u8>>, MemoryError> {
-        let storage_key = durable_key(namespace, logical_key);
-        let vector = stub_embedding(storage_key.as_bytes(), self.store.dim);
+        let _ = namespace;
+        let vector = self.embed_text(logical_key).await?;
         let hits = self.store.search(COLLECTION, &vector, 1).await?;
         Ok(hits.into_iter().next())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::embedding::stub_embedding;
+
+    #[test]
+    fn stub_embedding_reexported_compat() {
+        let v = stub_embedding(b"hello", 4);
+        assert_eq!(v.len(), 4);
+    }
+
+    #[test]
+    fn vector_memory_stub_provider_dimensions() {
+        let mem = VectorMemory::from_provider_spec("stub/16").expect("stub");
+        assert_eq!(mem.provider.dimensions(), 16);
     }
 }

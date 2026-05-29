@@ -16,4 +16,5 @@ pub use persistent::PersistentMemory;
 pub use provider::VectorStoreProvider;
 pub use session::SessionMemory;
 pub use shared::SharedMemory;
-pub use vector::{stub_embedding, VectorMemory};
+pub use vector::VectorMemory;
+pub use crate::embedding::stub_embedding;
