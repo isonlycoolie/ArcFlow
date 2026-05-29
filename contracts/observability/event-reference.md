@@ -55,4 +55,6 @@ Events are defined in `runtime/arcflow-core/src/tracing/events.rs` and documente
 | Event | When emitted |
 |-------|----------------|
 | `TraceStorageWarning` | Per-run event cap reached; one warning per run |
-| `RetryAttempted` | Step retry with backoff (future) |
+| `RetryAttempted` | Step retry with backoff (Sprint 7) |
+| `RetryExhausted` | All retry attempts failed (Sprint 7) |
+| `TimeoutEnforced` | Step or workflow timeout (Sprint 7) |

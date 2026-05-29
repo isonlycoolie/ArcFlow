@@ -66,7 +66,7 @@ echo "=== sdk-python (mirror .github/workflows/sdk-python.yml) ==="
 (
   set -euo pipefail
   cd "$ROOT/sdk-python"
-  python -m pip install -q maturin pytest "mypy<1.19" black ruff
+  python -m pip install -q maturin pytest "mypy<1.19" black ruff pytest-httpserver
   python -m maturin build --release --out dist
   WHEEL="$(python -c 'from pathlib import Path; ws=sorted(Path("dist").glob("arcflow-*.whl")); print(ws[-1] if ws else "")')"
   if [ -z "$WHEEL" ]; then

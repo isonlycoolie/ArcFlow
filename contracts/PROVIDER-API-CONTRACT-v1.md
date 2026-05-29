@@ -1,6 +1,6 @@
 # PROVIDER-API-CONTRACT v1
 
-**Status:** Draft for Sprint 6 implementation  
+**Status:** Implemented (Sprint 6)  
 **Scope:** `ModelProvider` trait and OpenAI / Anthropic / Gemini adapters in `arcflow-core`.
 
 ## ModelProvider trait

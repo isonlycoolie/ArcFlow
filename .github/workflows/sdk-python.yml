@@ -41,7 +41,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --upgrade pip
-          python -m pip install maturin pytest "mypy<1.19" black ruff
+          python -m pip install maturin pytest "mypy<1.19" black ruff pytest-httpserver
       - name: Build wheel
         working-directory: sdk-python
         shell: bash
