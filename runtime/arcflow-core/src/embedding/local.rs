@@ -98,3 +98,23 @@ impl EmbeddingProvider for LocalEmbeddingProvider {
 pub fn local_provider(model: &str) -> Result<Arc<dyn EmbeddingProvider>, EmbeddingError> {
     Ok(Arc::new(LocalEmbeddingProvider::new(model)?))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn local_embed_normalized_384() {
+        let v = local_embed("hello world", 384);
+        assert_eq!(v.len(), 384);
+        let norm: f32 = v.iter().map(|x| x * x).sum::<f32>().sqrt();
+        assert!((norm - 1.0).abs() < 0.01);
+    }
+
+    #[tokio::test]
+    async fn local_provider_default_model() {
+        let p = LocalEmbeddingProvider::new(DEFAULT_MODEL).unwrap();
+        let v = p.embed(&["offline text".into()]).await.unwrap();
+        assert_eq!(v[0].len(), 384);
+    }
+}
