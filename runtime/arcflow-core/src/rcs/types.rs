@@ -529,3 +529,63 @@ mod tests {
             hitl: None,
         });
     }
+
+    #[test]
+    fn run_request_round_trip() {
+        round_trip(&RunRequest {
+            workflow_id: Uuid::new_v4(),
+            input: "hello".to_string(),
+            trace_id: Uuid::new_v4(),
+            provider_config: None,
+        });
+    }
+
+    #[test]
+    fn run_result_round_trip() {
+        round_trip(&RunResult {
+            trace_id: Uuid::new_v4(),
+            status: ExecutionStatus::Completed,
+            output: Some("done".to_string()),
+            steps: vec![StepResult {
+                step_id: Uuid::new_v4(),
+                status: ExecutionStatus::Completed,
+                output: Some("step out".to_string()),
+                latency_ms: 42,
+                tokens_used: Some(100),
+            }],
+            error: None,
+        });
+    }
+
+    #[test]
+    fn step_result_round_trip() {
+        round_trip(&StepResult {
+            step_id: Uuid::new_v4(),
+            status: ExecutionStatus::Failed,
+            output: None,
+            latency_ms: 10,
+            tokens_used: None,
+        });
+    }
+
+    #[test]
+    fn error_payload_round_trip() {
+        round_trip(&ErrorPayload {
+            code: ErrorCode::StepExecutionFailed,
+            message: "step failed".to_string(),
+            step_id: Some(Uuid::new_v4()),
+            recoverable: true,
+        });
+    }
+
+    #[test]
+    fn trace_event_round_trip() {
+        round_trip(&TraceEvent {
+            trace_id: Uuid::new_v4(),
+            event_kind: TraceEventKind::WorkflowStarted,
+            timestamp: Utc.with_ymd_and_hms(2025, 1, 1, 0, 0, 0).unwrap(),
+            step_id: None,
+            data: Some(serde_json::json!({"note": "start"})),
+        });
+    }
+}
