@@ -11,6 +11,7 @@ use crate::rcs::types::{AgentDefinition, WorkflowDefinition};
 use crate::tools::{ToolInvoker, ToolRuntime};
 
 use super::record::WorkflowExecutionRecord;
+use super::execution_config::ExecutionConfig;
 use super::run::run_sorted_steps;
 use super::run_error::WorkflowRunError;
 use super::validation::validate_workflow;
@@ -56,6 +57,8 @@ impl WorkflowEngine {
             None,
             default_max_tokens(),
             default_temperature(),
+            &ExecutionConfig::default(),
+            None,
         )
     }
 
@@ -84,6 +87,69 @@ impl WorkflowEngine {
             provider,
             provider_max_tokens,
             provider_temperature,
+            &ExecutionConfig::default(),
+            None,
+        )
+    }
+
+    /// Executes with Sprint 7 retry, timeout, and recovery options.
+    #[allow(clippy::result_large_err)]
+    #[allow(clippy::too_many_arguments)]
+    pub fn execute_with_config(
+        &self,
+        workflow: &WorkflowDefinition,
+        agents: &HashMap<Uuid, AgentDefinition>,
+        run_input: &str,
+        tool_runtime: Option<&ToolRuntime>,
+        tool_invoker: Option<Arc<dyn ToolInvoker>>,
+        provider: Option<Arc<dyn ModelProvider>>,
+        provider_max_tokens: u32,
+        provider_temperature: f32,
+        exec_config: &ExecutionConfig,
+    ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
+        validate_workflow(workflow, agents)?;
+        run_sorted_steps(
+            &self.agent_runtime,
+            workflow,
+            agents,
+            run_input,
+            tool_runtime,
+            tool_invoker,
+            provider,
+            provider_max_tokens,
+            provider_temperature,
+            exec_config,
+            None,
+        )
+    }
+
+    /// Resumes a failed run from PostgreSQL recovery state (Sprint 7).
+    #[allow(clippy::result_large_err)]
+    #[allow(clippy::too_many_arguments)]
+    pub fn resume_with_config(
+        &self,
+        workflow: &WorkflowDefinition,
+        agents: &HashMap<Uuid, AgentDefinition>,
+        original_run_id: &str,
+        tool_runtime: Option<&ToolRuntime>,
+        tool_invoker: Option<Arc<dyn ToolInvoker>>,
+        provider: Option<Arc<dyn ModelProvider>>,
+        provider_max_tokens: u32,
+        provider_temperature: f32,
+        exec_config: &ExecutionConfig,
+    ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
+        validate_workflow(workflow, agents)?;
+        crate::recovery::resume_workflow(
+            &self.agent_runtime,
+            workflow,
+            agents,
+            original_run_id,
+            tool_runtime,
+            tool_invoker,
+            provider,
+            provider_max_tokens,
+            provider_temperature,
+            exec_config,
         )
     }
 }
