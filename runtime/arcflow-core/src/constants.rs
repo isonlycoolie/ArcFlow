@@ -35,3 +35,11 @@ pub const PROVIDER_DEFAULT_TEMPERATURE: f32 = 0.7;
 pub const PROVIDER_MAX_STREAM_TOKENS: u32 = 8192;
 pub const PROVIDER_STREAM_TIMEOUT_SECS: u64 = 120;
 pub const ARCFLOW_USER_AGENT: &str = concat!("arcflow/", env!("CARGO_PKG_VERSION"));
+
+/// Maximum retry attempts per step (Sprint 7).
+pub const RETRY_MAX_ALLOWED_ATTEMPTS: u32 = 50;
+pub const RETRY_DEFAULT_BASE_MS: u64 = 500;
+pub const RETRY_DEFAULT_MULTIPLIER_X100: u64 = 200;
+pub const RETRY_DEFAULT_MAX_MS: u64 = 30_000;
+pub const TIMEOUT_MAX_SECONDS: u64 = 3_600;
+pub const RECOVERY_STORAGE_TIMEOUT_SECS: u64 = 10;

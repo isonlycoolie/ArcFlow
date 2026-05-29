@@ -172,4 +172,33 @@ pub enum TraceEventKind {
         backoff_ms: u64,
         trigger_error_code: String,
     },
+    RetryExhausted {
+        run_id: String,
+        step_id: String,
+        total_attempts: u32,
+        last_error_code: String,
+    },
+    TimeoutEnforced {
+        run_id: String,
+        step_id: String,
+        timeout_type: String,
+        configured_ms: u64,
+        elapsed_ms: u64,
+    },
+    StepFallbackActivated {
+        run_id: String,
+        step_id: String,
+        primary_agent_name: String,
+        fallback_agent_name: String,
+    },
+    WorkflowRecoveryStarted {
+        run_id: String,
+        original_run_id: String,
+        resume_from_step: usize,
+    },
+    WorkflowRecoveryCompleted {
+        run_id: String,
+        original_run_id: String,
+        steps_re_executed: usize,
+    },
 }

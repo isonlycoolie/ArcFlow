@@ -57,4 +57,33 @@ pub enum RuntimeError {
         suggestion: String,
         step_id: Uuid,
     },
+
+    /// Step exceeded configured wall-clock timeout (Sprint 7).
+    #[error("step '{step_id}' timed out after {elapsed_ms}ms (configured: {configured_ms}ms)")]
+    StepTimeout {
+        step_id: String,
+        configured_ms: u64,
+        elapsed_ms: u64,
+    },
+
+    /// Workflow exceeded configured wall-clock timeout (Sprint 7).
+    #[error("workflow timed out after {elapsed_ms}ms (configured: {configured_ms}ms)")]
+    WorkflowTimeout {
+        configured_ms: u64,
+        elapsed_ms: u64,
+    },
+
+    /// All retry attempts exhausted for a step (Sprint 7).
+    #[error(
+        "step '{step_id}' failed after {attempts_made} attempts — last error: {last_error_code}"
+    )]
+    RetryExhausted {
+        step_id: String,
+        attempts_made: u32,
+        last_error_code: String,
+    },
+
+    /// Recovery state persistence failed (Sprint 7).
+    #[error("recovery storage error: {reason}")]
+    RecoveryStorageError { reason: String },
 }

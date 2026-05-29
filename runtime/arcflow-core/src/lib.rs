@@ -50,3 +50,9 @@ pub mod providers;
 
 /// Internal streaming engine (Sprint 6).
 pub mod streaming;
+
+/// Retry and timeout enforcement (Sprint 7).
+pub mod retry;
+
+/// Partial execution recovery (Sprint 7).
+pub mod recovery;
