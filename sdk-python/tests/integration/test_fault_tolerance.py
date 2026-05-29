@@ -1,4 +1,4 @@
-"""Sprint 7 chaos tests — see contracts/CHAOS-TEST-SPEC-v1.md."""
+"""Sprint 7 fault-tolerance integration tests."""
 
 from __future__ import annotations
 

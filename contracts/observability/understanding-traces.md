@@ -37,9 +37,13 @@ See [cli-reference.md](cli-reference.md) for flags and exit codes.
 
 Set `ARCFLOW_OTLP_ENDPOINT` to export metadata spans after run completion. Export is best-effort and never blocks workflow execution.
 
+## Limits
+
+- `MAX_TRACE_EVENTS_PER_RUN` = 10,000 per run
+- `MAX_CONCURRENT_TRACES` = 100 completed runs in the process store
+
 ## Related contracts
 
 - [Event reference](event-reference.md)
 - [Debugging guide](debugging-guide.md)
 - [TRACE-EVENT-SCHEMA-v1.md](../TRACE-EVENT-SCHEMA-v1.md)
-- [ACD-005-python.md](../ACD-005-python.md)

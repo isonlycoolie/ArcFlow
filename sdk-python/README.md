@@ -141,7 +141,7 @@ cargo run -p arcflow-cli -- trace <run-id> --format json --verbose
 
 Optional OTLP export: set `ARCFLOW_OTLP_ENDPOINT` before running workflows.
 
-See [contracts/observability-traces.md](../contracts/observability-traces.md) and [contracts/observability/](../contracts/observability/).
+See [contracts/observability/](../contracts/observability/) and [TRACE-EVENT-SCHEMA-v1.md](../contracts/TRACE-EVENT-SCHEMA-v1.md).
 
 ## Providers (Sprint 6)
 

@@ -15,4 +15,4 @@ From the repo root:
 bash scripts/ci-local.sh
 ```
 
-See `contracts/sprint4-verification.md` for Sprint 4 grep gates and integration test notes.
+Static analysis gates: `bash scripts/check-no-unwrap.sh` and `bash scripts/check-no-sql-interpolation.sh`.

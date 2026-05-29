@@ -1,4 +1,4 @@
-"""Structured execution traces (Sprint 5). See contracts/ACD-005-python.md."""
+"""Structured execution traces. See contracts/TRACE-EVENT-SCHEMA-v1.md."""
 
 from __future__ import annotations
 
