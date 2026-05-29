@@ -4,6 +4,8 @@ from arcflow.agent import Agent
 from arcflow.exceptions import (
     ArcFlowError,
     InfrastructureUnavailableError,
+    RetryExhaustedError,
+    WorkflowTimeoutError,
     MemoryConfigurationError,
     MemoryOperationError,
     ProviderConfigurationError,
@@ -58,4 +60,6 @@ __all__ = [
     "WorkflowConfigurationError",
     "WorkflowExecutionError",
     "WorkflowResult",
+    "RetryExhaustedError",
+    "WorkflowTimeoutError",
 ]

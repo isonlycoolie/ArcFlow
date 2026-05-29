@@ -115,6 +115,40 @@ class ProviderExecutionError(ArcFlowError):
         self.failed_step = failed_step
 
 
+class RetryExhaustedError(WorkflowExecutionError):
+    """Raised when all retry attempts for a step are exhausted."""
+
+    def __init__(
+        self,
+        message: str,
+        attempts_made: int,
+        run_id: str | None = None,
+        failed_step: str | None = None,
+        last_error_code: str | None = None,
+    ) -> None:
+        super().__init__(message, run_id=run_id, failed_step=failed_step)
+        self.attempts_made = attempts_made
+        self.last_error_code = last_error_code
+
+
+class WorkflowTimeoutError(WorkflowExecutionError):
+    """Raised when a workflow or step timeout is enforced."""
+
+    def __init__(
+        self,
+        message: str,
+        timeout_type: str,
+        configured_seconds: float,
+        elapsed_seconds: float,
+        run_id: str | None = None,
+        failed_step: str | None = None,
+    ) -> None:
+        super().__init__(message, run_id=run_id, failed_step=failed_step)
+        self.timeout_type = timeout_type
+        self.configured_seconds = configured_seconds
+        self.elapsed_seconds = elapsed_seconds
+
+
 class InfrastructureUnavailableError(ArcFlowError):
     """Raised when an optional memory backend is unreachable or unset."""
 
