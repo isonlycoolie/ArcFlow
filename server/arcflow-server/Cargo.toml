@@ -1,0 +1,23 @@
+[package]
+name = "arcflow-server"
+version.workspace = true
+edition.workspace = true
+description = "ArcFlow self-hosted HTTP runtime server"
+
+[[bin]]
+name = "arcflow-server"
+path = "src/main.rs"
+
+[dependencies]
+arcflow-core = { path = "../../runtime/arcflow-core" }
+axum = { version = "0.7", features = ["json"] }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+subtle = "2"
+tower = "0.5"
+tower-http = { version = "0.6", features = ["limit"] }
+uuid = { workspace = true }
+chrono = { workspace = true }

@@ -5,6 +5,7 @@ members = [
     "sdk-python",
     "sdk-typescript",
     "cli/arcflow-cli",
+    "server/arcflow-server",
 ]
 resolver = "2"
 
