@@ -98,3 +98,103 @@ pub async fn create_run(
         &exec_config,
     );
 
+    let (status, result_json, error_json) = match execution {
+        Ok(record) => {
+            let output = record
+                .step_outputs
+                .last()
+                .map(|s| s.content.clone())
+                .unwrap_or_default();
+            (
+                ExecutionStatus::Completed,
+                Some(serde_json::json!({
+                    "output": output,
+                    "step_count": record.step_outputs.len(),
+                })),
+                None,
+            )
+        }
+        Err(WorkflowRunError::Failed { error, partial }) => {
+            let code = match &error {
+                arcflow_core::error::RuntimeError::AgentExecutionFailed { .. } => {
+                    ErrorCode::StepExecutionFailed
+                }
+                _ => ErrorCode::InternalError,
+            };
+            (
+                ExecutionStatus::Failed,
+                None,
+                Some(serde_json::json!({
+                    "code": format!("{:?}", code),
+                    "message": error.to_string(),
+                    "step_id": partial.step_outputs.last().map(|s| s.step_id.to_string()),
+                })),
+            )
+        }
+        Err(WorkflowRunError::Interrupted {
+            approval_key,
+            expires_at,
+            partial,
+        }) => {
+            (
+                ExecutionStatus::Interrupted,
+                Some(serde_json::json!({
+                    "approval_key": approval_key,
+                    "expires_at": expires_at.to_rfc3339(),
+                    "step_index": partial.step_outputs.len(),
+                    "run_id": partial.run_id.to_string(),
+                })),
+                None,
+            )
+        }
+        Err(WorkflowRunError::Aborted(err)) => {
+            return Err(bad_request(err.to_string()));
+        }
+    };
+
+    store
+        .mark_completed(
+            &run_id.to_string(),
+            status,
+            result_json.clone(),
+            error_json.clone(),
+        )
+        .await
+        .map_err(internal)?;
+
+    Ok(Json(CreateRunResponse {
+        run_id: run_id.to_string(),
+        trace_id: trace_id.to_string(),
+        status,
+    }))
+}
+
+pub async fn get_run(
+    State(state): State<Arc<AppState>>,
+    Path(run_id): Path<String>,
+) -> Result<Json<RunStatusResponse>, (StatusCode, String)> {
+    let store = state
+        .runs
+        .as_ref()
+        .ok_or((
+            StatusCode::SERVICE_UNAVAILABLE,
+            "[ArcFlow] ARCFLOW_POSTGRESQL_URL is required".into(),
+        ))?;
+    let stored = store
+        .get(&run_id)
+        .await
+        .map_err(internal)?
+        .ok_or((StatusCode::NOT_FOUND, format!("run '{run_id}' not found")))?;
+    Ok(Json(stored.into_response()))
+}
+
+pub async fn get_run_trace(
+    Path(run_id): Path<String>,
+) -> Result<Json<arcflow_core::tracing::types::ExecutionTrace>, (StatusCode, String)> {
+    match get_execution_trace(&run_id) {
+        Some(trace) => Ok(Json(trace)),
+        None => Err((
+            StatusCode::NOT_FOUND,
+            format!("[ArcFlow] Trace not found for run '{run_id}'"),
+        )),
+    }
