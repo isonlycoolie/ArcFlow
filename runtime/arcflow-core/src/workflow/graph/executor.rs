@@ -98,3 +98,75 @@ mod tests {
         GraphDefinition {
             entry_node: "a".into(),
             max_iterations: 5,
+            nodes: vec![
+                GraphNode {
+                    id: "a".into(),
+                    step_ref: Uuid::new_v4(),
+                    inputs: None,
+                    outputs: None,
+                },
+                GraphNode {
+                    id: "b".into(),
+                    step_ref: Uuid::new_v4(),
+                    inputs: None,
+                    outputs: None,
+                },
+            ],
+            edges: vec![
+                GraphEdge {
+                    from: "a".into(),
+                    to: Some("b".into()),
+                    condition: Some("go".into()),
+                },
+                GraphEdge {
+                    from: "b".into(),
+                    to: None,
+                    condition: None,
+                },
+            ],
+            join_nodes: vec![],
+        }
+    }
+
+    #[test]
+    fn conditional_edge_routes_by_key() {
+        let ex = GraphExecutor::new(sample_graph());
+        let next = ex.resolve_next("a", Some("go")).expect("resolve");
+        assert_eq!(next, vec!["b".to_string()]);
+    }
+
+    #[test]
+    fn terminal_node_returns_empty() {
+        let ex = GraphExecutor::new(sample_graph());
+        let next = ex.resolve_next("b", None).expect("resolve");
+        assert!(next.is_empty());
+    }
+
+    #[test]
+    fn visit_limit_enforced() {
+        let mut ex = GraphExecutor::new(sample_graph());
+        for _ in 0..5 {
+            ex.record_visit("a").expect("ok");
+        }
+        assert!(ex.record_visit("a").is_err());
+    }
+
+    #[test]
+    fn parallel_edges_allowed_with_flag() {
+        let mut graph = sample_graph();
+        graph.edges.push(GraphEdge {
+            from: "a".into(),
+            to: Some("c".into()),
+            condition: Some("alt".into()),
+        });
+        graph.nodes.push(GraphNode {
+            id: "c".into(),
+            step_ref: Uuid::new_v4(),
+            inputs: None,
+            outputs: None,
+        });
+        let ex = GraphExecutor::new(graph).with_parallel();
+        let next = ex.resolve_next("a", Some("go")).expect("resolve");
+        assert_eq!(next.len(), 1);
+    }
+}
