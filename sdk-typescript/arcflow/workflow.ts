@@ -184,3 +184,103 @@ export class Workflow {
 
   setEntry(nodeId: string): this {
     const trimmed = nodeId.trim();
+    if (!this.graphNodes.has(trimmed)) {
+      throw new WorkflowConfigurationError(
+        `[ArcFlow] Entry node '${trimmed}' is not registered.`,
+      );
+    }
+    this.entryNode = trimmed;
+    return this;
+  }
+
+  withMaxIterations(count: number): this {
+    if (count < 1) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] max_iterations must be at least 1.",
+      );
+    }
+    this.maxIterations = count;
+    return this;
+  }
+
+  withRetry(maxAttempts: number, options: Omit<RetryOptions, "maxAttempts"> = {}): this {
+    if (this.hasRun) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] withRetry() must be called before workflow.run().",
+      );
+    }
+    if (maxAttempts < 1) {
+      throw new WorkflowConfigurationError(
+        `[ArcFlow] retry maxAttempts must be at least 1. Got ${maxAttempts}.`,
+      );
+    }
+    this.retryOptions = { maxAttempts, ...options };
+    return this;
+  }
+
+  withTimeout(seconds: number): this {
+    if (seconds <= 0) {
+      throw new WorkflowConfigurationError(
+        `[ArcFlow] Workflow timeout must be positive. Got ${seconds}s.`,
+      );
+    }
+    this.workflowTimeoutSeconds = seconds;
+    return this;
+  }
+
+  withStepTimeout(seconds: number): this {
+    if (seconds <= 0) {
+      throw new WorkflowConfigurationError(
+        `[ArcFlow] Step timeout must be positive. Got ${seconds}s.`,
+      );
+    }
+    this.stepTimeoutSeconds = seconds;
+    return this;
+  }
+
+  enableRecovery(): this {
+    this.recoveryEnabled = true;
+    return this;
+  }
+
+  private execConfigJson(): string | undefined {
+    return buildExecConfigJson({
+      retry: this.retryOptions,
+      workflowTimeoutSeconds: this.workflowTimeoutSeconds,
+      stepTimeoutSeconds: this.stepTimeoutSeconds,
+      recoveryEnabled: this.recoveryEnabled,
+    });
+  }
+
+  private agentsAndSteps(): {
+    agents: Agent[];
+    steps: Array<{ stepId: string; agentId: string; order: number }>;
+  } {
+    if (this.graphMode) {
+      const agents: Agent[] = [];
+      const steps: Array<{ stepId: string; agentId: string; order: number }> = [];
+      let order = 1;
+      for (const record of this.graphNodes.values()) {
+        agents.push(record.agent);
+        steps.push({
+          stepId: record.stepId,
+          agentId: record.agent.agentId,
+          order: order++,
+        });
+      }
+      return { agents, steps };
+    }
+    return {
+      agents: this.steps,
+      steps: this.steps.map((agent, index) => ({
+        stepId: randomUUID(),
+        agentId: agent.agentId,
+        order: index + 1,
+      })),
+    };
+  }
+
+  private graphJson(): string | undefined {
+    if (!this.graphMode) {
+      return undefined;
+    }
