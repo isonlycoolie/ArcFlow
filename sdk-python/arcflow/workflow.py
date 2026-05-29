@@ -1,12 +1,14 @@
-"""Workflow — ordered pipeline of Agent steps."""
+"""Workflow — ordered pipeline of Agent steps or graph DAG."""
 
 from __future__ import annotations
 
+import json
 from uuid import uuid4
 
 from arcflow.agent import Agent
 from arcflow.constants import RETRY_MAX_ALLOWED_ATTEMPTS
 from arcflow.exceptions import TraceNotFoundError, WorkflowConfigurationError
+from arcflow.hitl import HitlConfig
 from arcflow.provider import ProviderConfig
 from arcflow.result import WorkflowResult
 from arcflow.retry import BackoffStrategy, ExponentialBackoff
@@ -14,9 +16,9 @@ from arcflow.trace import TraceResult
 
 
 class Workflow:
-    """Declares steps; execution is delegated to the ArcFlow runtime."""
+    """Declares steps or graph nodes; execution is delegated to the ArcFlow runtime."""
 
-    def __init__(self, name: str = "default") -> None:
+    def __init__(self, name: str = "default", *, graph: bool = False, runtime: str | None = None) -> None:
         trimmed = name.strip()
         if not trimmed:
             raise WorkflowConfigurationError(
@@ -24,8 +26,13 @@ class Workflow:
                 "Provide a descriptive name (e.g. 'research_pipeline')."
             )
         self._name = trimmed
+        self._graph_mode = graph
         self._steps: list[Agent] = []
-        self._step_rows: list[tuple[str, str, int, str | None]] = []
+        self._step_rows: list[tuple[str, str, int, str | None, str | None]] = []
+        self._graph_nodes: dict[str, tuple[Agent, str]] = {}
+        self._graph_edges: list[tuple[str, str | None, str | None]] = []
+        self._entry_node: str | None = None
+        self._max_iterations = 100
         self._workflow_id: str | None = None
         self._last_run_id: str | None = None
         self._has_run = False
@@ -33,8 +40,21 @@ class Workflow:
         self._workflow_timeout_seconds: float | None = None
         self._step_timeout_seconds: float | None = None
         self._recovery_enabled = False
+        self._runtime_url: str | None = (
+            runtime.strip().rstrip("/") if runtime and runtime.strip() else None
+        )
 
-    def step(self, agent: Agent, *, fallback: Agent | None = None) -> Workflow:
+    def step(
+        self,
+        agent: Agent,
+        *,
+        fallback: Agent | None = None,
+        hitl: HitlConfig | None = None,
+    ) -> Workflow:
+        if self._graph_mode:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] Graph workflows use node() — step() is not allowed when graph=True."
+            )
         if not isinstance(agent, Agent):
             raise WorkflowConfigurationError(
                 "[ArcFlow] workflow.step() requires an Agent instance. "
@@ -46,7 +66,7 @@ class Workflow:
             )
         fallback_step_id: str | None = None
         if fallback is not None:
-            for sid, aid, _, _ in self._step_rows:
+            for sid, aid, _, _, _ in self._step_rows:
                 if aid == str(fallback.agent_id):
                     fallback_step_id = sid
                     break
@@ -56,8 +76,76 @@ class Workflow:
                 )
         step_id = str(uuid4())
         order = len(self._step_rows) + 1
-        self._step_rows.append((step_id, str(agent.agent_id), order, fallback_step_id))
+        hitl_json = hitl.to_json() if hitl is not None else None
+        self._step_rows.append((step_id, str(agent.agent_id), order, fallback_step_id, hitl_json))
         self._steps.append(agent)
+        return self
+
+    def node(self, node_id: str, agent: Agent) -> Workflow:
+        if not self._graph_mode:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] node() requires Workflow(graph=True)."
+            )
+        if self._has_run:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] workflow.node() must be called before workflow.run()."
+            )
+        trimmed = node_id.strip()
+        if not trimmed:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] Graph node id must be a non-empty string."
+            )
+        if not isinstance(agent, Agent):
+            raise WorkflowConfigurationError(
+                "[ArcFlow] workflow.node() requires an Agent instance."
+            )
+        if trimmed in self._graph_nodes:
+            raise WorkflowConfigurationError(
+                f"[ArcFlow] Duplicate graph node id '{trimmed}'."
+            )
+        step_id = str(uuid4())
+        self._graph_nodes[trimmed] = (agent, step_id)
+        if self._entry_node is None:
+            self._entry_node = trimmed
+        return self
+
+    def add_edge(
+        self,
+        from_id: str,
+        to_id: str | None = None,
+        *,
+        condition: str | None = None,
+    ) -> Workflow:
+        if not self._graph_mode:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] add_edge() requires Workflow(graph=True)."
+            )
+        if self._has_run:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] workflow.add_edge() must be called before workflow.run()."
+            )
+        self._graph_edges.append((from_id.strip(), to_id, condition))
+        return self
+
+    def set_entry(self, node_id: str) -> Workflow:
+        if not self._graph_mode:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] set_entry() requires Workflow(graph=True)."
+            )
+        trimmed = node_id.strip()
+        if trimmed not in self._graph_nodes:
+            raise WorkflowConfigurationError(
+                f"[ArcFlow] Entry node '{trimmed}' is not registered."
+            )
+        self._entry_node = trimmed
+        return self
+
+    def max_iterations(self, count: int) -> Workflow:
+        if count < 1:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] max_iterations must be at least 1."
+            )
+        self._max_iterations = count
         return self
 
     def retry(
@@ -114,84 +202,10 @@ class Workflow:
         self._recovery_enabled = True
         return self
 
-    def resume(self, run_id: str) -> WorkflowResult:
-        if not self._recovery_enabled:
+    def _graph_payload(self) -> str:
+        if not self._entry_node:
             raise WorkflowConfigurationError(
-                "[ArcFlow] workflow.resume() requires enable_recovery()."
+                "[ArcFlow] Graph workflow has no entry node."
             )
-        if not run_id.strip():
-            raise WorkflowConfigurationError(
-                "[ArcFlow] resume() requires a non-empty run_id."
-            )
-        from arcflow._internal.exec_config import build_exec_config_json
-        from arcflow._internal import runtime
-
-        if self._workflow_id is None:
-            raise WorkflowConfigurationError(
-                "[ArcFlow] Cannot resume — no prior run on this workflow instance."
-            )
-        exec_json = build_exec_config_json(
-            retry=self._retry,
-            workflow_timeout_seconds=self._workflow_timeout_seconds,
-            step_timeout_seconds=self._step_timeout_seconds,
-            recovery_enabled=True,
-        )
-        result = runtime.resume_workflow(
-            self._name,
-            self._workflow_id,
-            self._steps,
-            self._step_rows,
-            run_id.strip(),
-            exec_json,
-        )
-        self._last_run_id = result.run_id
-        return result
-
-    def run(
-        self,
-        input: str,
-        *,
-        provider: ProviderConfig | None = None,
-    ) -> WorkflowResult:
-        trimmed = input.strip()
-        if not trimmed:
-            raise WorkflowConfigurationError(
-                "[ArcFlow] Workflow input must be a non-empty string."
-            )
-        if not self._steps:
-            raise WorkflowConfigurationError(
-                "[ArcFlow] Cannot run a workflow with no steps."
-            )
-        from arcflow._internal.exec_config import build_exec_config_json
-        from arcflow._internal import runtime
-
-        exec_json = build_exec_config_json(
-            retry=self._retry,
-            workflow_timeout_seconds=self._workflow_timeout_seconds,
-            step_timeout_seconds=self._step_timeout_seconds,
-            recovery_enabled=self._recovery_enabled,
-        )
-        provider_row = provider.binding_tuple() if provider is not None else None
-        if self._workflow_id is None:
-            self._workflow_id = str(uuid4())
-        result = runtime.run_workflow(
-            self._name,
-            self._workflow_id,
-            self._steps,
-            self._step_rows,
-            trimmed,
-            provider_row,
-            exec_json,
-        )
-        self._last_run_id = result.run_id
-        self._has_run = True
-        return result
-
-    def trace(self) -> TraceResult:
-        if not self._last_run_id:
-            raise TraceNotFoundError(
-                "[ArcFlow] No workflow run yet. Call workflow.run() before trace()."
-            )
-        from arcflow._internal import runtime
-
-        return runtime.get_trace(self._last_run_id)
+        nodes = [
+            {"id": node_id, "step_id": step_id}
