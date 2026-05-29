@@ -198,3 +198,67 @@ pub fn run_graph_loop(
                 tool_invoker.clone(),
                 workflow_started,
                 provider.clone(),
+                provider_max_tokens,
+                provider_temperature,
+                retry_config.clone(),
+                step_timeout,
+                workflow_deadline,
+                exec_config.recovery_enabled,
+                None,
+            )?;
+
+            graph_step_index += 1;
+            join_gate.mark_completed(&current);
+
+            let checkpoint_outputs: Vec<_> = loop_ctx.step_outputs.to_vec();
+            persist_graph_checkpoint(
+                exec_config.recovery_enabled,
+                workflow.id,
+                run_id,
+                run_input,
+                &checkpoint_outputs,
+                &current,
+                executor.total_visits(),
+                None,
+            );
+
+            let edge_key = loop_ctx
+                .step_outputs
+                .last()
+                .map(|o| o.content.trim().to_string())
+                .filter(|s| !s.is_empty());
+
+            let next_nodes = executor
+                .resolve_next(&current, edge_key.as_deref())
+                .map_err(WorkflowRunError::Aborted)?;
+
+            join_gate.enqueue_targets(&mut pending, next_nodes);
+            join_gate.enqueue_ready_joins(&mut pending);
+        }
+
+        let duration_ms = workflow_started.elapsed().as_millis() as u64;
+        sprint5.emit(TraceEventKind::WorkflowCompleted {
+            run_id: run_key.clone(),
+            duration_ms,
+            total_tokens: TokenUsage::default(),
+        });
+        legacy.workflow_completed();
+        let trace_events = legacy.events().to_vec();
+        drop(sprint5);
+        store.mark_complete(&run_key);
+        maybe_export_trace(&run_key);
+        Ok(WorkflowExecutionRecord {
+            run_id,
+            workflow_id: workflow.id,
+            step_outputs,
+            final_state: state.snapshot(),
+            trace_events,
+        })
+    })
+    .unwrap_or_else(|| {
+        Err(WorkflowRunError::Aborted(RuntimeError::StateCommitFailed {
+            step_id: Uuid::nil(),
+            reason: "trace store lock unavailable".into(),
+        }))
+    })
+}
