@@ -7,7 +7,8 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
 use crate::constants::{
-    ARCFLOW_USER_AGENT, GEMINI_API_ENDPOINT, GEMINI_API_KEY_ENV, PROVIDER_REQUEST_TIMEOUT_SECS,
+    endpoint_from_env, ARCFLOW_USER_AGENT, GEMINI_API_ENDPOINT, GEMINI_API_ENDPOINT_ENV,
+    GEMINI_API_KEY_ENV, PROVIDER_REQUEST_TIMEOUT_SECS,
 };
 use crate::tracing::types::TokenUsage;
 
@@ -29,7 +30,11 @@ impl GeminiProvider {
             provider_id: "gemini".into(),
             key_env_var: GEMINI_API_KEY_ENV.into(),
         })?;
-        Self::with_base_url(model, api_key, GEMINI_API_ENDPOINT.to_string())
+        Self::with_base_url(
+            model,
+            api_key,
+            endpoint_from_env(GEMINI_API_ENDPOINT_ENV, GEMINI_API_ENDPOINT),
+        )
     }
 
     pub fn with_base_url(

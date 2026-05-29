@@ -20,6 +20,15 @@ pub const ANTHROPIC_API_ENDPOINT: &str = "https://api.anthropic.com/v1/messages"
 pub const GEMINI_API_ENDPOINT: &str =
     "https://generativelanguage.googleapis.com/v1beta/models";
 
+/// Optional endpoint overrides for CI mock servers (never credentials).
+pub const OPENAI_API_ENDPOINT_ENV: &str = "ARCFLOW_OPENAI_API_ENDPOINT";
+pub const ANTHROPIC_API_ENDPOINT_ENV: &str = "ARCFLOW_ANTHROPIC_API_ENDPOINT";
+pub const GEMINI_API_ENDPOINT_ENV: &str = "ARCFLOW_GEMINI_API_ENDPOINT";
+
+pub fn endpoint_from_env(env_name: &str, default: &str) -> String {
+    std::env::var(env_name).unwrap_or_else(|_| default.to_string())
+}
+
 pub const PROVIDER_REQUEST_TIMEOUT_SECS: u64 = 120;
 pub const PROVIDER_DEFAULT_MAX_TOKENS: u32 = 4096;
 pub const PROVIDER_DEFAULT_TEMPERATURE: f32 = 0.7;

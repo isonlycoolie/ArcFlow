@@ -7,8 +7,8 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
 use crate::constants::{
-    ANTHROPIC_API_ENDPOINT, ANTHROPIC_API_KEY_ENV, ARCFLOW_USER_AGENT,
-    PROVIDER_REQUEST_TIMEOUT_SECS,
+    endpoint_from_env, ANTHROPIC_API_ENDPOINT, ANTHROPIC_API_ENDPOINT_ENV, ANTHROPIC_API_KEY_ENV,
+    ARCFLOW_USER_AGENT, PROVIDER_REQUEST_TIMEOUT_SECS,
 };
 use crate::tracing::types::TokenUsage;
 
@@ -31,7 +31,11 @@ impl AnthropicProvider {
                 provider_id: "anthropic".into(),
                 key_env_var: ANTHROPIC_API_KEY_ENV.into(),
             })?;
-        Self::with_endpoint(model, api_key, ANTHROPIC_API_ENDPOINT.to_string())
+        Self::with_endpoint(
+            model,
+            api_key,
+            endpoint_from_env(ANTHROPIC_API_ENDPOINT_ENV, ANTHROPIC_API_ENDPOINT),
+        )
     }
 
     pub fn with_endpoint(

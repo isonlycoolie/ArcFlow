@@ -7,7 +7,8 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
 use crate::constants::{
-    ARCFLOW_USER_AGENT, OPENAI_API_ENDPOINT, OPENAI_API_KEY_ENV, PROVIDER_REQUEST_TIMEOUT_SECS,
+    endpoint_from_env, ARCFLOW_USER_AGENT, OPENAI_API_ENDPOINT, OPENAI_API_ENDPOINT_ENV,
+    OPENAI_API_KEY_ENV, PROVIDER_REQUEST_TIMEOUT_SECS,
 };
 use crate::tracing::types::TokenUsage;
 
@@ -29,7 +30,11 @@ impl OpenAIProvider {
             provider_id: "openai".into(),
             key_env_var: OPENAI_API_KEY_ENV.into(),
         })?;
-        Self::with_endpoint(model, api_key, OPENAI_API_ENDPOINT.to_string())
+        Self::with_endpoint(
+            model,
+            api_key,
+            endpoint_from_env(OPENAI_API_ENDPOINT_ENV, OPENAI_API_ENDPOINT),
+        )
     }
 
     pub fn with_endpoint(
