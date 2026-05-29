@@ -104,6 +104,10 @@ fn runtime_config_message(err: &RuntimeError) -> String {
             step_id,
             reason,
         } => format!("Provider '{provider_id}' failed for step '{step_id}': {reason}."),
+        RuntimeError::StepTimeout { .. }
+        | RuntimeError::WorkflowTimeout { .. }
+        | RuntimeError::RetryExhausted { .. }
+        | RuntimeError::RecoveryStorageError { .. } => format!("{err}."),
     })
 }
 
@@ -137,5 +141,21 @@ fn runtime_execution_message(err: &RuntimeError) -> String {
             reason,
             ..
         } => format!("Provider '{provider_id}' failed: {reason}."),
+        RuntimeError::StepTimeout { step_id, configured_ms, .. } => {
+            format!("Step '{step_id}' timed out (limit {configured_ms}ms).")
+        }
+        RuntimeError::WorkflowTimeout { configured_ms, .. } => {
+            format!("Workflow timed out (limit {configured_ms}ms).")
+        }
+        RuntimeError::RetryExhausted {
+            step_id,
+            attempts_made,
+            last_error_code,
+        } => format!(
+            "Step '{step_id}' failed after {attempts_made} attempts: {last_error_code}."
+        ),
+        RuntimeError::RecoveryStorageError { reason } => {
+            format!("Recovery storage error: {reason}.")
+        }
     })
 }
