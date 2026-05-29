@@ -19,6 +19,9 @@ dev = [
     "ruff>=0.1",
     "maturin>=1.0",
 ]
+langchain = [
+    "langchain-core>=0.2.0",
+]
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
@@ -36,7 +39,7 @@ select = ["E", "F", "W", "I", "N", "UP", "B"]
 [tool.mypy]
 python_version = "3.10"
 strict = true
-packages = ["arcflow"]
+packages = ["arcflow", "arcflow_langchain"]
 enable_error_code = ["import-untyped"]
 
 [[tool.mypy.overrides]]
