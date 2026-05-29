@@ -10,6 +10,7 @@ export ARCFLOW_POSTGRESQL_URL=postgres://arcflow:arcflow@localhost:5432/arcflow
 psql "$ARCFLOW_POSTGRESQL_URL" -f runtime/arcflow-core/migrations/002_recovery_v2.sql
 psql "$ARCFLOW_POSTGRESQL_URL" -f runtime/arcflow-core/migrations/003_arcflow_runs.sql
 psql "$ARCFLOW_POSTGRESQL_URL" -f runtime/arcflow-core/migrations/004_human_approvals.sql
+psql "$ARCFLOW_POSTGRESQL_URL" -f runtime/arcflow-core/migrations/005_trace_events.sql
 
 # Run server
 cargo run -p arcflow-server
@@ -38,3 +39,13 @@ await wf.step(agent).run("hello");
 ```
 
 Set `ARCFLOW_SERVER_API_KEY` in the client environment to match the server.
+
+## Load test
+
+With the server running:
+
+```bash
+bash scripts/load-test-runs.sh
+```
+
+Environment variables: `ARCFLOW_LOAD_CONCURRENCY` (default 100), `ARCFLOW_LOAD_MAX_P99_MS` (default 500).
