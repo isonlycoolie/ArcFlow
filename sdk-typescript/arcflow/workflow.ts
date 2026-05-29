@@ -5,10 +5,14 @@ import {
   mapNativeError,
   TraceNotFoundError,
   WorkflowConfigurationError,
+  WorkflowExecutionError,
 } from "./exceptions.js";
+import { buildGraphJson } from "./graph.js";
+import { runRemoteWorkflow } from "./remote.js";
 import type { Provider } from "./provider.js";
 import { toWorkflowResult, type WorkflowResult } from "./result.js";
 import { traceFromJson, type TraceResult } from "./trace.js";
+import { buildExecConfigJson, type RetryOptions } from "./types/fault.js";
 
 type NativeBinding = {
   executeWorkflow: (
@@ -23,6 +27,27 @@ type NativeBinding = {
       maxTokens: number;
       temperature: number;
     },
+    execConfigJson?: string,
+    graphJson?: string,
+  ) => Promise<{
+    output: string;
+    runId: string;
+    stepCount: number;
+    traceEventsJson: string;
+  }>;
+  executeResumeWorkflow: (
+    workflowName: string,
+    workflowId: string,
+    agents: Array<{ id: string; name: string; role: string; instructions: string }>,
+    steps: Array<{ stepId: string; agentId: string; order: number }>,
+    originalRunId: string,
+    provider?: {
+      kind: string;
+      model: string;
+      maxTokens: number;
+      temperature: number;
+    },
+    execConfigJson?: string,
   ) => Promise<{
     output: string;
     runId: string;
@@ -39,16 +64,40 @@ function loadNative(): NativeBinding {
 
 export interface WorkflowConfig {
   name?: string;
+  graph?: boolean;
+  runtime?: string;
 }
 
 export interface RunOptions {
   provider?: Provider;
 }
 
+interface GraphNodeRecord {
+  nodeId: string;
+  agent: Agent;
+  stepId: string;
+}
+
 export class Workflow {
   private readonly name: string;
+  private readonly graphMode: boolean;
+  readonly runtimeUrl: string | undefined;
   private readonly steps: Agent[] = [];
+  private readonly graphNodes = new Map<string, GraphNodeRecord>();
+  private readonly graphEdges: Array<{
+    from: string;
+    to?: string | null;
+    condition?: string | null;
+  }> = [];
+  private entryNode: string | null = null;
+  private maxIterations = 100;
+  private workflowId: string | null = null;
   private lastRunId: string | null = null;
+  private hasRun = false;
+  private retryOptions: RetryOptions | undefined;
+  private workflowTimeoutSeconds: number | undefined;
+  private stepTimeoutSeconds: number | undefined;
+  private recoveryEnabled = false;
 
   constructor(config: WorkflowConfig = {}) {
     const trimmed = (config.name ?? "default").trim();
@@ -58,9 +107,16 @@ export class Workflow {
       );
     }
     this.name = trimmed;
+    this.graphMode = config.graph === true;
+    this.runtimeUrl = config.runtime?.trim().replace(/\/$/, "") || undefined;
   }
 
   step(agent: Agent): this {
+    if (this.graphMode) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] Graph workflows use node() — step() is not allowed when graph=true.",
+      );
+    }
     if (!(agent instanceof Agent)) {
       throw new WorkflowConfigurationError(
         "[ArcFlow] workflow.step() requires an Agent instance.",
@@ -70,53 +126,61 @@ export class Workflow {
     return this;
   }
 
-  async run(input: string, options: RunOptions = {}): Promise<WorkflowResult> {
-    const trimmed = input.trim();
+  node(nodeId: string, agent: Agent): this {
+    if (!this.graphMode) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] node() requires Workflow({ graph: true }).",
+      );
+    }
+    if (this.hasRun) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] workflow.node() must be called before workflow.run().",
+      );
+    }
+    const trimmed = nodeId.trim();
     if (!trimmed) {
       throw new WorkflowConfigurationError(
-        "[ArcFlow] Workflow input must be a non-empty string.",
+        "[ArcFlow] Graph node id must be a non-empty string.",
       );
     }
-    if (this.steps.length === 0) {
+    if (!(agent instanceof Agent)) {
       throw new WorkflowConfigurationError(
-        "[ArcFlow] Cannot run a workflow with no steps.",
+        "[ArcFlow] workflow.node() requires an Agent instance.",
       );
     }
-    const native = loadNative();
-    const agents = this.steps.map((agent) => agent.bindingRow());
-    const steps = this.steps.map((agent, index) => ({
+    if (this.graphNodes.has(trimmed)) {
+      throw new WorkflowConfigurationError(
+        `[ArcFlow] Duplicate graph node id '${trimmed}'.`,
+      );
+    }
+    this.graphNodes.set(trimmed, {
+      nodeId: trimmed,
+      agent,
       stepId: randomUUID(),
-      agentId: agent.agentId,
-      order: index + 1,
-    }));
-    const provider = options.provider?.bindingRow();
-    try {
-      const result = await native.executeWorkflow(
-        this.name,
-        randomUUID(),
-        agents,
-        steps,
-        trimmed,
-        provider,
-      );
-      this.lastRunId = result.runId;
-      return toWorkflowResult(result);
-    } catch (err) {
-      throw mapNativeError(err);
+    });
+    if (!this.entryNode) {
+      this.entryNode = trimmed;
     }
+    return this;
   }
 
-  trace(): TraceResult {
-    if (!this.lastRunId) {
-      throw new TraceNotFoundError(
-        "[ArcFlow] No workflow run yet. Call workflow.run() before trace().",
+  addEdge(
+    fromId: string,
+    toId?: string | null,
+    options: { condition?: string | null } = {},
+  ): this {
+    if (!this.graphMode) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] addEdge() requires Workflow({ graph: true }).",
       );
     }
-    const native = loadNative();
-    try {
-      return traceFromJson(native.getExecutionTraceJson(this.lastRunId));
-    } catch (err) {
-      throw mapNativeError(err);
-    }
+    this.graphEdges.push({
+      from: fromId.trim(),
+      to: toId ?? null,
+      condition: options.condition ?? null,
+    });
+    return this;
   }
-}
+
+  setEntry(nodeId: string): this {
+    const trimmed = nodeId.trim();
