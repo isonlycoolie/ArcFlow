@@ -11,5 +11,5 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-npx --yes ajv-cli compile -s contracts/rcs-v1.schema.json --spec=draft7
-echo "OK: contracts/rcs-v1.schema.json compiles as draft-07"
+npx --yes ajv-cli compile -s contracts/normative/rcs/v1.schema.json --spec=draft7
+echo "OK: contracts/normative/rcs/v1.schema.json compiles as draft-07"

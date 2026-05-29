@@ -1,4 +1,4 @@
-"""Structured execution traces. See contracts/TRACE-EVENT-SCHEMA-v1.md."""
+"""Structured execution traces. See contracts/normative/observability/trace-events-v1.md."""
 
 from __future__ import annotations
 

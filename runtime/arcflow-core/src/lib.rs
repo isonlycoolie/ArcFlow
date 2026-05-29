@@ -5,7 +5,7 @@
 // observability engine, and provider abstraction layer.
 //
 // Architecture: ADR-001 (docs pipeline — see docs/architecture/ADR-001.md locally)
-// Contract: See contracts/rcs-v1.schema.json
+// Contract: See contracts/normative/rcs/v1.schema.json
 //
 // Public API surface: Only types in the `rcs` module are public across
 // the SDK boundary. All other public items are for inter-crate use within

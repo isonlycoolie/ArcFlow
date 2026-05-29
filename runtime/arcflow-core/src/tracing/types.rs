@@ -1,4 +1,4 @@
-//! Core trace aggregate types (Sprint 5). See TRACE-EVENT-SCHEMA-v1.md.
+//! Core trace aggregate types (Sprint 5). See contracts/normative/observability/trace-events-v1.md.
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

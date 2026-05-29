@@ -1,6 +1,6 @@
 //! Runtime Contract Specification — type definitions.
 //!
-//! Schema source of truth: `contracts/rcs-v1.schema.json`.
+//! Schema source of truth: `contracts/normative/rcs/v1.schema.json`.
 
 use serde::{Deserialize, Serialize};
 

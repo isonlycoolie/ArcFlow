@@ -49,4 +49,4 @@ All errors extend `ArcFlowError` and use the `[ArcFlow]` message prefix. Catch w
 import { WorkflowConfigurationError } from "arcflow";
 ```
 
-See the [TypeScript SDK README](../../sdk-typescript/README.md) for the full public API.
+See the [TypeScript SDK README](../../../../sdk-typescript/README.md) for the full public API.

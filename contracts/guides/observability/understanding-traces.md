@@ -46,4 +46,4 @@ Set `ARCFLOW_OTLP_ENDPOINT` to export metadata spans after run completion. Expor
 
 - [Event reference](event-reference.md)
 - [Debugging guide](debugging-guide.md)
-- [TRACE-EVENT-SCHEMA-v1.md](../TRACE-EVENT-SCHEMA-v1.md)
+- [Trace event schema](../../normative/observability/trace-events-v1.md)

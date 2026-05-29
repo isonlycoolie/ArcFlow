@@ -1,7 +1,7 @@
 // Runtime Contract Specification — Sprint 1
 //
 // Types, envelope handling, and protocol errors for SDK ↔ runtime messages.
-// Schema source of truth: contracts/rcs-v1.schema.json
+// Schema source of truth: contracts/normative/rcs/v1.schema.json
 
 pub mod envelope;
 pub mod error;

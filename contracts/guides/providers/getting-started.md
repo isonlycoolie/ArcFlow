@@ -38,4 +38,4 @@ await wf.run("topic", { provider: new OpenAI({ model: "gpt-4o" }) });
 
 Without a provider, workflows use the deterministic stub agent (Sprint 2 behaviour).
 
-See [PROVIDER-API-CONTRACT-v1.md](../PROVIDER-API-CONTRACT-v1.md) for HTTP mappings and error codes.
+See [provider API v1](../../normative/providers/api-v1.md) for HTTP mappings and error codes.

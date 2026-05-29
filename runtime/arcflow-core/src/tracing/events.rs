@@ -1,4 +1,4 @@
-//! Sprint 5 trace event kinds. Schema: contracts/TRACE-EVENT-SCHEMA-v1.md
+//! Sprint 5 trace event kinds. Schema: contracts/normative/observability/trace-events-v1.md
 
 use serde::{Deserialize, Serialize};
 

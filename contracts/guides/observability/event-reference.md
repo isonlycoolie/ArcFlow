@@ -1,6 +1,6 @@
 # Trace event reference
 
-Events are defined in `runtime/arcflow-core/src/tracing/events.rs` and documented in [TRACE-EVENT-SCHEMA-v1.md](../TRACE-EVENT-SCHEMA-v1.md). All events carry metadata only — no user input, tool output, or memory values.
+Events are defined in `runtime/arcflow-core/src/tracing/events.rs` and documented in [trace-events-v1.md](../../normative/observability/trace-events-v1.md). All events carry metadata only — no user input, tool output, or memory values.
 
 ## Workflow lifecycle
 

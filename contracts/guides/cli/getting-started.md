@@ -8,4 +8,4 @@ cd my-project
 arcflow trace <run-id>
 ```
 
-Commands: `init`, `run`, `trace`, `validate`. See `contracts/CLI-SPEC-v1.md`.
+Commands: `init`, `run`, `trace`, `validate`. See [CLI spec v1](../../normative/cli/spec-v1.md).

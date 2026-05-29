@@ -91,4 +91,4 @@ pub trait ModelProvider: Send + Sync + 'static {
 
 ## RCS integration
 
-SDKs pass [`ProviderConfig`](rcs-v1.schema.json) on `RunRequest.provider_config`. `ProviderRuntime::from_config` builds `Arc<dyn ModelProvider>`.
+SDKs pass [`ProviderConfig`](../rcs/v1.schema.json) on `RunRequest.provider_config`. `ProviderRuntime::from_config` builds `Arc<dyn ModelProvider>`.
