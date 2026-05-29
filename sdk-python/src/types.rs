@@ -48,6 +48,7 @@ pub struct StepInput {
     pub step_id: Uuid,
     pub agent_id: Uuid,
     pub order: u32,
+    pub fallback_step_id: Option<Uuid>,
 }
 
 fn parse_tool_row(item: Bound<'_, PyAny>) -> PyResult<ToolInput> {
@@ -131,18 +132,27 @@ pub fn parse_agent_tuple(item: Bound<'_, PyAny>) -> PyResult<AgentInput> {
 
 pub fn parse_step_tuple(item: Bound<'_, PyAny>) -> PyResult<StepInput> {
     let tuple = item.downcast::<PyTuple>()?;
-    if tuple.len() != 3 {
+    if tuple.len() != 3 && tuple.len() != 4 {
         return Err(configuration_error(
-            "Internal step tuple must have three fields (step_id, agent_id, order).",
+            "Internal step tuple must have three or four fields (step_id, agent_id, order, fallback_step_id?).",
         ));
     }
     let step_id = parse_uuid("step_id", tuple.get_item(0)?.extract::<String>()?.as_str())?;
     let agent_id = parse_uuid("agent_id", tuple.get_item(1)?.extract::<String>()?.as_str())?;
     let order: u32 = tuple.get_item(2)?.extract()?;
+    let fallback_step_id = if tuple.len() == 4 {
+        match tuple.get_item(3)?.extract::<Option<String>>()? {
+            Some(raw) if !raw.is_empty() => Some(parse_uuid("fallback_step_id", raw.as_str())?),
+            _ => None,
+        }
+    } else {
+        None
+    };
     Ok(StepInput {
         step_id,
         agent_id,
         order,
+        fallback_step_id,
     })
 }
 
@@ -192,7 +202,7 @@ pub fn build_workflow(
             id: s.step_id,
             agent_id: s.agent_id,
             order: s.order,
-            fallback_step_id: None,
+            fallback_step_id: s.fallback_step_id,
         })
         .collect();
     let workflow = WorkflowDefinition {
