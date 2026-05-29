@@ -1,0 +1,41 @@
+{
+  "run_id": "run-preview-001",
+  "workflow_name": "react-preview",
+  "status": "Completed",
+  "started_at": "2026-05-30T10:00:00Z",
+  "completed_at": "2026-05-30T10:00:12Z",
+  "duration_ms": 12000,
+  "steps": [
+    {
+      "step_index": 0,
+      "step_id": "b1000001-0001-4000-8000-000000000001",
+      "agent_name": "think",
+      "agent_role": "think",
+      "status": "Completed",
+      "started_at": "2026-05-30T10:00:00Z",
+      "completed_at": "2026-05-30T10:00:04Z",
+      "duration_ms": 4000
+    },
+    {
+      "step_index": 1,
+      "step_id": "b1000001-0001-4000-8000-000000000002",
+      "agent_name": "act",
+      "agent_role": "act",
+      "status": "Completed",
+      "started_at": "2026-05-30T10:00:04Z",
+      "completed_at": "2026-05-30T10:00:08Z",
+      "duration_ms": 4000
+    },
+    {
+      "step_index": 2,
+      "step_id": "b1000001-0001-4000-8000-000000000003",
+      "agent_name": "observe",
+      "agent_role": "observe",
+      "status": "Completed",
+      "started_at": "2026-05-30T10:00:08Z",
+      "completed_at": "2026-05-30T10:00:12Z",
+      "duration_ms": 4000
+    }
+  ],
+  "events_dropped": 0
+}

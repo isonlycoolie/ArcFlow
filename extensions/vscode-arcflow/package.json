@@ -1,0 +1,98 @@
+{
+  "name": "vscode-arcflow",
+  "displayName": "ArcFlow",
+  "description": "Visual graph and trace timeline for ArcFlow RCS workflows (preview)",
+  "version": "0.1.0-preview",
+  "publisher": "arcflow",
+  "license": "MIT OR Apache-2.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Debuggers",
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:arcflow-workflow",
+    "onLanguage:arcflow-trace",
+    "onCommand:arcflow.visualizeGraph",
+    "onCommand:arcflow.viewTraceTimeline",
+    "onCommand:arcflow.connectServer"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "arcflow-workflow",
+        "aliases": ["ArcFlow Workflow"],
+        "extensions": [".arcflow.json"]
+      },
+      {
+        "id": "arcflow-trace",
+        "aliases": ["ArcFlow Trace"],
+        "extensions": [".arcflow.trace.json"]
+      }
+    ],
+    "commands": [
+      {
+        "command": "arcflow.visualizeGraph",
+        "title": "ArcFlow: Visualize Graph",
+        "icon": "$(type-hierarchy)"
+      },
+      {
+        "command": "arcflow.viewTraceTimeline",
+        "title": "ArcFlow: View Trace Timeline",
+        "icon": "$(timeline-view-icon)"
+      },
+      {
+        "command": "arcflow.connectServer",
+        "title": "ArcFlow: Connect to Local Server",
+        "icon": "$(plug)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "arcflow.visualizeGraph",
+          "when": "resourceExtname == .json && resourceFilename =~ /\\.arcflow\\.json$/",
+          "group": "navigation"
+        },
+        {
+          "command": "arcflow.viewTraceTimeline",
+          "when": "resourceExtname == .json && resourceFilename =~ /\\.arcflow\\.trace\\.json$/",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "ArcFlow",
+      "properties": {
+        "arcflow.serverUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:8080",
+          "description": "Local ArcFlow HTTP server URL (localhost only)."
+        },
+        "arcflow.autoOpenGraph": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically open graph webview when an *.arcflow.json file is opened."
+        },
+        "arcflow.autoOpenTrace": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically open trace timeline when an *.arcflow.trace.json file is opened."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.7.2"
+  }
+}
