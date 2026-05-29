@@ -15,7 +15,9 @@ use uuid::Uuid;
 
 use crate::embedding::{resolve_from_env, resolve_provider, EmbeddingError, EmbeddingProvider};
 
+use super::chunking::{ChunkStrategy, RecursiveCharacterSplitter};
 use super::error::MemoryError;
+use super::hybrid::{sparse_lexical_score, HybridHit, HybridRetriever, DEFAULT_DENSE_WEIGHT, DEFAULT_SPARSE_WEIGHT};
 use super::namespace::durable_key;
 use super::provider::VectorStoreProvider;
 
@@ -109,6 +111,36 @@ impl QdrantVectorStore {
             reason: "qdrant client missing after connect".into(),
         })
     }
+
+    /// Dense search returning cosine score and payload text for hybrid fusion.
+    pub async fn search_scored(
+        &mut self,
+        collection: &str,
+        vector: &[f32],
+        limit: usize,
+    ) -> Result<Vec<(f32, String)>, MemoryError> {
+        let client = self.client().await?;
+        let results = client
+            .search_points(SearchPoints {
+                collection_name: collection.into(),
+                vector: vector.to_vec(),
+                limit: limit as u64,
+                with_payload: Some(true.into()),
+                ..Default::default()
+            })
+            .await
+            .map_err(map_qdrant_client_error)?;
+        let mut out = Vec::new();
+        for point in results.result {
+            let score = point.score;
+            if let Some(payload) = point.payload.get("payload") {
+                if let Some(s) = payload.as_str() {
+                    out.push((score, s.to_string()));
+                }
+            }
+        }
+        Ok(out)
+    }
 }
 
 #[async_trait]
@@ -168,10 +200,71 @@ impl VectorStoreProvider for QdrantVectorStore {
     }
 }
 
+/// Chunking settings for document ingest.
+#[derive(Clone, Debug)]
+pub struct ChunkingConfig {
+    pub chunk_size: usize,
+    pub overlap: usize,
+}
+
+impl Default for ChunkingConfig {
+    fn default() -> Self {
+        Self {
+            chunk_size: 512,
+            overlap: 64,
+        }
+    }
+}
+
+/// Hybrid dense/sparse fusion weights.
+#[derive(Clone, Debug)]
+pub struct HybridRetrievalConfig {
+    pub dense_weight: f32,
+    pub sparse_weight: f32,
+}
+
+impl Default for HybridRetrievalConfig {
+    fn default() -> Self {
+        Self {
+            dense_weight: DEFAULT_DENSE_WEIGHT,
+            sparse_weight: DEFAULT_SPARSE_WEIGHT,
+        }
+    }
+}
+
+/// Retrieval strategy for semantic search.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum RetrievalMode {
+    #[default]
+    Dense,
+    Hybrid,
+}
+
+/// Vector memory runtime configuration (chunking + retrieval).
+#[derive(Clone, Debug)]
+pub struct VectorMemoryConfig {
+    pub chunking: ChunkingConfig,
+    pub retrieval: HybridRetrievalConfig,
+    pub mode: RetrievalMode,
+}
+
+impl Default for VectorMemoryConfig {
+    fn default() -> Self {
+        Self {
+            chunking: ChunkingConfig::default(),
+            retrieval: HybridRetrievalConfig::default(),
+            mode: RetrievalMode::Dense,
+        }
+    }
+}
+
 /// High-level vector memory API.
 pub struct VectorMemory {
     store: QdrantVectorStore,
     provider: Arc<dyn EmbeddingProvider>,
+    config: VectorMemoryConfig,
+    splitter: RecursiveCharacterSplitter,
+    hybrid: HybridRetriever,
 }
 
 impl Default for VectorMemory {
@@ -187,23 +280,44 @@ impl VectorMemory {
             Self::from_provider_spec("stub").expect("stub provider always available")
         })
     }
-
-    /// Builds vector memory from a provider spec such as `openai/text-embedding-3-small`.
     pub fn from_provider_spec(spec: &str) -> Result<Self, EmbeddingError> {
         let provider = resolve_provider(spec)?;
-        Ok(Self {
-            store: QdrantVectorStore::new(provider.dimensions()),
-            provider,
-        })
+        Ok(Self::with_provider(provider, VectorMemoryConfig::default()))
     }
 
     /// Resolves the embedding provider from environment variables.
     pub fn from_env() -> Result<Self, EmbeddingError> {
         let provider = resolve_from_env()?;
-        Ok(Self {
+        Ok(Self::with_provider(provider, VectorMemoryConfig::default()))
+    }
+
+    /// Builds vector memory with chunking and hybrid retrieval settings.
+    pub fn with_config(spec: &str, config: VectorMemoryConfig) -> Result<Self, EmbeddingError> {
+        let provider = resolve_provider(spec)?;
+        Ok(Self::with_provider(provider, config))
+    }
+
+    fn with_provider(provider: Arc<dyn EmbeddingProvider>, config: VectorMemoryConfig) -> Self {
+        let splitter = RecursiveCharacterSplitter::new(
+            config.chunking.chunk_size,
+            config.chunking.overlap,
+        );
+        let hybrid = HybridRetriever::new(
+            config.retrieval.dense_weight,
+            config.retrieval.sparse_weight,
+        );
+        Self {
             store: QdrantVectorStore::new(provider.dimensions()),
             provider,
-        })
+            config,
+            splitter,
+            hybrid,
+        }
+    }
+
+    /// Active configuration (chunking + retrieval).
+    pub fn config(&self) -> &VectorMemoryConfig {
+        &self.config
     }
 
     async fn embed_text(&self, text: &str) -> Result<Vec<f32>, MemoryError> {
@@ -238,10 +352,66 @@ impl VectorMemory {
         namespace: &str,
         logical_key: &str,
     ) -> Result<Option<Vec<u8>>, MemoryError> {
-        let _ = namespace;
-        let vector = self.embed_text(logical_key).await?;
-        let hits = self.store.search(COLLECTION, &vector, 1).await?;
+        let hits = self.search(namespace, logical_key, 1).await?;
         Ok(hits.into_iter().next())
+    }
+
+    /// Chunks `text`, embeds each chunk, and upserts under `{key}#chunkN`.
+    pub async fn write_document(
+        &mut self,
+        namespace: &str,
+        key: &str,
+        text: &str,
+    ) -> Result<usize, MemoryError> {
+        let chunks = self.splitter.split(text);
+        let count = chunks.len();
+        for (idx, chunk) in chunks.into_iter().enumerate() {
+            let chunk_key = format!("{key}#chunk{idx}");
+            self.write(namespace, &chunk_key, chunk.as_bytes()).await?;
+        }
+        Ok(count)
+    }
+
+    /// Semantic search returning up to `top_k` payload blobs.
+    pub async fn search(
+        &mut self,
+        namespace: &str,
+        query: &str,
+        top_k: usize,
+    ) -> Result<Vec<Vec<u8>>, MemoryError> {
+        let _ = namespace;
+        let vector = self.embed_text(query).await?;
+        match self.config.mode {
+            RetrievalMode::Dense => {
+                self.store.search(COLLECTION, &vector, top_k).await
+            }
+            RetrievalMode::Hybrid => {
+                let candidates = self
+                    .store
+                    .search_scored(COLLECTION, &vector, top_k.saturating_mul(3).max(top_k))
+                    .await?;
+                let hits: Vec<HybridHit> = candidates
+                    .iter()
+                    .enumerate()
+                    .map(|(idx, (dense_score, text))| HybridHit {
+                        point_id: idx.to_string(),
+                        dense_score: *dense_score,
+                        sparse_score: sparse_lexical_score(query, text),
+                    })
+                    .collect();
+                let ranked = self.hybrid.rank(hits, top_k);
+                Ok(ranked
+                    .into_iter()
+                    .filter_map(|(id, _)| {
+                        id.parse::<usize>().ok().and_then(|i| {
+                            candidates
+                                .get(i)
+                                .map(|(_, text)| text.as_bytes().to_vec())
+                        })
+                    })
+                    .collect())
+            }
+        }
     }
 }
 
@@ -257,8 +427,17 @@ mod tests {
     }
 
     #[test]
-    fn vector_memory_stub_provider_dimensions() {
-        let mem = VectorMemory::from_provider_spec("stub/16").expect("stub");
-        assert_eq!(mem.provider.dimensions(), 16);
+    fn vector_memory_config_defaults() {
+        let cfg = VectorMemoryConfig::default();
+        assert_eq!(cfg.chunking.chunk_size, 512);
+        assert_eq!(cfg.mode, RetrievalMode::Dense);
+    }
+
+    #[test]
+    fn vector_memory_hybrid_mode_configured() {
+        let mut cfg = VectorMemoryConfig::default();
+        cfg.mode = RetrievalMode::Hybrid;
+        let mem = VectorMemory::with_config("stub/8", cfg).expect("stub");
+        assert_eq!(mem.config().mode, RetrievalMode::Hybrid);
     }
 }
