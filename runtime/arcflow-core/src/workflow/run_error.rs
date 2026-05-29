@@ -1,5 +1,6 @@
 //! Workflow run failures that may include a partial execution record.
 
+use chrono::{DateTime, Utc};
 use thiserror::Error;
 
 use crate::error::RuntimeError;
@@ -17,6 +18,14 @@ pub enum WorkflowRunError {
     #[error("workflow run failed: {error}")]
     Failed {
         error: RuntimeError,
+        partial: WorkflowExecutionRecord,
+    },
+
+    /// Intentional pause awaiting human approval (Phase 1.4 HITL).
+    #[error("workflow interrupted for human approval '{approval_key}'")]
+    Interrupted {
+        approval_key: String,
+        expires_at: DateTime<Utc>,
         partial: WorkflowExecutionRecord,
     },
 }

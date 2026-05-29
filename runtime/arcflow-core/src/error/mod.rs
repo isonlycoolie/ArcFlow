@@ -86,4 +86,20 @@ pub enum RuntimeError {
     /// Recovery state persistence failed (Sprint 7).
     #[error("recovery storage error: {reason}")]
     RecoveryStorageError { reason: String },
+
+    /// Human rejected the approval request (Phase 1.4 HITL).
+    #[error("human rejected approval '{approval_key}'")]
+    HumanRejected { approval_key: String },
+
+    /// Human approval window expired (Phase 1.4 HITL).
+    #[error("human approval '{approval_key}' timed out")]
+    HumanTimeout { approval_key: String },
+
+    /// Approval key not found for the run (Phase 1.4 HITL).
+    #[error("approval '{approval_key}' not found for run")]
+    ApprovalNotFound { approval_key: String },
+
+    /// Approval was already resolved (Phase 1.4 HITL).
+    #[error("approval '{approval_key}' was already resolved")]
+    AlreadyApproved { approval_key: String },
 }

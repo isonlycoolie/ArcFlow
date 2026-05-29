@@ -86,8 +86,13 @@ pub fn resume_workflow(
         original_run_id: original_uuid,
         recovery_id: recovery.recovery_id.clone(),
         precompleted,
-        start_step_index: recovery.failed_at_step_index.saturating_add(1),
+        start_step_index: if recovery.failure_error_code == crate::human::HUMAN_INTERRUPT_CODE {
+            recovery.failed_at_step_index
+        } else {
+            recovery.failed_at_step_index.saturating_add(1)
+        },
         run_input: recovery.original_input.clone(),
+        approval: None,
     };
 
     let run_input = resume.run_input.clone();
