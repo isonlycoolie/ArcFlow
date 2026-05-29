@@ -429,3 +429,103 @@ mod tests {
     #[test]
     fn error_code_round_trip() {
         round_trip(&ErrorCode::WorkflowNotFound);
+    }
+
+    #[test]
+    fn memory_type_round_trip() {
+        round_trip(&MemoryType::Session);
+    }
+
+    #[test]
+    fn memory_scope_round_trip() {
+        round_trip(&MemoryScope::Workflow);
+    }
+
+    #[test]
+    fn trace_event_kind_round_trip() {
+        round_trip(&TraceEventKind::StepStarted);
+    }
+
+    #[test]
+    fn provider_id_round_trip() {
+        round_trip(&ProviderId::Anthropic);
+    }
+
+    #[test]
+    fn retry_policy_round_trip() {
+        round_trip(&RetryPolicy {
+            max_attempts: 3,
+            backoff_ms: 100,
+            max_backoff_ms: 5_000,
+        });
+    }
+
+    #[test]
+    fn memory_config_round_trip() {
+        round_trip(&MemoryConfig {
+            memory_type: MemoryType::Vector,
+            scope: MemoryScope::Agent,
+            namespace: Some("ns".into()),
+            ttl_seconds: Some(3600),
+        });
+    }
+
+    #[test]
+    fn tool_definition_round_trip() {
+        round_trip(&ToolDefinition {
+            name: "search".to_string(),
+            input_schema: serde_json::json!({"type": "object"}),
+            permissions: Some(vec!["read".to_string()]),
+        });
+    }
+
+    #[test]
+    fn provider_config_round_trip() {
+        round_trip(&ProviderConfig {
+            provider_id: ProviderId::OpenAI,
+            model: "gpt-4".to_string(),
+            api_key_env: "OPENAI_API_KEY".to_string(),
+            params: Some(serde_json::json!({"temperature": 0.2})),
+        });
+    }
+
+    #[test]
+    fn workflow_definition_round_trip() {
+        round_trip(&WorkflowDefinition {
+            id: Uuid::new_v4(),
+            name: "test-workflow".to_string(),
+            steps: vec![StepDefinition {
+                id: Uuid::new_v4(),
+                agent_id: Uuid::new_v4(),
+                order: 1,
+                fallback_step_id: None,
+                hitl: None,
+            }],
+            retry_policy: None,
+            execution_mode: ExecutionMode::Linear,
+            graph: None,
+        });
+    }
+
+    #[test]
+    fn agent_definition_round_trip() {
+        round_trip(&AgentDefinition {
+            id: Uuid::new_v4(),
+            name: "researcher".to_string(),
+            role: "research".to_string(),
+            instructions: "Find sources".to_string(),
+            tools: None,
+            memory_config: None,
+        });
+    }
+
+    #[test]
+    fn step_definition_round_trip() {
+        round_trip(&StepDefinition {
+            id: Uuid::new_v4(),
+            agent_id: Uuid::new_v4(),
+            order: 2,
+            fallback_step_id: Some(Uuid::new_v4()),
+            hitl: None,
+        });
+    }
