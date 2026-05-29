@@ -98,3 +98,20 @@ impl StoredRun {
                     approval_key: v.get("approval_key")?.as_str()?.to_string(),
                     expires_at: v.get("expires_at")?.as_str()?.to_string(),
                     step_index: v.get("step_index").and_then(|s| s.as_u64()).map(|n| n as usize),
+                })
+            })
+        } else {
+            None
+        };
+        RunStatusResponse {
+            run_id: self.run_id,
+            trace_id: self.trace_id,
+            status: self.status,
+            result,
+            error,
+            interrupt,
+            created_at: self.created_at.to_rfc3339(),
+            completed_at: self.completed_at.map(|t| t.to_rfc3339()),
+        }
+    }
+}
