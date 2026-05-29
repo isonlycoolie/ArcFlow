@@ -18,8 +18,19 @@ use crate::tracing::{
 };
 
 use super::context::ExecutionContext;
+use super::execution_config::ExecutionConfig;
 use super::record::WorkflowExecutionRecord;
 use super::run_error::WorkflowRunError;
+use crate::retry::RetryConfig;
+
+/// Parameters when resuming from PostgreSQL recovery state.
+pub struct ResumeParams {
+    pub original_run_id: Uuid,
+    pub recovery_id: String,
+    pub precompleted: Vec<ExecutionStepOutput>,
+    pub start_step_index: usize,
+    pub run_input: String,
+}
 
 struct RunLoop<'a> {
     run_id: Uuid,
@@ -27,6 +38,84 @@ struct RunLoop<'a> {
     state: &'a mut StateEngine,
     step_outputs: &'a mut Vec<ExecutionStepOutput>,
     run_input: &'a str,
+}
+
+fn check_workflow_timeout(
+    workflow_timeout: Option<std::time::Duration>,
+    workflow_started: Instant,
+    run_key: &str,
+    sprint5: &mut TraceEventEmitter<'_>,
+) -> Result<(), RuntimeError> {
+    let Some(limit) = workflow_timeout else {
+        return Ok(());
+    };
+    let elapsed = workflow_started.elapsed();
+    if elapsed <= limit {
+        return Ok(());
+    }
+    let configured_ms = limit.as_millis() as u64;
+    let elapsed_ms = elapsed.as_millis() as u64;
+    sprint5.emit(TraceEventKind::TimeoutEnforced {
+        run_id: run_key.to_string(),
+        step_id: String::new(),
+        timeout_type: "workflow".to_string(),
+        configured_ms,
+        elapsed_ms,
+    });
+    Err(RuntimeError::WorkflowTimeout {
+        configured_ms,
+        elapsed_ms,
+    })
+}
+
+#[allow(clippy::result_large_err)]
+#[allow(clippy::too_many_arguments)]
+fn fail_step(
+    loop_ctx: &RunLoop<'_>,
+    legacy: &TraceEmitter,
+    sprint5: &mut TraceEventEmitter<'_>,
+    run_key: &str,
+    step: &StepDefinition,
+    step_index: usize,
+    workflow_started: Instant,
+    step_started: Instant,
+    recovery_enabled: bool,
+    err: RuntimeError,
+) -> Result<(), WorkflowRunError> {
+    error!(
+        run_id = %loop_ctx.run_id,
+        step_id = %step.id,
+        error = %err,
+        "step execution failed"
+    );
+    sprint5.emit(TraceEventKind::StepFailed {
+        run_id: run_key.to_string(),
+        step_id: step.id.to_string(),
+        step_index,
+        duration_ms: step_started.elapsed().as_millis() as u64,
+        error_code: "step_failed".into(),
+        error_message: err.to_string(),
+    });
+    sprint5.emit(TraceEventKind::WorkflowFailed {
+        run_id: run_key.to_string(),
+        duration_ms: workflow_started.elapsed().as_millis() as u64,
+        failed_step_index: Some(step_index),
+        error_code: "step_failed".into(),
+    });
+    let partial = partial_record(loop_ctx, legacy);
+    crate::recovery::persist::persist_if_enabled(
+        recovery_enabled,
+        loop_ctx.workflow_id,
+        loop_ctx.run_id,
+        loop_ctx.run_input,
+        &partial.step_outputs,
+        step_index,
+        "step_failed",
+    );
+    Err(WorkflowRunError::Failed {
+        error: err,
+        partial,
+    })
 }
 
 fn partial_record(loop_ctx: &RunLoop<'_>, legacy: &TraceEmitter) -> WorkflowExecutionRecord {
@@ -41,12 +130,58 @@ fn partial_record(loop_ctx: &RunLoop<'_>, legacy: &TraceEmitter) -> WorkflowExec
 
 #[allow(clippy::result_large_err)]
 #[allow(clippy::too_many_arguments)]
+fn execute_agent_for_step(
+    agent_runtime: &AgentRuntime,
+    agent: &AgentDefinition,
+    step: &StepDefinition,
+    loop_ctx: &RunLoop<'_>,
+    memory: &mut MemoryCoordinator,
+    legacy: &mut TraceEmitter,
+    sprint5: &mut TraceEventEmitter<'_>,
+    run_key: &str,
+    tool_runtime: Option<&ToolRuntime>,
+    tool_invoker: Option<Arc<dyn ToolInvoker>>,
+    provider: Option<Arc<dyn ModelProvider>>,
+    provider_max_tokens: u32,
+    provider_temperature: f32,
+    retry_config: Option<RetryConfig>,
+    step_timeout: Option<std::time::Duration>,
+    workflow_deadline: Option<Instant>,
+) -> Result<ExecutionStepOutput, RuntimeError> {
+    let state_snapshot = loop_ctx.state.snapshot();
+    let mut exec_ctx = ExecutionContext {
+        tool_runtime,
+        tool_invoker,
+        memory,
+        legacy,
+        sprint5,
+        run_id: run_key.to_string(),
+        provider,
+        provider_max_tokens,
+        provider_temperature,
+        retry_config,
+        step_timeout,
+        workflow_deadline,
+    };
+    agent_runtime.execute_with_context(
+        agent,
+        step.id,
+        &state_snapshot,
+        loop_ctx.run_input,
+        Some(&mut exec_ctx),
+    )
+}
+
+#[allow(clippy::result_large_err)]
+#[allow(clippy::too_many_arguments)]
 fn run_one_step(
     agent_runtime: &AgentRuntime,
     loop_ctx: &mut RunLoop<'_>,
     step: &StepDefinition,
     step_index: usize,
     agent: &AgentDefinition,
+    all_steps: &[StepDefinition],
+    agents: &HashMap<Uuid, AgentDefinition>,
     memory: &mut MemoryCoordinator,
     legacy: &mut TraceEmitter,
     sprint5: &mut TraceEventEmitter<'_>,
