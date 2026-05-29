@@ -329,3 +329,103 @@ pub struct WorkflowDefinition {
     pub graph: Option<GraphDefinition>,
 }
 
+/// Request to execute a registered workflow.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct RunRequest {
+    /// Registered workflow id to execute.
+    pub workflow_id: Uuid,
+    /// Caller-supplied input payload as text.
+    pub input: String,
+    /// Trace id for observability correlation.
+    pub trace_id: Uuid,
+    /// Optional LLM provider override for this run.
+    pub provider_config: Option<ProviderConfig>,
+}
+
+/// Outcome of a workflow execution.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct RunResult {
+    /// Trace id matching the originating run.
+    pub trace_id: Uuid,
+    /// Overall workflow execution status.
+    pub status: ExecutionStatus,
+    /// Final workflow output when successful.
+    pub output: Option<String>,
+    /// Per-step results collected during execution.
+    pub steps: Vec<StepResult>,
+    /// Error details when status is failed.
+    pub error: Option<ErrorPayload>,
+}
+
+/// Result of a single step within a workflow run.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct StepResult {
+    /// Step identifier.
+    pub step_id: Uuid,
+    /// Step execution status.
+    pub status: ExecutionStatus,
+    /// Step output text when present.
+    pub output: Option<String>,
+    /// Wall-clock latency in milliseconds.
+    pub latency_ms: u64,
+    /// Token usage when reported by the provider.
+    pub tokens_used: Option<u32>,
+}
+
+/// Structured error returned to SDKs.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ErrorPayload {
+    /// Stable machine-readable error code.
+    pub code: ErrorCode,
+    /// Human-readable error message.
+    pub message: String,
+    /// Step associated with the error when applicable.
+    pub step_id: Option<Uuid>,
+    /// Whether the caller may retry the operation.
+    pub recoverable: bool,
+}
+
+/// Single observability event emitted during execution.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TraceEvent {
+    /// Trace id correlating workflow execution.
+    pub trace_id: Uuid,
+    /// Event classification.
+    pub event_kind: TraceEventKind,
+    /// UTC timestamp of the event.
+    pub timestamp: DateTime<Utc>,
+    /// Related step id when applicable.
+    pub step_id: Option<Uuid>,
+    /// Optional structured event payload.
+    pub data: Option<Value>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::TimeZone;
+
+    fn round_trip<T>(original: &T) -> T
+    where
+        T: Serialize + for<'de> Deserialize<'de> + PartialEq + std::fmt::Debug,
+    {
+        let json = serde_json::to_string(original).expect("value must serialize to JSON");
+        let deserialized: T =
+            serde_json::from_str(&json).expect("value must deserialize from JSON");
+        assert_eq!(original, &deserialized, "round-trip must preserve value");
+        deserialized
+    }
+
+    #[test]
+    fn message_type_round_trip() {
+        round_trip(&MessageType::RunWorkflow);
+    }
+
+    #[test]
+    fn execution_status_round_trip() {
+        round_trip(&ExecutionStatus::Running);
+    }
+
+    #[test]
+    fn error_code_round_trip() {
+        round_trip(&ErrorCode::WorkflowNotFound);
