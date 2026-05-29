@@ -1,1 +1,4 @@
 node_modules/
+arcflow/*.js
+arcflow/*.d.ts
+arcflow/*.d.ts.map
