@@ -384,3 +384,64 @@ export class Workflow {
     } else if (this.steps.length === 0) {
       throw new WorkflowConfigurationError(
         "[ArcFlow] Cannot run a workflow with no steps.",
+      );
+    }
+    if (!this.workflowId) {
+      this.workflowId = randomUUID();
+    }
+    if (this.runtimeUrl) {
+      const result = await runRemoteWorkflow(
+        this,
+        trimmed,
+        this.execConfigJson(),
+      );
+      this.lastRunId = result.runId;
+      this.hasRun = true;
+      return result;
+    }
+    const native = loadNative();
+    const { agents, steps } = this.agentsAndSteps();
+    const provider = options.provider?.bindingRow();
+    try {
+      const result = await native.executeWorkflow(
+        this.name,
+        this.workflowId,
+        agents.map((agent) => agent.bindingRow()),
+        steps,
+        trimmed,
+        provider,
+        this.execConfigJson(),
+        this.graphJson(),
+      );
+      this.lastRunId = result.runId;
+      this.hasRun = true;
+      return toWorkflowResult(result);
+    } catch (err) {
+      if (err instanceof Error && err.message.includes("WorkflowExecutionError|")) {
+        const [, runId] = err.message.split("|");
+        if (runId) {
+          this.lastRunId = runId;
+          this.hasRun = true;
+        }
+        throw mapNativeError(err);
+      }
+      throw mapNativeError(err);
+    }
+  }
+
+  trace(): TraceResult {
+    if (!this.lastRunId) {
+      throw new TraceNotFoundError(
+        "[ArcFlow] No workflow run yet. Call workflow.run() before trace().",
+      );
+    }
+    const native = loadNative();
+    try {
+      return traceFromJson(native.getExecutionTraceJson(this.lastRunId));
+    } catch (err) {
+      throw mapNativeError(err);
+    }
+  }
+}
+
+export { WorkflowExecutionError };
