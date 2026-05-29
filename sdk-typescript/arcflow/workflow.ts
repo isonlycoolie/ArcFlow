@@ -13,13 +13,14 @@ import type { Provider } from "./provider.js";
 import { toWorkflowResult, type WorkflowResult } from "./result.js";
 import { traceFromJson, type TraceResult } from "./trace.js";
 import { buildExecConfigJson, type RetryOptions } from "./types/fault.js";
+import { HitlConfig } from "./hitl.js";
 
 type NativeBinding = {
   executeWorkflow: (
     workflowName: string,
     workflowId: string,
     agents: Array<{ id: string; name: string; role: string; instructions: string }>,
-    steps: Array<{ stepId: string; agentId: string; order: number }>,
+    steps: Array<{ stepId: string; agentId: string; order: number; hitlJson?: string }>,
     runInput: string,
     provider?: {
       kind: string;
@@ -39,7 +40,7 @@ type NativeBinding = {
     workflowName: string,
     workflowId: string,
     agents: Array<{ id: string; name: string; role: string; instructions: string }>,
-    steps: Array<{ stepId: string; agentId: string; order: number }>,
+    steps: Array<{ stepId: string; agentId: string; order: number; hitlJson?: string }>,
     originalRunId: string,
     provider?: {
       kind: string;
@@ -82,7 +83,7 @@ export class Workflow {
   private readonly name: string;
   private readonly graphMode: boolean;
   readonly runtimeUrl: string | undefined;
-  private readonly steps: Agent[] = [];
+  private readonly steps: Array<{ agent: Agent; hitl?: HitlConfig }> = [];
   private readonly graphNodes = new Map<string, GraphNodeRecord>();
   private readonly graphEdges: Array<{
     from: string;
@@ -111,7 +112,7 @@ export class Workflow {
     this.runtimeUrl = config.runtime?.trim().replace(/\/$/, "") || undefined;
   }
 
-  step(agent: Agent): this {
+  step(agent: Agent, options: { hitl?: HitlConfig } = {}): this {
     if (this.graphMode) {
       throw new WorkflowConfigurationError(
         "[ArcFlow] Graph workflows use node() — step() is not allowed when graph=true.",
@@ -122,7 +123,7 @@ export class Workflow {
         "[ArcFlow] workflow.step() requires an Agent instance.",
       );
     }
-    this.steps.push(agent);
+    this.steps.push({ agent, hitl: options.hitl });
     return this;
   }
 
@@ -254,11 +255,11 @@ export class Workflow {
 
   private agentsAndSteps(): {
     agents: Agent[];
-    steps: Array<{ stepId: string; agentId: string; order: number }>;
+    steps: Array<{ stepId: string; agentId: string; order: number; hitlJson?: string }>;
   } {
     if (this.graphMode) {
       const agents: Agent[] = [];
-      const steps: Array<{ stepId: string; agentId: string; order: number }> = [];
+      const steps: Array<{ stepId: string; agentId: string; order: number; hitlJson?: string }> = [];
       let order = 1;
       for (const record of this.graphNodes.values()) {
         agents.push(record.agent);
@@ -271,11 +272,12 @@ export class Workflow {
       return { agents, steps };
     }
     return {
-      agents: this.steps,
-      steps: this.steps.map((agent, index) => ({
+      agents: this.steps.map((row) => row.agent),
+      steps: this.steps.map((row, index) => ({
         stepId: randomUUID(),
-        agentId: agent.agentId,
+        agentId: row.agent.agentId,
         order: index + 1,
+        hitlJson: row.hitl?.toJson(),
       })),
     };
   }
@@ -342,11 +344,17 @@ export class Workflow {
     const workflowBody: Record<string, unknown> = {
       id: workflowId,
       name: this.name,
-      steps: steps.map((s) => ({
-        id: s.stepId,
-        agent_id: s.agentId,
-        order: s.order,
-      })),
+      steps: steps.map((s) => {
+        const row: Record<string, unknown> = {
+          id: s.stepId,
+          agent_id: s.agentId,
+          order: s.order,
+        };
+        if (s.hitlJson) {
+          row.hitl = JSON.parse(s.hitlJson);
+        }
+        return row;
+      }),
       execution_mode: this.graphMode ? "graph" : "linear",
     };
     if (this.graphMode) {

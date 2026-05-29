@@ -96,5 +96,6 @@ pub fn parse_execution_config(raw: Option<&str>) -> Result<ExecutionConfig, Stri
         retry,
         timeouts,
         recovery_enabled: parsed.recovery_enabled.unwrap_or(false),
+        run_id: None,
     })
 }
