@@ -115,6 +115,8 @@ export ARCFLOW_QDRANT_URL=http://localhost:6333
 | `InfrastructureUnavailableError` | Postgres/Qdrant unreachable or URL unset |
 | `TraceNotFoundError` | No trace for last run (call `run()` first) or run evicted from store |
 | `TraceStorageWarning` | Trace store dropped events at capacity |
+| `ProviderConfigurationError` | Invalid provider config before run |
+| `ProviderExecutionError` | LLM provider call failed; check `provider_id` |
 
 Messages use the format `[ArcFlow] <what happened>. <what to do>.`
 
@@ -140,3 +142,17 @@ cargo run -p arcflow-cli -- trace <run-id> --format json --verbose
 Optional OTLP export: set `ARCFLOW_OTLP_ENDPOINT` before running workflows.
 
 See [contracts/observability-traces.md](../contracts/observability-traces.md) and [contracts/observability/](../contracts/observability/).
+
+## Providers (Sprint 6)
+
+```python
+from arcflow import Agent, OpenAI, Workflow
+
+wf = Workflow("demo")
+wf.step(Agent(name="writer", role="author", instructions="Summarize."))
+result = wf.run("topic", provider=OpenAI(model="gpt-4o"))
+```
+
+Set `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GEMINI_API_KEY` in the environment. Without `provider=`, workflows use the stub agent (backwards compatible).
+
+See [contracts/providers/getting-started.md](../contracts/providers/getting-started.md).
