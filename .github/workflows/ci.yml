@@ -155,3 +155,29 @@ jobs:
             test -d "$dir" || (echo "Missing required directory: $dir" && exit 1)
           done
           if [ -d docs ]; then echo "Note: local docs/ may exist but must not be tracked by git"; fi
+
+  provider-security-audit:
+    name: Provider credential scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python scripts/assert_provider_no_credentials.py
+
+  typescript-build:
+    name: TypeScript SDK build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: cargo build -p arcflow-node
+      - working-directory: sdk-typescript
+        run: |
+          npm install
+          npm run build:ts
+          npm test
