@@ -98,3 +98,8 @@ pub(crate) fn interrupt_for_human(
     .map_err(WorkflowRunError::Aborted)?;
 
     Err(WorkflowRunError::Interrupted {
+        approval_key: hitl.approval_key.clone(),
+        expires_at,
+        partial,
+    })
+}
