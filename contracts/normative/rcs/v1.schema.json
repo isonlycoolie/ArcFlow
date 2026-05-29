@@ -465,3 +465,56 @@
           "description": "Final workflow output when successful. Sprint 2–3."
         },
         "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/StepResult" },
+          "description": "Per-step results. Sprint 5–7."
+        },
+        "error": {
+          "$ref": "#/$defs/ErrorPayload",
+          "description": "Error details when status is Failed. Sprint 2–3, Sprint 7."
+        }
+      },
+      "required": ["trace_id", "status", "steps"],
+      "additionalProperties": false
+    },
+    "TraceEvent": {
+      "type": "object",
+      "description": "Observability event emitted during execution. Sprint 5.",
+      "properties": {
+        "trace_id": { "$ref": "#/$defs/Uuid" },
+        "event_kind": { "$ref": "#/$defs/TraceEventKind" },
+        "timestamp": { "$ref": "#/$defs/DateTimeUtc" },
+        "step_id": {
+          "$ref": "#/$defs/Uuid",
+          "description": "Related step when applicable. Sprint 5."
+        },
+        "data": {
+          "description": "Optional structured event payload. Sprint 5.",
+          "type": "object"
+        }
+      },
+      "required": ["trace_id", "event_kind", "timestamp"],
+      "additionalProperties": false
+    },
+    "MessageEnvelope": {
+      "type": "object",
+      "description": "Wire wrapper for every RCS message. All sprints.",
+      "properties": {
+        "rcs_version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+$",
+          "description": "Protocol version MAJOR.MINOR for negotiation. All sprints."
+        },
+        "message_type": { "$ref": "#/$defs/MessageType" },
+        "trace_id": { "$ref": "#/$defs/Uuid" },
+        "timestamp": { "$ref": "#/$defs/DateTimeUtc" },
+        "payload": {
+          "description": "Typed message body as JSON. All sprints.",
+          "type": "object"
+        }
+      },
+      "required": ["rcs_version", "message_type", "trace_id", "timestamp", "payload"],
+      "additionalProperties": false
+    }
+  }
+}
