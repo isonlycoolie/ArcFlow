@@ -61,6 +61,7 @@ impl WorkflowEngine {
 
     /// Executes with optional tool runtime, invoker, and LLM provider (Sprint 6).
     #[allow(clippy::result_large_err)]
+    #[allow(clippy::too_many_arguments)]
     pub fn execute_with_tools(
         &self,
         workflow: &WorkflowDefinition,

@@ -156,6 +156,7 @@ fn run_one_step(
 
 /// Runs validated steps in `order` sequence; halts on first agent failure with a partial record.
 #[allow(clippy::result_large_err)]
+#[allow(clippy::too_many_arguments)]
 pub(super) fn run_sorted_steps(
     agent_runtime: &AgentRuntime,
     workflow: &WorkflowDefinition,
