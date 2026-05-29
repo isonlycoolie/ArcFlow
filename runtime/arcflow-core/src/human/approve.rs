@@ -198,3 +198,14 @@ fn build_partial_from_recovery(recovery: &crate::recovery::state::RecoveryState)
                 agent_id,
                 content: s.content.clone(),
                 status: ExecutionStatus::Completed,
+            })
+        })
+        .collect();
+    WorkflowExecutionRecord {
+        run_id,
+        workflow_id,
+        step_outputs,
+        final_state: crate::state::StateEngine::new().snapshot(),
+        trace_events: vec![],
+    }
+}
