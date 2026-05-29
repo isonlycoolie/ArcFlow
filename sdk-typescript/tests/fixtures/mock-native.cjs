@@ -1,7 +1,26 @@
-exports.executeWorkflow = async () => ({
-  output: "[stub] writer (author): Reply briefly.",
-  runId: "00000000-0000-4000-8000-000000000001",
-  stepCount: 1,
+exports.executeWorkflow = async (
+  _workflowName,
+  _workflowId,
+  _agents,
+  _steps,
+  _runInput,
+  _provider,
+  _execConfigJson,
+  graphJson,
+) => {
+  const stepCount = graphJson ? JSON.parse(graphJson).nodes.length : 1;
+  return {
+    output: "[stub] writer (author): Reply briefly.",
+    runId: "00000000-0000-4000-8000-000000000001",
+    stepCount,
+    traceEventsJson: "[]",
+  };
+};
+
+exports.executeResumeWorkflow = async () => ({
+  output: "[stub] writer resumed",
+  runId: "00000000-0000-4000-8000-000000000002",
+  stepCount: 2,
   traceEventsJson: "[]",
 });
 
