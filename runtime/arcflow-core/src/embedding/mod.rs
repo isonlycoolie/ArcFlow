@@ -2,6 +2,7 @@
 
 mod error;
 mod local;
+mod onnx;
 mod openai;
 mod provider;
 mod stub;

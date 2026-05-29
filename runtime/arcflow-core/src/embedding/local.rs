@@ -66,6 +66,10 @@ fn fnv1a(bytes: &[u8]) -> u64 {
 }
 
 fn l2_normalize(v: &mut [f32]) {
+    l2_normalize_slice(v);
+}
+
+pub(crate) fn l2_normalize_slice(v: &mut [f32]) {
     let norm: f32 = v.iter().map(|x| x * x).sum::<f32>().sqrt();
     if norm > f32::EPSILON {
         for x in v.iter_mut() {
@@ -87,6 +91,15 @@ impl EmbeddingProvider for LocalEmbeddingProvider {
     async fn embed(&self, texts: &[String]) -> Result<Vec<Vec<f32>>, EmbeddingError> {
         if texts.is_empty() {
             return Err(EmbeddingError::EmptyBatch);
+        }
+        if let Ok(path) = std::env::var("ARCFLOW_EMBEDDING_ONNX_PATH") {
+            if !path.trim().is_empty() {
+                if let Ok(vecs) = super::onnx::embed_batch(path.trim(), texts, self.dimensions).await
+                {
+                    return Ok(vecs);
+                }
+                tracing::warn!("ONNX embedding failed; using hash fallback");
+            }
         }
         Ok(texts
             .iter()
