@@ -98,3 +98,51 @@ fn invalid(reason: impl Into<String>) -> RuntimeError {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use uuid::Uuid;
+
+    fn step(id: Uuid) -> StepDefinition {
+        StepDefinition {
+            id,
+            agent_id: Uuid::new_v4(),
+            order: 0,
+            fallback_step_id: None,
+            hitl: None,
+        }
+    }
+
+    use crate::rcs::types::GraphNode;
+
+    fn minimal_graph(step_id: Uuid) -> GraphDefinition {
+        GraphDefinition {
+            entry_node: "a".into(),
+            max_iterations: 10,
+            nodes: vec![GraphNode {
+                id: "a".into(),
+                step_ref: step_id,
+                inputs: None,
+                outputs: None,
+            }],
+            edges: vec![],
+            join_nodes: vec![],
+        }
+    }
+
+    #[test]
+    fn valid_single_node_graph() {
+        let sid = Uuid::new_v4();
+        validate_graph(&minimal_graph(sid), &[step(sid)]).expect("valid");
+    }
+
+    #[test]
+    fn rejects_missing_step_ref() {
+        let sid = Uuid::new_v4();
+        let err = validate_graph(&minimal_graph(Uuid::new_v4()), &[step(sid)]).unwrap_err();
+        assert!(matches!(
+            err,
+            RuntimeError::InvalidWorkflowDefinition { .. }
+        ));
+    }
+}
