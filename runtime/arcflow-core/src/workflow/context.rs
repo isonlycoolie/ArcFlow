@@ -1,9 +1,11 @@
 //! Optional Sprint 4 execution context (tools + memory + trace).
 
 use std::sync::Arc;
+use std::time::Instant;
 
 use crate::memory::MemoryCoordinator;
 use crate::providers::ModelProvider;
+use crate::retry::RetryConfig;
 use crate::tools::{ToolInvoker, ToolRuntime};
 use crate::tracing::{emitter::TraceEmitter, sprint5_emitter::TraceEventEmitter};
 
@@ -26,4 +28,10 @@ pub struct ExecutionContext<'a, 's> {
     /// Provider generation limits when a provider is active.
     pub provider_max_tokens: u32,
     pub provider_temperature: f32,
+    /// Workflow-level retry configuration (Sprint 7).
+    pub retry_config: Option<RetryConfig>,
+    /// Per-step wall-clock limit (Sprint 7).
+    pub step_timeout: Option<std::time::Duration>,
+    /// Absolute deadline for the whole workflow run (Sprint 7).
+    pub workflow_deadline: Option<Instant>,
 }
