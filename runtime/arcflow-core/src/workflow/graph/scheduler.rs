@@ -111,7 +111,7 @@ pub fn run_graph_loop(
 
     let step_timeout = exec_config.timeouts.step_timeout;
     let workflow_timeout = exec_config.timeouts.workflow_timeout;
-    let run_id = Uuid::new_v4();
+    let run_id = exec_config.run_id.unwrap_or_else(Uuid::new_v4);
     let run_key = run_id.to_string();
     let workflow_started = Instant::now();
     let workflow_deadline = workflow_timeout.map(|wt| workflow_started + wt);

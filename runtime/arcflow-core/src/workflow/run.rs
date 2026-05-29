@@ -451,9 +451,9 @@ pub(crate) fn run_sorted_steps(
     exec_config.validate().map_err(WorkflowRunError::Aborted)?;
     let step_timeout = exec_config.timeouts.step_timeout;
     let workflow_timeout = exec_config.timeouts.workflow_timeout;
-    let run_id = resume
-        .as_ref()
-        .map(|r| r.original_run_id)
+    let run_id = exec_config
+        .run_id
+        .or_else(|| resume.as_ref().map(|r| r.original_run_id))
         .unwrap_or_else(Uuid::new_v4);
     let run_key = run_id.to_string();
     let workflow_started = Instant::now();
