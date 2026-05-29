@@ -7,9 +7,10 @@ use uuid::Uuid;
 
 use crate::agent::AgentRuntime;
 use crate::error::{RuntimeError, StateError};
+use crate::human::{interrupt_for_human, ApprovalResult};
 use crate::memory::MemoryCoordinator;
 use crate::providers::ModelProvider;
-use crate::rcs::types::{AgentDefinition, StepDefinition, WorkflowDefinition};
+use crate::rcs::types::{AgentDefinition, ExecutionStatus, StepDefinition, WorkflowDefinition};
 use crate::state::{ExecutionStepOutput, StateEngine};
 use crate::tools::{ToolInvoker, ToolRuntime};
 use crate::tracing::{
@@ -30,17 +31,19 @@ pub struct ResumeParams {
     pub precompleted: Vec<ExecutionStepOutput>,
     pub start_step_index: usize,
     pub run_input: String,
+    /// Injected human approval when resuming from HITL interrupt.
+    pub approval: Option<ApprovalResult>,
 }
 
-struct RunLoop<'a> {
-    run_id: Uuid,
-    workflow_id: Uuid,
-    state: &'a mut StateEngine,
-    step_outputs: &'a mut Vec<ExecutionStepOutput>,
-    run_input: &'a str,
+pub(crate) struct RunLoop<'a> {
+    pub(crate) run_id: Uuid,
+    pub(crate) workflow_id: Uuid,
+    pub(crate) state: &'a mut StateEngine,
+    pub(crate) step_outputs: &'a mut Vec<ExecutionStepOutput>,
+    pub(crate) run_input: &'a str,
 }
 
-fn check_workflow_timeout(
+pub(crate) fn check_workflow_timeout(
     workflow_timeout: Option<std::time::Duration>,
     workflow_started: Instant,
     run_key: &str,
@@ -118,7 +121,7 @@ fn fail_step(
     })
 }
 
-fn partial_record(loop_ctx: &RunLoop<'_>, legacy: &TraceEmitter) -> WorkflowExecutionRecord {
+pub(crate) fn partial_record(loop_ctx: &RunLoop<'_>, legacy: &TraceEmitter) -> WorkflowExecutionRecord {
     WorkflowExecutionRecord {
         run_id: loop_ctx.run_id,
         workflow_id: loop_ctx.workflow_id,
@@ -174,7 +177,7 @@ fn execute_agent_for_step(
 
 #[allow(clippy::result_large_err)]
 #[allow(clippy::too_many_arguments)]
-fn run_one_step(
+pub(crate) fn run_one_step(
     agent_runtime: &AgentRuntime,
     loop_ctx: &mut RunLoop<'_>,
     step: &StepDefinition,
@@ -196,6 +199,7 @@ fn run_one_step(
     step_timeout: Option<std::time::Duration>,
     workflow_deadline: Option<Instant>,
     recovery_enabled: bool,
+    approval: Option<&ApprovalResult>,
 ) -> Result<(), WorkflowRunError> {
     debug!(
         run_id = %loop_ctx.run_id,
@@ -203,6 +207,56 @@ fn run_one_step(
         agent_id = %agent.id,
         "step execution started"
     );
+
+    if let Some(ref hitl) = step.hitl {
+        if let Some(result) = approval {
+            if !result.approved {
+                return fail_step(
+                    loop_ctx,
+                    legacy,
+                    sprint5,
+                    run_key,
+                    step,
+                    step_index,
+                    workflow_started,
+                    Instant::now(),
+                    recovery_enabled,
+                    RuntimeError::HumanRejected {
+                        approval_key: hitl.approval_key.clone(),
+                    },
+                );
+            }
+            let content = serde_json::json!({
+                "approved": true,
+                "data": result.data,
+            })
+            .to_string();
+            let out = ExecutionStepOutput {
+                step_id: step.id,
+                agent_id: agent.id,
+                content,
+                status: ExecutionStatus::Completed,
+            };
+            return commit_step_output(
+                loop_ctx,
+                legacy,
+                sprint5,
+                run_key,
+                step,
+                step_index,
+                Instant::now(),
+                out,
+            );
+        }
+        return interrupt_for_human(
+            loop_ctx,
+            legacy,
+            step,
+            step_index,
+            hitl,
+            recovery_enabled,
+        );
+    }
 
     sprint5.emit(TraceEventKind::StepStarted {
         run_id: run_key.to_string(),
@@ -321,6 +375,28 @@ fn run_one_step(
         }
     };
 
+    commit_step_output(
+        loop_ctx,
+        legacy,
+        sprint5,
+        run_key,
+        step,
+        step_index,
+        step_started,
+        out,
+    )
+}
+
+fn commit_step_output(
+    loop_ctx: &mut RunLoop<'_>,
+    legacy: &TraceEmitter,
+    sprint5: &mut TraceEventEmitter<'_>,
+    run_key: &str,
+    step: &StepDefinition,
+    step_index: usize,
+    step_started: Instant,
+    out: ExecutionStepOutput,
+) -> Result<(), WorkflowRunError> {
     loop_ctx
         .state
         .commit(out.clone())
@@ -340,12 +416,6 @@ fn run_one_step(
         tokens: TokenUsage::default(),
         output_size_bytes: out.content.len(),
     });
-
-    debug!(
-        run_id = %loop_ctx.run_id,
-        step_id = %step.id,
-        "step execution completed"
-    );
     loop_ctx.step_outputs.push(out);
     Ok(())
 }
@@ -381,7 +451,10 @@ pub(crate) fn run_sorted_steps(
     exec_config.validate().map_err(WorkflowRunError::Aborted)?;
     let step_timeout = exec_config.timeouts.step_timeout;
     let workflow_timeout = exec_config.timeouts.workflow_timeout;
-    let run_id = Uuid::new_v4();
+    let run_id = resume
+        .as_ref()
+        .map(|r| r.original_run_id)
+        .unwrap_or_else(Uuid::new_v4);
     let run_key = run_id.to_string();
     let workflow_started = Instant::now();
     let workflow_deadline = workflow_timeout.map(|wt| workflow_started + wt);
@@ -465,6 +538,10 @@ pub(crate) fn run_sorted_steps(
                     step_id: step.id,
                 }));
             };
+            let step_approval = resume
+                .as_ref()
+                .and_then(|r| r.approval.as_ref())
+                .filter(|_| step_index == start_index);
             run_one_step(
                 agent_runtime,
                 &mut loop_ctx,
@@ -487,6 +564,7 @@ pub(crate) fn run_sorted_steps(
                 step_timeout,
                 workflow_deadline,
                 exec_config.recovery_enabled,
+                step_approval,
             )?;
         }
 
