@@ -56,6 +56,7 @@ pub fn build_workflow(
             agent_id,
             order: step.order,
             fallback_step_id: None,
+            hitl: None,
         });
     }
     let workflow = WorkflowDefinition {
@@ -63,6 +64,8 @@ pub fn build_workflow(
         name: workflow_name,
         steps: step_defs,
         retry_policy: None,
+        execution_mode: arcflow_core::rcs::types::ExecutionMode::Linear,
+        graph: None,
     };
     Ok((workflow, agent_map))
 }
