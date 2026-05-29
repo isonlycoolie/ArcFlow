@@ -353,7 +353,7 @@ fn run_one_step(
 /// Runs validated steps in `order` sequence; halts on first agent failure with a partial record.
 #[allow(clippy::result_large_err)]
 #[allow(clippy::too_many_arguments)]
-pub(super) fn run_sorted_steps(
+pub(crate) fn run_sorted_steps(
     agent_runtime: &AgentRuntime,
     workflow: &WorkflowDefinition,
     agents: &HashMap<Uuid, AgentDefinition>,
@@ -363,39 +363,102 @@ pub(super) fn run_sorted_steps(
     provider: Option<Arc<dyn ModelProvider>>,
     provider_max_tokens: u32,
     provider_temperature: f32,
+    exec_config: &ExecutionConfig,
+    resume: Option<ResumeParams>,
 ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
+    let retry_config = exec_config
+        .retry
+        .clone()
+        .or_else(|| {
+            workflow
+                .retry_policy
+                .as_ref()
+                .map(RetryConfig::from_rcs)
+        });
+    if let Some(ref r) = retry_config {
+        r.validate().map_err(WorkflowRunError::Aborted)?;
+    }
+    exec_config.validate().map_err(WorkflowRunError::Aborted)?;
+    let step_timeout = exec_config.timeouts.step_timeout;
+    let workflow_timeout = exec_config.timeouts.workflow_timeout;
     let run_id = Uuid::new_v4();
     let run_key = run_id.to_string();
     let workflow_started = Instant::now();
+    let workflow_deadline = workflow_timeout.map(|wt| workflow_started + wt);
+    let effective_input = resume
+        .as_ref()
+        .map(|r| r.run_input.as_str())
+        .unwrap_or(run_input);
 
     with_store(|store| {
         let mut steps = workflow.steps.clone();
         steps.sort_by_key(|s| s.order);
         let step_count = steps.len();
+        let start_index = resume.as_ref().map(|r| r.start_step_index).unwrap_or(0);
 
         let mut sprint5 = TraceEventEmitter::new(run_key.clone(), store);
         let mut legacy = TraceEmitter::new(run_id);
 
-        sprint5.emit(TraceEventKind::WorkflowStarted {
-            run_id: run_key.clone(),
-            workflow_name: workflow.name.clone(),
-            step_count,
-        });
-        legacy.workflow_started();
+        if let Some(ref r) = resume {
+            sprint5.emit(TraceEventKind::WorkflowRecoveryStarted {
+                run_id: run_key.clone(),
+                original_run_id: r.original_run_id.to_string(),
+                resume_from_step: r.start_step_index,
+            });
+        } else {
+            sprint5.emit(TraceEventKind::WorkflowStarted {
+                run_id: run_key.clone(),
+                workflow_name: workflow.name.clone(),
+                step_count,
+            });
+            legacy.workflow_started();
+        }
         info!(run_id = %run_id, workflow_id = %workflow.id, "workflow execution started");
 
         let mut state = StateEngine::new();
         let mut memory = MemoryCoordinator::new(run_id);
         let mut step_outputs = Vec::new();
+        if let Some(ref r) = resume {
+            for pre in &r.precompleted {
+                state.commit(pre.clone()).map_err(|e: StateError| {
+                    WorkflowRunError::Aborted(RuntimeError::StateCommitFailed {
+                        step_id: pre.step_id,
+                        reason: e.to_string(),
+                    })
+                })?;
+                step_outputs.push(pre.clone());
+            }
+        }
         let mut loop_ctx = RunLoop {
             run_id,
             workflow_id: workflow.id,
             state: &mut state,
             step_outputs: &mut step_outputs,
-            run_input,
+            run_input: effective_input,
         };
 
         for (step_index, step) in steps.iter().enumerate() {
+            if step_index < start_index {
+                continue;
+            }
+            if let Err(err) = check_workflow_timeout(
+                workflow_timeout,
+                workflow_started,
+                &run_key,
+                &mut sprint5,
+            ) {
+                sprint5.emit(TraceEventKind::WorkflowFailed {
+                    run_id: run_key.clone(),
+                    duration_ms: workflow_started.elapsed().as_millis() as u64,
+                    failed_step_index: Some(step_index),
+                    error_code: "workflow_timeout".into(),
+                });
+                let partial = partial_record(&loop_ctx, &legacy);
+                return Err(WorkflowRunError::Failed {
+                    error: err,
+                    partial,
+                });
+            }
             let Some(agent) = agents.get(&step.agent_id) else {
                 return Err(WorkflowRunError::Aborted(RuntimeError::AgentNotFound {
                     agent_id: step.agent_id,
@@ -408,6 +471,8 @@ pub(super) fn run_sorted_steps(
                 step,
                 step_index,
                 agent,
+                &steps,
+                agents,
                 &mut memory,
                 &mut legacy,
                 &mut sprint5,
@@ -418,7 +483,20 @@ pub(super) fn run_sorted_steps(
                 provider.clone(),
                 provider_max_tokens,
                 provider_temperature,
+                retry_config.clone(),
+                step_timeout,
+                workflow_deadline,
+                exec_config.recovery_enabled,
             )?;
+        }
+
+        if let Some(ref r) = resume {
+            let re_executed = step_count.saturating_sub(r.start_step_index);
+            sprint5.emit(TraceEventKind::WorkflowRecoveryCompleted {
+                run_id: run_key.clone(),
+                original_run_id: r.original_run_id.to_string(),
+                steps_re_executed: re_executed,
+            });
         }
 
         let duration_ms = workflow_started.elapsed().as_millis() as u64;
