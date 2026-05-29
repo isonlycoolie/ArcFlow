@@ -96,5 +96,6 @@ pub fn parse_exec_config(value: Option<serde_json::Value>) -> Result<ExecutionCo
         retry,
         timeouts,
         recovery_enabled: parsed.recovery_enabled.unwrap_or(false),
+        run_id: None,
     })
 }

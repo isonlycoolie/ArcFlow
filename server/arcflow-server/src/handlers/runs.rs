@@ -82,7 +82,8 @@ pub async fn create_run(
         .await
         .map_err(internal)?;
 
-    let exec_config = parse_exec_config(body.exec_config).map_err(bad_request)?;
+    let mut exec_config = parse_exec_config(body.exec_config).map_err(bad_request)?;
+    exec_config.run_id = Some(run_id);
     let agent_map: HashMap<Uuid, AgentDefinition> =
         body.agents.iter().map(|a| (a.id, a.clone())).collect();
     let engine = WorkflowEngine::new();
@@ -162,6 +163,8 @@ pub async fn create_run(
         .await
         .map_err(internal)?;
 
+    persist_run_trace(&state, &run_id.to_string()).await?;
+
     Ok(Json(CreateRunResponse {
         run_id: run_id.to_string(),
         trace_id: trace_id.to_string(),
@@ -189,15 +192,39 @@ pub async fn get_run(
 }
 
 pub async fn get_run_trace(
+    State(state): State<Arc<AppState>>,
     Path(run_id): Path<String>,
 ) -> Result<Json<arcflow_core::tracing::types::ExecutionTrace>, (StatusCode, String)> {
-    match get_execution_trace(&run_id) {
-        Some(trace) => Ok(Json(trace)),
-        None => Err((
+    if let Some(trace) = get_execution_trace(&run_id) {
+        return Ok(Json(trace));
+    }
+    let Some(traces) = state.traces.as_ref() else {
+        return Err((
+            StatusCode::NOT_FOUND,
+            format!("[ArcFlow] Trace not found for run '{run_id}'"),
+        ));
+    };
+    match traces.load_execution_trace(&run_id).await {
+        Ok(Some(trace)) => Ok(Json(trace)),
+        Ok(None) => Err((
             StatusCode::NOT_FOUND,
             format!("[ArcFlow] Trace not found for run '{run_id}'"),
         )),
+        Err(e) => Err(internal(e)),
     }
+}
+
+async fn persist_run_trace(state: &AppState, run_id: &str) -> Result<(), (StatusCode, String)> {
+    let Some(traces) = state.traces.as_ref() else {
+        return Ok(());
+    };
+    let Some(trace) = get_execution_trace(run_id) else {
+        return Ok(());
+    };
+    traces
+        .persist_events(run_id, &trace.events)
+        .await
+        .map_err(internal)
 }
 
 fn internal(err: sqlx::Error) -> (StatusCode, String) {
