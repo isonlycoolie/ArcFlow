@@ -9,6 +9,7 @@ use crate::providers::async_bridge::block_on_provider;
 use crate::providers::{
     build_agent_request, default_max_tokens, default_temperature, ProviderCallError,
 };
+use crate::retry::engine::{execute_with_retry, RetryError};
 use crate::rcs::types::{AgentDefinition, ExecutionStatus, MemoryScope, MemoryType};
 use crate::state::{ExecutionStepOutput, StateSnapshot};
 use crate::tools::ToolError;
@@ -18,6 +19,53 @@ use crate::tracing::TokenUsage;
 use crate::workflow::ExecutionContext;
 
 use super::stub::STUB_FAIL_ROLE;
+
+fn effective_provider_timeout(
+    ctx: &ExecutionContext<'_, '_>,
+) -> Option<std::time::Duration> {
+    let mut limit = ctx.step_timeout;
+    if let Some(deadline) = ctx.workflow_deadline {
+        let remaining = deadline.saturating_duration_since(std::time::Instant::now());
+        limit = Some(match limit {
+            Some(step_limit) => step_limit.min(remaining),
+            None => remaining,
+        });
+    }
+    limit.filter(|d| !d.is_zero())
+}
+
+fn is_deadline_elapsed(err: &RuntimeError) -> bool {
+    match err {
+        RuntimeError::ProviderCallFailed { reason, .. } => {
+            reason.contains("deadline") || reason.contains("timed out")
+        }
+        RuntimeError::StepTimeout { .. } | RuntimeError::WorkflowTimeout { .. } => true,
+        _ => false,
+    }
+}
+
+fn timeout_error_for_context(
+    ctx: &ExecutionContext<'_, '_>,
+    step_id: &str,
+    configured_ms: u64,
+    elapsed_ms: u64,
+) -> RuntimeError {
+    if ctx
+        .workflow_deadline
+        .is_some_and(|d| std::time::Instant::now() >= d)
+    {
+        RuntimeError::WorkflowTimeout {
+            configured_ms,
+            elapsed_ms,
+        }
+    } else {
+        RuntimeError::StepTimeout {
+            step_id: step_id.to_string(),
+            configured_ms,
+            elapsed_ms,
+        }
+    }
+}
 
 /// Invokes agents without provider I/O; output is derived from role and input.
 pub struct AgentRuntime;
@@ -146,7 +194,114 @@ impl AgentRuntime {
         });
 
         let started = std::time::Instant::now();
-        let result = block_on_provider(provider.complete(request));
+        let limit = effective_provider_timeout(ctx);
+        let provider_arc = provider.clone();
+        let provider_call = async {
+            if let Some(retry_cfg) = ctx.retry_config.clone() {
+                execute_with_retry(
+                    || {
+                        let req = build_agent_request(
+                            &agent.instructions,
+                            run_input,
+                            max_tokens,
+                            temperature,
+                        );
+                        let p = provider_arc.clone();
+                        async move { p.complete(req).await }
+                    },
+                    &retry_cfg,
+                    &step_id_str,
+                    ctx.sprint5,
+                )
+                .await
+                .map_err(|e| match e {
+                    RetryError::NonRetryable(err) => {
+                        emit_provider_error(ctx, &step_id_str, &err);
+                        map_provider_error(step_id, err)
+                    }
+                    RetryError::Exhausted {
+                        attempts_made,
+                        last_error_code,
+                        error,
+                    } => {
+                        emit_provider_error(ctx, &step_id_str, &error);
+                        RuntimeError::RetryExhausted {
+                            step_id: step_id_str.clone(),
+                            attempts_made,
+                            last_error_code,
+                        }
+                    }
+                })
+            } else {
+                provider
+                    .complete(request)
+                    .await
+                    .map_err(|err| {
+                        emit_provider_error(ctx, &step_id_str, &err);
+                        map_provider_error(step_id, err)
+                    })
+            }
+        };
+
+        let result = if let Some(limit) = limit {
+            let configured_ms = limit.as_millis() as u64;
+            match block_on_provider(async {
+                tokio::time::timeout(limit, provider_call).await
+            }) {
+                Ok(Ok(response)) => Ok(response),
+                Ok(Err(err)) if is_deadline_elapsed(&err) => {
+                    let elapsed_ms = started.elapsed().as_millis() as u64;
+                    let timeout_type = if ctx
+                        .workflow_deadline
+                        .is_some_and(|d| std::time::Instant::now() >= d)
+                    {
+                        "workflow"
+                    } else {
+                        "step"
+                    };
+                    ctx.sprint5.emit(TraceEventKind::TimeoutEnforced {
+                        run_id: ctx.run_id.clone(),
+                        step_id: step_id_str.clone(),
+                        timeout_type: timeout_type.to_string(),
+                        configured_ms,
+                        elapsed_ms,
+                    });
+                    Err(timeout_error_for_context(
+                        ctx,
+                        &step_id_str,
+                        configured_ms,
+                        elapsed_ms,
+                    ))
+                }
+                Ok(Err(err)) => Err(err),
+                Err(_elapsed) => {
+                    let elapsed_ms = started.elapsed().as_millis() as u64;
+                    let timeout_type = if ctx
+                        .workflow_deadline
+                        .is_some_and(|d| std::time::Instant::now() >= d)
+                    {
+                        "workflow"
+                    } else {
+                        "step"
+                    };
+                    ctx.sprint5.emit(TraceEventKind::TimeoutEnforced {
+                        run_id: ctx.run_id.clone(),
+                        step_id: step_id_str.clone(),
+                        timeout_type: timeout_type.to_string(),
+                        configured_ms,
+                        elapsed_ms,
+                    });
+                    Err(timeout_error_for_context(
+                        ctx,
+                        &step_id_str,
+                        configured_ms,
+                        elapsed_ms,
+                    ))
+                }
+            }
+        } else {
+            block_on_provider(provider_call)
+        };
 
         match result {
             Ok(response) => {
@@ -173,10 +328,7 @@ impl AgentRuntime {
                 });
                 Ok((response.content, response.tokens))
             }
-            Err(err) => {
-                emit_provider_error(ctx, &step_id_str, &err);
-                Err(map_provider_error(step_id, err))
-            }
+            Err(err) => Err(err),
         }
     }
 
