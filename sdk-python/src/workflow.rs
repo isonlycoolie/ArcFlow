@@ -49,6 +49,7 @@ fn record_to_py(record: WorkflowExecutionRecord) -> PyWorkflowResult {
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn provider_from_tuple(
     row: Option<(String, String, u32, f32)>,
 ) -> PyResult<(Option<Arc<dyn ModelProvider>>, u32, f32)> {
@@ -87,6 +88,7 @@ fn provider_from_tuple(
 #[pyfunction]
 #[pyo3(signature = (workflow_name, workflow_id, agents, steps, run_input, tool_executors, provider = None))]
 #[allow(clippy::result_large_err)] // WorkflowRunError carries partial record by design (ADR-002)
+#[allow(clippy::too_many_arguments)]
 pub fn execute_workflow(
     py: Python<'_>,
     workflow_name: String,

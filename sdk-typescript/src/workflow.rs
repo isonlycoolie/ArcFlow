@@ -49,6 +49,7 @@ fn record_to_js(record: WorkflowExecutionRecord) -> JsWorkflowResult {
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn provider_from_js(
     row: Option<JsProviderInput>,
 ) -> std::result::Result<(Option<Arc<dyn ModelProvider>>, u32, f32), Error> {
