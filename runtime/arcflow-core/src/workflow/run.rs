@@ -192,6 +192,10 @@ fn run_one_step(
     provider: Option<Arc<dyn ModelProvider>>,
     provider_max_tokens: u32,
     provider_temperature: f32,
+    retry_config: Option<RetryConfig>,
+    step_timeout: Option<std::time::Duration>,
+    workflow_deadline: Option<Instant>,
+    recovery_enabled: bool,
 ) -> Result<(), WorkflowRunError> {
     debug!(
         run_id = %loop_ctx.run_id,
@@ -209,54 +213,111 @@ fn run_one_step(
     });
 
     let step_started = Instant::now();
-    let out = {
-        let mut exec_ctx = ExecutionContext {
-            tool_runtime,
-            tool_invoker,
-            memory,
-            legacy,
-            sprint5,
-            run_id: run_key.to_string(),
-            provider: provider.clone(),
-            provider_max_tokens,
-            provider_temperature,
-        };
-        agent_runtime.execute_with_context(
-            agent,
-            step.id,
-            &loop_ctx.state.snapshot(),
-            loop_ctx.run_input,
-            Some(&mut exec_ctx),
-        )
-    };
-
-    let out = match out {
+    let out = match execute_agent_for_step(
+        agent_runtime,
+        agent,
+        step,
+        loop_ctx,
+        memory,
+        legacy,
+        sprint5,
+        run_key,
+        tool_runtime,
+        tool_invoker.clone(),
+        provider.clone(),
+        provider_max_tokens,
+        provider_temperature,
+        retry_config.clone(),
+        step_timeout,
+        workflow_deadline,
+    ) {
         Ok(output) => output,
         Err(err) => {
-            error!(
-                run_id = %loop_ctx.run_id,
-                step_id = %step.id,
-                error = %err,
-                "step execution failed"
-            );
-            sprint5.emit(TraceEventKind::StepFailed {
-                run_id: run_key.to_string(),
-                step_id: step.id.to_string(),
-                step_index,
-                duration_ms: step_started.elapsed().as_millis() as u64,
-                error_code: "step_failed".into(),
-                error_message: err.to_string(),
-            });
-            sprint5.emit(TraceEventKind::WorkflowFailed {
-                run_id: run_key.to_string(),
-                duration_ms: workflow_started.elapsed().as_millis() as u64,
-                failed_step_index: Some(step_index),
-                error_code: "step_failed".into(),
-            });
-            return Err(WorkflowRunError::Failed {
-                error: err,
-                partial: partial_record(loop_ctx, legacy),
-            });
+            if let Some(fallback_id) = step.fallback_step_id {
+                if let Some(fallback_step) = all_steps.iter().find(|s| s.id == fallback_id) {
+                    if let Some(fallback_agent) = agents.get(&fallback_step.agent_id) {
+                        sprint5.emit(TraceEventKind::StepFallbackActivated {
+                            run_id: run_key.to_string(),
+                            step_id: step.id.to_string(),
+                            primary_agent_name: agent.name.clone(),
+                            fallback_agent_name: fallback_agent.name.clone(),
+                        });
+                        match execute_agent_for_step(
+                            agent_runtime,
+                            fallback_agent,
+                            step,
+                            loop_ctx,
+                            memory,
+                            legacy,
+                            sprint5,
+                            run_key,
+                            tool_runtime,
+                            tool_invoker,
+                            provider,
+                            provider_max_tokens,
+                            provider_temperature,
+                            retry_config,
+                            step_timeout,
+                            workflow_deadline,
+                        ) {
+                            Ok(fallback_out) => fallback_out,
+                            Err(fallback_err) => {
+                                return fail_step(
+                                    loop_ctx,
+                                    legacy,
+                                    sprint5,
+                                    run_key,
+                                    step,
+                                    step_index,
+                                    workflow_started,
+                                    step_started,
+                                    recovery_enabled,
+                                    fallback_err,
+                                );
+                            }
+                        }
+                    } else {
+                        return fail_step(
+                            loop_ctx,
+                            legacy,
+                            sprint5,
+                            run_key,
+                            step,
+                            step_index,
+                            workflow_started,
+                            step_started,
+                            recovery_enabled,
+                            err,
+                        );
+                    }
+                } else {
+                    return fail_step(
+                        loop_ctx,
+                        legacy,
+                        sprint5,
+                        run_key,
+                        step,
+                        step_index,
+                        workflow_started,
+                        step_started,
+                        recovery_enabled,
+                        err,
+                    );
+                }
+            } else {
+                return fail_step(
+                    loop_ctx,
+                    legacy,
+                    sprint5,
+                    run_key,
+                    step,
+                    step_index,
+                    workflow_started,
+                    step_started,
+                    recovery_enabled,
+                    err,
+                );
+            }
         }
     };
 
