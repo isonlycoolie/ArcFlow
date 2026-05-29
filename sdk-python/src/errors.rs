@@ -79,6 +79,52 @@ fn raise_for_runtime_error(
             Some(run_id),
             Some(step_id.to_string()),
         ),
+        RuntimeError::RetryExhausted {
+            step_id,
+            attempts_made,
+            last_error_code,
+        } => raise_retry_exhausted(
+            py,
+            prefix(&format!(
+                "Retry exhausted for step '{step_id}' after {attempts_made} attempts. \
+                 Last error: {last_error_code}. Check provider availability."
+            )),
+            Some(run_id),
+            Some(step_id.clone()),
+            *attempts_made,
+            Some(last_error_code.clone()),
+        ),
+        RuntimeError::StepTimeout {
+            step_id,
+            configured_ms,
+            elapsed_ms,
+        } => raise_workflow_timeout(
+            py,
+            prefix(&format!(
+                "Step '{step_id}' timed out after {elapsed_ms}ms (limit {configured_ms}ms). \
+                 Increase step_timeout or optimize the step."
+            )),
+            Some(run_id),
+            Some(step_id.clone()),
+            "step",
+            *configured_ms as f64 / 1000.0,
+            *elapsed_ms as f64 / 1000.0,
+        ),
+        RuntimeError::WorkflowTimeout {
+            configured_ms,
+            elapsed_ms,
+        } => raise_workflow_timeout(
+            py,
+            prefix(&format!(
+                "Workflow timed out after {elapsed_ms}ms (limit {configured_ms}ms). \
+                 Increase timeout or optimize steps."
+            )),
+            Some(run_id),
+            None,
+            "workflow",
+            *configured_ms as f64 / 1000.0,
+            *elapsed_ms as f64 / 1000.0,
+        ),
         _ => {
             let failed = partial.step_outputs.last().map(|o| o.agent_id.to_string());
             raise_execution(py, runtime_execution_message(err), Some(run_id), failed)
@@ -119,6 +165,10 @@ fn runtime_config_message(err: &RuntimeError) -> String {
             step_id,
             reason,
         } => format!("Provider '{provider_id}' failed for step '{step_id}': {reason}."),
+        RuntimeError::StepTimeout { .. }
+        | RuntimeError::WorkflowTimeout { .. }
+        | RuntimeError::RetryExhausted { .. }
+        | RuntimeError::RecoveryStorageError { .. } => format!("{err}."),
     })
 }
 
@@ -154,6 +204,22 @@ fn runtime_execution_message(err: &RuntimeError) -> String {
             reason,
             ..
         } => format!("Provider '{provider_id}' failed: {reason}."),
+        RuntimeError::StepTimeout { step_id, configured_ms, .. } => format!(
+            "Step '{step_id}' timed out (limit {configured_ms}ms)."
+        ),
+        RuntimeError::WorkflowTimeout { configured_ms, .. } => {
+            format!("Workflow timed out (limit {configured_ms}ms).")
+        }
+        RuntimeError::RetryExhausted {
+            step_id,
+            attempts_made,
+            last_error_code,
+        } => format!(
+            "Step '{step_id}' failed after {attempts_made} attempts: {last_error_code}."
+        ),
+        RuntimeError::RecoveryStorageError { reason } => {
+            format!("Recovery storage error: {reason}.")
+        }
     })
 }
 
@@ -244,6 +310,58 @@ fn raise_provider_execution(
         let exc_mod = import_exceptions(py)?;
         let cls = exc_mod.getattr("ProviderExecutionError")?;
         cls.call1((message, provider_id, run_id, failed_step))
+    })();
+    match built {
+        Ok(value) => PyErr::from_value(value),
+        Err(err) => err,
+    }
+}
+
+fn raise_retry_exhausted(
+    py: Python<'_>,
+    message: String,
+    run_id: Option<String>,
+    failed_step: Option<String>,
+    attempts_made: u32,
+    last_error_code: Option<String>,
+) -> PyErr {
+    let built: PyResult<Bound<'_, PyAny>> = (|| {
+        let exc_mod = import_exceptions(py)?;
+        let cls = exc_mod.getattr("RetryExhaustedError")?;
+        cls.call1((
+            message,
+            attempts_made,
+            run_id,
+            failed_step,
+            last_error_code,
+        ))
+    })();
+    match built {
+        Ok(value) => PyErr::from_value(value),
+        Err(err) => err,
+    }
+}
+
+fn raise_workflow_timeout(
+    py: Python<'_>,
+    message: String,
+    run_id: Option<String>,
+    failed_step: Option<String>,
+    timeout_type: &str,
+    configured_seconds: f64,
+    elapsed_seconds: f64,
+) -> PyErr {
+    let built: PyResult<Bound<'_, PyAny>> = (|| {
+        let exc_mod = import_exceptions(py)?;
+        let cls = exc_mod.getattr("WorkflowTimeoutError")?;
+        cls.call1((
+            message,
+            timeout_type,
+            configured_seconds,
+            elapsed_seconds,
+            run_id,
+            failed_step,
+        ))
     })();
     match built {
         Ok(value) => PyErr::from_value(value),
