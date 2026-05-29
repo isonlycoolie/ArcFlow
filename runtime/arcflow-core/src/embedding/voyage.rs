@@ -98,3 +98,58 @@ impl EmbeddingProvider for VoyageEmbeddingProvider {
             .post(&self.endpoint)
             .bearer_auth(&self.api_key)
             .json(&body)
+            .send()
+            .await
+            .map_err(|e| EmbeddingError::RequestFailed {
+                reason: e.to_string(),
+            })?;
+        let status = response.status();
+        if !status.is_success() {
+            let reason = response
+                .text()
+                .await
+                .unwrap_or_else(|_| status.to_string());
+            return Err(EmbeddingError::RequestFailed { reason });
+        }
+        let parsed: EmbeddingsResponse = response.json().await.map_err(|e| {
+            EmbeddingError::ParseError {
+                reason: e.to_string(),
+            }
+        })?;
+        if parsed.data.is_empty() {
+            return Err(EmbeddingError::EmptyBatch);
+        }
+        Ok(parsed.data.into_iter().map(|d| d.embedding).collect())
+    }
+}
+
+pub fn voyage_provider(model: &str) -> Result<Arc<dyn EmbeddingProvider>, EmbeddingError> {
+    Ok(Arc::new(VoyageEmbeddingProvider::new(model)?))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use wiremock::matchers::{header, method, path};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
+
+    #[tokio::test]
+    async fn voyage_embed_parses_response() {
+        let mock = MockServer::start().await;
+        std::env::set_var(VOYAGE_API_KEY_ENV, "test-key");
+        std::env::set_var(VOYAGE_EMBEDDINGS_ENDPOINT_ENV, format!("{}/v1/embeddings", mock.uri()));
+
+        Mock::given(method("POST"))
+            .and(path("/v1/embeddings"))
+            .and(header("authorization", "Bearer test-key"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "data": [{ "embedding": [0.1, 0.2] }]
+            })))
+            .mount(&mock)
+            .await;
+
+        let provider = VoyageEmbeddingProvider::new("voyage-3").unwrap();
+        let vectors = provider.embed(&["hello".into()]).await.unwrap();
+        assert_eq!(vectors.len(), 1);
+    }
+}
