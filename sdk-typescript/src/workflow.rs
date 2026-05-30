@@ -35,7 +35,7 @@ pub struct JsWorkflowResult {
     pub trace_events_json: String,
 }
 
-fn record_to_js(record: WorkflowExecutionRecord) -> JsWorkflowResult {
+pub(crate) fn record_to_js(record: WorkflowExecutionRecord) -> JsWorkflowResult {
     let output = record
         .step_outputs
         .last()
@@ -52,7 +52,7 @@ fn record_to_js(record: WorkflowExecutionRecord) -> JsWorkflowResult {
 }
 
 #[allow(clippy::type_complexity)]
-fn provider_from_js(
+pub(crate) fn provider_from_js(
     row: Option<JsProviderInput>,
 ) -> std::result::Result<(Option<Arc<dyn ModelProvider>>, u32, f32), Error> {
     let Some(input) = row else {

@@ -38,6 +38,11 @@ pub fn workflow_run_error_to_napi(err: WorkflowRunError) -> Error {
         WorkflowRunError::Failed { error, partial } => {
             raise_for_runtime_error(&error, partial.run_id.to_string(), &partial)
         }
+        WorkflowRunError::Interrupted { partial, .. } => Error::from_reason(format!(
+            "WorkflowInterruptedError|{}|{}",
+            partial.run_id,
+            "Workflow paused for human approval."
+        )),
     }
 }
 
@@ -107,7 +112,19 @@ fn runtime_config_message(err: &RuntimeError) -> String {
         RuntimeError::StepTimeout { .. }
         | RuntimeError::WorkflowTimeout { .. }
         | RuntimeError::RetryExhausted { .. }
-        | RuntimeError::RecoveryStorageError { .. } => format!("{err}."),
+        |         RuntimeError::RecoveryStorageError { .. } => format!("{err}."),
+        RuntimeError::HumanRejected { approval_key } => {
+            format!("Human approval rejected for key '{approval_key}'.")
+        }
+        RuntimeError::HumanTimeout { approval_key } => {
+            format!("Human approval timed out for key '{approval_key}'.")
+        }
+        RuntimeError::ApprovalNotFound { approval_key } => {
+            format!("Approval key '{approval_key}' was not found.")
+        }
+        RuntimeError::AlreadyApproved { approval_key } => {
+            format!("Approval key '{approval_key}' was already resolved.")
+        }
     })
 }
 
@@ -156,6 +173,18 @@ fn runtime_execution_message(err: &RuntimeError) -> String {
         ),
         RuntimeError::RecoveryStorageError { reason } => {
             format!("Recovery storage error: {reason}.")
+        }
+        RuntimeError::HumanRejected { approval_key } => {
+            format!("Human approval rejected for key '{approval_key}'.")
+        }
+        RuntimeError::HumanTimeout { approval_key } => {
+            format!("Human approval timed out for key '{approval_key}'.")
+        }
+        RuntimeError::ApprovalNotFound { approval_key } => {
+            format!("Approval key '{approval_key}' was not found.")
+        }
+        RuntimeError::AlreadyApproved { approval_key } => {
+            format!("Approval key '{approval_key}' was already resolved.")
         }
     })
 }

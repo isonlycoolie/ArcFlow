@@ -3,9 +3,11 @@
 mod errors;
 mod execution_config;
 mod graph;
+mod stream;
 mod types;
 mod workflow;
 
+pub use stream::{start_workflow_stream, JsWorkflowStreamIterator};
 pub use workflow::{
     execute_resume_workflow, execute_workflow, execute_workflow_stream,
     get_execution_trace_json, get_version, JsStreamWorkflowResult, JsWorkflowResult,
