@@ -93,3 +93,55 @@ mod tests {
         let retriever = HybridRetriever::new(0.7, 0.3);
         let fused = retriever.fuse_score(1.0, 0.0);
         assert!((fused - 0.7).abs() < f32::EPSILON);
+        let fused2 = retriever.fuse_score(0.0, 1.0);
+        assert!((fused2 - 0.3).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    fn rank_orders_by_fused_score() {
+        let retriever = HybridRetriever::default();
+        let hits = vec![
+            HybridHit {
+                point_id: "a".into(),
+                dense_score: 0.9,
+                sparse_score: 0.1,
+            },
+            HybridHit {
+                point_id: "b".into(),
+                dense_score: 0.5,
+                sparse_score: 1.0,
+            },
+        ];
+        let ranked = retriever.rank(hits, 2);
+        assert_eq!(ranked.len(), 2);
+        assert!(ranked[0].1 >= ranked[1].1);
+    }
+
+    #[test]
+    fn sparse_lexical_prefers_matching_terms() {
+        let high = sparse_lexical_score("rust memory vector", "rust memory vector store");
+        let low = sparse_lexical_score("rust memory vector", "unrelated text only");
+        assert!(high > low);
+        assert!((0.0..=1.0).contains(&high));
+    }
+
+    #[test]
+    fn rank_dedupes_by_point_id() {
+        let retriever = HybridRetriever::default();
+        let hits = vec![
+            HybridHit {
+                point_id: "x".into(),
+                dense_score: 0.2,
+                sparse_score: 0.0,
+            },
+            HybridHit {
+                point_id: "x".into(),
+                dense_score: 0.8,
+                sparse_score: 0.5,
+            },
+        ];
+        let ranked = retriever.rank(hits, 1);
+        assert_eq!(ranked.len(), 1);
+        assert_eq!(ranked[0].0, "x");
+    }
+}
