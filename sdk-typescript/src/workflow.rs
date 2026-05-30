@@ -188,3 +188,98 @@ fn execute_with_config_stream_sync(
     Ok(JsStreamWorkflowResult {
         events_json,
         output: base.output,
+        run_id: base.run_id,
+        step_count: base.step_count,
+        trace_events_json: base.trace_events_json,
+    })
+}
+
+#[napi]
+pub async fn execute_workflow_stream(
+    workflow_name: String,
+    workflow_id: String,
+    agents: Vec<JsAgentInput>,
+    steps: Vec<JsStepInput>,
+    run_input: String,
+    provider: Option<JsProviderInput>,
+    exec_config_json: Option<String>,
+    graph_json: Option<String>,
+) -> Result<JsStreamWorkflowResult> {
+    match tokio::task::spawn_blocking(move || {
+        execute_with_config_stream_sync(
+            workflow_name,
+            workflow_id,
+            agents,
+            steps,
+            run_input,
+            provider,
+            exec_config_json,
+            graph_json,
+        )
+    })
+    .await
+    {
+        Ok(Ok(result)) => Ok(result),
+        Ok(Err(err)) => Err(err),
+        Err(err) => Err(Error::from_reason(format!(
+            "[ArcFlow] Runtime task failed: {err}"
+        ))),
+    }
+}
+
+#[napi]
+pub async fn execute_workflow(
+    workflow_name: String,
+    workflow_id: String,
+    agents: Vec<JsAgentInput>,
+    steps: Vec<JsStepInput>,
+    run_input: String,
+    provider: Option<JsProviderInput>,
+    exec_config_json: Option<String>,
+    graph_json: Option<String>,
+) -> Result<JsWorkflowResult> {
+    match tokio::task::spawn_blocking(move || {
+        execute_with_config_sync(
+            workflow_name,
+            workflow_id,
+            agents,
+            steps,
+            run_input,
+            provider,
+            exec_config_json,
+            graph_json,
+        )
+    })
+    .await
+    {
+        Ok(Ok(result)) => Ok(result),
+        Ok(Err(err)) => Err(err),
+        Err(err) => Err(Error::from_reason(format!(
+            "[ArcFlow] Runtime task failed: {err}"
+        ))),
+    }
+}
+
+#[napi]
+pub async fn execute_resume_workflow(
+    workflow_name: String,
+    workflow_id: String,
+    agents: Vec<JsAgentInput>,
+    steps: Vec<JsStepInput>,
+    original_run_id: String,
+    provider: Option<JsProviderInput>,
+    exec_config_json: Option<String>,
+) -> Result<JsWorkflowResult> {
+    match tokio::task::spawn_blocking(move || {
+        let wf_id = Uuid::parse_str(&workflow_id)
+            .map_err(|_| configuration_error("Invalid workflow id."))?;
+        let (workflow, agent_map) = build_workflow(workflow_name, wf_id, &agents, &steps)?;
+        let (provider, max_tokens, temperature) = provider_from_js(provider)?;
+        let exec_config = parse_execution_config(exec_config_json.as_deref())
+            .map_err(configuration_error)?;
+        let engine = WorkflowEngine::new();
+        let record = engine
+            .resume_with_config(
+                &workflow,
+                &agent_map,
+                &original_run_id,
