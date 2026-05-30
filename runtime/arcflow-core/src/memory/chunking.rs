@@ -93,3 +93,91 @@ impl RecursiveCharacterSplitter {
             }
         }
         with_overlap
+    }
+
+    fn split_on_separator(&self, text: &str, separator: &str) -> Vec<String> {
+        if separator.is_empty() {
+            return text.chars().map(|c| c.to_string()).collect();
+        }
+        text.split(separator)
+            .map(|part| {
+                if part.is_empty() {
+                    String::new()
+                } else {
+                    format!("{part}{separator}")
+                }
+            })
+            .filter(|s| !s.is_empty())
+            .collect()
+    }
+}
+
+impl ChunkStrategy for RecursiveCharacterSplitter {
+    fn split(&self, text: &str) -> Vec<String> {
+        let trimmed = text.trim();
+        if trimmed.is_empty() {
+            return Vec::new();
+        }
+        if trimmed.len() <= self.chunk_size {
+            return vec![trimmed.to_string()];
+        }
+
+        for separator in &self.separators {
+            if separator.is_empty() || trimmed.contains(separator) {
+                let splits = self.split_on_separator(trimmed, separator);
+                return self.merge_splits(splits);
+            }
+        }
+        vec![trimmed.to_string()]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn empty_input_yields_no_chunks() {
+        let splitter = RecursiveCharacterSplitter::default();
+        assert!(splitter.split("").is_empty());
+        assert!(splitter.split("   ").is_empty());
+    }
+
+    #[test]
+    fn short_text_single_chunk() {
+        let splitter = RecursiveCharacterSplitter::new(100, 0);
+        let chunks = splitter.split("hello world");
+        assert_eq!(chunks, vec!["hello world".to_string()]);
+    }
+
+    #[test]
+    fn splits_on_paragraph_boundaries() {
+        let splitter = RecursiveCharacterSplitter::new(40, 0);
+        let text = "aaaa bbbb cccc dddd.\n\neeee ffff gggg hhhh.";
+        let chunks = splitter.split(text);
+        assert!(chunks.len() >= 2);
+        for chunk in &chunks {
+            assert!(chunk.len() <= 60, "chunk too large: {}", chunk.len());
+        }
+    }
+
+    #[test]
+    fn overlap_prefixes_later_chunks() {
+        let splitter = RecursiveCharacterSplitter::new(20, 5);
+        let text = "one two three four five six seven eight nine ten";
+        let chunks = splitter.split(text);
+        assert!(chunks.len() >= 2);
+        if chunks.len() >= 2 {
+            let second_start: String = chunks[1].chars().take(5).collect();
+            let first_end: String = chunks[0]
+                .chars()
+                .rev()
+                .take(5)
+                .collect::<String>()
+                .chars()
+                .rev()
+                .collect();
+            assert_eq!(second_start, first_end);
+        }
+    }
+}
