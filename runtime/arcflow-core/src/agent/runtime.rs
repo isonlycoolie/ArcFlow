@@ -93,3 +93,98 @@ impl AgentRuntime {
         state: &StateSnapshot,
         run_input: &str,
     ) -> Result<ExecutionStepOutput, RuntimeError> {
+        self.execute_with_context(agent, step_id, state, run_input, None)
+    }
+
+    /// Like [`Self::execute`] with optional tools, memory, and trace context.
+    pub fn execute_with_context(
+        &self,
+        agent: &AgentDefinition,
+        step_id: Uuid,
+        state: &StateSnapshot,
+        run_input: &str,
+        mut ctx: Option<&mut ExecutionContext<'_, '_>>,
+    ) -> Result<ExecutionStepOutput, RuntimeError> {
+        let memory_note = if let Some(ctx) = ctx.as_mut() {
+            self.run_memory_if_configured(agent, step_id, state, run_input, ctx)?
+        } else {
+            None
+        };
+        if let Some(ctx) = ctx.as_mut() {
+            self.run_tools_if_configured(agent, step_id, run_input, ctx)?;
+            tokens_consumed(ctx.sprint5, &ctx.run_id, step_id, &agent.name);
+        }
+        if agent.role == STUB_FAIL_ROLE {
+            return Err(RuntimeError::AgentExecutionFailed {
+                step_id,
+                reason: "stub agent configured to fail".into(),
+            });
+        }
+
+        if let Some(ctx) = ctx.as_ref() {
+            if let Some(ref test) = ctx.test_config {
+                let key = crate::workflow::resolve_key(
+                    ctx.step_order,
+                    &step_id.to_string(),
+                    test,
+                );
+                if let Some(stub_key) = key {
+                    if test.should_fail(&stub_key, ctx.test_attempt) {
+                        return Err(RuntimeError::AgentExecutionFailed {
+                            step_id,
+                            reason: format!("test stub failure for {stub_key}"),
+                        });
+                    }
+                    if let Some(output) = test.stub_output(&stub_key, ctx.test_attempt) {
+                        return Ok(ExecutionStepOutput {
+                            step_id,
+                            agent_id: agent.id,
+                            content: output,
+                            status: ExecutionStatus::Completed,
+                        });
+                    }
+                }
+            }
+        }
+
+        let step_tokens = if let Some(ctx) = ctx.as_mut() {
+            if let Some(provider) = ctx.provider.clone() {
+                Some(self.execute_with_provider(agent, step_id, run_input, ctx, provider)?)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
+        let prior = state.steps.len();
+        let (mut content, _tokens_for_step) = if let Some((text, tokens)) = step_tokens {
+            (text, Some(tokens))
+        } else {
+            (
+                format!(
+                    "[{role}] processed: {run_input} (step: {step_id}, prior_steps: {prior})",
+                    role = agent.role,
+                    run_input = run_input,
+                    step_id = step_id,
+                    prior = prior,
+                ),
+                None,
+            )
+        };
+
+        if let Some(note) = memory_note {
+            content.push_str(&format!(" memory_read={note:?}"));
+        }
+
+        if let Some(ctx) = ctx.as_mut() {
+            tokens_consumed(ctx.sprint5, &ctx.run_id, step_id, &agent.name);
+        }
+
+        Ok(ExecutionStepOutput {
+            step_id,
+            agent_id: agent.id,
+            content,
+            status: ExecutionStatus::Completed,
+        })
+    }
