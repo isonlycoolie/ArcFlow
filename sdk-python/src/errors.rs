@@ -23,7 +23,44 @@ pub fn workflow_run_error_to_py(err: WorkflowRunError) -> PyErr {
         WorkflowRunError::Failed { error, partial } => {
             raise_for_runtime_error(py, &error, partial.run_id.to_string(), &partial)
         }
+        WorkflowRunError::Interrupted {
+            approval_key,
+            expires_at,
+            partial,
+        } => raise_interrupted(
+            py,
+            partial.run_id.to_string(),
+            approval_key,
+            expires_at.to_rfc3339(),
+        ),
     })
+}
+
+fn raise_interrupted(
+    py: Python<'_>,
+    run_id: String,
+    approval_key: String,
+    expires_at: String,
+) -> PyErr {
+    use pyo3::types::PyDict;
+    let built: PyResult<Bound<'_, PyAny>> = (|| {
+        let hitl_mod = py.import("arcflow.hitl")?;
+        let cls = hitl_mod.getattr("WorkflowInterruptedError")?;
+        let kwargs = PyDict::new_bound(py);
+        kwargs.set_item("run_id", run_id.clone())?;
+        kwargs.set_item("approval_key", approval_key.clone())?;
+        kwargs.set_item("expires_at", expires_at)?;
+        cls.call(
+            (prefix(&format!(
+                "Workflow paused for human approval '{approval_key}'."
+            )),),
+            Some(&kwargs),
+        )
+    })();
+    match built {
+        Ok(value) => PyErr::from_value(value),
+        Err(err) => err,
+    }
 }
 
 fn raise_for_runtime_error(
@@ -125,6 +162,22 @@ fn raise_for_runtime_error(
             *configured_ms as f64 / 1000.0,
             *elapsed_ms as f64 / 1000.0,
         ),
+        RuntimeError::HumanRejected { approval_key } => {
+            let built: PyResult<Bound<'_, PyAny>> = (|| {
+                let hitl_mod = py.import("arcflow.hitl")?;
+                let cls = hitl_mod.getattr("HumanRejectedError")?;
+                let kwargs = pyo3::types::PyDict::new_bound(py);
+                kwargs.set_item("approval_key", approval_key)?;
+                cls.call(
+                    (prefix(&format!("Human rejected approval '{approval_key}'.")),),
+                    Some(&kwargs),
+                )
+            })();
+            match built {
+                Ok(value) => PyErr::from_value(value),
+                Err(err) => err,
+            }
+        }
         _ => {
             let failed = partial.step_outputs.last().map(|o| o.agent_id.to_string());
             raise_execution(py, runtime_execution_message(err), Some(run_id), failed)
@@ -167,8 +220,20 @@ fn runtime_config_message(err: &RuntimeError) -> String {
         } => format!("Provider '{provider_id}' failed for step '{step_id}': {reason}."),
         RuntimeError::StepTimeout { .. }
         | RuntimeError::WorkflowTimeout { .. }
-        | RuntimeError::RetryExhausted { .. }
+        |         RuntimeError::RetryExhausted { .. }
         | RuntimeError::RecoveryStorageError { .. } => format!("{err}."),
+        RuntimeError::HumanRejected { approval_key } => {
+            format!("Human rejected approval '{approval_key}'.")
+        }
+        RuntimeError::HumanTimeout { approval_key } => {
+            format!("Human approval '{approval_key}' timed out.")
+        }
+        RuntimeError::ApprovalNotFound { approval_key } => {
+            format!("Approval '{approval_key}' not found.")
+        }
+        RuntimeError::AlreadyApproved { approval_key } => {
+            format!("Approval '{approval_key}' was already resolved.")
+        }
     })
 }
 
@@ -219,6 +284,18 @@ fn runtime_execution_message(err: &RuntimeError) -> String {
         ),
         RuntimeError::RecoveryStorageError { reason } => {
             format!("Recovery storage error: {reason}.")
+        }
+        RuntimeError::HumanRejected { approval_key } => {
+            format!("Human rejected approval '{approval_key}'.")
+        }
+        RuntimeError::HumanTimeout { approval_key } => {
+            format!("Human approval '{approval_key}' timed out.")
+        }
+        RuntimeError::ApprovalNotFound { approval_key } => {
+            format!("Approval '{approval_key}' not found.")
+        }
+        RuntimeError::AlreadyApproved { approval_key } => {
+            format!("Approval '{approval_key}' was already resolved.")
         }
     })
 }
