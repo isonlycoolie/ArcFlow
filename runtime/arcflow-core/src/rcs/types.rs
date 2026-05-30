@@ -283,3 +283,98 @@ pub struct GraphEdge {
     pub from: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub to: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub condition: Option<String>,
+}
+
+/// Fan-in join for parallel branches.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct JoinNode {
+    pub id: String,
+    pub wait_for: Vec<String>,
+}
+
+fn default_max_graph_iterations() -> u32 {
+    100
+}
+
+/// Graph execution topology (Phase 1.1).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GraphDefinition {
+    pub entry_node: String,
+    #[serde(default = "default_max_graph_iterations")]
+    pub max_iterations: u32,
+    pub nodes: Vec<GraphNode>,
+    pub edges: Vec<GraphEdge>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub join_nodes: Vec<JoinNode>,
+}
+
+/// Complete workflow specification submitted by an SDK.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct WorkflowDefinition {
+    /// Unique workflow identifier (UUID v4).
+    pub id: Uuid,
+    /// Human-readable workflow name (max 256 chars at validation).
+    pub name: String,
+    /// Steps comprising the workflow.
+    pub steps: Vec<StepDefinition>,
+    /// Optional default retry policy for all steps.
+    pub retry_policy: Option<RetryPolicy>,
+    /// Linear (default) or graph execution.
+    #[serde(default)]
+    pub execution_mode: ExecutionMode,
+    /// Required when `execution_mode` is graph.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub graph: Option<GraphDefinition>,
+}
+
+/// Request to execute a registered workflow.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct RunRequest {
+    /// Registered workflow id to execute.
+    pub workflow_id: Uuid,
+    /// Caller-supplied input payload as text.
+    pub input: String,
+    /// Trace id for observability correlation.
+    pub trace_id: Uuid,
+    /// Optional LLM provider override for this run.
+    pub provider_config: Option<ProviderConfig>,
+}
+
+/// Outcome of a workflow execution.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct RunResult {
+    /// Trace id matching the originating run.
+    pub trace_id: Uuid,
+    /// Overall workflow execution status.
+    pub status: ExecutionStatus,
+    /// Final workflow output when successful.
+    pub output: Option<String>,
+    /// Per-step results collected during execution.
+    pub steps: Vec<StepResult>,
+    /// Error details when status is failed.
+    pub error: Option<ErrorPayload>,
+}
+
+/// Result of a single step within a workflow run.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct StepResult {
+    /// Step identifier.
+    pub step_id: Uuid,
+    /// Step execution status.
+    pub status: ExecutionStatus,
+    /// Step output text when present.
+    pub output: Option<String>,
+    /// Wall-clock latency in milliseconds.
+    pub latency_ms: u64,
+    /// Token usage when reported by the provider.
+    pub tokens_used: Option<u32>,
+}
+
+/// Structured error returned to SDKs.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ErrorPayload {
+    /// Stable machine-readable error code.
+    pub code: ErrorCode,
+    /// Human-readable error message.
