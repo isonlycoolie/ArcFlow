@@ -1,10 +1,19 @@
 //! Bounded in-process trace storage (Sprint 5 Phase 3).
 
 use std::collections::HashMap;
+use std::sync::{Arc, OnceLock};
 
 use crate::constants::{MAX_CONCURRENT_TRACES, MAX_TRACE_EVENTS_PER_RUN};
 use crate::tracing::events::TraceEventKind;
 use crate::tracing::types::TraceEvent;
+
+pub type PersistHook = Arc<dyn Fn(&str, &TraceEvent) + Send + Sync>;
+static PERSIST_HOOK: OnceLock<PersistHook> = OnceLock::new();
+
+/// Registers a hook invoked after each trace event is appended (e.g. Postgres persist).
+pub fn set_trace_event_persist_hook(hook: PersistHook) {
+    let _ = PERSIST_HOOK.set(hook);
+}
 
 #[derive(Debug)]
 struct BoundedEventBuffer {
@@ -52,6 +61,11 @@ impl TraceStore {
             return false;
         }
         buffer.events.push(event);
+        if let Some(hook) = PERSIST_HOOK.get() {
+            if let Some(last) = buffer.events.last() {
+                hook(run_id, last);
+            }
+        }
         true
     }
 
@@ -79,15 +93,3 @@ impl TraceStore {
             }
         }
         self.evict_if_needed();
-    }
-
-    fn evict_if_needed(&mut self) {
-        while self.traces.len() > MAX_CONCURRENT_TRACES {
-            let Some(oldest) = self.completion_order.first().cloned() else {
-                break;
-            };
-            self.traces.remove(&oldest);
-            self.completion_order.retain(|id| id != &oldest);
-        }
-    }
-}
