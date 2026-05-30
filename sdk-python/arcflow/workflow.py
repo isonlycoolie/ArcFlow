@@ -188,3 +188,98 @@ class Workflow:
             raise WorkflowConfigurationError(
                 f"[ArcFlow] retry max_attempts exceeds maximum {RETRY_MAX_ALLOWED_ATTEMPTS}."
             )
+        self._retry = (max_attempts, backoff or ExponentialBackoff())
+        return self
+
+    def timeout(self, seconds: float) -> Workflow:
+        if self._has_run:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] workflow.timeout() must be called before workflow.run()."
+            )
+        if seconds <= 0:
+            raise WorkflowConfigurationError(
+                f"[ArcFlow] Workflow timeout must be positive. Got {seconds}s."
+            )
+        self._workflow_timeout_seconds = seconds
+        return self
+
+    def step_timeout(self, seconds: float) -> Workflow:
+        if self._has_run:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] workflow.step_timeout() must be called before workflow.run()."
+            )
+        if seconds <= 0:
+            raise WorkflowConfigurationError(
+                f"[ArcFlow] Step timeout must be positive. Got {seconds}s."
+            )
+        self._step_timeout_seconds = seconds
+        return self
+
+    def enable_recovery(self, storage: str = "postgresql") -> Workflow:
+        if storage != "postgresql":
+            raise WorkflowConfigurationError(
+                f"[ArcFlow] '{storage}' is not a supported recovery backend. "
+                "Supported: postgresql."
+            )
+        self._recovery_enabled = True
+        return self
+
+    def _graph_payload(self) -> str:
+        if not self._entry_node:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] Graph workflow has no entry node."
+            )
+        nodes = [
+            {"id": node_id, "step_id": step_id}
+            for node_id, (_, step_id) in self._graph_nodes.items()
+        ]
+        edges = [
+            {"from": f, "to": t, "condition": c}
+            for f, t, c in self._graph_edges
+        ]
+        payload: dict[str, object] = {
+            "entry_node": self._entry_node,
+            "max_iterations": self._max_iterations,
+            "nodes": nodes,
+            "edges": edges,
+        }
+        if self._graph_joins:
+            payload["join_nodes"] = [
+                {"id": join_id, "wait_for": branches}
+                for join_id, branches in self._graph_joins
+            ]
+        return json.dumps(payload)
+
+    def _agents_and_steps(self) -> tuple[list[Agent], list[tuple[str, str, int, str | None]]]:
+        if self._graph_mode:
+            agents: list[Agent] = []
+            rows: list[tuple[str, str, int, str | None, str | None]] = []
+            for order, (node_id, (agent, step_id)) in enumerate(
+                self._graph_nodes.items(), start=1
+            ):
+                agents.append(agent)
+                rows.append((step_id, str(agent.agent_id), order, None, None))
+            return agents, rows
+        return self._steps, self._step_rows
+
+    def _build_run_payload(
+        self, run_input: str, exec_config_json: str | None
+    ) -> dict[str, object]:
+        agents, steps = self._agents_and_steps()
+        workflow_id = self._workflow_id or str(uuid4())
+        self._workflow_id = workflow_id
+        step_defs = []
+        for sid, aid, order, _, hitl_json in steps:
+            row: dict[str, object] = {"id": sid, "agent_id": aid, "order": order}
+            if hitl_json:
+                row["hitl"] = json.loads(hitl_json)
+            step_defs.append(row)
+        agent_defs = [
+            {
+                "id": str(agent.agent_id),
+                "name": agent.name,
+                "role": agent.role,
+                "instructions": agent.instructions,
+            }
+            for agent in agents
+        ]
