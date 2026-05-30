@@ -188,3 +188,98 @@
         },
         "instructions": {
           "type": "string",
+          "description": "System or task instructions. Sprint 2–3, Sprint 6 provider calls."
+        },
+        "tools": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ToolDefinition" },
+          "description": "Tools available to the agent. Sprint 4."
+        },
+        "memory_config": {
+          "$ref": "#/$defs/MemoryConfig",
+          "description": "Optional memory configuration. Sprint 4."
+        }
+      },
+      "required": ["id", "name", "role", "instructions"],
+      "additionalProperties": false
+    },
+    "StepDefinition": {
+      "type": "object",
+      "description": "Ordered step within a workflow. Sprint 2 execution.",
+      "properties": {
+        "id": { "$ref": "#/$defs/Uuid" },
+        "agent_id": {
+          "$ref": "#/$defs/Uuid",
+          "description": "Agent that executes this step. Sprint 2–3."
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Execution order among steps. Sprint 2."
+        },
+        "fallback_step_id": {
+          "$ref": "#/$defs/Uuid",
+          "description": "Optional fallback step on failure. Sprint 7."
+        },
+        "hitl": {
+          "$ref": "#/$defs/HitlConfig",
+          "description": "Optional human approval gate (Phase 1.4)."
+        }
+      },
+      "required": ["id", "agent_id", "order"],
+      "additionalProperties": false
+    },
+    "HitlConfig": {
+      "type": "object",
+      "description": "Human-in-the-loop gate on a step (Phase 1.4).",
+      "properties": {
+        "approval_key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable key scoped to the run for approval requests."
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Wall-clock seconds before the approval expires."
+        },
+        "interrupt": {
+          "type": "boolean",
+          "default": true,
+          "description": "When true, checkpoint and return Interrupted instead of blocking."
+        }
+      },
+      "required": ["approval_key", "timeout_seconds"],
+      "additionalProperties": false
+    },
+    "ExecutionMode": {
+      "type": "string",
+      "enum": ["linear", "graph"],
+      "default": "linear",
+      "description": "Workflow execution strategy. linear = ordered steps; graph = DAG with conditional edges. Phase 1.1."
+    },
+    "GraphNode": {
+      "type": "object",
+      "description": "Node in a graph workflow referencing a StepDefinition. Phase 1.1.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Graph-local node identifier."
+        },
+        "step_ref": {
+          "$ref": "#/$defs/Uuid",
+          "description": "References StepDefinition.id."
+        },
+        "inputs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional input state keys for this node."
+        },
+        "outputs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional output state keys for this node."
+        }
+      },
+      "required": ["id", "step_ref"],
+      "additionalProperties": false
