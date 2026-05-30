@@ -93,3 +93,41 @@ impl EmbeddingProvider for LocalEmbeddingProvider {
             return Err(EmbeddingError::EmptyBatch);
         }
         if let Ok(path) = std::env::var("ARCFLOW_EMBEDDING_ONNX_PATH") {
+            if !path.trim().is_empty() {
+                if let Ok(vecs) = super::onnx::embed_batch(path.trim(), texts, self.dimensions).await
+                {
+                    return Ok(vecs);
+                }
+                tracing::warn!("ONNX embedding failed; using hash fallback");
+            }
+        }
+        Ok(texts
+            .iter()
+            .map(|t| local_embed(t, self.dimensions))
+            .collect())
+    }
+}
+
+pub fn local_provider(model: &str) -> Result<Arc<dyn EmbeddingProvider>, EmbeddingError> {
+    Ok(Arc::new(LocalEmbeddingProvider::new(model)?))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn local_embed_normalized_384() {
+        let v = local_embed("hello world", 384);
+        assert_eq!(v.len(), 384);
+        let norm: f32 = v.iter().map(|x| x * x).sum::<f32>().sqrt();
+        assert!((norm - 1.0).abs() < 0.01);
+    }
+
+    #[tokio::test]
+    async fn local_provider_default_model() {
+        let p = LocalEmbeddingProvider::new(DEFAULT_MODEL).unwrap();
+        let v = p.embed(&["offline text".into()]).await.unwrap();
+        assert_eq!(v[0].len(), 384);
+    }
+}
