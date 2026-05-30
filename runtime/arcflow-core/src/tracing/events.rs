@@ -201,4 +201,17 @@ pub enum TraceEventKind {
         original_run_id: String,
         steps_re_executed: usize,
     },
+    /// Streaming chunk metadata only — no token text (RCS v0.4, SEC-1).
+    StreamChunkReceived {
+        run_id: String,
+        step_id: String,
+        chunk_bytes: usize,
+    },
+    /// Token count delta during streaming — counts only, no text (RCS v0.4, SEC-1).
+    TokenEmitted {
+        run_id: String,
+        step_id: String,
+        completion_token_delta: u32,
+        prompt_token_delta: u32,
+    },
 }

@@ -456,6 +456,7 @@ impl AgentRuntime {
 
         let mut output = String::new();
         let mut tokens = TokenUsage::default();
+        let mut prev_tokens = TokenUsage::default();
         let model_id = provider.model_id().to_string();
         let mut stream = stream;
 
@@ -463,6 +464,11 @@ impl AgentRuntime {
             match chunk_result {
                 Ok(chunk) => {
                     if !chunk.content.is_empty() {
+                        ctx.sprint5.emit(TraceEventKind::StreamChunkReceived {
+                            run_id: ctx.run_id.clone(),
+                            step_id: step_id_str.to_string(),
+                            chunk_bytes: chunk.content.len(),
+                        });
                         if let Some(tx) = ctx.stream_tx.as_ref() {
                             tx.try_send(StreamEvent::Token {
                                 text: chunk.content.clone(),
@@ -472,6 +478,20 @@ impl AgentRuntime {
                         output.push_str(&chunk.content);
                     }
                     if let Some(t) = chunk.tokens {
+                        let completion_delta = t
+                            .completion_tokens
+                            .saturating_sub(prev_tokens.completion_tokens);
+                        let prompt_delta =
+                            t.prompt_tokens.saturating_sub(prev_tokens.prompt_tokens);
+                        if completion_delta > 0 || prompt_delta > 0 {
+                            ctx.sprint5.emit(TraceEventKind::TokenEmitted {
+                                run_id: ctx.run_id.clone(),
+                                step_id: step_id_str.to_string(),
+                                completion_token_delta: completion_delta,
+                                prompt_token_delta: prompt_delta,
+                            });
+                        }
+                        prev_tokens = t.clone();
                         tokens = t;
                     }
                     if chunk.is_final {

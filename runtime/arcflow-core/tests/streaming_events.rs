@@ -171,3 +171,45 @@ fn non_streaming_run_emits_no_stream_events() {
         .expect("workflow should complete");
     assert!(rx.try_recv().is_err());
 }
+
+#[test]
+fn streaming_trace_store_has_no_token_text() {
+    use arcflow_core::tracing::get_execution_trace;
+
+    let agent_id = Uuid::new_v4();
+    let step_id = Uuid::new_v4();
+    let run_id = Uuid::new_v4();
+    let (workflow, agents) = single_step_workflow(agent_id, step_id);
+    let provider: Arc<dyn ModelProvider> = Arc::new(MockStreamProvider {
+        chunks: vec!["secret-token-text".into()],
+    });
+    let (tx, mut rx) = default_stream_pair();
+    let exec_config = ExecutionConfig {
+        run_id: Some(run_id),
+        stream: Some(StreamConfig { enabled: true }),
+        ..ExecutionConfig::default()
+    };
+    WorkflowEngine::new()
+        .execute_with_config(
+            &workflow,
+            &agents,
+            "hello",
+            None,
+            None,
+            Some(provider),
+            128,
+            0.0,
+            &exec_config,
+            Some(tx),
+        )
+        .expect("workflow should complete");
+    while rx.try_recv().is_ok() {}
+
+    let trace = get_execution_trace(&run_id.to_string()).expect("trace present");
+    let blob = serde_json::to_string(&trace.events).expect("serialize");
+    assert!(
+        !blob.contains("secret-token-text"),
+        "trace must not contain streamed token text"
+    );
+    assert!(blob.contains("StreamChunkReceived"));
+}

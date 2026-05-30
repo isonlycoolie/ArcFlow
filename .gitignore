@@ -18,6 +18,7 @@ ArcFlow_Improvement_Plans/phase1-90-days/*
 ArcFlow_Improvement_Plans/phase2-months-4-6/*
 !ArcFlow_Improvement_Plans/phase2-months-4-6/workflow-testing-guide.md
 !ArcFlow_Improvement_Plans/phase2-months-4-6/langchain-migration-guide.md
+!ArcFlow_Improvement_Plans/phase2-months-4-6/streaming-workflows-guide.md
 ArcFlow_Improvement_Plans/phase3-long-term/*
 !ArcFlow_Improvement_Plans/phase3-long-term/otel-observability-guide.md
 !ArcFlow_Improvement_Plans/phase3-long-term/workflow-registry-guide.md
