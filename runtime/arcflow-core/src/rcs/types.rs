@@ -568,3 +568,24 @@ mod tests {
         });
     }
 
+    #[test]
+    fn error_payload_round_trip() {
+        round_trip(&ErrorPayload {
+            code: ErrorCode::StepExecutionFailed,
+            message: "step failed".to_string(),
+            step_id: Some(Uuid::new_v4()),
+            recoverable: true,
+        });
+    }
+
+    #[test]
+    fn trace_event_round_trip() {
+        round_trip(&TraceEvent {
+            trace_id: Uuid::new_v4(),
+            event_kind: TraceEventKind::WorkflowStarted,
+            timestamp: Utc.with_ymd_and_hms(2025, 1, 1, 0, 0, 0).unwrap(),
+            step_id: None,
+            data: Some(serde_json::json!({"note": "start"})),
+        });
+    }
+}
