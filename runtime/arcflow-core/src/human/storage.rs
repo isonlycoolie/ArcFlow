@@ -93,3 +93,45 @@ impl HumanApprovalStorage {
             let _ = sqlx::query(
                 "UPDATE arcflow_human_approvals SET status = 'expired', resolved_at = NOW()
                  WHERE run_id = $1 AND approval_key = $2",
+            )
+            .bind(run_id)
+            .bind(approval_key)
+            .execute(&self.pool)
+            .await;
+            return Err(RuntimeError::HumanTimeout {
+                approval_key: approval_key.to_string(),
+            });
+        }
+
+        let new_status = if approved { "approved" } else { "rejected" };
+        tokio::time::timeout(
+            std::time::Duration::from_secs(RECOVERY_STORAGE_TIMEOUT_SECS),
+            sqlx::query(
+                "UPDATE arcflow_human_approvals
+                 SET status = $3, approved = $4, data_json = $5, resolved_at = NOW()
+                 WHERE run_id = $1 AND approval_key = $2 AND status = 'pending'",
+            )
+            .bind(run_id)
+            .bind(approval_key)
+            .bind(new_status)
+            .bind(approved)
+            .bind(data)
+            .execute(&self.pool),
+        )
+        .await
+        .map_err(|_| RuntimeError::RecoveryStorageError {
+            reason: "approval resolve timed out".into(),
+        })?
+        .map_err(|e| RuntimeError::RecoveryStorageError {
+            reason: format!("approval resolve failed: {e}"),
+        })?;
+
+        Ok(ApprovalResolveOutcome::Resolved)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ApprovalResolveOutcome {
+    Resolved,
+    AlreadyResolved,
+}
