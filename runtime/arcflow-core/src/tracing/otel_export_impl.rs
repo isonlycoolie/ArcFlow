@@ -5,7 +5,6 @@ use opentelemetry::KeyValue;
 use tracing::warn;
 
 use super::otel::{init_otlp_exporter, otlp_configured};
-use super::otel_config;
 use super::registry::get_execution_trace;
 use super::types::{ExecutionTrace, StepTrace};
 
@@ -42,7 +41,7 @@ fn export_trace_blocking(trace: &ExecutionTrace) -> Result<(), String> {
 }
 
 pub fn maybe_export_trace_impl(run_id: &str) {
-    if !otlp_configured() && !otel_config::export_requested() {
+    if !otlp_configured() {
         return;
     }
     let Some(trace) = get_execution_trace(run_id) else {
