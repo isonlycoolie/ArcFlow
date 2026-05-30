@@ -568,3 +568,98 @@ pub(crate) fn run_sorted_steps(
 
         for (step_index, step) in steps.iter().enumerate() {
             if step_index < start_index {
+                continue;
+            }
+            if let Err(err) = check_workflow_timeout(
+                workflow_timeout,
+                workflow_started,
+                &run_key,
+                &mut sprint5,
+            ) {
+                sprint5.emit(TraceEventKind::WorkflowFailed {
+                    run_id: run_key.clone(),
+                    duration_ms: workflow_started.elapsed().as_millis() as u64,
+                    failed_step_index: Some(step_index),
+                    error_code: "workflow_timeout".into(),
+                });
+                let partial = partial_record(&loop_ctx, &legacy);
+                return Err(WorkflowRunError::Failed {
+                    error: err,
+                    partial,
+                });
+            }
+            let Some(agent) = agents.get(&step.agent_id) else {
+                return Err(WorkflowRunError::Aborted(RuntimeError::AgentNotFound {
+                    agent_id: step.agent_id,
+                    step_id: step.id,
+                }));
+            };
+            let step_approval = resume
+                .as_ref()
+                .and_then(|r| r.approval.as_ref())
+                .filter(|_| step_index == start_index);
+            run_one_step(
+                agent_runtime,
+                &mut loop_ctx,
+                step,
+                step_index,
+                agent,
+                &steps,
+                agents,
+                &mut memory,
+                &mut legacy,
+                &mut sprint5,
+                &run_key,
+                tool_runtime,
+                tool_invoker.clone(),
+                workflow_started,
+                provider.clone(),
+                provider_max_tokens,
+                provider_temperature,
+                retry_config.clone(),
+                step_timeout,
+                workflow_deadline,
+                exec_config.recovery_enabled,
+                step_approval,
+                active_stream.clone(),
+                None,
+            )?;
+        }
+
+        if let Some(ref r) = resume {
+            let re_executed = step_count.saturating_sub(r.start_step_index);
+            sprint5.emit(TraceEventKind::WorkflowRecoveryCompleted {
+                run_id: run_key.clone(),
+                original_run_id: r.original_run_id.to_string(),
+                steps_re_executed: re_executed,
+            });
+        }
+
+        let duration_ms = workflow_started.elapsed().as_millis() as u64;
+        sprint5.emit(TraceEventKind::WorkflowCompleted {
+            run_id: run_key.clone(),
+            duration_ms,
+            total_tokens: TokenUsage::default(),
+        });
+        legacy.workflow_completed();
+        info!(run_id = %run_id, "workflow execution completed");
+        let trace_events = legacy.events().to_vec();
+        drop(sprint5);
+
+        store.mark_complete(&run_key);
+        maybe_export_trace(&run_key);
+        Ok(WorkflowExecutionRecord {
+            run_id,
+            workflow_id: workflow.id,
+            step_outputs,
+            final_state: state.snapshot(),
+            trace_events,
+        })
+    })
+    .unwrap_or_else(|| {
+        Err(WorkflowRunError::Aborted(RuntimeError::StateCommitFailed {
+            step_id: Uuid::nil(),
+            reason: "trace store lock unavailable".into(),
+        }))
+    })
+}
