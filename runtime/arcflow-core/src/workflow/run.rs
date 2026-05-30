@@ -378,3 +378,98 @@ pub(crate) fn run_one_step(
                             workflow_started,
                             step_started,
                             recovery_enabled,
+                            err,
+                            &stream_tx,
+                        );
+                    }
+                } else {
+                    return fail_step(
+                        loop_ctx,
+                        legacy,
+                        sprint5,
+                        run_key,
+                        step,
+                        step_index,
+                        workflow_started,
+                        step_started,
+                        recovery_enabled,
+                        err,
+                        &stream_tx,
+                    );
+                }
+            } else {
+                return fail_step(
+                    loop_ctx,
+                    legacy,
+                    sprint5,
+                    run_key,
+                    step,
+                    step_index,
+                    workflow_started,
+                    step_started,
+                    recovery_enabled,
+                    err,
+                    &stream_tx,
+                );
+            }
+        }
+    };
+
+    commit_step_output(
+        loop_ctx,
+        legacy,
+        sprint5,
+        run_key,
+        step,
+        step_index,
+        step_started,
+        out,
+        &stream_tx,
+    )
+}
+
+fn commit_step_output(
+    loop_ctx: &mut RunLoop<'_>,
+    legacy: &TraceEmitter,
+    sprint5: &mut TraceEventEmitter<'_>,
+    run_key: &str,
+    step: &StepDefinition,
+    step_index: usize,
+    step_started: Instant,
+    out: ExecutionStepOutput,
+    stream_tx: &Option<StreamChannelSender>,
+) -> Result<(), WorkflowRunError> {
+    loop_ctx
+        .state
+        .commit(out.clone())
+        .map_err(|e: StateError| WorkflowRunError::Failed {
+            error: RuntimeError::StateCommitFailed {
+                step_id: step.id,
+                reason: e.to_string(),
+            },
+            partial: partial_record(loop_ctx, legacy),
+        })?;
+
+    sprint5.emit(TraceEventKind::StepCompleted {
+        run_id: run_key.to_string(),
+        step_id: step.id.to_string(),
+        step_index,
+        duration_ms: step_started.elapsed().as_millis() as u64,
+        tokens: TokenUsage::default(),
+        output_size_bytes: out.content.len(),
+    });
+    try_emit_stream(
+        stream_tx,
+        StreamEvent::StepComplete {
+            step_id: step.id.to_string(),
+            duration_ms: step_started.elapsed().as_millis() as u64,
+        },
+    );
+    loop_ctx.step_outputs.push(out);
+    Ok(())
+}
+
+/// Runs validated steps in `order` sequence; halts on first agent failure with a partial record.
+#[allow(clippy::result_large_err)]
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn run_sorted_steps(
