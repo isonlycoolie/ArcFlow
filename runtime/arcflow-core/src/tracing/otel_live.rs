@@ -54,3 +54,23 @@ pub fn workflow_span(run_id: &str, workflow_name: &str) -> SpanGuard {
         ),
     }
 }
+
+/// Opens an `arcflow.step` span nested under the active workflow span.
+pub fn step_span(run_id: &str, step_id: &str, step_index: usize, agent_name: &str) -> SpanGuard {
+    if !otel_config::otel_enabled() {
+        return SpanGuard::none();
+    }
+    try_init_live_tracing();
+    SpanGuard {
+        _inner: Some(
+            tracing::info_span!(
+                "arcflow.step",
+                run_id = run_id,
+                step_id = step_id,
+                step_index = step_index,
+                agent_name = agent_name,
+            )
+            .entered(),
+        ),
+    }
+}

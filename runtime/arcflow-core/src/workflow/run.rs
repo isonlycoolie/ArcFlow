@@ -292,6 +292,14 @@ pub(crate) fn run_one_step(
         agent_role: agent.role.clone(),
     });
 
+    #[cfg(feature = "otel")]
+    let _otel_step = crate::tracing::otel_live::step_span(
+        run_key,
+        &step.id.to_string(),
+        step_index,
+        &agent.name,
+    );
+
     try_emit_stream(
         &stream_tx,
         StreamEvent::StepStart {
