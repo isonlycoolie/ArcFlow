@@ -93,3 +93,98 @@ pub fn resume_workflow_with_approval(
         }));
     };
     if !recovery.is_resumable() {
+        return Err(WorkflowRunError::Aborted(RuntimeError::RecoveryStorageError {
+            reason: "recovery state has already been consumed".into(),
+        }));
+    }
+    if recovery.failure_error_code != HUMAN_INTERRUPT_CODE {
+        return Err(WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
+            reason: "run is not in human interrupt state".into(),
+        }));
+    }
+    if recovery.workflow_definition_id != workflow.id.to_string() {
+        return Err(WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
+            reason: "workflow definition id does not match recovery state".into(),
+        }));
+    }
+
+    if !approval.approved {
+        return Err(WorkflowRunError::Failed {
+            error: RuntimeError::HumanRejected {
+                approval_key: approval_key.to_string(),
+            },
+            partial: build_partial_from_recovery(&recovery),
+        });
+    }
+
+    let precompleted: Vec<ExecutionStepOutput> = recovery
+        .completed_steps
+        .iter()
+        .filter_map(|s| {
+            let step_id = Uuid::parse_str(&s.step_id).ok()?;
+            let agent_id = Uuid::parse_str(&s.agent_id).ok()?;
+            Some(ExecutionStepOutput {
+                step_id,
+                agent_id,
+                content: s.content.clone(),
+                status: ExecutionStatus::Completed,
+            })
+        })
+        .collect();
+
+    let original_uuid = Uuid::parse_str(original_run_id).map_err(|_| {
+        WorkflowRunError::Aborted(RuntimeError::RecoveryStorageError {
+            reason: "invalid original_run_id".into(),
+        })
+    })?;
+
+    let resume = ResumeParams {
+        original_run_id: original_uuid,
+        recovery_id: recovery.recovery_id.clone(),
+        precompleted,
+        start_step_index: recovery.failed_at_step_index,
+        run_input: recovery.original_input.clone(),
+        approval: Some(approval),
+    };
+
+    let run_input = resume.run_input.clone();
+    let record = run_sorted_steps(
+        agent_runtime,
+        workflow,
+        agents,
+        &run_input,
+        tool_runtime,
+        tool_invoker,
+        provider,
+        provider_max_tokens,
+        provider_temperature,
+        exec_config,
+        Some(resume),
+        None,
+    )?;
+
+    if let Ok(url) = std::env::var("ARCFLOW_POSTGRESQL_URL") {
+        let rt = tokio::runtime::Runtime::new().map_err(|e| {
+            WorkflowRunError::Aborted(RuntimeError::RecoveryStorageError {
+                reason: e.to_string(),
+            })
+        })?;
+        let _ = rt.block_on(async {
+            if let Ok(pool) = sqlx::postgres::PgPoolOptions::new()
+                .max_connections(2)
+                .connect(&url)
+                .await
+            {
+                let storage = RecoveryStorage::new(pool);
+                let _ = storage.mark_consumed(&recovery.recovery_id).await;
+            }
+        });
+    }
+
+    Ok(record)
+}
+
+fn build_partial_from_recovery(recovery: &crate::recovery::state::RecoveryState) -> WorkflowExecutionRecord {
+    let run_id = Uuid::parse_str(&recovery.original_run_id).unwrap_or_else(|_| Uuid::new_v4());
+    let workflow_id =
+        Uuid::parse_str(&recovery.workflow_definition_id).unwrap_or_else(|_| Uuid::new_v4());
