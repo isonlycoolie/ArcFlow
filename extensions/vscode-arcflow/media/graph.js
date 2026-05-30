@@ -93,3 +93,22 @@
       text.textContent = node.label;
       g.appendChild(text);
 
+      nodesGroup.appendChild(g);
+    });
+    svg.appendChild(nodesGroup);
+  }
+
+  if (window.__ARCFLOW_INITIAL__) {
+    render(window.__ARCFLOW_INITIAL__);
+  }
+
+  window.addEventListener("message", function (event) {
+    if (event.data && event.data.type === "update") {
+      render(event.data);
+    }
+  });
+
+  if (typeof acquireVsCodeApi === "function") {
+    acquireVsCodeApi().postMessage({ type: "ready" });
+  }
+})();
