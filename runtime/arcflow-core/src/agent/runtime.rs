@@ -388,6 +388,8 @@ impl AgentRuntime {
                 });
                 #[cfg(feature = "otel")]
                 crate::tracing::otel_live::record_llm_tokens(
+                    provider.provider_id(),
+                    provider.model_id(),
                     response.tokens.prompt_tokens,
                     response.tokens.completion_tokens,
                 );
@@ -506,6 +508,8 @@ impl AgentRuntime {
         });
         #[cfg(feature = "otel")]
         crate::tracing::otel_live::record_llm_tokens(
+            provider.provider_id(),
+            provider.model_id(),
             tokens.prompt_tokens,
             tokens.completion_tokens,
         );

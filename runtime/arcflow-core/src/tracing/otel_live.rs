@@ -97,12 +97,24 @@ pub fn llm_span(run_id: &str, step_id: &str, provider: &str, model: &str) -> Spa
     }
 }
 
-/// Records token counts on the active LLM span (SEC-1: counts only).
-pub fn record_llm_tokens(prompt_tokens: u32, completion_tokens: u32) {
+/// Records token counts on the active LLM span and metrics (SEC-1: counts only).
+pub fn record_llm_tokens(
+    provider: &str,
+    model: &str,
+    prompt_tokens: u32,
+    completion_tokens: u32,
+) {
     if !otel_config::otel_enabled() {
         return;
     }
     let span = tracing::Span::current();
     span.record("tokens.prompt", prompt_tokens);
     span.record("tokens.completion", completion_tokens);
+    super::otel_metrics::record_llm_tokens(provider, model, "prompt", prompt_tokens as u64);
+    super::otel_metrics::record_llm_tokens(
+        provider,
+        model,
+        "completion",
+        completion_tokens as u64,
+    );
 }

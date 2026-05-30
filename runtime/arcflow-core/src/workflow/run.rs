@@ -655,6 +655,12 @@ pub(crate) fn run_sorted_steps(
         });
         legacy.workflow_completed();
         info!(run_id = %run_id, "workflow execution completed");
+        #[cfg(feature = "otel")]
+        crate::tracing::otel_metrics::record_workflow_duration_ms(
+            duration_ms,
+            "completed",
+            &workflow.name,
+        );
         let trace_events = legacy.events().to_vec();
         drop(sprint5);
 
