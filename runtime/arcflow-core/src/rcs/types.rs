@@ -188,3 +188,98 @@ pub struct ToolDefinition {
 }
 
 /// LLM provider configuration for a run (Sprint 6).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ProviderConfig {
+    /// Provider identifier.
+    pub provider_id: ProviderId,
+    /// Model name passed to the provider API.
+    pub model: String,
+    /// Environment variable name holding the API key.
+    pub api_key_env: String,
+    /// Optional provider-specific parameters.
+    pub params: Option<Value>,
+}
+
+/// Agent role, instructions, and optional tool/memory configuration.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct AgentDefinition {
+    /// Unique agent identifier.
+    pub id: Uuid,
+    /// Human-readable agent name.
+    pub name: String,
+    /// Role label used in prompts and traces.
+    pub role: String,
+    /// System or task instructions for the agent.
+    pub instructions: String,
+    /// Tools available to this agent.
+    pub tools: Option<Vec<ToolDefinition>>,
+    /// Memory configuration for this agent.
+    pub memory_config: Option<MemoryConfig>,
+}
+
+/// Human-in-the-loop gate on a step (Phase 1.4).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct HitlConfig {
+    /// Stable key scoped to the run for approval requests.
+    pub approval_key: String,
+    /// Wall-clock seconds before the approval expires.
+    pub timeout_seconds: u64,
+    /// When true, checkpoint and return Interrupted instead of blocking.
+    #[serde(default = "default_hitl_interrupt")]
+    pub interrupt: bool,
+}
+
+fn default_hitl_interrupt() -> bool {
+    true
+}
+
+/// Human approval payload injected on resume (Phase 1.4).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ApprovalResult {
+    pub approved: bool,
+    #[serde(default)]
+    pub data: Value,
+}
+
+/// Single step within a workflow definition.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct StepDefinition {
+    /// Unique step identifier.
+    pub id: Uuid,
+    /// Agent that executes this step.
+    pub agent_id: Uuid,
+    /// Execution order relative to other steps.
+    pub order: u32,
+    /// Optional fallback step when this step fails.
+    pub fallback_step_id: Option<Uuid>,
+    /// Optional human approval gate before agent execution.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hitl: Option<HitlConfig>,
+}
+
+/// Workflow execution strategy (Phase 1.1).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum ExecutionMode {
+    #[default]
+    Linear,
+    Graph,
+}
+
+/// Node in a graph workflow referencing a step definition.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GraphNode {
+    pub id: String,
+    pub step_ref: Uuid,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub inputs: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub outputs: Option<Vec<String>>,
+}
+
+/// Directed edge between graph nodes.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GraphEdge {
+    pub from: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub to: Option<String>,
