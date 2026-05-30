@@ -93,3 +93,98 @@ fn execute_with_config_sync(
     workflow_id: String,
     agents: Vec<JsAgentInput>,
     steps: Vec<JsStepInput>,
+    run_input: String,
+    provider: Option<JsProviderInput>,
+    exec_config_json: Option<String>,
+    graph_json: Option<String>,
+) -> std::result::Result<JsWorkflowResult, Error> {
+    let wf_id = Uuid::parse_str(&workflow_id)
+        .map_err(|_| configuration_error("Invalid workflow id."))?;
+    let (mut workflow, agent_map) = build_workflow(workflow_name, wf_id, &agents, &steps)?;
+    if let Some(raw) = graph_json {
+        crate::graph::apply_graph_json(&mut workflow, &raw).map_err(configuration_error)?;
+    }
+    let (provider, max_tokens, temperature) = provider_from_js(provider)?;
+    let exec_config = parse_execution_config(exec_config_json.as_deref())
+        .map_err(configuration_error)?;
+    let engine = WorkflowEngine::new();
+    let record = engine
+        .execute_with_config(
+            &workflow,
+            &agent_map,
+            &run_input,
+            None,
+            None,
+            provider,
+            max_tokens,
+            temperature,
+            &exec_config,
+            None,
+        )
+        .map_err(workflow_run_error_to_napi)?;
+    Ok(record_to_js(record))
+}
+
+#[napi(object)]
+pub struct JsStreamWorkflowResult {
+    pub events_json: String,
+    pub output: String,
+    pub run_id: String,
+    pub step_count: u32,
+    pub trace_events_json: String,
+}
+
+fn drain_stream_events(
+    mut rx: tokio::sync::mpsc::Receiver<StreamEvent>,
+) -> Vec<StreamEvent> {
+    let mut events = Vec::new();
+    while let Ok(event) = rx.try_recv() {
+        events.push(event);
+    }
+    events
+}
+
+#[allow(clippy::too_many_arguments)]
+fn execute_with_config_stream_sync(
+    workflow_name: String,
+    workflow_id: String,
+    agents: Vec<JsAgentInput>,
+    steps: Vec<JsStepInput>,
+    run_input: String,
+    provider: Option<JsProviderInput>,
+    exec_config_json: Option<String>,
+    graph_json: Option<String>,
+) -> std::result::Result<JsStreamWorkflowResult, Error> {
+    let wf_id = Uuid::parse_str(&workflow_id)
+        .map_err(|_| configuration_error("Invalid workflow id."))?;
+    let (mut workflow, agent_map) = build_workflow(workflow_name, wf_id, &agents, &steps)?;
+    if let Some(raw) = graph_json {
+        crate::graph::apply_graph_json(&mut workflow, &raw).map_err(configuration_error)?;
+    }
+    let (provider, max_tokens, temperature) = provider_from_js(provider)?;
+    let mut exec_config = parse_execution_config(exec_config_json.as_deref())
+        .map_err(configuration_error)?;
+    exec_config.stream = Some(StreamConfig { enabled: true });
+    let (tx, rx) = default_stream_pair();
+    let engine = WorkflowEngine::new();
+    let record = engine
+        .execute_with_config(
+            &workflow,
+            &agent_map,
+            &run_input,
+            None,
+            None,
+            provider,
+            max_tokens,
+            temperature,
+            &exec_config,
+            Some(tx),
+        )
+        .map_err(workflow_run_error_to_napi)?;
+    let events = drain_stream_events(rx);
+    let events_json =
+        serde_json::to_string(&events).unwrap_or_else(|_| "[]".to_string());
+    let base = record_to_js(record);
+    Ok(JsStreamWorkflowResult {
+        events_json,
+        output: base.output,
