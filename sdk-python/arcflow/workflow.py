@@ -45,6 +45,7 @@ class Workflow:
         self._runtime_url: str | None = (
             runtime.strip().rstrip("/") if runtime and runtime.strip() else None
         )
+        self._registry_ref: tuple[str, str] | None = None
 
     def step(
         self,
@@ -263,9 +264,82 @@ class Workflow:
             return agents, rows
         return self._steps, self._step_rows
 
+    def _build_publish_payload(
+        self, *, published_by: str | None = None
+    ) -> dict[str, object]:
+        agents, steps = self._agents_and_steps()
+        workflow_id = self._workflow_id or str(uuid4())
+        self._workflow_id = workflow_id
+        step_defs = []
+        for sid, aid, order, _, hitl_json in steps:
+            row: dict[str, object] = {"id": sid, "agent_id": aid, "order": order}
+            if hitl_json:
+                row["hitl"] = json.loads(hitl_json)
+            step_defs.append(row)
+        agent_defs = [
+            {
+                "id": str(agent.agent_id),
+                "name": agent.name,
+                "role": agent.role,
+                "instructions": agent.instructions,
+            }
+            for agent in agents
+        ]
+        workflow_body: dict[str, object] = {
+            "id": workflow_id,
+            "name": self._name,
+            "steps": step_defs,
+            "execution_mode": "graph" if self._graph_mode else "linear",
+        }
+        if self._graph_mode:
+            workflow_body["graph"] = json.loads(self._graph_payload())
+        payload: dict[str, object] = {
+            "workflow": workflow_body,
+            "agents": agent_defs,
+        }
+        if published_by:
+            payload["published_by"] = published_by
+        return payload
+
+    def publish(self, version: str, *, published_by: str | None = None) -> dict[str, object]:
+        if not self._runtime_url:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] workflow.publish() requires Workflow(..., runtime=...)."
+            )
+        if self._graph_mode:
+            if not self._graph_nodes:
+                raise WorkflowConfigurationError(
+                    "[ArcFlow] Cannot publish a graph workflow with no nodes."
+                )
+        elif not self._steps:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] Cannot publish a workflow with no steps."
+            )
+        from arcflow._internal import remote
+
+        return remote.publish_workflow(self, version, published_by=published_by)
+
+    @classmethod
+    def resolve(cls, name: str, version: str, *, runtime: str) -> Workflow:
+        from arcflow._internal import remote
+
+        resolved = remote.resolve_workflow(name, version, runtime=runtime)
+        wf = cls(name=name, runtime=runtime)
+        wf._registry_ref = (name, str(resolved["version"]))
+        return wf
+
     def _build_run_payload(
         self, run_input: str, exec_config_json: str | None
     ) -> dict[str, object]:
+        if self._registry_ref:
+            ref_name, ref_version = self._registry_ref
+            payload: dict[str, object] = {
+                "workflow_ref": {"name": ref_name, "version": ref_version},
+                "input": run_input,
+            }
+            if exec_config_json:
+                payload["exec_config"] = json.loads(exec_config_json)
+            return payload
         agents, steps = self._agents_and_steps()
         workflow_id = self._workflow_id or str(uuid4())
         self._workflow_id = workflow_id
@@ -396,15 +470,16 @@ class Workflow:
             raise WorkflowConfigurationError(
                 "[ArcFlow] Workflow input must be a non-empty string."
             )
-        if self._graph_mode:
-            if not self._graph_nodes:
+        if not self._registry_ref:
+            if self._graph_mode:
+                if not self._graph_nodes:
+                    raise WorkflowConfigurationError(
+                        "[ArcFlow] Cannot run a graph workflow with no nodes."
+                    )
+            elif not self._steps:
                 raise WorkflowConfigurationError(
-                    "[ArcFlow] Cannot run a graph workflow with no nodes."
+                    "[ArcFlow] Cannot run a workflow with no steps."
                 )
-        elif not self._steps:
-            raise WorkflowConfigurationError(
-                "[ArcFlow] Cannot run a workflow with no steps."
-            )
         from arcflow._internal.exec_config import build_exec_config_json
         from arcflow._internal import runtime
 

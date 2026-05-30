@@ -18,6 +18,45 @@ if TYPE_CHECKING:
 API_KEY_HEADER = "X-ArcFlow-Api-Key"
 
 
+def publish_workflow(
+    workflow: Workflow,
+    version: str,
+    *,
+    published_by: str | None = None,
+) -> dict[str, Any]:
+    base_url = workflow._runtime_url  # noqa: SLF001
+    if not base_url:
+        raise WorkflowConfigurationError(
+            "[ArcFlow] Remote runtime URL is not configured."
+        )
+    payload = workflow._build_publish_payload(published_by=published_by)  # noqa: SLF001
+    return _put_json(
+        f"{base_url}/v1/workflows/{workflow._name}/versions/{version}",  # noqa: SLF001
+        payload,
+    )
+
+
+def resolve_workflow(name: str, version: str, *, runtime: str) -> dict[str, Any]:
+    base_url = runtime.strip().rstrip("/")
+    if not base_url:
+        raise WorkflowConfigurationError(
+            "[ArcFlow] resolve() requires a non-empty runtime URL."
+        )
+    if _looks_like_semver_range(version):
+        from urllib.parse import quote
+
+        return _get_json(
+            f"{base_url}/v1/workflows/{name}/resolve?range={quote(version, safe='')}"
+        )
+    return _get_json(f"{base_url}/v1/workflows/{name}/versions/{version}")
+
+
+def _looks_like_semver_range(version: str) -> bool:
+    return any(ch in version for ch in "^~*") or version.startswith(
+        (">=", "<=", ">", "<")
+    )
+
+
 def run_workflow(
     workflow: Workflow,
     run_input: str,
@@ -121,6 +160,10 @@ def _api_key() -> str | None:
 
 def _post_json(url: str, payload: dict[str, Any]) -> dict[str, Any]:
     return _request("POST", url, payload)
+
+
+def _put_json(url: str, payload: dict[str, Any]) -> dict[str, Any]:
+    return _request("PUT", url, payload)
 
 
 def _get_json(url: str) -> dict[str, Any]:
