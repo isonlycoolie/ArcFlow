@@ -8,13 +8,15 @@ use arcflow_core::constants::{
 use arcflow_core::get_execution_trace;
 use arcflow_core::providers::{ModelProvider, ProviderRuntime};
 use arcflow_core::rcs::types::{ProviderConfig, ProviderId};
-use arcflow_core::workflow::{WorkflowEngine, WorkflowExecutionRecord};
+use arcflow_core::workflow::{ExecutionConfig, StreamConfig, WorkflowEngine, WorkflowExecutionRecord};
+use arcflow_core::streaming::{default_stream_pair, StreamEvent};
 use napi::bindgen_prelude::*;
 use napi::Error;
 use napi_derive::napi;
 use uuid::Uuid;
 
 use crate::errors::{configuration_error, trace_not_found, workflow_run_error_to_napi};
+use crate::execution_config::parse_execution_config;
 use crate::types::{build_workflow, JsAgentInput, JsStepInput};
 
 #[napi(object)]
@@ -85,74 +87,9 @@ fn provider_from_js(
     Ok((Some(provider), input.max_tokens, input.temperature as f32))
 }
 
-fn execute_sync(
+#[allow(clippy::too_many_arguments)]
+fn execute_with_config_sync(
     workflow_name: String,
     workflow_id: String,
     agents: Vec<JsAgentInput>,
     steps: Vec<JsStepInput>,
-    run_input: String,
-    provider: Option<JsProviderInput>,
-) -> std::result::Result<JsWorkflowResult, Error> {
-    let wf_id = Uuid::parse_str(&workflow_id)
-        .map_err(|_| configuration_error("Invalid workflow id."))?;
-    let (workflow, agent_map) = build_workflow(workflow_name, wf_id, &agents, &steps)?;
-    let (provider, max_tokens, temperature) = provider_from_js(provider)?;
-    let engine = WorkflowEngine::new();
-    let record = engine
-        .execute_with_tools(
-            &workflow,
-            &agent_map,
-            &run_input,
-            None,
-            None,
-            provider,
-            max_tokens,
-            temperature,
-        )
-        .map_err(workflow_run_error_to_napi)?;
-    Ok(record_to_js(record))
-}
-
-#[napi]
-pub async fn execute_workflow(
-    workflow_name: String,
-    workflow_id: String,
-    agents: Vec<JsAgentInput>,
-    steps: Vec<JsStepInput>,
-    run_input: String,
-    provider: Option<JsProviderInput>,
-) -> Result<JsWorkflowResult> {
-    match tokio::task::spawn_blocking(move || {
-        execute_sync(
-            workflow_name,
-            workflow_id,
-            agents,
-            steps,
-            run_input,
-            provider,
-        )
-    })
-    .await
-    {
-        Ok(Ok(result)) => Ok(result),
-        Ok(Err(err)) => Err(err),
-        Err(err) => Err(Error::from_reason(format!(
-            "[ArcFlow] Runtime task failed: {err}"
-        ))),
-    }
-}
-
-#[napi]
-pub fn get_execution_trace_json(run_id: String) -> Result<String> {
-    match get_execution_trace(&run_id) {
-        Some(trace) => serde_json::to_string(&trace).map_err(|e| {
-            Error::from_reason(format!("[ArcFlow] Failed to serialize trace: {e}"))
-        }),
-        None => Err(trace_not_found(&run_id)),
-    }
-}
-
-#[napi]
-pub fn get_version() -> String {
-    env!("CARGO_PKG_VERSION").to_string()
-}
