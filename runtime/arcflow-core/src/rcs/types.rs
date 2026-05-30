@@ -72,6 +72,10 @@ pub enum ErrorCode {
     ApprovalNotFound,
     /// Approval was already resolved (Phase 1.4 HITL).
     AlreadyApproved,
+    /// Embedding provider failure (Phase 2.5).
+    EmbeddingError,
+    /// Rerank provider failure (Phase 2.5).
+    RerankError,
 }
 
 /// Memory backend kind for agent configuration.
@@ -163,8 +167,71 @@ pub struct RetryPolicy {
     pub max_backoff_ms: u64,
 }
 
-/// Agent memory access configuration (Sprint 4).
+/// Hybrid retrieval mode for vector memory (Phase 2.5).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum RetrievalModeSpec {
+    #[default]
+    Dense,
+    Hybrid,
+}
+
+/// Optional rerank provider for vector retrieval (Phase 2.5).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum RerankProviderSpec {
+    Cohere,
+    Local,
+}
+
+/// Vector retrieval settings on agent memory config (Phase 2.5 / RCS v0.5).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct MemoryRetrievalConfig {
+    #[serde(default)]
+    pub mode: RetrievalModeSpec,
+    #[serde(default = "default_dense_weight")]
+    pub dense_weight: f32,
+    #[serde(default = "default_sparse_weight")]
+    pub sparse_weight: f32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rerank: Option<RerankProviderSpec>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub top_k: Option<u32>,
+}
+
+fn default_dense_weight() -> f32 {
+    0.7
+}
+
+fn default_sparse_weight() -> f32 {
+    0.3
+}
+
+/// Document chunking settings for vector ingest (Phase 2.5 / RCS v0.5).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MemoryChunkingConfig {
+    #[serde(default = "default_chunk_strategy")]
+    pub strategy: String,
+    #[serde(default = "default_chunk_size")]
+    pub chunk_size: usize,
+    #[serde(default = "default_chunk_overlap")]
+    pub overlap: usize,
+}
+
+fn default_chunk_strategy() -> String {
+    "recursive".into()
+}
+
+fn default_chunk_size() -> usize {
+    512
+}
+
+fn default_chunk_overlap() -> usize {
+    64
+}
+
+/// Agent memory access configuration (Sprint 4, extended Phase 2.5).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MemoryConfig {
     /// Memory backend kind.
     pub memory_type: MemoryType,
@@ -174,6 +241,15 @@ pub struct MemoryConfig {
     pub namespace: Option<String>,
     /// Optional time-to-live in seconds.
     pub ttl_seconds: Option<u64>,
+    /// Embedding provider spec, e.g. `openai/text-embedding-3-small` (Phase 2.5).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub embedding: Option<String>,
+    /// Hybrid retrieval and rerank settings (Phase 2.5).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub retrieval: Option<MemoryRetrievalConfig>,
+    /// Document chunking for vector ingest (Phase 2.5).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chunking: Option<MemoryChunkingConfig>,
 }
 
 /// External tool specification embedded in agent definitions.
@@ -467,6 +543,19 @@ mod tests {
             scope: MemoryScope::Agent,
             namespace: Some("ns".into()),
             ttl_seconds: Some(3600),
+            embedding: Some("openai/text-embedding-3-small".into()),
+            retrieval: Some(MemoryRetrievalConfig {
+                mode: RetrievalModeSpec::Hybrid,
+                dense_weight: 0.7,
+                sparse_weight: 0.3,
+                rerank: Some(RerankProviderSpec::Cohere),
+                top_k: Some(5),
+            }),
+            chunking: Some(MemoryChunkingConfig {
+                strategy: "recursive".into(),
+                chunk_size: 512,
+                overlap: 64,
+            }),
         });
     }
 

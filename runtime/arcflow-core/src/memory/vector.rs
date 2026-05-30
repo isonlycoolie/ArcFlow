@@ -14,14 +14,56 @@ use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
 use crate::embedding::{resolve_from_env, resolve_provider, EmbeddingError, EmbeddingProvider};
+use crate::rcs::types::{
+    MemoryChunkingConfig, MemoryConfig, MemoryRetrievalConfig, MemoryType, RerankProviderSpec,
+    RetrievalModeSpec,
+};
 
-use super::chunking::{ChunkStrategy, RecursiveCharacterSplitter};
+use super::chunking::{
+    extract_chunk_metadata, ChunkMetadata, ChunkStrategy, RecursiveCharacterSplitter,
+};
 use super::error::MemoryError;
 use super::hybrid::{sparse_lexical_score, HybridHit, HybridRetriever, DEFAULT_DENSE_WEIGHT, DEFAULT_SPARSE_WEIGHT};
 use super::namespace::durable_key;
 use super::provider::VectorStoreProvider;
+use super::rerank::resolve_rerank_provider;
 
 const COLLECTION: &str = "arcflow_memory";
+
+fn sparse_term_indices(text: &str) -> Vec<String> {
+    text.to_lowercase()
+        .split(|c: char| !c.is_alphanumeric())
+        .filter(|t| !t.is_empty())
+        .map(str::to_string)
+        .collect()
+}
+
+/// Maps RCS `MemoryConfig` to runtime vector settings (Phase 2.5).
+pub fn vector_config_from_memory(config: &MemoryConfig) -> VectorMemoryConfig {
+    let mut out = VectorMemoryConfig::default();
+    if let Some(chunking) = &config.chunking {
+        out.chunking = ChunkingConfig {
+            chunk_size: chunking.chunk_size,
+            overlap: chunking.overlap,
+        };
+    }
+    if let Some(retrieval) = &config.retrieval {
+        out.mode = match retrieval.mode {
+            RetrievalModeSpec::Hybrid => RetrievalMode::Hybrid,
+            RetrievalModeSpec::Dense => RetrievalMode::Dense,
+        };
+        out.retrieval = HybridRetrievalConfig {
+            dense_weight: retrieval.dense_weight,
+            sparse_weight: retrieval.sparse_weight,
+        };
+        out.rerank = retrieval.rerank.map(|r| match r {
+            RerankProviderSpec::Cohere => "cohere".into(),
+            RerankProviderSpec::Local => "local".into(),
+        });
+        out.top_k = retrieval.top_k;
+    }
+    out
+}
 
 /// Qdrant point ids must be valid UUIDs; derive deterministically from storage key.
 fn point_id_from_key(storage_key: &str) -> String {
@@ -158,6 +200,26 @@ impl VectorStoreProvider for QdrantVectorStore {
             "payload".to_string(),
             QdrantValue::from(String::from_utf8_lossy(payload).to_string()),
         );
+        let meta = extract_chunk_metadata(String::from_utf8_lossy(payload).as_ref());
+        if let Some(title) = meta.title {
+            payload_map.insert("title".to_string(), QdrantValue::from(title));
+        }
+        if let Some(source) = meta.source {
+            payload_map.insert("source".to_string(), QdrantValue::from(source));
+        }
+        if let Some(page) = meta.page {
+            payload_map.insert("page".to_string(), QdrantValue::from(page as i64));
+        }
+        if env::var("ARCFLOW_QDRANT_HYBRID")
+            .map(|v| v == "true" || v == "1")
+            .unwrap_or(false)
+        {
+            let sparse_terms = sparse_term_indices(String::from_utf8_lossy(payload).as_ref());
+            payload_map.insert(
+                "sparse_terms".to_string(),
+                QdrantValue::from(sparse_terms.join(" ")),
+            );
+        }
         let qdrant_id = point_id_from_key(point_id);
         let point = PointStruct::new(qdrant_id, vector.to_vec(), payload_map);
         client
@@ -246,6 +308,8 @@ pub struct VectorMemoryConfig {
     pub chunking: ChunkingConfig,
     pub retrieval: HybridRetrievalConfig,
     pub mode: RetrievalMode,
+    pub rerank: Option<String>,
+    pub top_k: Option<u32>,
 }
 
 impl Default for VectorMemoryConfig {
@@ -254,6 +318,8 @@ impl Default for VectorMemoryConfig {
             chunking: ChunkingConfig::default(),
             retrieval: HybridRetrievalConfig::default(),
             mode: RetrievalMode::Dense,
+            rerank: None,
+            top_k: None,
         }
     }
 }
@@ -363,6 +429,7 @@ impl VectorMemory {
         key: &str,
         text: &str,
     ) -> Result<usize, MemoryError> {
+        let _meta = extract_chunk_metadata(text);
         let chunks = self.splitter.split(text);
         let count = chunks.len();
         for (idx, chunk) in chunks.into_iter().enumerate() {
@@ -370,6 +437,48 @@ impl VectorMemory {
             self.write(namespace, &chunk_key, chunk.as_bytes()).await?;
         }
         Ok(count)
+    }
+
+    /// Semantic search with optional rerank when configured.
+    pub async fn search_reranked(
+        &mut self,
+        namespace: &str,
+        query: &str,
+        top_k: usize,
+    ) -> Result<Vec<Vec<u8>>, MemoryError> {
+        let prefetch = top_k.saturating_mul(4).max(top_k);
+        let hits = self.search(namespace, query, prefetch).await?;
+        let Some(rerank_spec) = self.config.rerank.as_deref() else {
+            return Ok(hits.into_iter().take(top_k).collect());
+        };
+        let provider = resolve_rerank_provider(rerank_spec).map_err(|e| MemoryError::OperationFailed {
+            reason: e.to_string(),
+        })?;
+        let docs: Vec<String> = hits
+            .iter()
+            .map(|b| String::from_utf8_lossy(b).into_owned())
+            .collect();
+        let ranked = provider
+            .rerank(query, &docs, top_k)
+            .await
+            .map_err(|e| MemoryError::OperationFailed {
+                reason: e.to_string(),
+            })?;
+        Ok(ranked.into_iter().map(|r| r.text.into_bytes()).collect())
+    }
+
+    /// Builds vector memory from agent memory config (Phase 2.5).
+    pub fn from_memory_config(config: &MemoryConfig) -> Result<Self, EmbeddingError> {
+        if config.memory_type != MemoryType::Vector {
+            return Err(EmbeddingError::InvalidSpec {
+                reason: "memory_type must be Vector".into(),
+            });
+        }
+        let spec = config
+            .embedding
+            .as_deref()
+            .unwrap_or("stub/8");
+        Self::with_config(spec, vector_config_from_memory(config))
     }
 
     /// Semantic search returning up to `top_k` payload blobs.

@@ -314,6 +314,93 @@ impl MemoryCoordinator {
         );
         Ok(out)
     }
+
+    /// Ingests a document into vector memory using agent chunking config (Phase 2.5).
+    pub fn write_vector_document(
+        &self,
+        config: &MemoryConfig,
+        logical_key: &str,
+        text: &str,
+        agent_name: &str,
+        legacy: &mut TraceEmitter,
+        sprint5: &mut TraceEventEmitter<'_>,
+        run_id: &str,
+        step_id: Option<Uuid>,
+    ) -> Result<usize, MemoryError> {
+        let namespace = config.namespace.as_deref().ok_or(MemoryError::NamespaceRequired)?;
+        if namespace.is_empty() {
+            return Err(MemoryError::NamespaceRequired);
+        }
+        let started = Instant::now();
+        let mut vector = self.vector.borrow_mut();
+        if config.retrieval.is_some() || config.chunking.is_some() || config.embedding.is_some() {
+            let rebuilt = super::vector::VectorMemory::from_memory_config(config).map_err(|e| {
+                MemoryError::OperationFailed {
+                    reason: e.to_string(),
+                }
+            })?;
+            *vector = rebuilt;
+        }
+        let count = self
+            .runtime()?
+            .block_on(vector.write_document(namespace, logical_key, text))?;
+        memory_write(
+            legacy,
+            sprint5,
+            run_id,
+            step_id,
+            agent_name,
+            "vector",
+            logical_key,
+            started,
+        );
+        Ok(count)
+    }
+
+    /// Hybrid search with optional rerank from agent memory config (Phase 2.5).
+    pub fn search_vector(
+        &self,
+        config: &MemoryConfig,
+        query: &str,
+        top_k: usize,
+        agent_name: &str,
+        legacy: &mut TraceEmitter,
+        sprint5: &mut TraceEventEmitter<'_>,
+        run_id: &str,
+        step_id: Option<Uuid>,
+    ) -> Result<Vec<Vec<u8>>, MemoryError> {
+        let namespace = config.namespace.as_deref().ok_or(MemoryError::NamespaceRequired)?;
+        if namespace.is_empty() {
+            return Err(MemoryError::NamespaceRequired);
+        }
+        let started = Instant::now();
+        let mut vector = self.vector.borrow_mut();
+        if config.retrieval.is_some() || config.chunking.is_some() || config.embedding.is_some() {
+            let rebuilt = super::vector::VectorMemory::from_memory_config(config).map_err(|e| {
+                MemoryError::OperationFailed {
+                    reason: e.to_string(),
+                }
+            })?;
+            *vector = rebuilt;
+        }
+        let hits = self.runtime()?.block_on(vector.search_reranked(
+            namespace,
+            query,
+            top_k,
+        ))?;
+        memory_read(
+            legacy,
+            sprint5,
+            run_id,
+            step_id,
+            agent_name,
+            "vector",
+            query,
+            !hits.is_empty(),
+            started,
+        );
+        Ok(hits)
+    }
 }
 
 #[cfg(test)]
@@ -361,6 +448,9 @@ mod tests {
             scope: MemoryScope::Agent,
             namespace: None,
             ttl_seconds: None,
+            embedding: None,
+            retrieval: None,
+            chunking: None,
         };
         let err = coord
             .read_shared(

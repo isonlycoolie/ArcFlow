@@ -98,6 +98,9 @@ fn workflow_with_session_memory_records_trace_events() {
                 scope: MemoryScope::Agent,
                 namespace: None,
                 ttl_seconds: None,
+                embedding: None,
+                retrieval: None,
+                chunking: None,
             }),
         },
     );

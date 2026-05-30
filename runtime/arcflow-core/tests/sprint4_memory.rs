@@ -48,6 +48,9 @@ fn shared_agent_b_reads_agent_a_write() {
             scope: MemoryScope::Workflow,
             namespace: None,
             ttl_seconds: None,
+            embedding: None,
+            retrieval: None,
+            chunking: None,
         };
         let read_cfg = write_cfg.clone();
         coord

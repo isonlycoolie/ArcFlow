@@ -1,5 +1,54 @@
 //! Document chunking for vector memory (Phase 2.5).
 
+use serde::{Deserialize, Serialize};
+
+/// Heuristic metadata extracted from document headers.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ChunkMetadata {
+    pub title: Option<String>,
+    pub source: Option<String>,
+    pub page: Option<u32>,
+}
+
+/// Extracts title, source, and page hints from leading markdown or plain headers.
+pub fn extract_chunk_metadata(text: &str) -> ChunkMetadata {
+    let mut meta = ChunkMetadata::default();
+    for line in text.lines().take(12) {
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+        if meta.title.is_none() {
+            if let Some(title) = trimmed.strip_prefix("# ") {
+                meta.title = Some(title.trim().to_string());
+                continue;
+            }
+            if trimmed.starts_with("Title:") {
+                meta.title = Some(trimmed.trim_start_matches("Title:").trim().to_string());
+                continue;
+            }
+        }
+        if meta.source.is_none() {
+            if let Some(source) = trimmed.strip_prefix("Source:") {
+                meta.source = Some(source.trim().to_string());
+                continue;
+            }
+            if trimmed.starts_with("http://") || trimmed.starts_with("https://") {
+                meta.source = Some(trimmed.to_string());
+                continue;
+            }
+        }
+        if meta.page.is_none() {
+            if let Some(page) = trimmed.strip_prefix("Page:") {
+                if let Ok(num) = page.trim().parse::<u32>() {
+                    meta.page = Some(num);
+                }
+            }
+        }
+    }
+    meta
+}
+
 /// Splits text into retrieval-sized chunks.
 pub trait ChunkStrategy {
     /// Returns ordered chunk strings (may be empty for empty input).
@@ -179,5 +228,14 @@ mod tests {
                 .collect();
             assert_eq!(second_start, first_end);
         }
+    }
+
+    #[test]
+    fn extract_metadata_from_markdown_header() {
+        let text = "# ArcFlow Guide\nSource: https://arcflow.dev\nPage: 3\n\nBody text.";
+        let meta = extract_chunk_metadata(text);
+        assert_eq!(meta.title.as_deref(), Some("ArcFlow Guide"));
+        assert_eq!(meta.source.as_deref(), Some("https://arcflow.dev"));
+        assert_eq!(meta.page, Some(3));
     }
 }
