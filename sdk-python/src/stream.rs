@@ -86,6 +86,23 @@ impl PyWorkflowStreamIterator {
         slf
     }
 
+    fn poll_event(&mut self, py: Python<'_>) -> PyResult<Option<Py<PyAny>>> {
+        if self.events_exhausted {
+            return Ok(None);
+        }
+        let bridge = self.bridge.as_ref().ok_or_else(|| {
+            configuration_error("Stream iterator already finalized.")
+        })?;
+        let event = py.allow_threads(|| bridge.lock().expect("stream lock").recv_event());
+        match event {
+            Some(ev) => stream_event_to_dict(py, ev).map(Some),
+            None => {
+                self.events_exhausted = true;
+                Ok(None)
+            }
+        }
+    }
+
     fn __next__(&mut self, py: Python<'_>) -> PyResult<Py<PyAny>> {
         if self.events_exhausted {
             return Err(PyErr::new::<pyo3::exceptions::PyStopIteration, _>(

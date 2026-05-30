@@ -36,6 +36,7 @@ class Workflow:
         self._max_iterations = 100
         self._workflow_id: str | None = None
         self._last_run_id: str | None = None
+        self._last_result: WorkflowResult | None = None
         self._has_run = False
         self._retry: tuple[int, BackoffStrategy] | None = None
         self._workflow_timeout_seconds: float | None = None
@@ -438,6 +439,78 @@ class Workflow:
         self._last_run_id = result.run_id
         self._has_run = True
         return result
+
+    async def run_stream(
+        self,
+        input: str,
+        *,
+        provider: ProviderConfig | None = None,
+    ):
+        """Async iterator of stream events; returns final result when exhausted."""
+        import asyncio
+
+        from arcflow.stream import StreamEvent
+        from arcflow._internal.exec_config import build_exec_config_json
+        from arcflow._internal import runtime
+
+        trimmed = input.strip()
+        if not trimmed:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] Workflow input must be a non-empty string."
+            )
+        if self._graph_mode:
+            if not self._graph_nodes:
+                raise WorkflowConfigurationError(
+                    "[ArcFlow] Cannot run a graph workflow with no nodes."
+                )
+        elif not self._steps:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] Cannot run a workflow with no steps."
+            )
+        if self._runtime_url:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] run_stream() is not supported for remote runtime URLs."
+            )
+        exec_json = build_exec_config_json(
+            retry=self._retry,
+            workflow_timeout_seconds=self._workflow_timeout_seconds,
+            step_timeout_seconds=self._step_timeout_seconds,
+            recovery_enabled=self._recovery_enabled,
+            stream=True,
+        )
+        if self._workflow_id is None:
+            self._workflow_id = str(uuid4())
+        steps, step_rows = self._agents_and_steps()
+        graph_json = self._graph_payload() if self._graph_mode else None
+        provider_row = provider.binding_tuple() if provider is not None else None
+        iterator = runtime.open_workflow_stream(
+            self._name,
+            self._workflow_id,
+            steps,
+            step_rows,
+            trimmed,
+            provider_row,
+            exec_json,
+            graph_json,
+        )
+        loop = asyncio.get_running_loop()
+
+        while True:
+            raw = await loop.run_in_executor(None, iterator.poll_event)
+            if raw is None:
+                break
+            yield StreamEvent.from_dict(raw)
+
+        native = await loop.run_in_executor(None, iterator.finalize)
+        self._last_run_id = native.run_id
+        self._has_run = True
+        self._last_result = WorkflowResult(
+            output=native.output,
+            run_id=native.run_id,
+            step_count=native.step_count,
+            trace_events=(),
+        )
+        return
 
     def test(self, cases: list[dict[str, object]]) -> list[dict[str, object]]:
         """Run deterministic stub cases without real LLM calls (Phase 2.3)."""

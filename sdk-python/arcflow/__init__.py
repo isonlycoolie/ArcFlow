@@ -30,6 +30,7 @@ from arcflow.trace import (
     TraceResult,
 )
 from arcflow.hitl import HitlConfig, HumanRejectedError, WorkflowInterruptedError
+from arcflow.stream import StreamEvent, StreamRunResult
 from arcflow.workflow import Workflow
 
 __all__ = [
@@ -51,6 +52,8 @@ __all__ = [
     "TraceStorageWarning",
     "StepError",
     "StepTrace",
+    "StreamEvent",
+    "StreamRunResult",
     "MemoryOperationTrace",
     "OpenAI",
     "Anthropic",
