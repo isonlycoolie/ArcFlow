@@ -283,3 +283,98 @@ class Workflow:
             }
             for agent in agents
         ]
+        workflow_body: dict[str, object] = {
+            "id": workflow_id,
+            "name": self._name,
+            "steps": step_defs,
+            "execution_mode": "graph" if self._graph_mode else "linear",
+        }
+        if self._graph_mode:
+            workflow_body["graph"] = json.loads(self._graph_payload())
+        payload: dict[str, object] = {
+            "workflow": workflow_body,
+            "agents": agent_defs,
+            "input": run_input,
+        }
+        if exec_config_json:
+            payload["exec_config"] = json.loads(exec_config_json)
+        return payload
+
+    def resume(self, run_id: str) -> WorkflowResult:
+        if not self._recovery_enabled:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] workflow.resume() requires enable_recovery()."
+            )
+        if not run_id.strip():
+            raise WorkflowConfigurationError(
+                "[ArcFlow] resume() requires a non-empty run_id."
+            )
+        from arcflow._internal.exec_config import build_exec_config_json
+        from arcflow._internal import runtime
+
+        if self._workflow_id is None:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] Cannot resume — no prior run on this workflow instance."
+            )
+        exec_json = build_exec_config_json(
+            retry=self._retry,
+            workflow_timeout_seconds=self._workflow_timeout_seconds,
+            step_timeout_seconds=self._step_timeout_seconds,
+            recovery_enabled=True,
+        )
+        steps, step_rows = self._agents_and_steps()
+        result = runtime.resume_workflow(
+            self._name,
+            self._workflow_id,
+            steps,
+            step_rows,
+            run_id.strip(),
+            exec_json,
+        )
+        self._last_run_id = result.run_id
+        return result
+
+    def resume_with_approval(
+        self,
+        run_id: str,
+        approval_key: str,
+        *,
+        approved: bool = True,
+        data: dict[str, object] | None = None,
+    ) -> WorkflowResult:
+        if not self._recovery_enabled:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] resume_with_approval() requires enable_recovery()."
+            )
+        if self._runtime_url:
+            from arcflow._internal import remote
+
+            return remote.approve_run(
+                self,
+                run_id.strip(),
+                approval_key.strip(),
+                approved=approved,
+                data=data or {},
+            )
+        from arcflow._internal.exec_config import build_exec_config_json
+        from arcflow._internal import runtime
+
+        if self._workflow_id is None:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] Cannot resume — no prior run on this workflow instance."
+            )
+        exec_json = build_exec_config_json(
+            retry=self._retry,
+            workflow_timeout_seconds=self._workflow_timeout_seconds,
+            step_timeout_seconds=self._step_timeout_seconds,
+            recovery_enabled=True,
+        )
+        steps, step_rows = self._agents_and_steps()
+        result = runtime.resume_with_approval(
+            self._name,
+            self._workflow_id,
+            steps,
+            step_rows,
+            run_id.strip(),
+            approval_key.strip(),
+            approved,
