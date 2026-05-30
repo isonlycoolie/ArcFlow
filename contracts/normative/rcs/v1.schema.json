@@ -33,7 +33,8 @@
         "Completed",
         "Failed",
         "Retrying",
-        "Cancelled"
+        "Cancelled",
+        "Interrupted"
       ],
       "description": "Workflow or step lifecycle state. Sprint 2 execution, Sprint 5 traces."
     },
@@ -49,7 +50,11 @@
         "Timeout",
         "RateLimited",
         "InternalError",
-        "UnsupportedRcsVersion"
+        "UnsupportedRcsVersion",
+        "HumanTimeout",
+        "HumanRejected",
+        "ApprovalNotFound",
+        "AlreadyApproved"
       ],
       "description": "Stable machine-readable error code in ErrorPayload. Sprint 7+ error handling."
     },
@@ -76,7 +81,10 @@
         "WorkflowCompleted",
         "StepFailed",
         "WorkflowFailed",
-        "RetryAttempted"
+        "RetryAttempted",
+        "GraphNodeStarted",
+        "GraphNodeCompleted",
+        "GraphIterationLimitReached"
       ],
       "description": "Observability event classification. Sprint 5 tracing engine."
     },
@@ -85,291 +93,3 @@
       "enum": ["OpenAI", "Anthropic", "Gemini", "Custom"],
       "description": "LLM provider identifier on ProviderConfig. Sprint 6 providers."
     },
-    "RetryPolicy": {
-      "type": "object",
-      "description": "Retry limits for workflow or step failures. Sprint 7 retry engine.",
-      "properties": {
-        "max_attempts": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Total attempts including the first run. Sprint 7."
-        },
-        "backoff_ms": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Initial backoff delay in milliseconds. Sprint 7."
-        },
-        "max_backoff_ms": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Upper bound on backoff delay in milliseconds. Sprint 7."
-        }
-      },
-      "required": ["max_attempts", "backoff_ms", "max_backoff_ms"],
-      "additionalProperties": false
-    },
-    "MemoryConfig": {
-      "type": "object",
-      "description": "Agent memory access configuration. Sprint 4.",
-      "properties": {
-        "memory_type": { "$ref": "#/$defs/MemoryType" },
-        "scope": { "$ref": "#/$defs/MemoryScope" },
-        "ttl_seconds": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Optional TTL for memory entries in seconds. Sprint 4."
-        }
-      },
-      "required": ["memory_type", "scope"],
-      "additionalProperties": false
-    },
-    "ToolDefinition": {
-      "type": "object",
-      "description": "External tool exposed to an agent. Sprint 4 tool runtime.",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "Tool name used for dispatch. Sprint 4."
-        },
-        "input_schema": {
-          "description": "JSON Schema describing tool inputs. Sprint 4.",
-          "type": "object"
-        },
-        "permissions": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Permission strings required to invoke the tool. Sprint 4."
-        }
-      },
-      "required": ["name", "input_schema"],
-      "additionalProperties": false
-    },
-    "ProviderConfig": {
-      "type": "object",
-      "description": "LLM provider settings for a run. Sprint 6.",
-      "properties": {
-        "provider_id": { "$ref": "#/$defs/ProviderId" },
-        "model": {
-          "type": "string",
-          "description": "Model id passed to the provider API. Sprint 6."
-        },
-        "api_key_env": {
-          "type": "string",
-          "description": "Environment variable holding the API key. Sprint 6."
-        },
-        "params": {
-          "description": "Optional provider-specific parameters. Sprint 6.",
-          "type": "object"
-        }
-      },
-      "required": ["provider_id", "model", "api_key_env"],
-      "additionalProperties": false
-    },
-    "AgentDefinition": {
-      "type": "object",
-      "description": "Agent role and capabilities referenced by workflow steps. Sprint 2–6.",
-      "properties": {
-        "id": { "$ref": "#/$defs/Uuid" },
-        "name": {
-          "type": "string",
-          "description": "Human-readable agent name. Sprint 2–3 SDK binding."
-        },
-        "role": {
-          "type": "string",
-          "description": "Role label used in prompts. Sprint 2–3."
-        },
-        "instructions": {
-          "type": "string",
-          "description": "System or task instructions. Sprint 2–3, Sprint 6 provider calls."
-        },
-        "tools": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/ToolDefinition" },
-          "description": "Tools available to the agent. Sprint 4."
-        },
-        "memory_config": {
-          "$ref": "#/$defs/MemoryConfig",
-          "description": "Optional memory configuration. Sprint 4."
-        }
-      },
-      "required": ["id", "name", "role", "instructions"],
-      "additionalProperties": false
-    },
-    "StepDefinition": {
-      "type": "object",
-      "description": "Ordered step within a workflow. Sprint 2 execution.",
-      "properties": {
-        "id": { "$ref": "#/$defs/Uuid" },
-        "agent_id": {
-          "$ref": "#/$defs/Uuid",
-          "description": "Agent that executes this step. Sprint 2–3."
-        },
-        "order": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Execution order among steps. Sprint 2."
-        },
-        "fallback_step_id": {
-          "$ref": "#/$defs/Uuid",
-          "description": "Optional fallback step on failure. Sprint 7."
-        }
-      },
-      "required": ["id", "agent_id", "order"],
-      "additionalProperties": false
-    },
-    "WorkflowDefinition": {
-      "type": "object",
-      "description": "Complete workflow registered with the runtime. Sprint 2–3, Sprint 7 retry.",
-      "properties": {
-        "id": { "$ref": "#/$defs/Uuid" },
-        "name": {
-          "type": "string",
-          "maxLength": 256,
-          "description": "Human-readable workflow name for traces and errors. Sprint 2–3."
-        },
-        "steps": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/StepDefinition" },
-          "description": "Steps comprising the workflow. Sprint 2–3."
-        },
-        "retry_policy": {
-          "$ref": "#/$defs/RetryPolicy",
-          "description": "Default retry policy for all steps. Sprint 7."
-        }
-      },
-      "required": ["id", "name", "steps"],
-      "additionalProperties": false
-    },
-    "RunRequest": {
-      "type": "object",
-      "description": "Instruction to execute a registered workflow. Sprint 2–3, Sprint 5–6.",
-      "properties": {
-        "workflow_id": {
-          "$ref": "#/$defs/Uuid",
-          "description": "Registered workflow id. Sprint 2–3."
-        },
-        "input": {
-          "type": "string",
-          "description": "Caller input text for the run. Sprint 2–3."
-        },
-        "trace_id": {
-          "$ref": "#/$defs/Uuid",
-          "description": "Correlation id for observability. Sprint 5."
-        },
-        "provider_config": {
-          "$ref": "#/$defs/ProviderConfig",
-          "description": "Optional provider override. Sprint 6."
-        }
-      },
-      "required": ["workflow_id", "input", "trace_id"],
-      "additionalProperties": false
-    },
-    "StepResult": {
-      "type": "object",
-      "description": "Result of one step within a workflow run. Sprint 5–7.",
-      "properties": {
-        "step_id": { "$ref": "#/$defs/Uuid" },
-        "status": { "$ref": "#/$defs/ExecutionStatus" },
-        "output": {
-          "type": "string",
-          "description": "Step output text when present. Sprint 5."
-        },
-        "latency_ms": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Wall-clock latency in milliseconds. Sprint 5."
-        },
-        "tokens_used": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Token usage when reported. Sprint 5."
-        }
-      },
-      "required": ["step_id", "status", "latency_ms"],
-      "additionalProperties": false
-    },
-    "ErrorPayload": {
-      "type": "object",
-      "description": "Structured error returned to SDKs. Sprint 2–3, Sprint 7.",
-      "properties": {
-        "code": { "$ref": "#/$defs/ErrorCode" },
-        "message": {
-          "type": "string",
-          "description": "Human-readable error message. Sprint 7+."
-        },
-        "step_id": {
-          "$ref": "#/$defs/Uuid",
-          "description": "Step associated with the error when applicable. Sprint 7."
-        },
-        "recoverable": {
-          "type": "boolean",
-          "description": "Whether the caller may retry. Sprint 7."
-        }
-      },
-      "required": ["code", "message", "recoverable"],
-      "additionalProperties": false
-    },
-    "RunResult": {
-      "type": "object",
-      "description": "Final workflow execution outcome. Sprint 2–3, Sprint 5–7.",
-      "properties": {
-        "trace_id": { "$ref": "#/$defs/Uuid" },
-        "status": { "$ref": "#/$defs/ExecutionStatus" },
-        "output": {
-          "type": "string",
-          "description": "Final workflow output when successful. Sprint 2–3."
-        },
-        "steps": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/StepResult" },
-          "description": "Per-step results. Sprint 5–7."
-        },
-        "error": {
-          "$ref": "#/$defs/ErrorPayload",
-          "description": "Error details when status is Failed. Sprint 2–3, Sprint 7."
-        }
-      },
-      "required": ["trace_id", "status", "steps"],
-      "additionalProperties": false
-    },
-    "TraceEvent": {
-      "type": "object",
-      "description": "Observability event emitted during execution. Sprint 5.",
-      "properties": {
-        "trace_id": { "$ref": "#/$defs/Uuid" },
-        "event_kind": { "$ref": "#/$defs/TraceEventKind" },
-        "timestamp": { "$ref": "#/$defs/DateTimeUtc" },
-        "step_id": {
-          "$ref": "#/$defs/Uuid",
-          "description": "Related step when applicable. Sprint 5."
-        },
-        "data": {
-          "description": "Optional structured event payload. Sprint 5.",
-          "type": "object"
-        }
-      },
-      "required": ["trace_id", "event_kind", "timestamp"],
-      "additionalProperties": false
-    },
-    "MessageEnvelope": {
-      "type": "object",
-      "description": "Wire wrapper for every RCS message. All sprints.",
-      "properties": {
-        "rcs_version": {
-          "type": "string",
-          "pattern": "^\\d+\\.\\d+$",
-          "description": "Protocol version MAJOR.MINOR for negotiation. All sprints."
-        },
-        "message_type": { "$ref": "#/$defs/MessageType" },
-        "trace_id": { "$ref": "#/$defs/Uuid" },
-        "timestamp": { "$ref": "#/$defs/DateTimeUtc" },
-        "payload": {
-          "description": "Typed message body as JSON. All sprints.",
-          "type": "object"
-        }
-      },
-      "required": ["rcs_version", "message_type", "trace_id", "timestamp", "payload"],
-      "additionalProperties": false
-    }
-  }
-}
