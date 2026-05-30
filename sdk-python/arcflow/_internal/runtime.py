@@ -10,11 +10,13 @@ from arcflow.trace import TraceResult
 
 try:
     from arcflow._arcflow_binding import WorkflowResult as NativeWorkflowResult
+    from arcflow._arcflow_binding import WorkflowStreamIterator as NativeWorkflowStreamIterator
     from arcflow._arcflow_binding import (
         execute_resume_with_approval,
         execute_resume_workflow,
         execute_workflow,
         get_execution_trace_json,
+        start_workflow_stream,
     )
 except ImportError as exc:  # pragma: no cover - built by maturin
     raise ImportError(
@@ -137,3 +139,33 @@ def resume_with_approval(
 def get_trace(run_id: str) -> TraceResult:
     """Loads a structured trace from the in-process Rust store."""
     return TraceResult.from_json(get_execution_trace_json(run_id))
+
+
+def open_workflow_stream(
+    workflow_name: str,
+    workflow_id: str,
+    steps: list[Agent],
+    step_rows: list[tuple[str, str, int, str | None, str | None]],
+    run_input: str,
+    provider: tuple[str, str, int, float] | None = None,
+    exec_config_json: str | None = None,
+    graph_json: str | None = None,
+) -> NativeWorkflowStreamIterator:
+    """Starts a live workflow stream backed by the Rust bridge."""
+    agent_rows = [agent.binding_tuple() for agent in steps]
+    binding_steps = [
+        (sid, aid, order, fb or "", hitl or "")
+        for sid, aid, order, fb, hitl in step_rows
+    ]
+    tool_executors = [tool.execute for agent in steps for tool in agent.tools]
+    return start_workflow_stream(
+        workflow_name,
+        workflow_id,
+        agent_rows,
+        binding_steps,
+        run_input,
+        tool_executors,
+        provider,
+        exec_config_json,
+        graph_json,
+    )

@@ -35,7 +35,7 @@ pub struct PyWorkflowResult {
     pub trace_events_json: String,
 }
 
-fn record_to_py(record: WorkflowExecutionRecord) -> PyWorkflowResult {
+pub(crate) fn record_to_py(record: WorkflowExecutionRecord) -> PyWorkflowResult {
     let output = record
         .step_outputs
         .last()
@@ -52,7 +52,7 @@ fn record_to_py(record: WorkflowExecutionRecord) -> PyWorkflowResult {
 }
 
 #[allow(clippy::type_complexity)]
-fn provider_from_tuple(
+pub(crate) fn provider_from_tuple(
     row: Option<(String, String, u32, f32)>,
 ) -> PyResult<(Option<Arc<dyn ModelProvider>>, u32, f32)> {
     let Some((kind, model, max_tokens, temperature)) = row else {

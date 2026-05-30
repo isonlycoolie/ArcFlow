@@ -5,12 +5,14 @@
 mod errors;
 mod execution_config;
 mod graph;
+mod stream;
 mod tools;
 mod types;
 mod workflow;
 
 use pyo3::prelude::*;
 
+use stream::{start_workflow_stream, PyWorkflowStreamIterator};
 use workflow::{
     execute_resume_with_approval, execute_resume_workflow, execute_workflow,
     get_execution_trace_json, PyWorkflowResult,
@@ -20,9 +22,11 @@ use workflow::{
 #[pymodule]
 fn _arcflow_binding(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(execute_workflow, m)?)?;
+    m.add_function(wrap_pyfunction!(start_workflow_stream, m)?)?;
     m.add_function(wrap_pyfunction!(execute_resume_workflow, m)?)?;
     m.add_function(wrap_pyfunction!(execute_resume_with_approval, m)?)?;
     m.add_function(wrap_pyfunction!(get_execution_trace_json, m)?)?;
     m.add_class::<PyWorkflowResult>()?;
+    m.add_class::<PyWorkflowStreamIterator>()?;
     Ok(())
 }
