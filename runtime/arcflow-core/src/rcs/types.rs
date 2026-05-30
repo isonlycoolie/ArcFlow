@@ -93,3 +93,98 @@ pub enum MemoryType {
 #[serde(rename_all = "PascalCase")]
 pub enum MemoryScope {
     /// Scoped to a single agent.
+    Agent,
+    /// Scoped to the current workflow run.
+    Workflow,
+    /// Global across workflows.
+    Global,
+}
+
+/// Kind of observability event emitted during execution.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub enum TraceEventKind {
+    /// Workflow execution started.
+    WorkflowStarted,
+    /// A step began running.
+    StepStarted,
+    /// An agent was invoked for a step.
+    AgentInvoked,
+    /// Memory read occurred.
+    MemoryRead,
+    /// Memory write occurred.
+    MemoryWrite,
+    /// External tool executed.
+    ToolExecuted,
+    /// Step finished successfully.
+    StepCompleted,
+    /// Workflow finished successfully.
+    WorkflowCompleted,
+    /// Step failed.
+    StepFailed,
+    /// Workflow failed.
+    WorkflowFailed,
+    /// Step retry attempted.
+    RetryAttempted,
+    /// Graph node execution started (Phase 1.1).
+    GraphNodeStarted,
+    /// Graph node finished (Phase 1.1).
+    GraphNodeCompleted,
+    /// Graph cycle iteration limit reached (Phase 1.1).
+    GraphIterationLimitReached,
+}
+
+/// Supported LLM provider identifiers.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub enum ProviderId {
+    /// OpenAI-compatible provider.
+    OpenAI,
+    /// Anthropic provider.
+    Anthropic,
+    /// Google Gemini provider.
+    Gemini,
+    /// Custom provider implementation.
+    Custom,
+}
+
+use chrono::{DateTime, Utc};
+use serde_json::Value;
+use uuid::Uuid;
+
+/// Retry policy applied at workflow or step level.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RetryPolicy {
+    /// Maximum number of attempts including the first run.
+    pub max_attempts: u32,
+    /// Initial backoff delay in milliseconds.
+    pub backoff_ms: u64,
+    /// Upper bound on backoff delay in milliseconds.
+    pub max_backoff_ms: u64,
+}
+
+/// Agent memory access configuration (Sprint 4).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MemoryConfig {
+    /// Memory backend kind.
+    pub memory_type: MemoryType,
+    /// Scope boundary for reads and writes.
+    pub scope: MemoryScope,
+    /// Namespace for persistent and vector backends.
+    pub namespace: Option<String>,
+    /// Optional time-to-live in seconds.
+    pub ttl_seconds: Option<u64>,
+}
+
+/// External tool specification embedded in agent definitions.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ToolDefinition {
+    /// Tool name used for dispatch.
+    pub name: String,
+    /// JSON Schema describing tool inputs.
+    pub input_schema: Value,
+    /// Permission strings required to invoke the tool.
+    pub permissions: Option<Vec<String>>,
+}
+
+/// LLM provider configuration for a run (Sprint 6).
