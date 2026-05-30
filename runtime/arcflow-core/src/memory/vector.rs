@@ -188,3 +188,98 @@ impl VectorStoreProvider for QdrantVectorStore {
             })
             .await
             .map_err(map_qdrant_client_error)?;
+        let mut out = Vec::new();
+        for point in results.result {
+            if let Some(payload) = point.payload.get("payload") {
+                if let Some(s) = payload.as_str() {
+                    out.push(s.as_bytes().to_vec());
+                }
+            }
+        }
+        Ok(out)
+    }
+}
+
+/// Chunking settings for document ingest.
+#[derive(Clone, Debug)]
+pub struct ChunkingConfig {
+    pub chunk_size: usize,
+    pub overlap: usize,
+}
+
+impl Default for ChunkingConfig {
+    fn default() -> Self {
+        Self {
+            chunk_size: 512,
+            overlap: 64,
+        }
+    }
+}
+
+/// Hybrid dense/sparse fusion weights.
+#[derive(Clone, Debug)]
+pub struct HybridRetrievalConfig {
+    pub dense_weight: f32,
+    pub sparse_weight: f32,
+}
+
+impl Default for HybridRetrievalConfig {
+    fn default() -> Self {
+        Self {
+            dense_weight: DEFAULT_DENSE_WEIGHT,
+            sparse_weight: DEFAULT_SPARSE_WEIGHT,
+        }
+    }
+}
+
+/// Retrieval strategy for semantic search.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum RetrievalMode {
+    #[default]
+    Dense,
+    Hybrid,
+}
+
+/// Vector memory runtime configuration (chunking + retrieval).
+#[derive(Clone, Debug)]
+pub struct VectorMemoryConfig {
+    pub chunking: ChunkingConfig,
+    pub retrieval: HybridRetrievalConfig,
+    pub mode: RetrievalMode,
+}
+
+impl Default for VectorMemoryConfig {
+    fn default() -> Self {
+        Self {
+            chunking: ChunkingConfig::default(),
+            retrieval: HybridRetrievalConfig::default(),
+            mode: RetrievalMode::Dense,
+        }
+    }
+}
+
+/// High-level vector memory API.
+pub struct VectorMemory {
+    store: QdrantVectorStore,
+    provider: Arc<dyn EmbeddingProvider>,
+    config: VectorMemoryConfig,
+    splitter: RecursiveCharacterSplitter,
+    hybrid: HybridRetriever,
+}
+
+impl Default for VectorMemory {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl VectorMemory {
+    /// Uses `ARCFLOW_EMBEDDING_PROVIDER`, or explicit `stub` in tests/dev mode.
+    pub fn new() -> Self {
+        Self::from_env().unwrap_or_else(|_| {
+            Self::from_provider_spec("stub").expect("stub provider always available")
+        })
+    }
+    pub fn from_provider_spec(spec: &str) -> Result<Self, EmbeddingError> {
+        let provider = resolve_provider(spec)?;
+        Ok(Self::with_provider(provider, VectorMemoryConfig::default()))
