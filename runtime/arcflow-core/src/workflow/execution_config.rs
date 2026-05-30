@@ -18,6 +18,8 @@ pub struct ExecutionConfig {
     pub recovery_enabled: bool,
     /// When set (e.g. by HTTP server), trace and recovery use this run id.
     pub run_id: Option<Uuid>,
+    /// Registry semver pin when the run used `workflow_ref` (Phase 3.3).
+    pub workflow_version: Option<String>,
     /// Deterministic stub overrides for workflow.test() (Phase 2.3).
     pub test: Option<TestConfig>,
     /// When enabled, step and token events are emitted on the run stream channel.

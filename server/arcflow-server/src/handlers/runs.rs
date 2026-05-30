@@ -53,12 +53,40 @@ pub async fn create_run(
         return Err(bad_request("input must be non-empty"));
     }
 
-    validate_agents(&body.workflow, &body.agents).map_err(bad_request)?;
-    validate_hitl(&body.workflow, body.exec_config.as_ref()).map_err(bad_request)?;
+    let (workflow, agents, registry_version) = if let Some(workflow_ref) = &body.workflow_ref {
+        if body.workflow.is_some() || body.agents.is_some() {
+            return Err(bad_request(
+                "provide workflow_ref or inline workflow and agents, not both",
+            ));
+        }
+        let registry = state.registry.as_ref().ok_or((
+            StatusCode::SERVICE_UNAVAILABLE,
+            "[ArcFlow] ARCFLOW_POSTGRESQL_URL is required for workflow_ref".into(),
+        ))?;
+        let loaded = crate::registry::load_ref::load(
+            registry,
+            &workflow_ref.name,
+            &workflow_ref.version,
+        )
+        .await
+        .map_err(bad_request)?;
+        (loaded.workflow, loaded.agents, Some(loaded.version))
+    } else {
+        let workflow = body
+            .workflow
+            .ok_or_else(|| bad_request("workflow is required when workflow_ref is omitted"))?;
+        let agents = body
+            .agents
+            .ok_or_else(|| bad_request("agents is required when workflow_ref is omitted"))?;
+        (workflow, agents, None)
+    };
+
+    validate_agents(&workflow, &agents).map_err(bad_request)?;
+    validate_hitl(&workflow, body.exec_config.as_ref()).map_err(bad_request)?;
 
     let run_id = Uuid::new_v4();
     let trace_id = Uuid::new_v4();
-    let workflow_hash = body.workflow.id.to_string();
+    let workflow_hash = workflow.id.to_string();
     let idempotency_key = headers
         .get("Idempotency-Key")
         .and_then(|v| v.to_str().ok());
@@ -70,8 +98,8 @@ pub async fn create_run(
             &workflow_hash,
             body.exec_config.clone(),
             idempotency_key,
-            Some(serde_json::to_value(&body.workflow).map_err(internal_json)?),
-            Some(serde_json::to_value(&body.agents).map_err(internal_json)?),
+            Some(serde_json::to_value(&workflow).map_err(internal_json)?),
+            Some(serde_json::to_value(&agents).map_err(internal_json)?),
             Some(body.input.as_str()),
         )
         .await
@@ -82,13 +110,14 @@ pub async fn create_run(
         .await
         .map_err(internal)?;
 
-    let mut exec_config = parse_exec_config(body.exec_config).map_err(bad_request)?;
+    let mut exec_config = parse_exec_config(body.exec_config, registry_version.as_deref())
+        .map_err(bad_request)?;
     exec_config.run_id = Some(run_id);
     let agent_map: HashMap<Uuid, AgentDefinition> =
-        body.agents.iter().map(|a| (a.id, a.clone())).collect();
+        agents.iter().map(|a| (a.id, a.clone())).collect();
     let engine = WorkflowEngine::new();
     let execution = engine.execute_with_config(
-        &body.workflow,
+        &workflow,
         &agent_map,
         &body.input,
         None,

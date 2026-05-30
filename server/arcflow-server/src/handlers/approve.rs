@@ -79,7 +79,7 @@ pub async fn approve_run(
     let agent_map: HashMap<Uuid, AgentDefinition> =
         agents.iter().map(|a| (a.id, a.clone())).collect();
 
-    let exec_config = parse_exec_config(stored.exec_config_json.clone()).map_err(|e| {
+    let exec_config = parse_exec_config(stored.exec_config_json.clone(), None).map_err(|e| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             format!("[ArcFlow] invalid exec_config snapshot: {e}"),

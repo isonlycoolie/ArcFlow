@@ -7,8 +7,12 @@ use arcflow_core::rcs::types::{AgentDefinition, ExecutionStatus, WorkflowDefinit
 
 #[derive(Debug, Deserialize)]
 pub struct CreateRunRequest {
-    pub workflow: WorkflowDefinition,
-    pub agents: Vec<AgentDefinition>,
+    #[serde(default)]
+    pub workflow: Option<WorkflowDefinition>,
+    #[serde(default)]
+    pub agents: Option<Vec<AgentDefinition>>,
+    #[serde(default)]
+    pub workflow_ref: Option<crate::dto::registry::WorkflowRef>,
     pub input: String,
     #[serde(default)]
     pub exec_config: Option<serde_json::Value>,

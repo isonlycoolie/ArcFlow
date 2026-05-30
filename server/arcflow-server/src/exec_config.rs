@@ -81,7 +81,10 @@ impl BackoffJson {
     }
 }
 
-pub fn parse_exec_config(value: Option<serde_json::Value>) -> Result<ExecutionConfig, String> {
+pub fn parse_exec_config(
+    value: Option<serde_json::Value>,
+    workflow_version: Option<&str>,
+) -> Result<ExecutionConfig, String> {
     let Some(json) = value else {
         return Ok(ExecutionConfig::default());
     };
@@ -103,6 +106,7 @@ pub fn parse_exec_config(value: Option<serde_json::Value>) -> Result<ExecutionCo
         timeouts,
         recovery_enabled: parsed.recovery_enabled.unwrap_or(false),
         run_id: None,
+        workflow_version: workflow_version.map(str::to_string),
         test: None,
         stream: parsed.stream.map(|s| StreamConfig {
             enabled: s.enabled,
