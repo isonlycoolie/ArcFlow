@@ -17,6 +17,8 @@ pub mod otel_inmemory;
 #[cfg(feature = "otel")]
 pub mod otel_sec1;
 #[cfg(feature = "otel")]
+pub mod otel_metrics;
+#[cfg(feature = "otel")]
 pub mod otel_live;
 #[cfg(feature = "otel")]
 pub(crate) mod otel_export_impl;
