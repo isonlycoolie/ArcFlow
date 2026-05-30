@@ -473,3 +473,98 @@ export class Workflow {
       this.hasRun = true;
       return toWorkflowResult(result);
     } catch (err) {
+      if (err instanceof Error && err.message.includes("WorkflowExecutionError|")) {
+        const [, runId] = err.message.split("|");
+        if (runId) {
+          this.lastRunId = runId;
+          this.hasRun = true;
+        }
+        throw mapNativeError(err);
+      }
+      throw mapNativeError(err);
+    }
+  }
+
+  async *runStream(
+    input: string,
+    options: RunOptions = {},
+  ): AsyncGenerator<StreamEvent, StreamRunResult, undefined> {
+    const trimmed = input.trim();
+    if (!trimmed) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] Workflow input must be a non-empty string.",
+      );
+    }
+    if (this.graphMode) {
+      if (this.graphNodes.size === 0) {
+        throw new WorkflowConfigurationError(
+          "[ArcFlow] Cannot run a graph workflow with no nodes.",
+        );
+      }
+    } else if (this.steps.length === 0) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] Cannot run a workflow with no steps.",
+      );
+    }
+    if (!this.workflowId) {
+      this.workflowId = randomUUID();
+    }
+    const native = loadNative();
+    const { agents, steps } = this.agentsAndSteps();
+    const provider = options.provider?.bindingRow();
+    const execConfigJson = buildExecConfigJson({
+      retry: this.retryOptions,
+      workflowTimeoutSeconds: this.workflowTimeoutSeconds,
+      stepTimeoutSeconds: this.stepTimeoutSeconds,
+      recoveryEnabled: this.recoveryEnabled,
+      stream: true,
+    });
+    try {
+      const result = await native.executeWorkflowStream(
+        this.name,
+        this.workflowId,
+        agents.map((agent) => agent.bindingRow()),
+        steps,
+        trimmed,
+        provider,
+        execConfigJson,
+        this.graphJson(),
+      );
+      const events = JSON.parse(result.eventsJson) as StreamEvent[];
+      for (const event of events) {
+        yield event;
+      }
+      this.lastRunId = result.runId;
+      this.hasRun = true;
+      return {
+        output: result.output,
+        runId: result.runId,
+        stepCount: result.stepCount,
+        traceEventsJson: result.traceEventsJson,
+      };
+    } catch (err) {
+      throw mapNativeError(err);
+    }
+  }
+
+  async test(
+    cases: Array<{
+      name?: string;
+      input?: string;
+      expected_output?: string;
+      stub_responses?: Record<string, unknown>;
+    }>,
+  ): Promise<Array<{ name: string; passed: boolean; output: string }>> {
+    const { agents, steps } = this.agentsAndSteps();
+    const native = loadNative();
+    const results: Array<{ name: string; passed: boolean; output: string }> = [];
+    for (const testCase of cases) {
+      const name = String(testCase.name ?? "case");
+      const runInput = String(testCase.input ?? "");
+      let stubResponses = testCase.stub_responses;
+      if (stubResponses === undefined && testCase.expected_output !== undefined) {
+        stubResponses = { step_1: { output: testCase.expected_output } };
+      }
+      const execConfigJson = buildExecConfigJson({
+        retry: this.retryOptions,
+        workflowTimeoutSeconds: this.workflowTimeoutSeconds,
