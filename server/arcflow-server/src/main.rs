@@ -4,6 +4,7 @@ mod dto;
 mod exec_config;
 mod handlers;
 mod middleware;
+mod registry;
 mod state;
 mod store;
 
