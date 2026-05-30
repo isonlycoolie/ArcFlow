@@ -5,12 +5,24 @@ exports.executeWorkflow = async (
   _steps,
   _runInput,
   _provider,
-  _execConfigJson,
+  execConfigJson,
   graphJson,
 ) => {
+  let output = "[stub] writer (author): Reply briefly.";
+  if (execConfigJson) {
+    try {
+      const cfg = JSON.parse(execConfigJson);
+      const stub = cfg.test?.stub_responses?.step_1?.output;
+      if (typeof stub === "string") {
+        output = stub;
+      }
+    } catch {
+      // ignore malformed exec config in mock
+    }
+  }
   const stepCount = graphJson ? JSON.parse(graphJson).nodes.length : 1;
   return {
-    output: "[stub] writer (author): Reply briefly.",
+    output,
     runId: "00000000-0000-4000-8000-000000000001",
     stepCount,
     traceEventsJson: "[]",

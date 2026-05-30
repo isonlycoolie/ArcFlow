@@ -4,8 +4,13 @@ use std::time::Duration;
 
 use arcflow_core::retry::{BackoffStrategy, RetryConfig};
 use arcflow_core::retry::TimeoutConfig as RetryTimeoutConfig;
-use arcflow_core::workflow::ExecutionConfig;
+use arcflow_core::workflow::{ExecutionConfig, StreamConfig};
 use serde::Deserialize;
+
+#[derive(Debug, Deserialize)]
+struct StreamJson {
+    enabled: bool,
+}
 
 #[derive(Debug, Deserialize)]
 struct ExecConfigJson {
@@ -13,6 +18,7 @@ struct ExecConfigJson {
     workflow_timeout_secs: Option<f64>,
     step_timeout_secs: Option<f64>,
     recovery_enabled: Option<bool>,
+    stream: Option<StreamJson>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -98,5 +104,8 @@ pub fn parse_exec_config(value: Option<serde_json::Value>) -> Result<ExecutionCo
         recovery_enabled: parsed.recovery_enabled.unwrap_or(false),
         run_id: None,
         test: None,
+        stream: parsed.stream.map(|s| StreamConfig {
+            enabled: s.enabled,
+        }),
     })
 }
