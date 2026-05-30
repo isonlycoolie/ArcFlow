@@ -37,8 +37,10 @@ exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
 const serverClient_1 = require("./client/serverClient");
+const debugAdapter_1 = require("./debug/debugAdapter");
 const webviewPanel_1 = require("./graph/webviewPanel");
 const traceTimelinePanel_1 = require("./trace/traceTimelinePanel");
+const breakpoints = new debugAdapter_1.BreakpointManager();
 function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand("arcflow.visualizeGraph", () => {
         const editor = vscode.window.activeTextEditor;
@@ -56,6 +58,46 @@ function activate(context) {
         (0, traceTimelinePanel_1.openTraceTimelinePanel)(context, editor.document);
     }), vscode.commands.registerCommand("arcflow.connectServer", () => {
         void (0, serverClient_1.connectToLocalServer)();
+    }), vscode.commands.registerCommand("arcflow.toggleBreakpoint", async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor || !(0, webviewPanel_1.isArcflowWorkflowDocument)(editor.document)) {
+            void vscode.window.showWarningMessage("Open an *.arcflow.json workflow file to set breakpoints.");
+            return;
+        }
+        const stepId = await vscode.window.showInputBox({
+            prompt: "Step or node id to break on",
+            placeHolder: "step-uuid",
+        });
+        if (!stepId) {
+            return;
+        }
+        const enabled = breakpoints.toggle(stepId);
+        void vscode.window.showInformationMessage(enabled
+            ? `ArcFlow: breakpoint set on ${stepId}`
+            : `ArcFlow: breakpoint removed from ${stepId}`);
+    }), vscode.commands.registerCommand("arcflow.startDebugRun", async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor || !(0, webviewPanel_1.isArcflowWorkflowDocument)(editor.document)) {
+            void vscode.window.showWarningMessage("Open an *.arcflow.json workflow file to start a debug run.");
+            return;
+        }
+        const workflow = JSON.parse(editor.document.getText());
+        const adapter = new debugAdapter_1.DebugAdapter(serverClient_1.ServerClient.fromConfig());
+        const runId = await adapter.startRun({
+            workflow: JSON.parse(editor.document.getText()),
+            agents: workflow.agents ?? [],
+            input: "debug",
+            breakpoints: breakpoints.list(),
+        });
+        if (!runId) {
+            void vscode.window.showErrorMessage("ArcFlow: debug run failed. Ensure ARCFLOW_DEBUG=true on the server.");
+            return;
+        }
+        void vscode.window.showInformationMessage(`ArcFlow: debug run ${runId} started`);
+        const state = await adapter.fetchState(runId);
+        if (state) {
+            await (0, debugAdapter_1.openDebugStatePanel)(context, state);
+        }
     }), vscode.workspace.onDidOpenTextDocument((document) => {
         const config = vscode.workspace.getConfiguration("arcflow");
         if ((0, webviewPanel_1.isArcflowWorkflowDocument)(document) && config.get("autoOpenGraph", true)) {
@@ -67,6 +109,6 @@ function activate(context) {
     }));
 }
 function deactivate() {
-    // Panels dispose themselves via onDidDispose handlers.
+    breakpoints.clear();
 }
 //# sourceMappingURL=extension.js.map

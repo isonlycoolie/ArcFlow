@@ -1,27 +1,40 @@
-# ArcFlow for VS Code (Preview)
+# ArcFlow for VS Code (Stable)
 
-Month 5 preview: read-only workflow graph and trace timeline for local development. No cloud account required.
+Local workflow graph, trace timeline, and step-through debugging. No cloud account required.
 
 ## Features
 
 - Open `*.arcflow.json` → SVG graph webview (graph or linear layout)
-- Open `*.arcflow.trace.json` → step timeline stub
-- **ArcFlow: Connect to Local Server** — pings `http://127.0.0.1:8080/health` (localhost only)
+- Layout positions saved to `.arcflow.layout.json` sidecar
+- Open `*.arcflow.trace.json` → step timeline
+- **Toggle Breakpoint** on step/node ids
+- **Start Debug Run** via `POST /v1/debug/runs/start` (requires `ARCFLOW_DEBUG=true` on server)
+- **Debug State** panel with masked step outputs at pause
+- **Connect to Local Server** — pings `http://127.0.0.1:8080/health` (localhost only)
 
 ## Quick start
 
 1. `npm install && npm run compile` in this folder
-2. Run **Extension Development Host** (F5) from `extensions/vscode-arcflow`
-3. Open `examples/react-preview.arcflow.json` or `examples/react-preview.arcflow.trace.json`
+2. Start `arcflow-server` with `ARCFLOW_DEBUG=true`
+3. Run **Extension Development Host** (F5)
+4. Open `examples/react-preview.arcflow.json`
 
-## Settings
+## Debug protocol
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `arcflow.serverUrl` | `http://127.0.0.1:8080` | Local server URL (127.0.0.1 / localhost only) |
-| `arcflow.autoOpenGraph` | `true` | Open graph when a workflow file opens |
-| `arcflow.autoOpenTrace` | `true` | Open timeline when a trace file opens |
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /v1/debug/runs/start` | Start run with breakpoints |
+| `GET /v1/debug/runs/{id}/state` | Paused state (values masked) |
+| `POST /v1/debug/runs/{id}/continue` | Resume after breakpoint |
 
-## Stable (Month 6)
+Debug routes bind only on localhost and are disabled unless `ARCFLOW_DEBUG=true`. Not for production deploy.
 
-Breakpoints on node/step ids, state inspection, debug console, and debug adapter wiring to `/v1/debug/runs/*` endpoints.
+## Tests
+
+```bash
+npm test
+```
+
+## Marketplace
+
+Publish manually when ready; stable code ships in-repo first.

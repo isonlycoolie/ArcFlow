@@ -2,6 +2,13 @@ import * as vscode from "vscode";
 import * as path from "path";
 import type { WorkflowDefinition } from "../types/rcs";
 import { computeGraphLayout, layoutDimensions } from "./layout";
+import {
+  layoutToSidecar,
+  loadLayoutSidecar,
+  mergeSidecarPositions,
+  resolveWorkflowPath,
+  saveLayoutSidecar,
+} from "./layoutSidecar";
 
 let activePanel: vscode.WebviewPanel | undefined;
 
@@ -14,7 +21,10 @@ export function openGraphPanel(
     return;
   }
 
-  const layout = computeGraphLayout(workflow);
+  const layout = mergeSidecarPositions(
+    computeGraphLayout(workflow),
+    loadLayoutSidecar(resolveWorkflowPath(document)),
+  );
   const dims = layoutDimensions(layout);
 
   if (activePanel) {
@@ -47,9 +57,16 @@ export function openGraphPanel(
     activePanel = undefined;
   });
 
-  activePanel.webview.onDidReceiveMessage((message: { type: string }) => {
+  activePanel.webview.onDidReceiveMessage((message: { type: string; layout?: ReturnType<typeof computeGraphLayout> }) => {
     if (message.type === "ready") {
       activePanel?.webview.postMessage({ type: "update", layout, dims });
+    }
+    if (message.type === "saveLayout" && message.layout) {
+      saveLayoutSidecar(
+        resolveWorkflowPath(document),
+        layoutToSidecar(message.layout),
+      );
+      void vscode.window.showInformationMessage("ArcFlow: layout saved to sidecar.");
     }
   });
 }

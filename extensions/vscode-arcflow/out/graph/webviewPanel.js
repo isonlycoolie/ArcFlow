@@ -38,13 +38,14 @@ exports.isArcflowWorkflowDocument = isArcflowWorkflowDocument;
 const vscode = __importStar(require("vscode"));
 const path = __importStar(require("path"));
 const layout_1 = require("./layout");
+const layoutSidecar_1 = require("./layoutSidecar");
 let activePanel;
 function openGraphPanel(context, document) {
     const workflow = parseWorkflowDocument(document);
     if (!workflow) {
         return;
     }
-    const layout = (0, layout_1.computeGraphLayout)(workflow);
+    const layout = (0, layoutSidecar_1.mergeSidecarPositions)((0, layout_1.computeGraphLayout)(workflow), (0, layoutSidecar_1.loadLayoutSidecar)((0, layoutSidecar_1.resolveWorkflowPath)(document)));
     const dims = (0, layout_1.layoutDimensions)(layout);
     if (activePanel) {
         activePanel.reveal(vscode.ViewColumn.Beside);
@@ -65,6 +66,10 @@ function openGraphPanel(context, document) {
     activePanel.webview.onDidReceiveMessage((message) => {
         if (message.type === "ready") {
             activePanel?.webview.postMessage({ type: "update", layout, dims });
+        }
+        if (message.type === "saveLayout" && message.layout) {
+            (0, layoutSidecar_1.saveLayoutSidecar)((0, layoutSidecar_1.resolveWorkflowPath)(document), (0, layoutSidecar_1.layoutToSidecar)(message.layout));
+            void vscode.window.showInformationMessage("ArcFlow: layout saved to sidecar.");
         }
     });
 }

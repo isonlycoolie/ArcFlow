@@ -1,8 +1,8 @@
 {
   "name": "vscode-arcflow",
   "displayName": "ArcFlow",
-  "description": "Visual graph and trace timeline for ArcFlow RCS workflows (preview)",
-  "version": "0.1.0-preview",
+  "description": "Visual graph, trace timeline, and local debug for ArcFlow workflows",
+  "version": "0.2.0-stable",
   "publisher": "arcflow",
   "license": "MIT OR Apache-2.0",
   "engines": {
@@ -18,7 +18,9 @@
     "onLanguage:arcflow-trace",
     "onCommand:arcflow.visualizeGraph",
     "onCommand:arcflow.viewTraceTimeline",
-    "onCommand:arcflow.connectServer"
+    "onCommand:arcflow.connectServer",
+    "onCommand:arcflow.toggleBreakpoint",
+    "onCommand:arcflow.startDebugRun"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -49,6 +51,21 @@
         "command": "arcflow.connectServer",
         "title": "ArcFlow: Connect to Local Server",
         "icon": "$(plug)"
+      },
+      {
+        "command": "arcflow.toggleBreakpoint",
+        "title": "ArcFlow: Toggle Breakpoint",
+        "icon": "$(debug-breakpoint)"
+      },
+      {
+        "command": "arcflow.startDebugRun",
+        "title": "ArcFlow: Start Debug Run",
+        "icon": "$(debug-start)"
+      }
+    ],
+    "breakpoints": [
+      {
+        "language": "arcflow-workflow"
       }
     ],
     "menus": {
@@ -89,11 +106,15 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "vsce package --no-dependencies"
+    "package": "vsce package --no-dependencies",
+    "test": "npm run compile && node ./out/test/runTest.js"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.10",
     "@types/node": "^22.10.2",
     "@types/vscode": "^1.85.0",
+    "@vscode/test-electron": "^2.4.1",
+    "mocha": "^11.1.0",
     "typescript": "^5.7.2"
   }
 }
