@@ -568,3 +568,98 @@ impl AgentRuntime {
                 prior
             }
             MemoryType::Shared => {
+                let owner = state.steps.last().map(|s| s.agent_id).unwrap_or(agent.id);
+                let prior = if config.scope == MemoryScope::Workflow {
+                    ctx.memory
+                        .read_shared(
+                            config,
+                            owner,
+                            STUB_MEMORY_KEY,
+                            &agent.name,
+                            ctx.legacy,
+                            ctx.sprint5,
+                            &ctx.run_id,
+                            Some(step_id),
+                        )
+                        .map_err(|e| map_memory_error(step_id, e))?
+                } else {
+                    None
+                };
+                ctx.memory
+                    .write_shared(
+                        agent.id,
+                        STUB_MEMORY_KEY,
+                        value,
+                        config,
+                        &agent.name,
+                        ctx.legacy,
+                        ctx.sprint5,
+                        &ctx.run_id,
+                        Some(step_id),
+                    )
+                    .map_err(|e| map_memory_error(step_id, e))?;
+                prior
+            }
+            MemoryType::Persistent => {
+                let ns = require_namespace(config, step_id)?;
+                let prior = ctx
+                    .memory
+                    .read_persistent(
+                        ns,
+                        STUB_MEMORY_KEY,
+                        &agent.name,
+                        ctx.legacy,
+                        ctx.sprint5,
+                        &ctx.run_id,
+                        Some(step_id),
+                    )
+                    .map_err(|e| map_memory_error(step_id, e))?;
+                ctx.memory
+                    .write_persistent(
+                        ns,
+                        STUB_MEMORY_KEY,
+                        value,
+                        &agent.name,
+                        ctx.legacy,
+                        ctx.sprint5,
+                        &ctx.run_id,
+                        Some(step_id),
+                    )
+                    .map_err(|e| map_memory_error(step_id, e))?;
+                prior
+            }
+            MemoryType::Vector => {
+                let ns = require_namespace(config, step_id)?;
+                let prior = ctx
+                    .memory
+                    .read_vector(
+                        ns,
+                        STUB_MEMORY_KEY,
+                        &agent.name,
+                        ctx.legacy,
+                        ctx.sprint5,
+                        &ctx.run_id,
+                        Some(step_id),
+                    )
+                    .map_err(|e| map_memory_error(step_id, e))?;
+                ctx.memory
+                    .write_vector(
+                        ns,
+                        STUB_MEMORY_KEY,
+                        value,
+                        &agent.name,
+                        ctx.legacy,
+                        ctx.sprint5,
+                        &ctx.run_id,
+                        Some(step_id),
+                    )
+                    .map_err(|e| map_memory_error(step_id, e))?;
+                prior
+            }
+        };
+        Ok(bytes_to_note(prior))
+    }
+}
+
+fn map_tool_error(name: String, step_id: Uuid, err: ToolError) -> RuntimeError {
+    RuntimeError::ToolExecutionFailed {
