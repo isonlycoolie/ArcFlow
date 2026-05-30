@@ -93,3 +93,83 @@ function buildTraceHtml(webview, extensionPath, trace) {
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="${cssUri}">
+  <title>ArcFlow Trace</title>
+</head>
+<body>
+  <header class="toolbar">
+    <h1>Trace Timeline</h1>
+    <span class="stub-badge">Preview stub</span>
+  </header>
+  <section id="meta"></section>
+  <ol id="timeline" class="timeline"></ol>
+  <p class="footer-note">Step-through debugging and breakpoints ship in stable (Month 6).</p>
+  <script nonce="${nonce}">
+    (function () {
+      const trace = ${payload};
+      const meta = document.getElementById("meta");
+      const timeline = document.getElementById("timeline");
+
+      function fmtTs(value) {
+        if (!value) return "—";
+        try { return new Date(value).toLocaleString(); } catch { return value; }
+      }
+
+      function render(t) {
+        meta.innerHTML = [
+          "<dl>",
+          "<dt>Run ID</dt><dd>" + t.run_id + "</dd>",
+          "<dt>Workflow</dt><dd>" + (t.workflow_name || "unknown") + "</dd>",
+          "<dt>Status</dt><dd>" + (t.status || "unknown") + "</dd>",
+          "<dt>Started</dt><dd>" + fmtTs(t.started_at) + "</dd>",
+          "<dt>Completed</dt><dd>" + fmtTs(t.completed_at) + "</dd>",
+          "<dt>Duration</dt><dd>" + (t.duration_ms != null ? t.duration_ms + " ms" : "—") + "</dd>",
+          "</dl>"
+        ].join("");
+
+        timeline.innerHTML = "";
+        if (!t.steps || t.steps.length === 0) {
+          timeline.innerHTML = "<li class=\\"empty\\">No steps recorded.</li>";
+          return;
+        }
+        t.steps.forEach(function (step) {
+          const li = document.createElement("li");
+          li.className = "step step-" + (step.status || "unknown").toLowerCase();
+          li.innerHTML =
+            "<div class=\\"step-head\\">" +
+            "<strong>#" + step.step_index + " " + (step.agent_name || step.step_id) + "</strong>" +
+            "<span class=\\"status\\">" + (step.status || "?") + "</span>" +
+            "</div>" +
+            "<div class=\\"step-meta\\">" +
+            (step.agent_role ? "<span>" + step.agent_role + "</span>" : "") +
+            "<span>" + fmtTs(step.started_at) + "</span>" +
+            (step.duration_ms != null ? "<span>" + step.duration_ms + " ms</span>" : "") +
+            "</div>";
+          timeline.appendChild(li);
+        });
+      }
+
+      render(trace);
+      window.addEventListener("message", function (event) {
+        if (event.data && event.data.type === "update") {
+          render(event.data.trace);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>`;
+}
+function getNonce() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let nonce = "";
+    for (let i = 0; i < 32; i++) {
+        nonce += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return nonce;
+}
+function isArcflowTraceDocument(document) {
+    return document.fileName.endsWith(".arcflow.trace.json");
+}
+//# sourceMappingURL=traceTimelinePanel.js.map
