@@ -129,19 +129,30 @@ impl AgentRuntime {
                     test,
                 );
                 if let Some(stub_key) = key {
-                    if test.should_fail(&stub_key, ctx.test_attempt) {
-                        return Err(RuntimeError::AgentExecutionFailed {
-                            step_id,
-                            reason: format!("test stub failure for {stub_key}"),
-                        });
-                    }
-                    if let Some(output) = test.stub_output(&stub_key, ctx.test_attempt) {
-                        return Ok(ExecutionStepOutput {
-                            step_id,
-                            agent_id: agent.id,
-                            content: output,
-                            status: ExecutionStatus::Completed,
-                        });
+                    let max_attempts = test
+                        .stub_responses
+                        .get(&stub_key)
+                        .and_then(|s| s.fail_times)
+                        .map(|fail_times| fail_times.saturating_add(1))
+                        .unwrap_or(1);
+                    for attempt in 1..=max_attempts {
+                        if test.should_fail(&stub_key, attempt) {
+                            if attempt >= max_attempts {
+                                return Err(RuntimeError::AgentExecutionFailed {
+                                    step_id,
+                                    reason: format!("test stub failure for {stub_key}"),
+                                });
+                            }
+                            continue;
+                        }
+                        if let Some(output) = test.stub_output(&stub_key, attempt) {
+                            return Ok(ExecutionStepOutput {
+                                step_id,
+                                agent_id: agent.id,
+                                content: output,
+                                status: ExecutionStatus::Completed,
+                            });
+                        }
                     }
                 }
             }
