@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use arcflow_core::rcs::types::{AgentDefinition, StepDefinition, WorkflowDefinition};
+use arcflow_core::rcs::types::{AgentDefinition, ExecutionMode, StepDefinition, WorkflowDefinition};
 use arcflow_core::workflow::WorkflowEngine;
 
 fn ag(id: Uuid, role: &str) -> AgentDefinition {
@@ -30,8 +30,11 @@ fn first_step_sees_empty_prior_state() {
             agent_id: a,
             order: 1,
             fallback_step_id: None,
+            hitl: None,
         }],
         retry_policy: None,
+        execution_mode: ExecutionMode::Linear,
+        graph: None,
     };
     let mut m = HashMap::new();
     m.insert(a, ag(a, "alpha"));
@@ -57,15 +60,19 @@ fn second_step_sees_first_step_in_snapshot() {
                 agent_id: a1,
                 order: 1,
                 fallback_step_id: None,
+            hitl: None,
             },
             StepDefinition {
                 id: s2,
                 agent_id: a2,
                 order: 2,
                 fallback_step_id: None,
+            hitl: None,
             },
         ],
         retry_policy: None,
+        execution_mode: ExecutionMode::Linear,
+        graph: None,
     };
     let mut m = HashMap::new();
     m.insert(a1, ag(a1, "first"));
