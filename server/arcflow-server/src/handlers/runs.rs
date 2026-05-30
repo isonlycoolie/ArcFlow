@@ -97,6 +97,7 @@ pub async fn create_run(
         arcflow_core::providers::default_max_tokens(),
         arcflow_core::providers::default_temperature(),
         &exec_config,
+        None,
     );
 
     let (status, result_json, error_json) = match execution {

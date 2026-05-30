@@ -158,6 +158,7 @@ pub fn execute_workflow(
             max_tokens,
             temperature,
             &exec_config,
+            None,
         )
     });
     let record = match record {
@@ -230,6 +231,7 @@ pub fn execute_resume_workflow(
             max_tokens,
             temperature,
             &exec_config,
+            None,
         )
     });
     let record = match record {

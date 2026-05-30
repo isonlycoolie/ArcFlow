@@ -11,7 +11,7 @@ mod test_config;
 mod validation;
 
 pub use context::ExecutionContext;
-pub use execution_config::ExecutionConfig;
+pub use execution_config::{ExecutionConfig, StreamConfig};
 pub use test_config::{resolve_key, TestConfig, TestStubStep};
 
 pub use engine::WorkflowEngine;

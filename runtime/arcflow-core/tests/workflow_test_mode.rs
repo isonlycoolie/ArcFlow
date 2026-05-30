@@ -57,7 +57,7 @@ fn test_stub_overrides_step_output() {
     };
 
     let record = WorkflowEngine::new()
-        .execute_with_config(&workflow, &agents, "hello", None, None, None, 1024, 0.7, &exec_config)
+        .execute_with_config(&workflow, &agents, "hello", None, None, None, 1024, 0.7, &exec_config, None)
         .expect("run");
     assert_eq!(record.step_outputs[0].content, "fixed-output");
 }

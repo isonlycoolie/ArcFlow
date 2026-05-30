@@ -12,6 +12,7 @@ use crate::memory::MemoryCoordinator;
 use crate::providers::ModelProvider;
 use crate::rcs::types::{AgentDefinition, ExecutionStatus, StepDefinition, WorkflowDefinition};
 use crate::state::{ExecutionStepOutput, StateEngine};
+use crate::streaming::{StreamChannelSender, StreamEvent};
 use crate::tools::{ToolInvoker, ToolRuntime};
 use crate::tracing::{
     emitter::TraceEmitter, events::TraceEventKind, otel_export::maybe_export_trace,
@@ -23,6 +24,12 @@ use super::execution_config::ExecutionConfig;
 use super::record::WorkflowExecutionRecord;
 use super::run_error::WorkflowRunError;
 use crate::retry::RetryConfig;
+
+fn try_emit_stream(tx: &Option<StreamChannelSender>, event: StreamEvent) {
+    if let Some(sender) = tx {
+        sender.try_send(event);
+    }
+}
 
 /// Parameters when resuming from PostgreSQL recovery state.
 pub struct ResumeParams {
@@ -85,7 +92,16 @@ fn fail_step(
     step_started: Instant,
     recovery_enabled: bool,
     err: RuntimeError,
+    stream_tx: &Option<StreamChannelSender>,
 ) -> Result<(), WorkflowRunError> {
+    try_emit_stream(
+        stream_tx,
+        StreamEvent::Error {
+            code: "step_failed".into(),
+            message: err.to_string(),
+            step_id: step.id.to_string(),
+        },
+    );
     error!(
         run_id = %loop_ctx.run_id,
         step_id = %step.id,
@@ -151,6 +167,7 @@ fn execute_agent_for_step(
     retry_config: Option<RetryConfig>,
     step_timeout: Option<std::time::Duration>,
     workflow_deadline: Option<Instant>,
+    stream_tx: &Option<StreamChannelSender>,
 ) -> Result<ExecutionStepOutput, RuntimeError> {
     let state_snapshot = loop_ctx.state.snapshot();
     let mut exec_ctx = ExecutionContext {
@@ -169,6 +186,7 @@ fn execute_agent_for_step(
         step_order: step.order,
         test_config: loop_ctx.test_config.clone(),
         test_attempt: 1,
+        stream_tx: stream_tx.clone(),
     };
     agent_runtime.execute_with_context(
         agent,
@@ -204,6 +222,8 @@ pub(crate) fn run_one_step(
     workflow_deadline: Option<Instant>,
     recovery_enabled: bool,
     approval: Option<&ApprovalResult>,
+    stream_tx: Option<StreamChannelSender>,
+    node_id: Option<String>,
 ) -> Result<(), WorkflowRunError> {
     debug!(
         run_id = %loop_ctx.run_id,
@@ -228,6 +248,7 @@ pub(crate) fn run_one_step(
                     RuntimeError::HumanRejected {
                         approval_key: hitl.approval_key.clone(),
                     },
+                    &stream_tx,
                 );
             }
             let content = serde_json::json!({
@@ -250,6 +271,7 @@ pub(crate) fn run_one_step(
                 step_index,
                 Instant::now(),
                 out,
+                &stream_tx,
             );
         }
         return interrupt_for_human(
@@ -270,6 +292,14 @@ pub(crate) fn run_one_step(
         agent_role: agent.role.clone(),
     });
 
+    try_emit_stream(
+        &stream_tx,
+        StreamEvent::StepStart {
+            step_id: step.id.to_string(),
+            node_id,
+        },
+    );
+
     let step_started = Instant::now();
     let out = match execute_agent_for_step(
         agent_runtime,
@@ -288,6 +318,7 @@ pub(crate) fn run_one_step(
         retry_config.clone(),
         step_timeout,
         workflow_deadline,
+        &stream_tx,
     ) {
         Ok(output) => output,
         Err(err) => {
@@ -317,6 +348,7 @@ pub(crate) fn run_one_step(
                             retry_config,
                             step_timeout,
                             workflow_deadline,
+                            &stream_tx,
                         ) {
                             Ok(fallback_out) => fallback_out,
                             Err(fallback_err) => {
@@ -331,6 +363,7 @@ pub(crate) fn run_one_step(
                                     step_started,
                                     recovery_enabled,
                                     fallback_err,
+                                    &stream_tx,
                                 );
                             }
                         }
@@ -346,6 +379,7 @@ pub(crate) fn run_one_step(
                             step_started,
                             recovery_enabled,
                             err,
+                            &stream_tx,
                         );
                     }
                 } else {
@@ -360,6 +394,7 @@ pub(crate) fn run_one_step(
                         step_started,
                         recovery_enabled,
                         err,
+                        &stream_tx,
                     );
                 }
             } else {
@@ -374,6 +409,7 @@ pub(crate) fn run_one_step(
                     step_started,
                     recovery_enabled,
                     err,
+                    &stream_tx,
                 );
             }
         }
@@ -388,6 +424,7 @@ pub(crate) fn run_one_step(
         step_index,
         step_started,
         out,
+        &stream_tx,
     )
 }
 
@@ -400,6 +437,7 @@ fn commit_step_output(
     step_index: usize,
     step_started: Instant,
     out: ExecutionStepOutput,
+    stream_tx: &Option<StreamChannelSender>,
 ) -> Result<(), WorkflowRunError> {
     loop_ctx
         .state
@@ -420,6 +458,13 @@ fn commit_step_output(
         tokens: TokenUsage::default(),
         output_size_bytes: out.content.len(),
     });
+    try_emit_stream(
+        stream_tx,
+        StreamEvent::StepComplete {
+            step_id: step.id.to_string(),
+            duration_ms: step_started.elapsed().as_millis() as u64,
+        },
+    );
     loop_ctx.step_outputs.push(out);
     Ok(())
 }
@@ -439,7 +484,13 @@ pub(crate) fn run_sorted_steps(
     provider_temperature: f32,
     exec_config: &ExecutionConfig,
     resume: Option<ResumeParams>,
+    stream_tx: Option<StreamChannelSender>,
 ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
+    let active_stream = if exec_config.stream.as_ref().is_some_and(|s| s.enabled) {
+        stream_tx
+    } else {
+        None
+    };
     let retry_config = exec_config
         .retry
         .clone()
@@ -570,6 +621,8 @@ pub(crate) fn run_sorted_steps(
                 workflow_deadline,
                 exec_config.recovery_enabled,
                 step_approval,
+                active_stream.clone(),
+                None,
             )?;
         }
 

@@ -108,6 +108,7 @@ pub fn resume_workflow(
         provider_temperature,
         exec_config,
         Some(resume),
+        None,
     )?;
 
     if let Ok(url) = std::env::var("ARCFLOW_POSTGRESQL_URL") {

@@ -117,6 +117,7 @@ fn react_cycle_respects_max_iterations() {
             256,
             0.0,
             &ExecutionConfig::default(),
+            None,
         )
         .unwrap_err();
 

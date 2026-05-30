@@ -69,7 +69,7 @@ fn hitl_without_recovery_returns_invalid_definition() {
     agents.insert(a3, agent(a3, "accounting"));
     let wf = expense_workflow(a1, a2, a3, Uuid::new_v4(), Uuid::new_v4(), Uuid::new_v4());
     let err = WorkflowEngine::new()
-        .execute_with_config(&wf, &agents, "request", None, None, None, 1024, 0.7, &ExecutionConfig::default())
+        .execute_with_config(&wf, &agents, "request", None, None, None, 1024, 0.7, &ExecutionConfig::default(), None)
         .unwrap_err();
     assert!(matches!(
         err,
@@ -102,7 +102,7 @@ fn hitl_interrupt_and_resume_completes() {
     };
     let engine = WorkflowEngine::new();
     let interrupted = engine
-        .execute_with_config(&wf, &agents, "expense:100", None, None, None, 1024, 0.7, &exec_config)
+        .execute_with_config(&wf, &agents, "expense:100", None, None, None, 1024, 0.7, &exec_config, None)
         .unwrap_err();
     let (partial, approval_key) = match interrupted {
         WorkflowRunError::Interrupted {

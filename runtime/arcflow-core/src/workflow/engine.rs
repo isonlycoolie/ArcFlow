@@ -60,6 +60,7 @@ impl WorkflowEngine {
             default_temperature(),
             &ExecutionConfig::default(),
             None,
+            None,
         )
     }
 
@@ -90,6 +91,7 @@ impl WorkflowEngine {
             provider_temperature,
             &ExecutionConfig::default(),
             None,
+            None,
         )
     }
 
@@ -107,6 +109,7 @@ impl WorkflowEngine {
         provider_max_tokens: u32,
         provider_temperature: f32,
         exec_config: &ExecutionConfig,
+        stream_tx: Option<crate::streaming::StreamChannelSender>,
     ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
         validate_workflow(workflow, agents)?;
         match workflow.execution_mode {
@@ -121,6 +124,7 @@ impl WorkflowEngine {
                 provider_max_tokens,
                 provider_temperature,
                 exec_config,
+                stream_tx,
             ),
             ExecutionMode::Linear => run_sorted_steps(
                 &self.agent_runtime,
@@ -134,6 +138,7 @@ impl WorkflowEngine {
                 provider_temperature,
                 exec_config,
                 None,
+                stream_tx,
             ),
         }
     }

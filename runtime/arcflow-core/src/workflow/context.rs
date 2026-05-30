@@ -6,6 +6,7 @@ use std::time::Instant;
 use crate::memory::MemoryCoordinator;
 use crate::providers::ModelProvider;
 use crate::retry::RetryConfig;
+use crate::streaming::StreamChannelSender;
 use crate::tools::{ToolInvoker, ToolRuntime};
 use crate::tracing::{emitter::TraceEmitter, sprint5_emitter::TraceEventEmitter};
 
@@ -40,4 +41,6 @@ pub struct ExecutionContext<'a, 's> {
     pub test_config: Option<crate::workflow::TestConfig>,
     /// Current attempt within retry loop (1-based).
     pub test_attempt: u32,
+    /// Optional per-run stream channel (Phase 2.1).
+    pub stream_tx: Option<StreamChannelSender>,
 }

@@ -93,6 +93,7 @@ pub fn run_graph_loop(
     provider_max_tokens: u32,
     provider_temperature: f32,
     exec_config: &ExecutionConfig,
+    stream_tx: Option<crate::streaming::StreamChannelSender>,
 ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
     let graph = workflow.graph.as_ref().ok_or_else(|| {
         WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
@@ -108,6 +109,12 @@ pub fn run_graph_loop(
         r.validate().map_err(WorkflowRunError::Aborted)?;
     }
     exec_config.validate().map_err(WorkflowRunError::Aborted)?;
+
+    let active_stream = if exec_config.stream.as_ref().is_some_and(|s| s.enabled) {
+        stream_tx
+    } else {
+        None
+    };
 
     let step_timeout = exec_config.timeouts.step_timeout;
     let workflow_timeout = exec_config.timeouts.workflow_timeout;
@@ -206,6 +213,8 @@ pub fn run_graph_loop(
                 workflow_deadline,
                 exec_config.recovery_enabled,
                 None,
+                active_stream.clone(),
+                Some(current.clone()),
             )?;
 
             graph_step_index += 1;
