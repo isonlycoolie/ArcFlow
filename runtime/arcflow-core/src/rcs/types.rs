@@ -378,3 +378,98 @@ pub struct ErrorPayload {
     /// Stable machine-readable error code.
     pub code: ErrorCode,
     /// Human-readable error message.
+    pub message: String,
+    /// Step associated with the error when applicable.
+    pub step_id: Option<Uuid>,
+    /// Whether the caller may retry the operation.
+    pub recoverable: bool,
+}
+
+/// Single observability event emitted during execution.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TraceEvent {
+    /// Trace id correlating workflow execution.
+    pub trace_id: Uuid,
+    /// Event classification.
+    pub event_kind: TraceEventKind,
+    /// UTC timestamp of the event.
+    pub timestamp: DateTime<Utc>,
+    /// Related step id when applicable.
+    pub step_id: Option<Uuid>,
+    /// Optional structured event payload.
+    pub data: Option<Value>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::TimeZone;
+
+    fn round_trip<T>(original: &T) -> T
+    where
+        T: Serialize + for<'de> Deserialize<'de> + PartialEq + std::fmt::Debug,
+    {
+        let json = serde_json::to_string(original).expect("value must serialize to JSON");
+        let deserialized: T =
+            serde_json::from_str(&json).expect("value must deserialize from JSON");
+        assert_eq!(original, &deserialized, "round-trip must preserve value");
+        deserialized
+    }
+
+    #[test]
+    fn message_type_round_trip() {
+        round_trip(&MessageType::RunWorkflow);
+    }
+
+    #[test]
+    fn execution_status_round_trip() {
+        round_trip(&ExecutionStatus::Running);
+    }
+
+    #[test]
+    fn error_code_round_trip() {
+        round_trip(&ErrorCode::WorkflowNotFound);
+    }
+
+    #[test]
+    fn memory_type_round_trip() {
+        round_trip(&MemoryType::Session);
+    }
+
+    #[test]
+    fn memory_scope_round_trip() {
+        round_trip(&MemoryScope::Workflow);
+    }
+
+    #[test]
+    fn trace_event_kind_round_trip() {
+        round_trip(&TraceEventKind::StepStarted);
+    }
+
+    #[test]
+    fn provider_id_round_trip() {
+        round_trip(&ProviderId::Anthropic);
+    }
+
+    #[test]
+    fn retry_policy_round_trip() {
+        round_trip(&RetryPolicy {
+            max_attempts: 3,
+            backoff_ms: 100,
+            max_backoff_ms: 5_000,
+        });
+    }
+
+    #[test]
+    fn memory_config_round_trip() {
+        round_trip(&MemoryConfig {
+            memory_type: MemoryType::Vector,
+            scope: MemoryScope::Agent,
+            namespace: Some("ns".into()),
+            ttl_seconds: Some(3600),
+        });
+    }
+
+    #[test]
+    fn tool_definition_round_trip() {
+        round_trip(&ToolDefinition {
