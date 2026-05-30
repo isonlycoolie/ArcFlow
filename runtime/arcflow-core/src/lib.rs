@@ -60,5 +60,8 @@ pub mod recovery;
 /// Human-in-the-loop pause and resume (Phase 1.4).
 pub mod human;
 
+/// Local-only step-through debugging (Phase 2.4).
+pub mod debug;
+
 /// Embedding providers for vector memory (Phase 1.5).
 pub mod embedding;

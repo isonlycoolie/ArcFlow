@@ -8,6 +8,9 @@ mod registry;
 mod state;
 mod store;
 
+#[cfg(feature = "debug-endpoints")]
+mod debug;
+
 use std::net::SocketAddr;
 use std::sync::Arc;
 
@@ -69,9 +72,35 @@ async fn main() {
         ))
         .layer(RequestBodyLimitLayer::new(1024 * 1024));
 
-    let app = public.merge(protected).with_state(state);
+    let app = public.merge(protected).with_state(state.clone());
+
+    #[cfg(feature = "debug-endpoints")]
+    let app = if std::env::var("ARCFLOW_DEBUG")
+        .map(|v| v == "true" || v == "1")
+        .unwrap_or(false)
+    {
+        use axum::routing::post;
+        let debug_routes = Router::new()
+            .route("/v1/debug/runs/start", post(debug::start_debug_run))
+            .route("/v1/debug/runs/:run_id/state", get(debug::get_debug_state))
+            .route(
+                "/v1/debug/runs/:run_id/continue",
+                post(debug::continue_debug_run),
+            )
+            .with_state(state);
+        app.merge(debug_routes)
+    } else {
+        app
+    };
+
+    let app = app;
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     tracing::info!(%addr, "arcflow-server listening");
     let listener = tokio::net::TcpListener::bind(addr).await.expect("bind");
-    axum::serve(listener, app).await.expect("serve");
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await
+    .expect("serve");
 }

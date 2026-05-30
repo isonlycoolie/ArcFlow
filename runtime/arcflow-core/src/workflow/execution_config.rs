@@ -5,6 +5,10 @@ use uuid::Uuid;
 use crate::retry::{RetryConfig, TimeoutConfig};
 use crate::workflow::test_config::TestConfig;
 
+use std::sync::Arc;
+
+use crate::debug::DebugSession;
+
 /// SDK opt-in for user-facing stream events (Phase 2.1).
 #[derive(Debug, Clone, Default)]
 pub struct StreamConfig {
@@ -24,6 +28,8 @@ pub struct ExecutionConfig {
     pub test: Option<TestConfig>,
     /// When enabled, step and token events are emitted on the run stream channel.
     pub stream: Option<StreamConfig>,
+    /// Local debug session with breakpoints (Phase 2.4).
+    pub debug: Option<Arc<DebugSession>>,
 }
 
 impl ExecutionConfig {

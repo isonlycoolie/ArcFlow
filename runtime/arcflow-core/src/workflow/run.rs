@@ -224,6 +224,7 @@ pub(crate) fn run_one_step(
     approval: Option<&ApprovalResult>,
     stream_tx: Option<StreamChannelSender>,
     node_id: Option<String>,
+    debug_session: Option<std::sync::Arc<crate::debug::DebugSession>>,
 ) -> Result<(), WorkflowRunError> {
     debug!(
         run_id = %loop_ctx.run_id,
@@ -307,6 +308,15 @@ pub(crate) fn run_one_step(
             node_id,
         },
     );
+
+    if let Some(session) = debug_session.as_ref() {
+        session.pause_before_step(
+            run_key,
+            step.id,
+            step_index,
+            &loop_ctx.state.snapshot(),
+        );
+    }
 
     let step_started = Instant::now();
     let out = match execute_agent_for_step(
@@ -638,6 +648,7 @@ pub(crate) fn run_sorted_steps(
                 step_approval,
                 active_stream.clone(),
                 None,
+                exec_config.debug.clone(),
             )?;
         }
 

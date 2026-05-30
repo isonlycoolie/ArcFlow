@@ -111,5 +111,6 @@ pub fn parse_exec_config(
         stream: parsed.stream.map(|s| StreamConfig {
             enabled: s.enabled,
         }),
+        debug: None,
     })
 }

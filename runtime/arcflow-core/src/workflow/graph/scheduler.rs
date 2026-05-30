@@ -215,6 +215,7 @@ pub fn run_graph_loop(
                 None,
                 active_stream.clone(),
                 Some(current.clone()),
+                exec_config.debug.clone(),
             )?;
 
             graph_step_index += 1;

@@ -14,6 +14,8 @@ pub struct AppState {
     pub runs: Option<Arc<RunStore>>,
     pub registry: Option<Arc<WorkflowRegistryStore>>,
     pub traces: Option<Arc<PostgresTracePersistence>>,
+    #[cfg(feature = "debug-endpoints")]
+    pub debug: Option<Arc<crate::debug::DebugRunStore>>,
 }
 
 impl AppState {
@@ -56,6 +58,11 @@ impl AppState {
             runs,
             registry,
             traces,
+            #[cfg(feature = "debug-endpoints")]
+            debug: std::env::var("ARCFLOW_DEBUG")
+                .map(|v| v == "true" || v == "1")
+                .unwrap_or(false)
+                .then(|| Arc::new(crate::debug::DebugRunStore::default())),
         }
     }
 }
