@@ -23,6 +23,9 @@ langchain = [
     "langchain-core>=0.2.0",
 ]
 
+[project.entry-points.pytest11]
+arcflow = "arcflow.testing.pytest_plugin"
+
 [tool.maturin]
 features = ["pyo3/extension-module"]
 module-name = "arcflow._arcflow_binding"
