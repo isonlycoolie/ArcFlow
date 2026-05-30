@@ -188,3 +188,97 @@ pub async fn get_run(
         .get(&run_id)
         .await
         .map_err(internal)?
+        .ok_or((StatusCode::NOT_FOUND, format!("run '{run_id}' not found")))?;
+    Ok(Json(stored.into_response()))
+}
+
+pub async fn get_run_trace(
+    State(state): State<Arc<AppState>>,
+    Path(run_id): Path<String>,
+) -> Result<Json<arcflow_core::tracing::types::ExecutionTrace>, (StatusCode, String)> {
+    if let Some(trace) = get_execution_trace(&run_id) {
+        return Ok(Json(trace));
+    }
+    let Some(traces) = state.traces.as_ref() else {
+        return Err((
+            StatusCode::NOT_FOUND,
+            format!("[ArcFlow] Trace not found for run '{run_id}'"),
+        ));
+    };
+    match traces.load_execution_trace(&run_id).await {
+        Ok(Some(trace)) => Ok(Json(trace)),
+        Ok(None) => Err((
+            StatusCode::NOT_FOUND,
+            format!("[ArcFlow] Trace not found for run '{run_id}'"),
+        )),
+        Err(e) => Err(internal(e)),
+    }
+}
+
+async fn persist_run_trace(state: &AppState, run_id: &str) -> Result<(), (StatusCode, String)> {
+    let Some(traces) = state.traces.as_ref() else {
+        return Ok(());
+    };
+    let Some(trace) = get_execution_trace(run_id) else {
+        return Ok(());
+    };
+    traces
+        .persist_events(run_id, &trace.events)
+        .await
+        .map_err(internal)
+}
+
+fn internal(err: sqlx::Error) -> (StatusCode, String) {
+    tracing::warn!(error = %err, "database error");
+    (
+        StatusCode::INTERNAL_SERVER_ERROR,
+        "[ArcFlow] Database error".into(),
+    )
+}
+
+fn bad_request(message: impl Into<String>) -> (StatusCode, String) {
+    (StatusCode::BAD_REQUEST, format!("[ArcFlow] {}", message.into()))
+}
+
+fn internal_json(err: serde_json::Error) -> (StatusCode, String) {
+    (
+        StatusCode::INTERNAL_SERVER_ERROR,
+        format!("[ArcFlow] JSON serialization error: {err}"),
+    )
+}
+
+fn validate_hitl(
+    workflow: &arcflow_core::rcs::types::WorkflowDefinition,
+    exec_config: Option<&serde_json::Value>,
+) -> Result<(), String> {
+    let has_hitl = workflow.steps.iter().any(|s| s.hitl.is_some());
+    if !has_hitl {
+        return Ok(());
+    }
+    let recovery = exec_config
+        .and_then(|v| v.get("recovery_enabled"))
+        .and_then(|b| b.as_bool())
+        .unwrap_or(false);
+    if !recovery {
+        return Err(
+            "workflows with HITL steps require exec_config.recovery_enabled=true".into(),
+        );
+    }
+    Ok(())
+}
+
+fn validate_agents(
+    workflow: &arcflow_core::rcs::types::WorkflowDefinition,
+    agents: &[AgentDefinition],
+) -> Result<(), String> {
+    let ids: HashMap<Uuid, _> = agents.iter().map(|a| (a.id, a)).collect();
+    for step in &workflow.steps {
+        if !ids.contains_key(&step.agent_id) {
+            return Err(format!(
+                "agent '{}' not found for step '{}'",
+                step.agent_id, step.id
+            ));
+        }
+    }
+    Ok(())
+}
