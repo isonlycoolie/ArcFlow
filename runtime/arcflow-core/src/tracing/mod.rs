@@ -15,7 +15,7 @@ pub mod otel;
 #[cfg(feature = "otel")]
 pub mod otel_inmemory;
 #[cfg(feature = "otel")]
-pub mod otel_metrics;
+pub mod otel_sec1;
 #[cfg(feature = "otel")]
 pub mod otel_live;
 #[cfg(feature = "otel")]
@@ -37,3 +37,5 @@ pub use registry::{get_execution_trace, set_trace_event_persist_hook, try_get_ex
 pub use sprint5_emitter::TraceEventEmitter;
 pub use store::TraceStore;
 pub use types::{ExecutionTrace, StepTrace, TokenUsage, TraceEvent};
+#[cfg(feature = "otel")]
+pub use otel_live::init_tracing_subscriber;

@@ -30,7 +30,7 @@ opentelemetry = { version = "0.27", features = ["trace", "metrics"], optional = 
 opentelemetry_sdk = { version = "0.27", features = ["trace", "testing", "metrics", "rt-tokio"], optional = true }
 opentelemetry-otlp = { version = "0.27", features = ["grpc-tonic", "http-proto", "metrics"], optional = true }
 tracing-opentelemetry = { version = "0.28", optional = true }
-tracing-subscriber = { version = "0.3", default-features = false, features = ["registry"], optional = true }
+tracing-subscriber = { version = "0.3", default-features = false, features = ["registry", "fmt", "env-filter"], optional = true }
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
 futures-util = "0.3"
 eventsource-stream = "0.2"

@@ -37,6 +37,29 @@ fn try_init_live_tracing() {
     });
 }
 
+/// Initializes fmt + optional OTel layers for binaries (server, CLI).
+pub fn init_tracing_subscriber(default_directive: &str) {
+    use tracing_subscriber::util::SubscriberInitExt;
+
+    let filter = tracing_subscriber::EnvFilter::from_default_env()
+        .add_directive(default_directive.parse().expect("valid tracing directive"));
+    let fmt_layer = tracing_subscriber::fmt::layer();
+
+    if otel_config::otel_enabled() && init_otlp_exporter().is_ok() {
+        let _ = super::otel_metrics::init_metrics();
+        let tracer = super::otel::sdk_tracer("arcflow-core");
+        let otel_layer = OpenTelemetryLayer::new(tracer);
+        Registry::default()
+            .with(filter)
+            .with(fmt_layer)
+            .with(otel_layer)
+            .init();
+        return;
+    }
+
+    Registry::default().with(filter).with(fmt_layer).init();
+}
+
 /// Opens an `arcflow.workflow` span when OTel is enabled.
 pub fn workflow_span(run_id: &str, workflow_name: &str) -> SpanGuard {
     if !otel_config::otel_enabled() {

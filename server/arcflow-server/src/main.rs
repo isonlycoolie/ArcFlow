@@ -21,12 +21,7 @@ use state::AppState;
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::from_default_env()
-                .add_directive("arcflow_server=info".parse().expect("valid directive")),
-        )
-        .init();
+    arcflow_core::tracing::otel_live::init_tracing_subscriber("arcflow_server=info");
 
     let api_key = std::env::var("ARCFLOW_SERVER_API_KEY").unwrap_or_else(|_| {
         eprintln!("[ArcFlow] ARCFLOW_SERVER_API_KEY must be set.");
