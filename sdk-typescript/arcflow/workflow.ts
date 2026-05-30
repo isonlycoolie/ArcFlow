@@ -8,7 +8,7 @@ import {
   WorkflowExecutionError,
 } from "./exceptions.js";
 import { buildGraphJson } from "./graph.js";
-import { runRemoteWorkflow } from "./remote.js";
+import { publishRemoteWorkflow, resolveRemoteWorkflow, runRemoteWorkflow } from "./remote.js";
 import type { Provider } from "./provider.js";
 import { toWorkflowResult, type WorkflowResult } from "./result.js";
 import { traceFromJson, type TraceResult } from "./trace.js";
@@ -125,7 +125,7 @@ interface GraphNodeRecord {
 }
 
 export class Workflow {
-  private readonly name: string;
+  readonly name: string;
   private readonly graphMode: boolean;
   readonly runtimeUrl: string | undefined;
   private readonly steps: Array<{ agent: Agent; hitl?: HitlConfig }> = [];
@@ -145,6 +145,7 @@ export class Workflow {
   private workflowTimeoutSeconds: number | undefined;
   private stepTimeoutSeconds: number | undefined;
   private recoveryEnabled = false;
+  private registryRef: { name: string; version: string } | undefined;
 
   constructor(config: WorkflowConfig = {}) {
     const trimmed = (config.name ?? "default").trim();
@@ -409,6 +410,19 @@ export class Workflow {
   }
 
   buildRunPayload(input: string, execConfigJson?: string): Record<string, unknown> {
+    if (this.registryRef) {
+      const payload: Record<string, unknown> = {
+        workflow_ref: {
+          name: this.registryRef.name,
+          version: this.registryRef.version,
+        },
+        input,
+      };
+      if (execConfigJson) {
+        payload.exec_config = JSON.parse(execConfigJson);
+      }
+      return payload;
+    }
     const { agents, steps } = this.agentsAndSteps();
     const workflowId = this.workflowId ?? randomUUID();
     this.workflowId = workflowId;
@@ -447,6 +461,78 @@ export class Workflow {
     return payload;
   }
 
+  buildPublishPayload(publishedBy?: string): Record<string, unknown> {
+    const { agents, steps } = this.agentsAndSteps();
+    const workflowId = this.workflowId ?? randomUUID();
+    this.workflowId = workflowId;
+    const workflowBody: Record<string, unknown> = {
+      id: workflowId,
+      name: this.name,
+      steps: steps.map((s) => {
+        const row: Record<string, unknown> = {
+          id: s.stepId,
+          agent_id: s.agentId,
+          order: s.order,
+        };
+        if (s.hitlJson) {
+          row.hitl = JSON.parse(s.hitlJson);
+        }
+        return row;
+      }),
+      execution_mode: this.graphMode ? "graph" : "linear",
+    };
+    if (this.graphMode) {
+      workflowBody.graph = JSON.parse(this.graphJson()!);
+    }
+    const payload: Record<string, unknown> = {
+      workflow: workflowBody,
+      agents: agents.map((agent) => ({
+        id: agent.agentId,
+        name: agent.name,
+        role: agent.role,
+        instructions: agent.instructions,
+      })),
+    };
+    if (publishedBy) {
+      payload.published_by = publishedBy;
+    }
+    return payload;
+  }
+
+  async publish(version: string, publishedBy?: string): Promise<Record<string, unknown>> {
+    if (!this.runtimeUrl) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] workflow.publish() requires Workflow({ runtime: ... }).",
+      );
+    }
+    if (this.graphMode) {
+      if (this.graphNodes.size === 0) {
+        throw new WorkflowConfigurationError(
+          "[ArcFlow] Cannot publish a graph workflow with no nodes.",
+        );
+      }
+    } else if (this.steps.length === 0) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] Cannot publish a workflow with no steps.",
+      );
+    }
+    return publishRemoteWorkflow(this, version, publishedBy);
+  }
+
+  static async resolve(
+    name: string,
+    version: string,
+    runtime: string,
+  ): Promise<Workflow> {
+    const resolved = await resolveRemoteWorkflow(name, version, runtime);
+    const wf = new Workflow({ name, runtime });
+    wf.registryRef = {
+      name,
+      version: String(resolved.version ?? version),
+    };
+    return wf;
+  }
+
   async run(input: string, options: RunOptions = {}): Promise<WorkflowResult> {
     const trimmed = input.trim();
     if (!trimmed) {
@@ -454,16 +540,18 @@ export class Workflow {
         "[ArcFlow] Workflow input must be a non-empty string.",
       );
     }
-    if (this.graphMode) {
-      if (this.graphNodes.size === 0) {
+    if (!this.registryRef) {
+      if (this.graphMode) {
+        if (this.graphNodes.size === 0) {
+          throw new WorkflowConfigurationError(
+            "[ArcFlow] Cannot run a graph workflow with no nodes.",
+          );
+        }
+      } else if (this.steps.length === 0) {
         throw new WorkflowConfigurationError(
-          "[ArcFlow] Cannot run a graph workflow with no nodes.",
+          "[ArcFlow] Cannot run a workflow with no steps.",
         );
       }
-    } else if (this.steps.length === 0) {
-      throw new WorkflowConfigurationError(
-        "[ArcFlow] Cannot run a workflow with no steps.",
-      );
     }
     if (!this.workflowId) {
       this.workflowId = randomUUID();

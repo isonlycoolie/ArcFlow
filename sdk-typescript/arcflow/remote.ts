@@ -18,6 +18,53 @@ interface RunStatusResponse {
   error?: { message: string; step_id?: string };
 }
 
+export async function publishRemoteWorkflow(
+  workflow: Workflow,
+  version: string,
+  publishedBy?: string,
+): Promise<Record<string, unknown>> {
+  const baseUrl = workflow.runtimeUrl;
+  if (!baseUrl) {
+    throw new WorkflowConfigurationError(
+      "[ArcFlow] Remote runtime URL is not configured.",
+    );
+  }
+  const payload = workflow.buildPublishPayload(publishedBy);
+  return requestJson(
+    "PUT",
+    `${baseUrl}/v1/workflows/${workflow.name}/versions/${version}`,
+    payload,
+  );
+}
+
+export async function resolveRemoteWorkflow(
+  name: string,
+  version: string,
+  runtime: string,
+): Promise<Record<string, unknown>> {
+  const baseUrl = runtime.trim().replace(/\/$/, "");
+  if (!baseUrl) {
+    throw new WorkflowConfigurationError(
+      "[ArcFlow] resolve() requires a non-empty runtime URL.",
+    );
+  }
+  if (looksLikeSemverRange(version)) {
+    const query = encodeURIComponent(version);
+    return requestJson(
+      "GET",
+      `${baseUrl}/v1/workflows/${name}/resolve?range=${query}`,
+    );
+  }
+  return requestJson(
+    "GET",
+    `${baseUrl}/v1/workflows/${name}/versions/${version}`,
+  );
+}
+
+function looksLikeSemverRange(version: string): boolean {
+  return /^[<>=]/.test(version) || /[\^~*]/.test(version);
+}
+
 export async function runRemoteWorkflow(
   workflow: Workflow,
   input: string,
