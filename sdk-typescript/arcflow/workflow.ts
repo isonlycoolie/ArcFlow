@@ -188,3 +188,98 @@ export class Workflow {
     return this;
   }
 
+  addEdge(
+    fromId: string,
+    toId?: string | null,
+    options: { condition?: string | null } = {},
+  ): this {
+    if (!this.graphMode) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] addEdge() requires Workflow({ graph: true }).",
+      );
+    }
+    this.graphEdges.push({
+      from: fromId.trim(),
+      to: toId ?? null,
+      condition: options.condition ?? null,
+    });
+    return this;
+  }
+
+  joinNode(joinId: string, waitFor: string[]): this {
+    if (!this.graphMode) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] joinNode() requires Workflow({ graph: true }).",
+      );
+    }
+    const trimmed = joinId.trim();
+    if (!this.graphNodes.has(trimmed)) {
+      throw new WorkflowConfigurationError(
+        `[ArcFlow] Join node '${trimmed}' is not registered.`,
+      );
+    }
+    if (!waitFor.length) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] joinNode waitFor must list at least one branch node.",
+      );
+    }
+    this.graphJoins.push({
+      id: trimmed,
+      waitFor: waitFor.map((id) => id.trim()),
+    });
+    return this;
+  }
+
+  setEntry(nodeId: string): this {
+    const trimmed = nodeId.trim();
+    if (!this.graphNodes.has(trimmed)) {
+      throw new WorkflowConfigurationError(
+        `[ArcFlow] Entry node '${trimmed}' is not registered.`,
+      );
+    }
+    this.entryNode = trimmed;
+    return this;
+  }
+
+  withMaxIterations(count: number): this {
+    if (count < 1) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] max_iterations must be at least 1.",
+      );
+    }
+    this.maxIterations = count;
+    return this;
+  }
+
+  withRetry(maxAttempts: number, options: Omit<RetryOptions, "maxAttempts"> = {}): this {
+    if (this.hasRun) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] withRetry() must be called before workflow.run().",
+      );
+    }
+    if (maxAttempts < 1) {
+      throw new WorkflowConfigurationError(
+        `[ArcFlow] retry maxAttempts must be at least 1. Got ${maxAttempts}.`,
+      );
+    }
+    this.retryOptions = { maxAttempts, ...options };
+    return this;
+  }
+
+  withTimeout(seconds: number): this {
+    if (seconds <= 0) {
+      throw new WorkflowConfigurationError(
+        `[ArcFlow] Workflow timeout must be positive. Got ${seconds}s.`,
+      );
+    }
+    this.workflowTimeoutSeconds = seconds;
+    return this;
+  }
+
+  withStepTimeout(seconds: number): this {
+    if (seconds <= 0) {
+      throw new WorkflowConfigurationError(
+        `[ArcFlow] Step timeout must be positive. Got ${seconds}s.`,
+      );
+    }
+    this.stepTimeoutSeconds = seconds;
