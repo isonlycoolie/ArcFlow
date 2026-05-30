@@ -378,3 +378,98 @@ class Workflow:
             run_id.strip(),
             approval_key.strip(),
             approved,
+            json.dumps(data or {}),
+            exec_json,
+        )
+        self._last_run_id = result.run_id
+        return result
+
+    def run(
+        self,
+        input: str,
+        *,
+        provider: ProviderConfig | None = None,
+    ) -> WorkflowResult:
+        trimmed = input.strip()
+        if not trimmed:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] Workflow input must be a non-empty string."
+            )
+        if self._graph_mode:
+            if not self._graph_nodes:
+                raise WorkflowConfigurationError(
+                    "[ArcFlow] Cannot run a graph workflow with no nodes."
+                )
+        elif not self._steps:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] Cannot run a workflow with no steps."
+            )
+        from arcflow._internal.exec_config import build_exec_config_json
+        from arcflow._internal import runtime
+
+        exec_json = build_exec_config_json(
+            retry=self._retry,
+            workflow_timeout_seconds=self._workflow_timeout_seconds,
+            step_timeout_seconds=self._step_timeout_seconds,
+            recovery_enabled=self._recovery_enabled,
+        )
+        if self._runtime_url:
+            from arcflow._internal import remote
+
+            result = remote.run_workflow(self, trimmed, exec_config_json=exec_json)
+            self._last_run_id = result.run_id
+            self._has_run = True
+            return result
+        provider_row = provider.binding_tuple() if provider is not None else None
+        if self._workflow_id is None:
+            self._workflow_id = str(uuid4())
+        steps, step_rows = self._agents_and_steps()
+        graph_json = self._graph_payload() if self._graph_mode else None
+        result = runtime.run_workflow(
+            self._name,
+            self._workflow_id,
+            steps,
+            step_rows,
+            trimmed,
+            provider_row,
+            exec_json,
+            graph_json,
+        )
+        self._last_run_id = result.run_id
+        self._has_run = True
+        return result
+
+    def test(self, cases: list[dict[str, object]]) -> list[dict[str, object]]:
+        """Run deterministic stub cases without real LLM calls (Phase 2.3)."""
+        from arcflow._internal.exec_config import build_exec_config_json
+        from arcflow._internal import runtime
+
+        results: list[dict[str, object]] = []
+        agents, step_rows = self._agents_and_steps()
+        steps = [agent for agent in agents]
+        for case in cases:
+            name = str(case.get("name", "case"))
+            run_input = str(case.get("input", ""))
+            stub_responses = case.get("stub_responses")
+            if stub_responses is None and "expected_output" in case:
+                stub_responses = {"step_1": {"output": case["expected_output"]}}
+            test_block = {"stub_responses": stub_responses or {}}
+            exec_json = build_exec_config_json(
+                retry=self._retry,
+                workflow_timeout_seconds=self._workflow_timeout_seconds,
+                step_timeout_seconds=self._step_timeout_seconds,
+                recovery_enabled=False,
+                test=test_block,
+            )
+            workflow_id = str(uuid4())
+            result = runtime.run_workflow(
+                self._name,
+                workflow_id,
+                steps,
+                step_rows,
+                run_input,
+                None,
+                exec_json,
+                self._graph_payload() if self._graph_mode else None,
+            )
+            expected = case.get("expected_output")
