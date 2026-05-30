@@ -3,7 +3,9 @@ use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
 use crate::error::RuntimeError;
-use crate::rcs::types::{AgentDefinition, WorkflowDefinition};
+use crate::rcs::types::{AgentDefinition, ExecutionMode, WorkflowDefinition};
+
+use super::graph::validate_graph;
 
 /// Static checks before any step runs.
 pub(crate) fn validate_workflow(
@@ -32,6 +34,23 @@ pub(crate) fn validate_workflow(
                 agent_id: step.agent_id,
                 step_id: step.id,
             });
+        }
+    }
+    match workflow.execution_mode {
+        ExecutionMode::Linear => {
+            if workflow.graph.is_some() {
+                return Err(RuntimeError::InvalidWorkflowDefinition {
+                    reason: "graph block not allowed in linear execution_mode".into(),
+                });
+            }
+        }
+        ExecutionMode::Graph => {
+            let Some(graph) = &workflow.graph else {
+                return Err(RuntimeError::InvalidWorkflowDefinition {
+                    reason: "graph block required when execution_mode is graph".into(),
+                });
+            };
+            validate_graph(graph, &workflow.steps)?;
         }
     }
     Ok(())
