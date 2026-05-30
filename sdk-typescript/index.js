@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Workflow = exports.WorkflowInterruptedError = exports.HumanRejectedError = exports.HitlConfig = exports.buildExecConfigJson = exports.OpenAI = exports.Gemini = exports.Anthropic = exports.buildGraphJson = exports.WorkflowTimeoutError = exports.WorkflowExecutionError = exports.WorkflowConfigurationError = exports.TraceNotFoundError = exports.RetryExhaustedError = exports.ProviderExecutionError = exports.ProviderConfigurationError = exports.mapNativeError = exports.ArcFlowError = exports.VERSION = exports.Agent = void 0;
+exports.Workflow = exports.enableStubMode = exports.buildTestExecConfig = exports.WorkflowInterruptedError = exports.HumanRejectedError = exports.HitlConfig = exports.buildExecConfigJson = exports.OpenAI = exports.Gemini = exports.Anthropic = exports.buildGraphJson = exports.WorkflowTimeoutError = exports.WorkflowExecutionError = exports.WorkflowConfigurationError = exports.TraceNotFoundError = exports.RetryExhaustedError = exports.ProviderExecutionError = exports.ProviderConfigurationError = exports.mapNativeError = exports.ArcFlowError = exports.VERSION = exports.Agent = void 0;
 var agent_js_1 = require("./arcflow/agent.js");
 Object.defineProperty(exports, "Agent", { enumerable: true, get: function () { return agent_js_1.Agent; } });
 var constants_js_1 = require("./arcflow/constants.js");
@@ -27,5 +27,8 @@ var hitl_js_1 = require("./arcflow/hitl.js");
 Object.defineProperty(exports, "HitlConfig", { enumerable: true, get: function () { return hitl_js_1.HitlConfig; } });
 Object.defineProperty(exports, "HumanRejectedError", { enumerable: true, get: function () { return hitl_js_1.HumanRejectedError; } });
 Object.defineProperty(exports, "WorkflowInterruptedError", { enumerable: true, get: function () { return hitl_js_1.WorkflowInterruptedError; } });
+var vitest_js_1 = require("./arcflow/testing/vitest.js");
+Object.defineProperty(exports, "buildTestExecConfig", { enumerable: true, get: function () { return vitest_js_1.buildTestExecConfig; } });
+Object.defineProperty(exports, "enableStubMode", { enumerable: true, get: function () { return vitest_js_1.enableStubMode; } });
 var workflow_js_1 = require("./arcflow/workflow.js");
 Object.defineProperty(exports, "Workflow", { enumerable: true, get: function () { return workflow_js_1.Workflow; } });
