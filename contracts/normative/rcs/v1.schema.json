@@ -93,3 +93,98 @@
       "enum": ["OpenAI", "Anthropic", "Gemini", "Custom"],
       "description": "LLM provider identifier on ProviderConfig. Sprint 6 providers."
     },
+    "RetryPolicy": {
+      "type": "object",
+      "description": "Retry limits for workflow or step failures. Sprint 7 retry engine.",
+      "properties": {
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Total attempts including the first run. Sprint 7."
+        },
+        "backoff_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Initial backoff delay in milliseconds. Sprint 7."
+        },
+        "max_backoff_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Upper bound on backoff delay in milliseconds. Sprint 7."
+        }
+      },
+      "required": ["max_attempts", "backoff_ms", "max_backoff_ms"],
+      "additionalProperties": false
+    },
+    "MemoryConfig": {
+      "type": "object",
+      "description": "Agent memory access configuration. Sprint 4.",
+      "properties": {
+        "memory_type": { "$ref": "#/$defs/MemoryType" },
+        "scope": { "$ref": "#/$defs/MemoryScope" },
+        "ttl_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Optional TTL for memory entries in seconds. Sprint 4."
+        }
+      },
+      "required": ["memory_type", "scope"],
+      "additionalProperties": false
+    },
+    "ToolDefinition": {
+      "type": "object",
+      "description": "External tool exposed to an agent. Sprint 4 tool runtime.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Tool name used for dispatch. Sprint 4."
+        },
+        "input_schema": {
+          "description": "JSON Schema describing tool inputs. Sprint 4.",
+          "type": "object"
+        },
+        "permissions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Permission strings required to invoke the tool. Sprint 4."
+        }
+      },
+      "required": ["name", "input_schema"],
+      "additionalProperties": false
+    },
+    "ProviderConfig": {
+      "type": "object",
+      "description": "LLM provider settings for a run. Sprint 6.",
+      "properties": {
+        "provider_id": { "$ref": "#/$defs/ProviderId" },
+        "model": {
+          "type": "string",
+          "description": "Model id passed to the provider API. Sprint 6."
+        },
+        "api_key_env": {
+          "type": "string",
+          "description": "Environment variable holding the API key. Sprint 6."
+        },
+        "params": {
+          "description": "Optional provider-specific parameters. Sprint 6.",
+          "type": "object"
+        }
+      },
+      "required": ["provider_id", "model", "api_key_env"],
+      "additionalProperties": false
+    },
+    "AgentDefinition": {
+      "type": "object",
+      "description": "Agent role and capabilities referenced by workflow steps. Sprint 2–6.",
+      "properties": {
+        "id": { "$ref": "#/$defs/Uuid" },
+        "name": {
+          "type": "string",
+          "description": "Human-readable agent name. Sprint 2–3 SDK binding."
+        },
+        "role": {
+          "type": "string",
+          "description": "Role label used in prompts. Sprint 2–3."
+        },
+        "instructions": {
+          "type": "string",
