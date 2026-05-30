@@ -11,6 +11,7 @@ psql "$ARCFLOW_POSTGRESQL_URL" -f runtime/arcflow-core/migrations/002_recovery_v
 psql "$ARCFLOW_POSTGRESQL_URL" -f runtime/arcflow-core/migrations/003_arcflow_runs.sql
 psql "$ARCFLOW_POSTGRESQL_URL" -f runtime/arcflow-core/migrations/004_human_approvals.sql
 psql "$ARCFLOW_POSTGRESQL_URL" -f runtime/arcflow-core/migrations/005_trace_events.sql
+psql "$ARCFLOW_POSTGRESQL_URL" -f runtime/arcflow-core/migrations/006_workflow_registry.sql
 
 # Run server
 cargo run -p arcflow-server
