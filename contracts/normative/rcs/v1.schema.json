@@ -33,7 +33,8 @@
         "Completed",
         "Failed",
         "Retrying",
-        "Cancelled"
+        "Cancelled",
+        "Interrupted"
       ],
       "description": "Workflow or step lifecycle state. Sprint 2 execution, Sprint 5 traces."
     },
@@ -49,7 +50,11 @@
         "Timeout",
         "RateLimited",
         "InternalError",
-        "UnsupportedRcsVersion"
+        "UnsupportedRcsVersion",
+        "HumanTimeout",
+        "HumanRejected",
+        "ApprovalNotFound",
+        "AlreadyApproved"
       ],
       "description": "Stable machine-readable error code in ErrorPayload. Sprint 7+ error handling."
     },
@@ -76,7 +81,10 @@
         "WorkflowCompleted",
         "StepFailed",
         "WorkflowFailed",
-        "RetryAttempted"
+        "RetryAttempted",
+        "GraphNodeStarted",
+        "GraphNodeCompleted",
+        "GraphIterationLimitReached"
       ],
       "description": "Observability event classification. Sprint 5 tracing engine."
     },
@@ -212,9 +220,138 @@
         "fallback_step_id": {
           "$ref": "#/$defs/Uuid",
           "description": "Optional fallback step on failure. Sprint 7."
+        },
+        "hitl": {
+          "$ref": "#/$defs/HitlConfig",
+          "description": "Optional human approval gate (Phase 1.4)."
         }
       },
       "required": ["id", "agent_id", "order"],
+      "additionalProperties": false
+    },
+    "HitlConfig": {
+      "type": "object",
+      "description": "Human-in-the-loop gate on a step (Phase 1.4).",
+      "properties": {
+        "approval_key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable key scoped to the run for approval requests."
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Wall-clock seconds before the approval expires."
+        },
+        "interrupt": {
+          "type": "boolean",
+          "default": true,
+          "description": "When true, checkpoint and return Interrupted instead of blocking."
+        }
+      },
+      "required": ["approval_key", "timeout_seconds"],
+      "additionalProperties": false
+    },
+    "ExecutionMode": {
+      "type": "string",
+      "enum": ["linear", "graph"],
+      "default": "linear",
+      "description": "Workflow execution strategy. linear = ordered steps; graph = DAG with conditional edges. Phase 1.1."
+    },
+    "GraphNode": {
+      "type": "object",
+      "description": "Node in a graph workflow referencing a StepDefinition. Phase 1.1.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Graph-local node identifier."
+        },
+        "step_ref": {
+          "$ref": "#/$defs/Uuid",
+          "description": "References StepDefinition.id."
+        },
+        "inputs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional input state keys for this node."
+        },
+        "outputs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional output state keys for this node."
+        }
+      },
+      "required": ["id", "step_ref"],
+      "additionalProperties": false
+    },
+    "GraphEdge": {
+      "type": "object",
+      "description": "Directed edge between graph nodes. Phase 1.1.",
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Source node id."
+        },
+        "to": {
+          "type": "string",
+          "description": "Target node id; omit for terminal."
+        },
+        "condition": {
+          "type": "string",
+          "description": "Edge key returned by source node; omit for unconditional."
+        }
+      },
+      "required": ["from"],
+      "additionalProperties": false
+    },
+    "JoinNode": {
+      "type": "object",
+      "description": "Fan-in join waiting for parallel branches. Phase 1.1.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Join node id (must exist in nodes)."
+        },
+        "wait_for": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Branch node ids that must complete before join proceeds."
+        }
+      },
+      "required": ["id", "wait_for"],
+      "additionalProperties": false
+    },
+    "GraphDefinition": {
+      "type": "object",
+      "description": "Graph execution topology for graph-mode workflows. Phase 1.1.",
+      "properties": {
+        "entry_node": {
+          "type": "string",
+          "description": "First node to execute."
+        },
+        "max_iterations": {
+          "type": "integer",
+          "default": 100,
+          "minimum": 1,
+          "maximum": 10000,
+          "description": "Maximum cycle iterations before GraphIterationLimitReached."
+        },
+        "nodes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/GraphNode" },
+          "minItems": 1
+        },
+        "edges": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/GraphEdge" }
+        },
+        "join_nodes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/JoinNode" }
+        }
+      },
+      "required": ["entry_node", "nodes", "edges"],
       "additionalProperties": false
     },
     "WorkflowDefinition": {
@@ -235,6 +372,14 @@
         "retry_policy": {
           "$ref": "#/$defs/RetryPolicy",
           "description": "Default retry policy for all steps. Sprint 7."
+        },
+        "execution_mode": {
+          "$ref": "#/$defs/ExecutionMode",
+          "description": "linear (default) or graph. Phase 1.1."
+        },
+        "graph": {
+          "$ref": "#/$defs/GraphDefinition",
+          "description": "Required when execution_mode is graph. Phase 1.1."
         }
       },
       "required": ["id", "name", "steps"],

@@ -36,6 +36,8 @@ pub enum ExecutionStatus {
     Retrying,
     /// Execution was cancelled before completion.
     Cancelled,
+    /// Paused awaiting human approval (Phase 1.4 HITL).
+    Interrupted,
 }
 
 /// Machine-readable error codes in `ErrorPayload`.
@@ -62,6 +64,14 @@ pub enum ErrorCode {
     InternalError,
     /// Envelope RCS version is not supported.
     UnsupportedRcsVersion,
+    /// Human approval window expired (Phase 1.4 HITL).
+    HumanTimeout,
+    /// Human rejected the approval request (Phase 1.4 HITL).
+    HumanRejected,
+    /// Approval key not found for the run (Phase 1.4 HITL).
+    ApprovalNotFound,
+    /// Approval was already resolved (Phase 1.4 HITL).
+    AlreadyApproved,
 }
 
 /// Memory backend kind for agent configuration.
@@ -116,6 +126,12 @@ pub enum TraceEventKind {
     WorkflowFailed,
     /// Step retry attempted.
     RetryAttempted,
+    /// Graph node execution started (Phase 1.1).
+    GraphNodeStarted,
+    /// Graph node finished (Phase 1.1).
+    GraphNodeCompleted,
+    /// Graph cycle iteration limit reached (Phase 1.1).
+    GraphIterationLimitReached,
 }
 
 /// Supported LLM provider identifiers.
@@ -201,6 +217,30 @@ pub struct AgentDefinition {
     pub memory_config: Option<MemoryConfig>,
 }
 
+/// Human-in-the-loop gate on a step (Phase 1.4).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct HitlConfig {
+    /// Stable key scoped to the run for approval requests.
+    pub approval_key: String,
+    /// Wall-clock seconds before the approval expires.
+    pub timeout_seconds: u64,
+    /// When true, checkpoint and return Interrupted instead of blocking.
+    #[serde(default = "default_hitl_interrupt")]
+    pub interrupt: bool,
+}
+
+fn default_hitl_interrupt() -> bool {
+    true
+}
+
+/// Human approval payload injected on resume (Phase 1.4).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ApprovalResult {
+    pub approved: bool,
+    #[serde(default)]
+    pub data: Value,
+}
+
 /// Single step within a workflow definition.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct StepDefinition {
@@ -212,6 +252,62 @@ pub struct StepDefinition {
     pub order: u32,
     /// Optional fallback step when this step fails.
     pub fallback_step_id: Option<Uuid>,
+    /// Optional human approval gate before agent execution.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hitl: Option<HitlConfig>,
+}
+
+/// Workflow execution strategy (Phase 1.1).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum ExecutionMode {
+    #[default]
+    Linear,
+    Graph,
+}
+
+/// Node in a graph workflow referencing a step definition.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GraphNode {
+    pub id: String,
+    pub step_ref: Uuid,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub inputs: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub outputs: Option<Vec<String>>,
+}
+
+/// Directed edge between graph nodes.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GraphEdge {
+    pub from: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub to: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub condition: Option<String>,
+}
+
+/// Fan-in join for parallel branches.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct JoinNode {
+    pub id: String,
+    pub wait_for: Vec<String>,
+}
+
+fn default_max_graph_iterations() -> u32 {
+    100
+}
+
+/// Graph execution topology (Phase 1.1).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GraphDefinition {
+    pub entry_node: String,
+    #[serde(default = "default_max_graph_iterations")]
+    pub max_iterations: u32,
+    pub nodes: Vec<GraphNode>,
+    pub edges: Vec<GraphEdge>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub join_nodes: Vec<JoinNode>,
 }
 
 /// Complete workflow specification submitted by an SDK.
@@ -225,6 +321,12 @@ pub struct WorkflowDefinition {
     pub steps: Vec<StepDefinition>,
     /// Optional default retry policy for all steps.
     pub retry_policy: Option<RetryPolicy>,
+    /// Linear (default) or graph execution.
+    #[serde(default)]
+    pub execution_mode: ExecutionMode,
+    /// Required when `execution_mode` is graph.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub graph: Option<GraphDefinition>,
 }
 
 /// Request to execute a registered workflow.
@@ -397,8 +499,11 @@ mod tests {
                 agent_id: Uuid::new_v4(),
                 order: 1,
                 fallback_step_id: None,
+                hitl: None,
             }],
             retry_policy: None,
+            execution_mode: ExecutionMode::Linear,
+            graph: None,
         });
     }
 
@@ -421,6 +526,7 @@ mod tests {
             agent_id: Uuid::new_v4(),
             order: 2,
             fallback_step_id: Some(Uuid::new_v4()),
+            hitl: None,
         });
     }
 

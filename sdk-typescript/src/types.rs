@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 
 use arcflow_core::rcs::types::{
-    AgentDefinition, StepDefinition, WorkflowDefinition,
+    AgentDefinition, HitlConfig, StepDefinition, WorkflowDefinition,
 };
 use napi::Error;
 use napi_derive::napi;
@@ -24,6 +24,7 @@ pub struct JsStepInput {
     pub step_id: String,
     pub agent_id: String,
     pub order: u32,
+    pub hitl_json: Option<String>,
 }
 
 pub fn build_workflow(
@@ -51,11 +52,16 @@ pub fn build_workflow(
     for step in steps {
         let step_id = parse_uuid("step_id", &step.step_id)?;
         let agent_id = parse_uuid("agent_id", &step.agent_id)?;
+        let hitl = match step.hitl_json.as_deref() {
+            Some(raw) if !raw.is_empty() => Some(parse_hitl_json(raw)?),
+            _ => None,
+        };
         step_defs.push(StepDefinition {
             id: step_id,
             agent_id,
             order: step.order,
             fallback_step_id: None,
+            hitl,
         });
     }
     let workflow = WorkflowDefinition {
@@ -63,6 +69,31 @@ pub fn build_workflow(
         name: workflow_name,
         steps: step_defs,
         retry_policy: None,
+        execution_mode: arcflow_core::rcs::types::ExecutionMode::Linear,
+        graph: None,
     };
     Ok((workflow, agent_map))
+}
+
+fn parse_hitl_json(raw: &str) -> Result<HitlConfig, Error> {
+    let v: serde_json::Value = serde_json::from_str(raw)
+        .map_err(|e| Error::from_reason(format!("[ArcFlow] Invalid HITL JSON: {e}")))?;
+    let approval_key = v
+        .get("approval_key")
+        .and_then(|x| x.as_str())
+        .ok_or_else(|| Error::from_reason("[ArcFlow] HITL config requires approval_key"))?
+        .to_string();
+    let timeout_seconds = v
+        .get("timeout_seconds")
+        .and_then(|x| x.as_u64())
+        .unwrap_or(3600);
+    let interrupt = v
+        .get("interrupt")
+        .and_then(|x| x.as_bool())
+        .unwrap_or(true);
+    Ok(HitlConfig {
+        approval_key,
+        timeout_seconds,
+        interrupt,
+    })
 }

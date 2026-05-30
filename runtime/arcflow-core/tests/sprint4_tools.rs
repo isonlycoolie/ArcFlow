@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use arcflow_core::rcs::types::{
-    AgentDefinition, ExecutionStatus, MemoryConfig, MemoryScope, MemoryType, StepDefinition,
+    AgentDefinition, ExecutionMode, ExecutionStatus, MemoryConfig, MemoryScope, MemoryType, StepDefinition,
     ToolDefinition, TraceEventKind, WorkflowDefinition,
 };
 use arcflow_core::tools::{RegisteredTool, ToolError, ToolInvoker, ToolRuntime};
@@ -55,8 +55,11 @@ fn workflow_runs_agent_with_tool() {
             agent_id: aid,
             order: 1,
             fallback_step_id: None,
+            hitl: None,
         }],
         retry_policy: None,
+        execution_mode: ExecutionMode::Linear,
+        graph: None,
     };
     let mut runtime = ToolRuntime::new();
     runtime
@@ -106,8 +109,11 @@ fn workflow_with_session_memory_records_trace_events() {
             agent_id: aid,
             order: 1,
             fallback_step_id: None,
+            hitl: None,
         }],
         retry_policy: None,
+        execution_mode: ExecutionMode::Linear,
+        graph: None,
     };
     let record = WorkflowEngine::new()
         .execute_with_tools(&wf, &agents, "remember", None, None, None, 0, 0.0)

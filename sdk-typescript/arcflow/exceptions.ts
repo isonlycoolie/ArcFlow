@@ -40,6 +40,24 @@ export class ProviderExecutionError extends ArcFlowError {
 
 export class TraceNotFoundError extends ArcFlowError {}
 
+export class RetryExhaustedError extends ArcFlowError {
+  readonly attemptsMade?: number;
+
+  constructor(message: string, attemptsMade?: number) {
+    super(message);
+    this.attemptsMade = attemptsMade;
+  }
+}
+
+export class WorkflowTimeoutError extends ArcFlowError {
+  readonly timeoutType?: string;
+
+  constructor(message: string, timeoutType?: string) {
+    super(message);
+    this.timeoutType = timeoutType;
+  }
+}
+
 export function mapNativeError(err: unknown): ArcFlowError {
   const message = err instanceof Error ? err.message : String(err);
   if (message.includes("ProviderExecutionError|")) {
@@ -54,6 +72,14 @@ export function mapNativeError(err: unknown): ArcFlowError {
   if (message.includes("WorkflowExecutionError|")) {
     const [, runId, failedStep, ...rest] = message.split("|");
     return new WorkflowExecutionError(rest.join("|") || message, runId, failedStep);
+  }
+  if (message.includes("failed after") && message.includes("attempts")) {
+    const match = message.match(/after (\d+) attempts/);
+    return new RetryExhaustedError(message, match ? Number(match[1]) : undefined);
+  }
+  if (message.toLowerCase().includes("timed out")) {
+    const timeoutType = message.includes("Workflow") ? "workflow" : "step";
+    return new WorkflowTimeoutError(message, timeoutType);
   }
   if (message.includes("No trace found")) {
     return new TraceNotFoundError(message);

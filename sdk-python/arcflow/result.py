@@ -14,6 +14,8 @@ class WorkflowResult:
     run_id: str
     step_count: int
     trace_events: tuple[dict[str, Any], ...] = ()
+    status: str = "completed"
+    approval_key: str | None = None
 
     def __repr__(self) -> str:
         preview = self.output[:50]

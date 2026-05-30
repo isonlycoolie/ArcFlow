@@ -32,10 +32,12 @@ opentelemetry-otlp = { version = "0.27", features = ["grpc-tonic"] }
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
 futures-util = "0.3"
 eventsource-stream = "0.2"
+ort = { version = "2.0.0-rc.10", optional = true, default-features = false, features = ["download-binaries"] }
 
 [features]
 default = []
 integration-memory = []
+embedding-local = ["ort"]
 
 [dev-dependencies]
 criterion = "0.5"

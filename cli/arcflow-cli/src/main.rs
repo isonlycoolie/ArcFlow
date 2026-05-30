@@ -1,6 +1,7 @@
 //! ArcFlow CLI (Sprint 8).
 
 mod commands;
+mod tui;
 
 use std::process::ExitCode;
 

@@ -12,6 +12,7 @@ use crate::providers::{
 use crate::retry::engine::{execute_with_retry, RetryError};
 use crate::rcs::types::{AgentDefinition, ExecutionStatus, MemoryScope, MemoryType};
 use crate::state::{ExecutionStepOutput, StateSnapshot};
+use crate::streaming::StreamEvent;
 use crate::tools::ToolError;
 use crate::tracing::events::TraceEventKind;
 use crate::tracing::tokens_consumed;
@@ -120,6 +121,32 @@ impl AgentRuntime {
             });
         }
 
+        if let Some(ctx) = ctx.as_ref() {
+            if let Some(ref test) = ctx.test_config {
+                let key = crate::workflow::resolve_key(
+                    ctx.step_order,
+                    &step_id.to_string(),
+                    test,
+                );
+                if let Some(stub_key) = key {
+                    if test.should_fail(&stub_key, ctx.test_attempt) {
+                        return Err(RuntimeError::AgentExecutionFailed {
+                            step_id,
+                            reason: format!("test stub failure for {stub_key}"),
+                        });
+                    }
+                    if let Some(output) = test.stub_output(&stub_key, ctx.test_attempt) {
+                        return Ok(ExecutionStepOutput {
+                            step_id,
+                            agent_id: agent.id,
+                            content: output,
+                            status: ExecutionStatus::Completed,
+                        });
+                    }
+                }
+            }
+        }
+
         let step_tokens = if let Some(ctx) = ctx.as_mut() {
             if let Some(provider) = ctx.provider.clone() {
                 Some(self.execute_with_provider(agent, step_id, run_input, ctx, provider)?)
@@ -196,6 +223,20 @@ impl AgentRuntime {
         let started = std::time::Instant::now();
         let limit = effective_provider_timeout(ctx);
         let provider_arc = provider.clone();
+        let stream_enabled = ctx.stream_tx.is_some();
+
+        if stream_enabled {
+            return self.execute_with_provider_stream(
+                agent,
+                step_id,
+                ctx,
+                provider,
+                &step_id_str,
+                started,
+                request,
+            );
+        }
+
         let provider_call = async {
             if let Some(retry_cfg) = ctx.retry_config.clone() {
                 execute_with_retry(
@@ -332,6 +373,108 @@ impl AgentRuntime {
         }
     }
 
+    fn execute_with_provider_stream(
+        &self,
+        agent: &AgentDefinition,
+        step_id: Uuid,
+        ctx: &mut ExecutionContext<'_, '_>,
+        provider: std::sync::Arc<dyn crate::providers::ModelProvider>,
+        step_id_str: &str,
+        started: std::time::Instant,
+        request: crate::providers::ProviderRequest,
+    ) -> Result<(String, TokenUsage), RuntimeError> {
+        use futures_util::StreamExt;
+
+        let limit = effective_provider_timeout(ctx);
+        let stream = if let Some(limit) = limit {
+            let configured_ms = limit.as_millis() as u64;
+            match block_on_provider(async {
+                tokio::time::timeout(limit, provider.stream(request)).await
+            }) {
+                Ok(Ok(stream)) => stream,
+                Ok(Err(err)) => {
+                    emit_provider_error(ctx, step_id_str, &err);
+                    return Err(map_provider_error(step_id, err));
+                }
+                Err(_) => {
+                    let elapsed_ms = started.elapsed().as_millis() as u64;
+                    ctx.sprint5.emit(TraceEventKind::TimeoutEnforced {
+                        run_id: ctx.run_id.clone(),
+                        step_id: step_id_str.to_string(),
+                        timeout_type: "step".to_string(),
+                        configured_ms,
+                        elapsed_ms,
+                    });
+                    return Err(timeout_error_for_context(
+                        ctx,
+                        step_id_str,
+                        configured_ms,
+                        elapsed_ms,
+                    ));
+                }
+            }
+        } else {
+            block_on_provider(provider.stream(request)).map_err(|err| {
+                emit_provider_error(ctx, step_id_str, &err);
+                map_provider_error(step_id, err)
+            })?
+        };
+
+        let mut output = String::new();
+        let mut tokens = TokenUsage::default();
+        let model_id = provider.model_id().to_string();
+        let mut stream = stream;
+
+        while let Some(chunk_result) = block_on_provider(stream.next()) {
+            match chunk_result {
+                Ok(chunk) => {
+                    if !chunk.content.is_empty() {
+                        if let Some(tx) = ctx.stream_tx.as_ref() {
+                            tx.try_send(StreamEvent::Token {
+                                text: chunk.content.clone(),
+                                step_id: step_id_str.to_string(),
+                            });
+                        }
+                        output.push_str(&chunk.content);
+                    }
+                    if let Some(t) = chunk.tokens {
+                        tokens = t;
+                    }
+                    if chunk.is_final {
+                        break;
+                    }
+                }
+                Err(err) => {
+                    emit_provider_error(ctx, step_id_str, &err);
+                    return Err(map_provider_error(step_id, err));
+                }
+            }
+        }
+
+        let latency_ms = started.elapsed().as_millis() as u64;
+        ctx.sprint5.emit(TraceEventKind::ProviderResponseReceived {
+            run_id: ctx.run_id.clone(),
+            step_id: step_id_str.to_string(),
+            provider_id: provider.provider_id().to_string(),
+            model_id: model_id.clone(),
+            tokens: tokens.clone(),
+            latency_ms,
+        });
+        ctx.sprint5.emit(TraceEventKind::AgentResponseReceived {
+            run_id: ctx.run_id.clone(),
+            step_id: step_id_str.to_string(),
+            agent_name: agent.name.clone(),
+            output_size_bytes: output.len(),
+        });
+        ctx.sprint5.emit(TraceEventKind::TokensConsumed {
+            run_id: ctx.run_id.clone(),
+            step_id: step_id_str.to_string(),
+            agent_name: agent.name.clone(),
+            tokens: tokens.clone(),
+        });
+        Ok((output, tokens))
+    }
+
     fn run_tools_if_configured(
         &self,
         agent: &AgentDefinition,
@@ -358,6 +501,16 @@ impl AgentRuntime {
         })?;
         for def in tools {
             let input = json!({ "message": run_input });
+            if let Some(tx) = ctx.stream_tx.as_ref() {
+                let args_keys = input
+                    .as_object()
+                    .map(|obj| obj.keys().cloned().collect())
+                    .unwrap_or_default();
+                tx.try_send(StreamEvent::ToolCall {
+                    tool_name: def.name.clone(),
+                    args_keys,
+                });
+            }
             if let Err(err) = rt.block_on(runtime.execute_tool(
                 &def.name,
                 input,

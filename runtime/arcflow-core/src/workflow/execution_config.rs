@@ -1,12 +1,27 @@
 //! Per-run execution options from SDK (Sprint 7).
 
+use uuid::Uuid;
+
 use crate::retry::{RetryConfig, TimeoutConfig};
+use crate::workflow::test_config::TestConfig;
+
+/// SDK opt-in for user-facing stream events (Phase 2.1).
+#[derive(Debug, Clone, Default)]
+pub struct StreamConfig {
+    pub enabled: bool,
+}
 
 #[derive(Debug, Clone, Default)]
 pub struct ExecutionConfig {
     pub retry: Option<RetryConfig>,
     pub timeouts: TimeoutConfig,
     pub recovery_enabled: bool,
+    /// When set (e.g. by HTTP server), trace and recovery use this run id.
+    pub run_id: Option<Uuid>,
+    /// Deterministic stub overrides for workflow.test() (Phase 2.3).
+    pub test: Option<TestConfig>,
+    /// When enabled, step and token events are emitted on the run stream channel.
+    pub stream: Option<StreamConfig>,
 }
 
 impl ExecutionConfig {

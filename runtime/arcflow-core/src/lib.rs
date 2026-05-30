@@ -56,3 +56,9 @@ pub mod retry;
 
 /// Partial execution recovery (Sprint 7).
 pub mod recovery;
+
+/// Human-in-the-loop pause and resume (Phase 1.4).
+pub mod human;
+
+/// Embedding providers for vector memory (Phase 1.5).
+pub mod embedding;

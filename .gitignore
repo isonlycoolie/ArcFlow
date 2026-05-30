@@ -8,6 +8,9 @@ arcflow_sprint01.md
 arcflow_sprint*.md
 ArcFlow_Sprint*_Implementation_Plan.md
 
+# Self-hosted improvement plans (local only — never commit)
+ArcFlow_Improvement_Plans/
+
 # Cursor IDE — local agent skills, rules, settings (never commit)
 .cursor/
 
