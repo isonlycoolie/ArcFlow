@@ -13,6 +13,8 @@ pub mod otel_config;
 #[cfg(feature = "otel")]
 pub mod otel;
 #[cfg(feature = "otel")]
+pub mod otel_inmemory;
+#[cfg(feature = "otel")]
 pub(crate) mod otel_export_impl;
 pub mod otel_export;
 pub mod persistence;
