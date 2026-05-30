@@ -93,3 +93,15 @@ impl TraceStore {
             }
         }
         self.evict_if_needed();
+    }
+
+    fn evict_if_needed(&mut self) {
+        while self.traces.len() > MAX_CONCURRENT_TRACES {
+            let Some(oldest) = self.completion_order.first().cloned() else {
+                break;
+            };
+            self.traces.remove(&oldest);
+            self.completion_order.retain(|id| id != &oldest);
+        }
+    }
+}
