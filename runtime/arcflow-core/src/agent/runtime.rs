@@ -473,3 +473,98 @@ impl AgentRuntime {
             tokens: tokens.clone(),
         });
         Ok((output, tokens))
+    }
+
+    fn run_tools_if_configured(
+        &self,
+        agent: &AgentDefinition,
+        step_id: Uuid,
+        run_input: &str,
+        ctx: &mut ExecutionContext<'_, '_>,
+    ) -> Result<(), RuntimeError> {
+        let Some(tools) = agent.tools.as_ref() else {
+            return Ok(());
+        };
+        if tools.is_empty() {
+            return Ok(());
+        }
+        let Some(runtime) = ctx.tool_runtime else {
+            return Ok(());
+        };
+        let Some(invoker) = ctx.tool_invoker.clone() else {
+            return Ok(());
+        };
+        let rt = tokio::runtime::Runtime::new().map_err(|e| RuntimeError::ToolExecutionFailed {
+            tool_name: "runtime".into(),
+            step_id,
+            reason: e.to_string(),
+        })?;
+        for def in tools {
+            let input = json!({ "message": run_input });
+            if let Some(tx) = ctx.stream_tx.as_ref() {
+                let args_keys = input
+                    .as_object()
+                    .map(|obj| obj.keys().cloned().collect())
+                    .unwrap_or_default();
+                tx.try_send(StreamEvent::ToolCall {
+                    tool_name: def.name.clone(),
+                    args_keys,
+                });
+            }
+            if let Err(err) = rt.block_on(runtime.execute_tool(
+                &def.name,
+                input,
+                invoker.clone(),
+                ctx.legacy,
+                ctx.sprint5,
+                &ctx.run_id,
+                Some(step_id),
+            )) {
+                return Err(map_tool_error(def.name.clone(), step_id, err));
+            }
+        }
+        Ok(())
+    }
+
+    /// Reads prior stub context, writes current input, returns prior value for output annotation.
+    fn run_memory_if_configured(
+        &self,
+        agent: &AgentDefinition,
+        step_id: Uuid,
+        state: &StateSnapshot,
+        run_input: &str,
+        ctx: &mut ExecutionContext<'_, '_>,
+    ) -> Result<Option<String>, RuntimeError> {
+        let Some(config) = agent.memory_config.as_ref() else {
+            return Ok(None);
+        };
+        let value = run_input.as_bytes();
+        let prior = match config.memory_type {
+            MemoryType::Session => {
+                let prior = ctx
+                    .memory
+                    .read_session(
+                        agent.id,
+                        STUB_MEMORY_KEY,
+                        &agent.name,
+                        ctx.legacy,
+                        ctx.sprint5,
+                        &ctx.run_id,
+                        Some(step_id),
+                    )
+                    .map_err(|e| map_memory_error(step_id, e))?;
+                ctx.memory
+                    .write_session(
+                        agent.id,
+                        STUB_MEMORY_KEY,
+                        value,
+                        &agent.name,
+                        ctx.legacy,
+                        ctx.sprint5,
+                        &ctx.run_id,
+                        Some(step_id),
+                    )
+                    .map_err(|e| map_memory_error(step_id, e))?;
+                prior
+            }
+            MemoryType::Shared => {
