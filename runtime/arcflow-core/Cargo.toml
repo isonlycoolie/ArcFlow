@@ -26,9 +26,10 @@ sqlx = { version = "0.8", default-features = false, features = [
 ] }
 qdrant-client = "1.12"
 async-trait = "0.1"
-opentelemetry = { version = "0.27", features = ["trace"] }
-opentelemetry_sdk = { version = "0.27", features = ["trace"] }
-opentelemetry-otlp = { version = "0.27", features = ["grpc-tonic"] }
+opentelemetry = { version = "0.27", features = ["trace"], optional = true }
+opentelemetry_sdk = { version = "0.27", features = ["trace", "testing"], optional = true }
+opentelemetry-otlp = { version = "0.27", features = ["grpc-tonic"], optional = true }
+tracing-opentelemetry = { version = "0.28", optional = true }
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
 futures-util = "0.3"
 eventsource-stream = "0.2"
@@ -38,6 +39,12 @@ ort = { version = "2.0.0-rc.10", optional = true, default-features = false, feat
 default = []
 integration-memory = []
 embedding-local = ["ort"]
+otel = [
+    "dep:opentelemetry",
+    "dep:opentelemetry_sdk",
+    "dep:opentelemetry-otlp",
+    "dep:tracing-opentelemetry",
+]
 
 [dev-dependencies]
 criterion = "0.5"

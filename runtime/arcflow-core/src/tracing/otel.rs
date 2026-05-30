@@ -1,4 +1,5 @@
-//! OpenTelemetry OTLP export (ADR-009). Active only when `ARCFLOW_OTLP_ENDPOINT` is set.
+//! OpenTelemetry OTLP export (ADR-009). Requires `otel` Cargo feature.
+#![cfg(feature = "otel")]
 
 use std::sync::OnceLock;
 use std::time::Duration;
