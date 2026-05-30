@@ -93,3 +93,98 @@ class Workflow:
             )
         trimmed = node_id.strip()
         if not trimmed:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] Graph node id must be a non-empty string."
+            )
+        if not isinstance(agent, Agent):
+            raise WorkflowConfigurationError(
+                "[ArcFlow] workflow.node() requires an Agent instance."
+            )
+        if trimmed in self._graph_nodes:
+            raise WorkflowConfigurationError(
+                f"[ArcFlow] Duplicate graph node id '{trimmed}'."
+            )
+        step_id = str(uuid4())
+        self._graph_nodes[trimmed] = (agent, step_id)
+        if self._entry_node is None:
+            self._entry_node = trimmed
+        return self
+
+    def add_edge(
+        self,
+        from_id: str,
+        to_id: str | None = None,
+        *,
+        condition: str | None = None,
+    ) -> Workflow:
+        if not self._graph_mode:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] add_edge() requires Workflow(graph=True)."
+            )
+        if self._has_run:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] workflow.add_edge() must be called before workflow.run()."
+            )
+        self._graph_edges.append((from_id.strip(), to_id, condition))
+        return self
+
+    def join_node(self, join_id: str, wait_for: list[str]) -> Workflow:
+        if not self._graph_mode:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] join_node() requires Workflow(graph=True)."
+            )
+        trimmed = join_id.strip()
+        if not trimmed:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] join_node id must be a non-empty string."
+            )
+        if trimmed not in self._graph_nodes:
+            raise WorkflowConfigurationError(
+                f"[ArcFlow] Join node '{trimmed}' is not registered."
+            )
+        if not wait_for:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] join_node wait_for must list at least one branch node."
+            )
+        self._graph_joins.append((trimmed, [b.strip() for b in wait_for]))
+        return self
+
+    def set_entry(self, node_id: str) -> Workflow:
+        if not self._graph_mode:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] set_entry() requires Workflow(graph=True)."
+            )
+        trimmed = node_id.strip()
+        if trimmed not in self._graph_nodes:
+            raise WorkflowConfigurationError(
+                f"[ArcFlow] Entry node '{trimmed}' is not registered."
+            )
+        self._entry_node = trimmed
+        return self
+
+    def max_iterations(self, count: int) -> Workflow:
+        if count < 1:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] max_iterations must be at least 1."
+            )
+        self._max_iterations = count
+        return self
+
+    def retry(
+        self,
+        max_attempts: int,
+        *,
+        backoff: BackoffStrategy | None = None,
+    ) -> Workflow:
+        if self._has_run:
+            raise WorkflowConfigurationError(
+                "[ArcFlow] workflow.retry() must be called before workflow.run()."
+            )
+        if max_attempts < 1:
+            raise WorkflowConfigurationError(
+                f"[ArcFlow] retry max_attempts must be at least 1. Got {max_attempts}."
+            )
+        if max_attempts > RETRY_MAX_ALLOWED_ATTEMPTS:
+            raise WorkflowConfigurationError(
+                f"[ArcFlow] retry max_attempts exceeds maximum {RETRY_MAX_ALLOWED_ATTEMPTS}."
+            )
