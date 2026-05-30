@@ -93,3 +93,52 @@ describe("fault tolerance", () => {
       ).rejects.toBeInstanceOf(RetryExhaustedError);
     });
   });
+
+  it("enforces step timeout", async () => {
+    await withMockServer((_req, res) => {
+      setTimeout(() => {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            model: "gpt-4o",
+            choices: [{ message: { content: "ok" }, finish_reason: "stop" }],
+          }),
+        );
+      }, 2000);
+    }, async (baseUrl) => {
+      process.env.OPENAI_API_KEY = "test-key";
+      process.env.ARCFLOW_OPENAI_API_ENDPOINT = `${baseUrl}/v1/chat/completions`;
+      const wf = new Workflow({ name: "step_timeout" })
+        .step(agent())
+        .withStepTimeout(1);
+      await expect(
+        wf.run("input", { provider: new OpenAI({ model: "gpt-4o" }) }),
+      ).rejects.toBeInstanceOf(WorkflowTimeoutError);
+    });
+  }, 10_000);
+
+  const postgresUrl = process.env.ARCFLOW_POSTGRESQL_URL;
+  (postgresUrl ? it : it.skip)("resumes after partial failure", async () => {
+    const ok = agent("writer");
+    const fail = new Agent({
+      name: "mid",
+      role: STUB_FAIL_ROLE,
+      instructions: "fail mid",
+    });
+    const wf = new Workflow({ name: "recovery_flow" })
+      .step(ok)
+      .step(fail)
+      .step(ok)
+      .enableRecovery();
+    let runId: string | undefined;
+    try {
+      await wf.run("recovery-input");
+    } catch (err) {
+      expect(err).toBeInstanceOf(WorkflowExecutionError);
+      runId = (err as WorkflowExecutionError).runId;
+    }
+    expect(runId).toBeTruthy();
+    const resumed = await wf.resume(runId!);
+    expect(resumed.stepCount).toBe(2);
+  });
+});
