@@ -93,3 +93,94 @@ pub async fn approve_run(
     };
 
     let execution = engine.resume_with_approval(
+        &workflow,
+        &agent_map,
+        &run_id,
+        &approval_key,
+        approval,
+        None,
+        None,
+        None,
+        arcflow_core::providers::default_max_tokens(),
+        arcflow_core::providers::default_temperature(),
+        &exec_config,
+        true,
+    );
+
+    let (status, result_json, error_json, message) = match execution {
+        Ok(record) => {
+            let output = record
+                .step_outputs
+                .last()
+                .map(|s| s.content.clone())
+                .unwrap_or_default();
+            (
+                ExecutionStatus::Completed,
+                Some(serde_json::json!({
+                    "output": output,
+                    "step_count": record.step_outputs.len(),
+                })),
+                None,
+                "Approval recorded, workflow completed".to_string(),
+            )
+        }
+        Err(WorkflowRunError::Failed { error, partial }) => {
+            let code = match &error {
+                arcflow_core::error::RuntimeError::HumanRejected { .. } => ErrorCode::HumanRejected,
+                _ => ErrorCode::StepExecutionFailed,
+            };
+            (
+                ExecutionStatus::Failed,
+                None,
+                Some(serde_json::json!({
+                    "code": format!("{:?}", code),
+                    "message": error.to_string(),
+                    "step_id": partial.step_outputs.last().map(|s| s.step_id.to_string()),
+                })),
+                "Approval recorded, workflow failed".to_string(),
+            )
+        }
+        Err(WorkflowRunError::Aborted(err)) => {
+            return map_aborted(err);
+        }
+        Err(WorkflowRunError::Interrupted { .. }) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "[ArcFlow] workflow remained interrupted after approval".into(),
+            ));
+        }
+    };
+
+    store
+        .mark_completed(&run_id, status, result_json.clone(), error_json.clone())
+        .await
+        .map_err(internal)?;
+
+    Ok(Json(ApproveResponse { status, message }))
+}
+
+fn internal(err: sqlx::Error) -> (StatusCode, String) {
+    tracing::warn!(error = %err, "database error");
+    (
+        StatusCode::INTERNAL_SERVER_ERROR,
+        "[ArcFlow] Database error".into(),
+    )
+}
+
+fn map_aborted(err: arcflow_core::error::RuntimeError) -> Result<Json<ApproveResponse>, (StatusCode, String)> {
+    match err {
+        arcflow_core::error::RuntimeError::HumanTimeout { approval_key } => Err((
+            StatusCode::GONE,
+            format!("[ArcFlow] HumanTimeout: approval '{approval_key}' expired"),
+        )),
+        arcflow_core::error::RuntimeError::ApprovalNotFound { approval_key } => Err((
+            StatusCode::NOT_FOUND,
+            format!("[ArcFlow] ApprovalNotFound: '{approval_key}'"),
+        )),
+        arcflow_core::error::RuntimeError::AlreadyApproved { approval_key } => Err((
+            StatusCode::CONFLICT,
+            format!("[ArcFlow] AlreadyApproved: '{approval_key}'"),
+        )),
+        other => Err((StatusCode::BAD_REQUEST, format!("[ArcFlow] {other}"))),
+    }
+}
