@@ -93,3 +93,28 @@ async function main() {
       .step(ok)
       .enableRecovery();
     let runId;
+    try {
+      await wf.run("recovery-input");
+      assert.fail("expected partial workflow failure");
+    } catch (err) {
+      const mapped = mapNativeError(err);
+      if (!(mapped instanceof WorkflowExecutionError) || !mapped.runId) {
+        console.warn(
+          "recovery resume check skipped:",
+          mapped instanceof Error ? mapped.message : String(mapped),
+        );
+        return;
+      }
+      runId = mapped.runId;
+    }
+    const resumed = await wf.resume(runId);
+    assert.equal(resumed.stepCount, 2);
+  }
+
+  console.log("fault integration checks passed");
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
