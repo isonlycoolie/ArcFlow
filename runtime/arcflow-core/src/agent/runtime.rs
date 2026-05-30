@@ -283,3 +283,98 @@ impl AgentRuntime {
                     })
             }
         };
+
+        let result = if let Some(limit) = limit {
+            let configured_ms = limit.as_millis() as u64;
+            match block_on_provider(async {
+                tokio::time::timeout(limit, provider_call).await
+            }) {
+                Ok(Ok(response)) => Ok(response),
+                Ok(Err(err)) if is_deadline_elapsed(&err) => {
+                    let elapsed_ms = started.elapsed().as_millis() as u64;
+                    let timeout_type = if ctx
+                        .workflow_deadline
+                        .is_some_and(|d| std::time::Instant::now() >= d)
+                    {
+                        "workflow"
+                    } else {
+                        "step"
+                    };
+                    ctx.sprint5.emit(TraceEventKind::TimeoutEnforced {
+                        run_id: ctx.run_id.clone(),
+                        step_id: step_id_str.clone(),
+                        timeout_type: timeout_type.to_string(),
+                        configured_ms,
+                        elapsed_ms,
+                    });
+                    Err(timeout_error_for_context(
+                        ctx,
+                        &step_id_str,
+                        configured_ms,
+                        elapsed_ms,
+                    ))
+                }
+                Ok(Err(err)) => Err(err),
+                Err(_elapsed) => {
+                    let elapsed_ms = started.elapsed().as_millis() as u64;
+                    let timeout_type = if ctx
+                        .workflow_deadline
+                        .is_some_and(|d| std::time::Instant::now() >= d)
+                    {
+                        "workflow"
+                    } else {
+                        "step"
+                    };
+                    ctx.sprint5.emit(TraceEventKind::TimeoutEnforced {
+                        run_id: ctx.run_id.clone(),
+                        step_id: step_id_str.clone(),
+                        timeout_type: timeout_type.to_string(),
+                        configured_ms,
+                        elapsed_ms,
+                    });
+                    Err(timeout_error_for_context(
+                        ctx,
+                        &step_id_str,
+                        configured_ms,
+                        elapsed_ms,
+                    ))
+                }
+            }
+        } else {
+            block_on_provider(provider_call)
+        };
+
+        match result {
+            Ok(response) => {
+                let latency_ms = started.elapsed().as_millis() as u64;
+                ctx.sprint5.emit(TraceEventKind::ProviderResponseReceived {
+                    run_id: ctx.run_id.clone(),
+                    step_id: step_id_str.clone(),
+                    provider_id: provider.provider_id().to_string(),
+                    model_id: response.model_id.clone(),
+                    tokens: response.tokens.clone(),
+                    latency_ms,
+                });
+                ctx.sprint5.emit(TraceEventKind::AgentResponseReceived {
+                    run_id: ctx.run_id.clone(),
+                    step_id: step_id_str.clone(),
+                    agent_name: agent.name.clone(),
+                    output_size_bytes: response.content_size_bytes(),
+                });
+                ctx.sprint5.emit(TraceEventKind::TokensConsumed {
+                    run_id: ctx.run_id.clone(),
+                    step_id: step_id_str,
+                    agent_name: agent.name.clone(),
+                    tokens: response.tokens.clone(),
+                });
+                Ok((response.content, response.tokens))
+            }
+            Err(err) => Err(err),
+        }
+    }
+
+    fn execute_with_provider_stream(
+        &self,
+        agent: &AgentDefinition,
+        step_id: Uuid,
+        ctx: &mut ExecutionContext<'_, '_>,
