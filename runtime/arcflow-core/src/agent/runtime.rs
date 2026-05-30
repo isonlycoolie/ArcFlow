@@ -663,3 +663,98 @@ impl AgentRuntime {
 
 fn map_tool_error(name: String, step_id: Uuid, err: ToolError) -> RuntimeError {
     RuntimeError::ToolExecutionFailed {
+        tool_name: name,
+        step_id,
+        reason: err.to_string(),
+    }
+}
+
+const STUB_MEMORY_KEY: &str = "arcflow.stub.context";
+
+fn bytes_to_note(bytes: Option<Vec<u8>>) -> Option<String> {
+    bytes.and_then(|b| String::from_utf8(b).ok())
+}
+
+fn map_memory_error(step_id: Uuid, err: MemoryError) -> RuntimeError {
+    match err {
+        MemoryError::InfrastructureUnavailable {
+            backend,
+            suggestion,
+        } => RuntimeError::InfrastructureUnavailable {
+            backend,
+            suggestion,
+            step_id,
+        },
+        other => RuntimeError::MemoryOperationFailed {
+            step_id,
+            reason: other.to_string(),
+        },
+    }
+}
+
+fn require_namespace(
+    config: &crate::rcs::types::MemoryConfig,
+    step_id: Uuid,
+) -> Result<&str, RuntimeError> {
+    config.namespace.as_deref().filter(|s| !s.is_empty()).ok_or(
+        RuntimeError::MemoryOperationFailed {
+            step_id,
+            reason: "namespace is required for persistent and vector memory".into(),
+        },
+    )
+}
+
+fn map_provider_error(step_id: Uuid, err: ProviderCallError) -> RuntimeError {
+    RuntimeError::ProviderCallFailed {
+        provider_id: err.provider_id().to_string(),
+        step_id,
+        reason: err.to_string(),
+    }
+}
+
+fn emit_provider_error(
+    ctx: &mut ExecutionContext<'_, '_>,
+    step_id: &str,
+    err: &ProviderCallError,
+) {
+    match err {
+        ProviderCallError::RateLimited {
+            retry_after_seconds, ..
+        } => {
+            ctx.sprint5.emit(TraceEventKind::ProviderRateLimited {
+                run_id: ctx.run_id.clone(),
+                step_id: step_id.to_string(),
+                provider_id: err.provider_id().to_string(),
+                retry_after_seconds: *retry_after_seconds,
+            });
+        }
+        _ => {
+            ctx.sprint5.emit(TraceEventKind::ProviderError {
+                run_id: ctx.run_id.clone(),
+                step_id: step_id.to_string(),
+                provider_id: err.provider_id().to_string(),
+                error_code: "provider_call_failed".into(),
+                error_message: err.to_string(),
+            });
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use uuid::Uuid;
+
+    use crate::agent::STUB_FAIL_ROLE;
+    use crate::rcs::types::AgentDefinition;
+    use crate::state::StateEngine;
+
+    fn sample_agent() -> AgentDefinition {
+        AgentDefinition {
+            id: Uuid::new_v4(),
+            name: "n".into(),
+            role: "researcher".into(),
+            instructions: "i".into(),
+            tools: None,
+            memory_config: None,
+        }
