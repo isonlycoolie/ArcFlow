@@ -93,3 +93,36 @@ function buildGraphHtml(webview, extensionPath, layout, dims) {
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="${cssUri}">
+  <title>ArcFlow Graph</title>
+</head>
+<body>
+  <header class="toolbar">
+    <span id="workflow-name"></span>
+    <span id="mode-badge" class="badge"></span>
+    <span class="hint">Read-only preview</span>
+  </header>
+  <div id="warnings"></div>
+  <div class="canvas-wrap">
+    <svg id="graph-canvas" role="img" aria-label="Workflow graph"></svg>
+  </div>
+  <script nonce="${nonce}">
+    window.__ARCFLOW_INITIAL__ = ${initialPayload};
+  </script>
+  <script nonce="${nonce}" src="${jsUri}"></script>
+</body>
+</html>`;
+}
+function getNonce() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let nonce = "";
+    for (let i = 0; i < 32; i++) {
+        nonce += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return nonce;
+}
+function isArcflowWorkflowDocument(document) {
+    return document.fileName.endsWith(".arcflow.json");
+}
+//# sourceMappingURL=webviewPanel.js.map
