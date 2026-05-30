@@ -188,3 +188,98 @@ impl AgentRuntime {
             status: ExecutionStatus::Completed,
         })
     }
+
+    fn execute_with_provider(
+        &self,
+        agent: &AgentDefinition,
+        step_id: Uuid,
+        run_input: &str,
+        ctx: &mut ExecutionContext<'_, '_>,
+        provider: std::sync::Arc<dyn crate::providers::ModelProvider>,
+    ) -> Result<(String, TokenUsage), RuntimeError> {
+        let max_tokens = if ctx.provider.is_some() {
+            ctx.provider_max_tokens
+        } else {
+            default_max_tokens()
+        };
+        let temperature = if ctx.provider.is_some() {
+            ctx.provider_temperature
+        } else {
+            default_temperature()
+        };
+        let request = build_agent_request(&agent.instructions, run_input, max_tokens, temperature);
+        let prompt_size = request.prompt_size_bytes();
+        let step_id_str = step_id.to_string();
+
+        ctx.sprint5.emit(TraceEventKind::ProviderRequestSent {
+            run_id: ctx.run_id.clone(),
+            step_id: step_id_str.clone(),
+            provider_id: provider.provider_id().to_string(),
+            model_id: provider.model_id().to_string(),
+            max_tokens: request.max_tokens,
+            prompt_size_bytes: prompt_size,
+        });
+
+        let started = std::time::Instant::now();
+        let limit = effective_provider_timeout(ctx);
+        let provider_arc = provider.clone();
+        let stream_enabled = ctx.stream_tx.is_some();
+
+        if stream_enabled {
+            return self.execute_with_provider_stream(
+                agent,
+                step_id,
+                ctx,
+                provider,
+                &step_id_str,
+                started,
+                request,
+            );
+        }
+
+        let provider_call = async {
+            if let Some(retry_cfg) = ctx.retry_config.clone() {
+                execute_with_retry(
+                    || {
+                        let req = build_agent_request(
+                            &agent.instructions,
+                            run_input,
+                            max_tokens,
+                            temperature,
+                        );
+                        let p = provider_arc.clone();
+                        async move { p.complete(req).await }
+                    },
+                    &retry_cfg,
+                    &step_id_str,
+                    ctx.sprint5,
+                )
+                .await
+                .map_err(|e| match e {
+                    RetryError::NonRetryable(err) => {
+                        emit_provider_error(ctx, &step_id_str, &err);
+                        map_provider_error(step_id, err)
+                    }
+                    RetryError::Exhausted {
+                        attempts_made,
+                        last_error_code,
+                        error,
+                    } => {
+                        emit_provider_error(ctx, &step_id_str, &error);
+                        RuntimeError::RetryExhausted {
+                            step_id: step_id_str.clone(),
+                            attempts_made,
+                            last_error_code,
+                        }
+                    }
+                })
+            } else {
+                provider
+                    .complete(request)
+                    .await
+                    .map_err(|err| {
+                        emit_provider_error(ctx, &step_id_str, &err);
+                        map_provider_error(step_id, err)
+                    })
+            }
+        };
