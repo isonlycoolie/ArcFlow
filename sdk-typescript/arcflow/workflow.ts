@@ -283,3 +283,98 @@ export class Workflow {
       );
     }
     this.stepTimeoutSeconds = seconds;
+    return this;
+  }
+
+  enableRecovery(): this {
+    this.recoveryEnabled = true;
+    return this;
+  }
+
+  private execConfigJson(): string | undefined {
+    return buildExecConfigJson({
+      retry: this.retryOptions,
+      workflowTimeoutSeconds: this.workflowTimeoutSeconds,
+      stepTimeoutSeconds: this.stepTimeoutSeconds,
+      recoveryEnabled: this.recoveryEnabled,
+    });
+  }
+
+  private agentsAndSteps(): {
+    agents: Agent[];
+    steps: Array<{ stepId: string; agentId: string; order: number; hitlJson?: string }>;
+  } {
+    if (this.graphMode) {
+      const agents: Agent[] = [];
+      const steps: Array<{ stepId: string; agentId: string; order: number; hitlJson?: string }> = [];
+      let order = 1;
+      for (const record of this.graphNodes.values()) {
+        agents.push(record.agent);
+        steps.push({
+          stepId: record.stepId,
+          agentId: record.agent.agentId,
+          order: order++,
+        });
+      }
+      return { agents, steps };
+    }
+    return {
+      agents: this.steps.map((row) => row.agent),
+      steps: this.steps.map((row, index) => ({
+        stepId: randomUUID(),
+        agentId: row.agent.agentId,
+        order: index + 1,
+        hitlJson: row.hitl?.toJson(),
+      })),
+    };
+  }
+
+  private graphJson(): string | undefined {
+    if (!this.graphMode) {
+      return undefined;
+    }
+    if (!this.entryNode) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] Graph workflow has no entry node.",
+      );
+    }
+    return buildGraphJson({
+      entryNode: this.entryNode,
+      maxIterations: this.maxIterations,
+      nodes: [...this.graphNodes.values()].map((n) => ({
+        id: n.nodeId,
+        stepId: n.stepId,
+      })),
+      edges: this.graphEdges,
+      joinNodes: this.graphJoins,
+    });
+  }
+
+  async resume(runId: string): Promise<WorkflowResult> {
+    if (!this.recoveryEnabled) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] workflow.resume() requires enableRecovery().",
+      );
+    }
+    if (!runId.trim()) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] resume() requires a non-empty run_id.",
+      );
+    }
+    if (!this.workflowId) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] Cannot resume — no prior run on this workflow instance.",
+      );
+    }
+    const native = loadNative();
+    const { agents, steps } = this.agentsAndSteps();
+    try {
+      const result = await native.executeResumeWorkflow(
+        this.name,
+        this.workflowId,
+        agents.map((agent) => agent.bindingRow()),
+        steps,
+        runId.trim(),
+        undefined,
+        this.execConfigJson(),
+      );
