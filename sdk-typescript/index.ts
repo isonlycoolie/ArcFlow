@@ -18,4 +18,9 @@ export { type StepTrace, type TraceResult, type TokenUsage } from "./arcflow/tra
 export { buildExecConfigJson } from "./arcflow/types/fault.js";
 export { HitlConfig, HumanRejectedError, WorkflowInterruptedError } from "./arcflow/hitl.js";
 export { type StreamEvent, type StreamRunResult } from "./arcflow/stream.js";
+export {
+  buildTestExecConfig,
+  enableStubMode,
+  type TestExecConfigOptions,
+} from "./arcflow/testing/vitest.js";
 export { Workflow, type RunOptions, type WorkflowConfig } from "./arcflow/workflow.js";
