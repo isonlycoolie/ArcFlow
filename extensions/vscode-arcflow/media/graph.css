@@ -93,3 +93,11 @@ svg {
 
 .edge line {
   stroke: var(--edge);
+  stroke-width: 1.5;
+  marker-end: url(#arrow);
+}
+
+.edge-label {
+  fill: var(--edge);
+  font-size: 10px;
+}
