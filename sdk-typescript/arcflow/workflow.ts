@@ -78,6 +78,29 @@ type NativeBinding = {
     stepCount: number;
     traceEventsJson: string;
   }>;
+  startWorkflowStream: (
+    workflowName: string,
+    workflowId: string,
+    agents: Array<{ id: string; name: string; role: string; instructions: string }>,
+    steps: Array<{ stepId: string; agentId: string; order: number; hitlJson?: string }>,
+    runInput: string,
+    provider?: {
+      kind: string;
+      model: string;
+      maxTokens: number;
+      temperature: number;
+    },
+    execConfigJson?: string,
+    graphJson?: string,
+  ) => {
+    pollEvent: () => string | null;
+    finalize: () => {
+      output: string;
+      runId: string;
+      stepCount: number;
+      traceEventsJson: string;
+    };
+  };
 };
 
 function loadNative(): NativeBinding {
@@ -520,7 +543,7 @@ export class Workflow {
       stream: true,
     });
     try {
-      const result = await native.executeWorkflowStream(
+      const iterator = native.startWorkflowStream(
         this.name,
         this.workflowId,
         agents.map((agent) => agent.bindingRow()),
@@ -530,10 +553,12 @@ export class Workflow {
         execConfigJson,
         this.graphJson(),
       );
-      const events = JSON.parse(result.eventsJson) as StreamEvent[];
-      for (const event of events) {
-        yield event;
+      let raw = iterator.pollEvent();
+      while (raw !== null) {
+        yield JSON.parse(raw) as StreamEvent;
+        raw = iterator.pollEvent();
       }
+      const result = iterator.finalize();
       this.lastRunId = result.runId;
       this.hasRun = true;
       return {

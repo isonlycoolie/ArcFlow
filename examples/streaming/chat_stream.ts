@@ -16,7 +16,9 @@ async function main(): Promise<void> {
   );
 
   process.stdout.write("Streaming events:\n");
+  let eventCount = 0;
   for await (const event of wf.runStream("Hello from ArcFlow")) {
+    eventCount += 1;
     switch (event.type) {
       case "token":
         process.stdout.write(event.text);
@@ -32,6 +34,9 @@ async function main(): Promise<void> {
       default:
         process.stdout.write(`[${event.type}]\n`);
     }
+  }
+  if (eventCount === 0) {
+    throw new Error("Expected at least one stream event.");
   }
   process.stdout.write("\nDone.\n");
 }
