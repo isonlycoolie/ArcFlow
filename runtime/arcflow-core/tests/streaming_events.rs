@@ -93,3 +93,81 @@ fn single_step_workflow(agent_id: Uuid, step_id: Uuid) -> (WorkflowDefinition, H
 }
 
 #[test]
+fn mock_provider_emits_five_token_events() {
+    let agent_id = Uuid::new_v4();
+    let step_id = Uuid::new_v4();
+    let (workflow, agents) = single_step_workflow(agent_id, step_id);
+    let provider: Arc<dyn ModelProvider> = Arc::new(MockStreamProvider {
+        chunks: vec![
+            "Hel".into(),
+            "lo".into(),
+            " ".into(),
+            "wo".into(),
+            "rld".into(),
+        ],
+    });
+    let (tx, mut rx) = default_stream_pair();
+    let exec_config = ExecutionConfig {
+        stream: Some(StreamConfig { enabled: true }),
+        ..ExecutionConfig::default()
+    };
+    let record = WorkflowEngine::new()
+        .execute_with_config(
+            &workflow,
+            &agents,
+            "hello",
+            None,
+            None,
+            Some(provider),
+            128,
+            0.0,
+            &exec_config,
+            Some(tx),
+        )
+        .expect("workflow should complete");
+    assert_eq!(record.step_outputs.len(), 1);
+    assert_eq!(record.step_outputs[0].content, "Hello world");
+
+    let mut events = Vec::new();
+    while let Ok(event) = rx.try_recv() {
+        events.push(event);
+    }
+    let token_events: Vec<_> = events
+        .iter()
+        .filter(|e| matches!(e, StreamEvent::Token { .. }))
+        .collect();
+    assert_eq!(token_events.len(), 5);
+    assert!(
+        events
+            .iter()
+            .any(|e| matches!(e, StreamEvent::StepStart { .. }))
+    );
+    assert!(
+        events
+            .iter()
+            .any(|e| matches!(e, StreamEvent::StepComplete { .. }))
+    );
+}
+
+#[test]
+fn non_streaming_run_emits_no_stream_events() {
+    let agent_id = Uuid::new_v4();
+    let step_id = Uuid::new_v4();
+    let (workflow, agents) = single_step_workflow(agent_id, step_id);
+    let (tx, mut rx) = default_stream_pair();
+    let _record = WorkflowEngine::new()
+        .execute_with_config(
+            &workflow,
+            &agents,
+            "hello",
+            None,
+            None,
+            None,
+            128,
+            0.0,
+            &ExecutionConfig::default(),
+            Some(tx),
+        )
+        .expect("workflow should complete");
+    assert!(rx.try_recv().is_err());
+}
