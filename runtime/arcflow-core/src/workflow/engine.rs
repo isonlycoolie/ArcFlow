@@ -188,3 +188,98 @@ impl WorkflowEngine {
         provider: Option<Arc<dyn ModelProvider>>,
         provider_max_tokens: u32,
         provider_temperature: f32,
+        exec_config: &ExecutionConfig,
+        resolve_in_db: bool,
+    ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
+        validate_workflow(workflow, agents)?;
+        crate::human::resume_workflow_with_approval(
+            &self.agent_runtime,
+            workflow,
+            agents,
+            original_run_id,
+            approval_key,
+            approval,
+            tool_runtime,
+            tool_invoker,
+            provider,
+            provider_max_tokens,
+            provider_temperature,
+            exec_config,
+            resolve_in_db,
+        )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use uuid::Uuid;
+
+    use super::WorkflowEngine;
+    use crate::error::RuntimeError;
+    use crate::rcs::types::{AgentDefinition, ExecutionMode, StepDefinition, WorkflowDefinition};
+    use crate::workflow::WorkflowRunError;
+
+    fn agent(id: Uuid) -> AgentDefinition {
+        AgentDefinition {
+            id,
+            name: "a".into(),
+            role: "r".into(),
+            instructions: "i".into(),
+            tools: None,
+            memory_config: None,
+        }
+    }
+
+    #[test]
+    fn execute_empty_step_list_returns_invalid_definition_error() {
+        let wf = WorkflowDefinition {
+            id: Uuid::new_v4(),
+            name: "w".into(),
+            steps: vec![],
+            retry_policy: None,
+            execution_mode: ExecutionMode::Linear,
+            graph: None,
+        };
+        let err = WorkflowEngine::new()
+            .execute(&wf, &HashMap::new(), "in")
+            .unwrap_err();
+        assert!(matches!(
+            err,
+            WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition { .. })
+        ));
+    }
+
+    #[test]
+    fn execute_with_unknown_agent_id_returns_agent_not_found_error() {
+        let aid = Uuid::new_v4();
+        let sid = Uuid::new_v4();
+        let wf = WorkflowDefinition {
+            id: Uuid::new_v4(),
+            name: "w".into(),
+            steps: vec![StepDefinition {
+                id: sid,
+                agent_id: aid,
+                order: 1,
+                fallback_step_id: None,
+                hitl: None,
+            }],
+            retry_policy: None,
+            execution_mode: ExecutionMode::Linear,
+            graph: None,
+        };
+        let err = WorkflowEngine::new()
+            .execute(&wf, &HashMap::new(), "in")
+            .unwrap_err();
+        assert!(matches!(
+            err,
+            WorkflowRunError::Aborted(RuntimeError::AgentNotFound { .. })
+        ));
+    }
+
+    #[test]
+    fn execute_with_duplicate_step_ids_returns_invalid_definition_error() {
+        let aid = Uuid::new_v4();
+        let dup = Uuid::new_v4();
+        let mut m = HashMap::new();
