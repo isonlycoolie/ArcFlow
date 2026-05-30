@@ -188,3 +188,98 @@ fn execute_agent_for_step(
         test_attempt: 1,
         stream_tx: stream_tx.clone(),
     };
+    agent_runtime.execute_with_context(
+        agent,
+        step.id,
+        &state_snapshot,
+        loop_ctx.run_input,
+        Some(&mut exec_ctx),
+    )
+}
+
+#[allow(clippy::result_large_err)]
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn run_one_step(
+    agent_runtime: &AgentRuntime,
+    loop_ctx: &mut RunLoop<'_>,
+    step: &StepDefinition,
+    step_index: usize,
+    agent: &AgentDefinition,
+    all_steps: &[StepDefinition],
+    agents: &HashMap<Uuid, AgentDefinition>,
+    memory: &mut MemoryCoordinator,
+    legacy: &mut TraceEmitter,
+    sprint5: &mut TraceEventEmitter<'_>,
+    run_key: &str,
+    tool_runtime: Option<&ToolRuntime>,
+    tool_invoker: Option<Arc<dyn ToolInvoker>>,
+    workflow_started: Instant,
+    provider: Option<Arc<dyn ModelProvider>>,
+    provider_max_tokens: u32,
+    provider_temperature: f32,
+    retry_config: Option<RetryConfig>,
+    step_timeout: Option<std::time::Duration>,
+    workflow_deadline: Option<Instant>,
+    recovery_enabled: bool,
+    approval: Option<&ApprovalResult>,
+    stream_tx: Option<StreamChannelSender>,
+    node_id: Option<String>,
+) -> Result<(), WorkflowRunError> {
+    debug!(
+        run_id = %loop_ctx.run_id,
+        step_id = %step.id,
+        agent_id = %agent.id,
+        "step execution started"
+    );
+
+    if let Some(ref hitl) = step.hitl {
+        if let Some(result) = approval {
+            if !result.approved {
+                return fail_step(
+                    loop_ctx,
+                    legacy,
+                    sprint5,
+                    run_key,
+                    step,
+                    step_index,
+                    workflow_started,
+                    Instant::now(),
+                    recovery_enabled,
+                    RuntimeError::HumanRejected {
+                        approval_key: hitl.approval_key.clone(),
+                    },
+                    &stream_tx,
+                );
+            }
+            let content = serde_json::json!({
+                "approved": true,
+                "data": result.data,
+            })
+            .to_string();
+            let out = ExecutionStepOutput {
+                step_id: step.id,
+                agent_id: agent.id,
+                content,
+                status: ExecutionStatus::Completed,
+            };
+            return commit_step_output(
+                loop_ctx,
+                legacy,
+                sprint5,
+                run_key,
+                step,
+                step_index,
+                Instant::now(),
+                out,
+                &stream_tx,
+            );
+        }
+        return interrupt_for_human(
+            loop_ctx,
+            legacy,
+            step,
+            step_index,
+            hitl,
+            recovery_enabled,
+        );
+    }
