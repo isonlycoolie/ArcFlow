@@ -378,3 +378,98 @@
           "description": "linear (default) or graph. Phase 1.1."
         },
         "graph": {
+          "$ref": "#/$defs/GraphDefinition",
+          "description": "Required when execution_mode is graph. Phase 1.1."
+        }
+      },
+      "required": ["id", "name", "steps"],
+      "additionalProperties": false
+    },
+    "RunRequest": {
+      "type": "object",
+      "description": "Instruction to execute a registered workflow. Sprint 2–3, Sprint 5–6.",
+      "properties": {
+        "workflow_id": {
+          "$ref": "#/$defs/Uuid",
+          "description": "Registered workflow id. Sprint 2–3."
+        },
+        "input": {
+          "type": "string",
+          "description": "Caller input text for the run. Sprint 2–3."
+        },
+        "trace_id": {
+          "$ref": "#/$defs/Uuid",
+          "description": "Correlation id for observability. Sprint 5."
+        },
+        "provider_config": {
+          "$ref": "#/$defs/ProviderConfig",
+          "description": "Optional provider override. Sprint 6."
+        }
+      },
+      "required": ["workflow_id", "input", "trace_id"],
+      "additionalProperties": false
+    },
+    "StepResult": {
+      "type": "object",
+      "description": "Result of one step within a workflow run. Sprint 5–7.",
+      "properties": {
+        "step_id": { "$ref": "#/$defs/Uuid" },
+        "status": { "$ref": "#/$defs/ExecutionStatus" },
+        "output": {
+          "type": "string",
+          "description": "Step output text when present. Sprint 5."
+        },
+        "latency_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Wall-clock latency in milliseconds. Sprint 5."
+        },
+        "tokens_used": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Token usage when reported. Sprint 5."
+        }
+      },
+      "required": ["step_id", "status", "latency_ms"],
+      "additionalProperties": false
+    },
+    "ErrorPayload": {
+      "type": "object",
+      "description": "Structured error returned to SDKs. Sprint 2–3, Sprint 7.",
+      "properties": {
+        "code": { "$ref": "#/$defs/ErrorCode" },
+        "message": {
+          "type": "string",
+          "description": "Human-readable error message. Sprint 7+."
+        },
+        "step_id": {
+          "$ref": "#/$defs/Uuid",
+          "description": "Step associated with the error when applicable. Sprint 7."
+        },
+        "recoverable": {
+          "type": "boolean",
+          "description": "Whether the caller may retry. Sprint 7."
+        }
+      },
+      "required": ["code", "message", "recoverable"],
+      "additionalProperties": false
+    },
+    "RunResult": {
+      "type": "object",
+      "description": "Final workflow execution outcome. Sprint 2–3, Sprint 5–7.",
+      "properties": {
+        "trace_id": { "$ref": "#/$defs/Uuid" },
+        "status": { "$ref": "#/$defs/ExecutionStatus" },
+        "output": {
+          "type": "string",
+          "description": "Final workflow output when successful. Sprint 2–3."
+        },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/StepResult" },
+          "description": "Per-step results. Sprint 5–7."
+        },
+        "error": {
+          "$ref": "#/$defs/ErrorPayload",
+          "description": "Error details when status is Failed. Sprint 2–3, Sprint 7."
+        }
