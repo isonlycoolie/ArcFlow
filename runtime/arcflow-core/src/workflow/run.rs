@@ -283,3 +283,98 @@ pub(crate) fn run_one_step(
             recovery_enabled,
         );
     }
+
+    sprint5.emit(TraceEventKind::StepStarted {
+        run_id: run_key.to_string(),
+        step_id: step.id.to_string(),
+        step_index,
+        agent_name: agent.name.clone(),
+        agent_role: agent.role.clone(),
+    });
+
+    try_emit_stream(
+        &stream_tx,
+        StreamEvent::StepStart {
+            step_id: step.id.to_string(),
+            node_id,
+        },
+    );
+
+    let step_started = Instant::now();
+    let out = match execute_agent_for_step(
+        agent_runtime,
+        agent,
+        step,
+        loop_ctx,
+        memory,
+        legacy,
+        sprint5,
+        run_key,
+        tool_runtime,
+        tool_invoker.clone(),
+        provider.clone(),
+        provider_max_tokens,
+        provider_temperature,
+        retry_config.clone(),
+        step_timeout,
+        workflow_deadline,
+        &stream_tx,
+    ) {
+        Ok(output) => output,
+        Err(err) => {
+            if let Some(fallback_id) = step.fallback_step_id {
+                if let Some(fallback_step) = all_steps.iter().find(|s| s.id == fallback_id) {
+                    if let Some(fallback_agent) = agents.get(&fallback_step.agent_id) {
+                        sprint5.emit(TraceEventKind::StepFallbackActivated {
+                            run_id: run_key.to_string(),
+                            step_id: step.id.to_string(),
+                            primary_agent_name: agent.name.clone(),
+                            fallback_agent_name: fallback_agent.name.clone(),
+                        });
+                        match execute_agent_for_step(
+                            agent_runtime,
+                            fallback_agent,
+                            step,
+                            loop_ctx,
+                            memory,
+                            legacy,
+                            sprint5,
+                            run_key,
+                            tool_runtime,
+                            tool_invoker,
+                            provider,
+                            provider_max_tokens,
+                            provider_temperature,
+                            retry_config,
+                            step_timeout,
+                            workflow_deadline,
+                            &stream_tx,
+                        ) {
+                            Ok(fallback_out) => fallback_out,
+                            Err(fallback_err) => {
+                                return fail_step(
+                                    loop_ctx,
+                                    legacy,
+                                    sprint5,
+                                    run_key,
+                                    step,
+                                    step_index,
+                                    workflow_started,
+                                    step_started,
+                                    recovery_enabled,
+                                    fallback_err,
+                                    &stream_tx,
+                                );
+                            }
+                        }
+                    } else {
+                        return fail_step(
+                            loop_ctx,
+                            legacy,
+                            sprint5,
+                            run_key,
+                            step,
+                            step_index,
+                            workflow_started,
+                            step_started,
+                            recovery_enabled,
