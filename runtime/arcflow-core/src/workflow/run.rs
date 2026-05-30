@@ -93,3 +93,98 @@ fn fail_step(
     recovery_enabled: bool,
     err: RuntimeError,
     stream_tx: &Option<StreamChannelSender>,
+) -> Result<(), WorkflowRunError> {
+    try_emit_stream(
+        stream_tx,
+        StreamEvent::Error {
+            code: "step_failed".into(),
+            message: err.to_string(),
+            step_id: step.id.to_string(),
+        },
+    );
+    error!(
+        run_id = %loop_ctx.run_id,
+        step_id = %step.id,
+        error = %err,
+        "step execution failed"
+    );
+    sprint5.emit(TraceEventKind::StepFailed {
+        run_id: run_key.to_string(),
+        step_id: step.id.to_string(),
+        step_index,
+        duration_ms: step_started.elapsed().as_millis() as u64,
+        error_code: "step_failed".into(),
+        error_message: err.to_string(),
+    });
+    sprint5.emit(TraceEventKind::WorkflowFailed {
+        run_id: run_key.to_string(),
+        duration_ms: workflow_started.elapsed().as_millis() as u64,
+        failed_step_index: Some(step_index),
+        error_code: "step_failed".into(),
+    });
+    let partial = partial_record(loop_ctx, legacy);
+    crate::recovery::persist::persist_if_enabled(
+        recovery_enabled,
+        loop_ctx.workflow_id,
+        loop_ctx.run_id,
+        loop_ctx.run_input,
+        &partial.step_outputs,
+        step_index,
+        "step_failed",
+    );
+    Err(WorkflowRunError::Failed {
+        error: err,
+        partial,
+    })
+}
+
+pub(crate) fn partial_record(loop_ctx: &RunLoop<'_>, legacy: &TraceEmitter) -> WorkflowExecutionRecord {
+    WorkflowExecutionRecord {
+        run_id: loop_ctx.run_id,
+        workflow_id: loop_ctx.workflow_id,
+        step_outputs: loop_ctx.step_outputs.clone(),
+        final_state: loop_ctx.state.snapshot(),
+        trace_events: legacy.events().to_vec(),
+    }
+}
+
+#[allow(clippy::result_large_err)]
+#[allow(clippy::too_many_arguments)]
+fn execute_agent_for_step(
+    agent_runtime: &AgentRuntime,
+    agent: &AgentDefinition,
+    step: &StepDefinition,
+    loop_ctx: &RunLoop<'_>,
+    memory: &mut MemoryCoordinator,
+    legacy: &mut TraceEmitter,
+    sprint5: &mut TraceEventEmitter<'_>,
+    run_key: &str,
+    tool_runtime: Option<&ToolRuntime>,
+    tool_invoker: Option<Arc<dyn ToolInvoker>>,
+    provider: Option<Arc<dyn ModelProvider>>,
+    provider_max_tokens: u32,
+    provider_temperature: f32,
+    retry_config: Option<RetryConfig>,
+    step_timeout: Option<std::time::Duration>,
+    workflow_deadline: Option<Instant>,
+    stream_tx: &Option<StreamChannelSender>,
+) -> Result<ExecutionStepOutput, RuntimeError> {
+    let state_snapshot = loop_ctx.state.snapshot();
+    let mut exec_ctx = ExecutionContext {
+        tool_runtime,
+        tool_invoker,
+        memory,
+        legacy,
+        sprint5,
+        run_id: run_key.to_string(),
+        provider,
+        provider_max_tokens,
+        provider_temperature,
+        retry_config,
+        step_timeout,
+        workflow_deadline,
+        step_order: step.order,
+        test_config: loop_ctx.test_config.clone(),
+        test_attempt: 1,
+        stream_tx: stream_tx.clone(),
+    };
