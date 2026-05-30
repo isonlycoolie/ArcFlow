@@ -5,6 +5,7 @@ use std::sync::OnceLock;
 use std::time::Duration;
 
 use opentelemetry::global;
+use opentelemetry::trace::TracerProvider as _;
 use opentelemetry::KeyValue;
 use opentelemetry_otlp::{Protocol, WithExportConfig};
 use opentelemetry_sdk::trace::{SimpleSpanProcessor, TracerProvider};
@@ -68,4 +69,13 @@ pub fn init_otlp_exporter() -> Result<(), String> {
     PROVIDER
         .set(provider)
         .map_err(|_| "otlp provider already initialized".to_string())
+}
+
+/// SDK tracer for live `tracing-opentelemetry` instrumentation.
+pub fn sdk_tracer(instrumentation: &'static str) -> opentelemetry_sdk::trace::Tracer {
+    let _ = init_otlp_exporter();
+    PROVIDER
+        .get()
+        .expect("otlp provider not initialized")
+        .tracer(instrumentation)
 }
