@@ -378,3 +378,66 @@ impl VectorMemory {
         namespace: &str,
         query: &str,
         top_k: usize,
+    ) -> Result<Vec<Vec<u8>>, MemoryError> {
+        let _ = namespace;
+        let vector = self.embed_text(query).await?;
+        match self.config.mode {
+            RetrievalMode::Dense => {
+                self.store.search(COLLECTION, &vector, top_k).await
+            }
+            RetrievalMode::Hybrid => {
+                let candidates = self
+                    .store
+                    .search_scored(COLLECTION, &vector, top_k.saturating_mul(3).max(top_k))
+                    .await?;
+                let hits: Vec<HybridHit> = candidates
+                    .iter()
+                    .enumerate()
+                    .map(|(idx, (dense_score, text))| HybridHit {
+                        point_id: idx.to_string(),
+                        dense_score: *dense_score,
+                        sparse_score: sparse_lexical_score(query, text),
+                    })
+                    .collect();
+                let ranked = self.hybrid.rank(hits, top_k);
+                Ok(ranked
+                    .into_iter()
+                    .filter_map(|(id, _)| {
+                        id.parse::<usize>().ok().and_then(|i| {
+                            candidates
+                                .get(i)
+                                .map(|(_, text)| text.as_bytes().to_vec())
+                        })
+                    })
+                    .collect())
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::embedding::stub_embedding;
+
+    #[test]
+    fn stub_embedding_reexported_compat() {
+        let v = stub_embedding(b"hello", 4);
+        assert_eq!(v.len(), 4);
+    }
+
+    #[test]
+    fn vector_memory_config_defaults() {
+        let cfg = VectorMemoryConfig::default();
+        assert_eq!(cfg.chunking.chunk_size, 512);
+        assert_eq!(cfg.mode, RetrievalMode::Dense);
+    }
+
+    #[test]
+    fn vector_memory_hybrid_mode_configured() {
+        let mut cfg = VectorMemoryConfig::default();
+        cfg.mode = RetrievalMode::Hybrid;
+        let mem = VectorMemory::with_config("stub/8", cfg).expect("stub");
+        assert_eq!(mem.config().mode, RetrievalMode::Hybrid);
+    }
+}
