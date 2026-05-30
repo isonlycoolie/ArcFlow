@@ -473,3 +473,98 @@ mod tests {
     #[test]
     fn tool_definition_round_trip() {
         round_trip(&ToolDefinition {
+            name: "search".to_string(),
+            input_schema: serde_json::json!({"type": "object"}),
+            permissions: Some(vec!["read".to_string()]),
+        });
+    }
+
+    #[test]
+    fn provider_config_round_trip() {
+        round_trip(&ProviderConfig {
+            provider_id: ProviderId::OpenAI,
+            model: "gpt-4".to_string(),
+            api_key_env: "OPENAI_API_KEY".to_string(),
+            params: Some(serde_json::json!({"temperature": 0.2})),
+        });
+    }
+
+    #[test]
+    fn workflow_definition_round_trip() {
+        round_trip(&WorkflowDefinition {
+            id: Uuid::new_v4(),
+            name: "test-workflow".to_string(),
+            steps: vec![StepDefinition {
+                id: Uuid::new_v4(),
+                agent_id: Uuid::new_v4(),
+                order: 1,
+                fallback_step_id: None,
+                hitl: None,
+            }],
+            retry_policy: None,
+            execution_mode: ExecutionMode::Linear,
+            graph: None,
+        });
+    }
+
+    #[test]
+    fn agent_definition_round_trip() {
+        round_trip(&AgentDefinition {
+            id: Uuid::new_v4(),
+            name: "researcher".to_string(),
+            role: "research".to_string(),
+            instructions: "Find sources".to_string(),
+            tools: None,
+            memory_config: None,
+        });
+    }
+
+    #[test]
+    fn step_definition_round_trip() {
+        round_trip(&StepDefinition {
+            id: Uuid::new_v4(),
+            agent_id: Uuid::new_v4(),
+            order: 2,
+            fallback_step_id: Some(Uuid::new_v4()),
+            hitl: None,
+        });
+    }
+
+    #[test]
+    fn run_request_round_trip() {
+        round_trip(&RunRequest {
+            workflow_id: Uuid::new_v4(),
+            input: "hello".to_string(),
+            trace_id: Uuid::new_v4(),
+            provider_config: None,
+        });
+    }
+
+    #[test]
+    fn run_result_round_trip() {
+        round_trip(&RunResult {
+            trace_id: Uuid::new_v4(),
+            status: ExecutionStatus::Completed,
+            output: Some("done".to_string()),
+            steps: vec![StepResult {
+                step_id: Uuid::new_v4(),
+                status: ExecutionStatus::Completed,
+                output: Some("step out".to_string()),
+                latency_ms: 42,
+                tokens_used: Some(100),
+            }],
+            error: None,
+        });
+    }
+
+    #[test]
+    fn step_result_round_trip() {
+        round_trip(&StepResult {
+            step_id: Uuid::new_v4(),
+            status: ExecutionStatus::Failed,
+            output: None,
+            latency_ms: 10,
+            tokens_used: None,
+        });
+    }
+
