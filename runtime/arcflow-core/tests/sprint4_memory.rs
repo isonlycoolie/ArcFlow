@@ -112,12 +112,12 @@ fn vector_store_and_search_stub() {
         let coord = MemoryCoordinator::new(run);
         coord
             .write_vector(
-                &ns, "doc", b"payload", "agent", legacy, sprint5, run_key, None,
+                &ns, "chunk-1", b"search me", "agent", legacy, sprint5, run_key, None,
             )
             .unwrap();
         let got = coord
-            .read_vector(&ns, "doc", "agent", legacy, sprint5, run_key, None)
+            .read_vector(&ns, "search me", "agent", legacy, sprint5, run_key, None)
             .unwrap();
-        assert_eq!(got.as_deref(), Some(b"payload".as_ref()));
+        assert_eq!(got.as_deref(), Some(b"search me".as_ref()));
     });
 }

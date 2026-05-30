@@ -3,7 +3,7 @@
 use std::sync::{Mutex, OnceLock};
 
 use super::builder::ExecutionTraceBuilder;
-use super::store::TraceStore;
+use super::store::{self, TraceStore};
 use super::types::ExecutionTrace;
 
 static TRACE_STORE: OnceLock<Mutex<TraceStore>> = OnceLock::new();
@@ -12,7 +12,11 @@ fn store() -> &'static Mutex<TraceStore> {
     TRACE_STORE.get_or_init(|| Mutex::new(TraceStore::new()))
 }
 
-/// Trace lookup failed because the store mutex is poisoned.
+/// Registers a hook invoked after each trace event is stored (e.g. Postgres persist).
+pub fn set_trace_event_persist_hook(hook: store::PersistHook) {
+    store::set_trace_event_persist_hook(hook);
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TraceLookupError {
     StoreLockFailed,

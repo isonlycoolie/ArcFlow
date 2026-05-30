@@ -14,6 +14,7 @@ crate-type = ["cdylib"]
 arcflow-core = { path = "../runtime/arcflow-core" }
 napi = { version = "2", default-features = false, features = ["napi4", "async", "tokio_rt"] }
 napi-derive = "2"
+serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 tokio = { workspace = true }
 uuid = { workspace = true }

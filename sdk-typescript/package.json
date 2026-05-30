@@ -16,6 +16,7 @@
     "build:ts": "tsc --project tsconfig.json",
     "build": "npm run build:native && npm run build:ts",
     "test": "jest",
+    "test:integration": "node tests/run-fault-integration.cjs",
     "prepublishOnly": "node scripts/verify-no-credentials.js"
   },
   "engines": {

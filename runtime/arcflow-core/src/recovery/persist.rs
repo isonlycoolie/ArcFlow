@@ -60,6 +60,10 @@ pub fn persist_if_enabled(
             failure_error_code: failure_error_code.to_string(),
             created_at: Utc::now(),
             is_consumed: false,
+            execution_mode: crate::rcs::types::ExecutionMode::Linear,
+            current_node_id: None,
+            graph_iteration_count: 0,
+            pending_join: None,
         };
         let storage = RecoveryStorage::new(pool);
         if let Err(e) = storage.save(&state).await {

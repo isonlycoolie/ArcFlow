@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use arcflow_core::rcs::types::{AgentDefinition, StepDefinition, WorkflowDefinition};
+use arcflow_core::rcs::types::{AgentDefinition, ExecutionMode, StepDefinition, WorkflowDefinition};
 use arcflow_core::workflow::{WorkflowEngine, WorkflowExecutionRecord};
 
 #[test]
@@ -20,15 +20,19 @@ fn identical_inputs_produce_identical_step_contents() {
                 agent_id: a,
                 order: 1,
                 fallback_step_id: None,
+            hitl: None,
             },
             StepDefinition {
                 id: s2,
                 agent_id: a,
                 order: 2,
                 fallback_step_id: None,
+            hitl: None,
             },
         ],
         retry_policy: None,
+        execution_mode: ExecutionMode::Linear,
+        graph: None,
     };
     let mut m = HashMap::new();
     m.insert(

@@ -29,6 +29,7 @@ from arcflow.trace import (
     ToolCallTrace,
     TraceResult,
 )
+from arcflow.hitl import HitlConfig, HumanRejectedError, WorkflowInterruptedError
 from arcflow.workflow import Workflow
 
 __all__ = [
@@ -56,6 +57,9 @@ __all__ = [
     "Gemini",
     "ProviderConfigurationError",
     "ProviderExecutionError",
+    "HitlConfig",
+    "HumanRejectedError",
+    "WorkflowInterruptedError",
     "Workflow",
     "WorkflowConfigurationError",
     "WorkflowExecutionError",
