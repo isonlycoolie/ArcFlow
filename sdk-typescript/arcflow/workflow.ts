@@ -378,3 +378,98 @@ export class Workflow {
         undefined,
         this.execConfigJson(),
       );
+      this.lastRunId = result.runId;
+      return toWorkflowResult(result);
+    } catch (err) {
+      throw mapNativeError(err);
+    }
+  }
+
+  buildRunPayload(input: string, execConfigJson?: string): Record<string, unknown> {
+    const { agents, steps } = this.agentsAndSteps();
+    const workflowId = this.workflowId ?? randomUUID();
+    this.workflowId = workflowId;
+    const workflowBody: Record<string, unknown> = {
+      id: workflowId,
+      name: this.name,
+      steps: steps.map((s) => {
+        const row: Record<string, unknown> = {
+          id: s.stepId,
+          agent_id: s.agentId,
+          order: s.order,
+        };
+        if (s.hitlJson) {
+          row.hitl = JSON.parse(s.hitlJson);
+        }
+        return row;
+      }),
+      execution_mode: this.graphMode ? "graph" : "linear",
+    };
+    if (this.graphMode) {
+      workflowBody.graph = JSON.parse(this.graphJson()!);
+    }
+    const payload: Record<string, unknown> = {
+      workflow: workflowBody,
+      agents: agents.map((agent) => ({
+        id: agent.agentId,
+        name: agent.name,
+        role: agent.role,
+        instructions: agent.instructions,
+      })),
+      input,
+    };
+    if (execConfigJson) {
+      payload.exec_config = JSON.parse(execConfigJson);
+    }
+    return payload;
+  }
+
+  async run(input: string, options: RunOptions = {}): Promise<WorkflowResult> {
+    const trimmed = input.trim();
+    if (!trimmed) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] Workflow input must be a non-empty string.",
+      );
+    }
+    if (this.graphMode) {
+      if (this.graphNodes.size === 0) {
+        throw new WorkflowConfigurationError(
+          "[ArcFlow] Cannot run a graph workflow with no nodes.",
+        );
+      }
+    } else if (this.steps.length === 0) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] Cannot run a workflow with no steps.",
+      );
+    }
+    if (!this.workflowId) {
+      this.workflowId = randomUUID();
+    }
+    if (this.runtimeUrl) {
+      const result = await runRemoteWorkflow(
+        this,
+        trimmed,
+        this.execConfigJson(),
+      );
+      this.lastRunId = result.runId;
+      this.hasRun = true;
+      return result;
+    }
+    const native = loadNative();
+    const { agents, steps } = this.agentsAndSteps();
+    const provider = options.provider?.bindingRow();
+    try {
+      const result = await native.executeWorkflow(
+        this.name,
+        this.workflowId,
+        agents.map((agent) => agent.bindingRow()),
+        steps,
+        trimmed,
+        provider,
+        this.execConfigJson(),
+        this.graphJson(),
+      );
+      this.lastRunId = result.runId;
+      this.hasRun = true;
+      return toWorkflowResult(result);
+    } catch (err) {
