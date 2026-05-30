@@ -17,7 +17,7 @@ from arcflow.exceptions import (
     WorkflowConfigurationError,
     WorkflowExecutionError,
 )
-from arcflow.memory import MemoryConfig, MemoryScope, MemoryType
+from arcflow.memory import MemoryConfig, MemoryChunkingConfig, MemoryRetrievalConfig, MemoryScope, MemoryType
 from arcflow.provider import Anthropic, Gemini, OpenAI
 from arcflow.result import WorkflowResult
 from arcflow.tool import Tool
@@ -38,6 +38,8 @@ __all__ = [
     "ArcFlowError",
     "InfrastructureUnavailableError",
     "MemoryConfig",
+    "MemoryChunkingConfig",
+    "MemoryRetrievalConfig",
     "MemoryConfigurationError",
     "MemoryOperationError",
     "MemoryScope",

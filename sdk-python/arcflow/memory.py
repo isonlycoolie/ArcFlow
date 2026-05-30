@@ -24,6 +24,54 @@ class MemoryScope(str, Enum):
     GLOBAL = "Global"
 
 
+class MemoryRetrievalConfig:
+    """Hybrid retrieval settings for vector memory (Phase 2.5)."""
+
+    def __init__(
+        self,
+        mode: str = "dense",
+        dense_weight: float = 0.7,
+        sparse_weight: float = 0.3,
+        rerank: str | None = None,
+        top_k: int | None = None,
+    ) -> None:
+        if mode not in ("dense", "hybrid"):
+            raise MemoryConfigurationError(
+                "[ArcFlow] retrieval.mode must be 'dense' or 'hybrid'."
+            )
+        if rerank is not None and rerank not in ("cohere", "local"):
+            raise MemoryConfigurationError(
+                "[ArcFlow] retrieval.rerank must be 'cohere', 'local', or omitted."
+            )
+        self.mode = mode
+        self.dense_weight = dense_weight
+        self.sparse_weight = sparse_weight
+        self.rerank = rerank
+        self.top_k = top_k
+
+
+class MemoryChunkingConfig:
+    """Document chunking settings for vector ingest (Phase 2.5)."""
+
+    def __init__(
+        self,
+        strategy: str = "recursive",
+        chunk_size: int = 512,
+        overlap: int = 64,
+    ) -> None:
+        if chunk_size < 64:
+            raise MemoryConfigurationError(
+                "[ArcFlow] chunking.chunk_size must be at least 64."
+            )
+        if overlap < 0:
+            raise MemoryConfigurationError(
+                "[ArcFlow] chunking.overlap must be non-negative."
+            )
+        self.strategy = strategy
+        self.chunk_size = chunk_size
+        self.overlap = overlap
+
+
 class MemoryConfig:
     """Configures how an agent uses memory during a workflow run."""
 
@@ -35,6 +83,9 @@ class MemoryConfig:
         scope: MemoryScope = MemoryScope.AGENT,
         namespace: str | None = None,
         ttl_seconds: int | None = None,
+        embedding: str | None = None,
+        retrieval: MemoryRetrievalConfig | None = None,
+        chunking: MemoryChunkingConfig | None = None,
     ) -> None:
         if not isinstance(memory_type, MemoryType):
             raise MemoryConfigurationError(
@@ -60,16 +111,34 @@ class MemoryConfig:
         self.memory_type = memory_type
         self.scope = scope
         self.ttl_seconds = ttl_seconds
+        self.embedding = embedding.strip() if embedding else None
+        self.retrieval = retrieval
+        self.chunking = chunking
 
     def binding_json(self) -> str | None:
         """JSON payload for the native binding, or None when unset."""
         import json
 
-        return json.dumps(
-            {
-                "memory_type": self.memory_type.value,
-                "scope": self.scope.value,
-                "namespace": self.namespace,
-                "ttl_seconds": self.ttl_seconds,
+        payload: dict[str, object] = {
+            "memory_type": self.memory_type.value,
+            "scope": self.scope.value,
+            "namespace": self.namespace,
+            "ttl_seconds": self.ttl_seconds,
+        }
+        if self.embedding:
+            payload["embedding"] = self.embedding
+        if self.retrieval is not None:
+            payload["retrieval"] = {
+                "mode": self.retrieval.mode,
+                "dense_weight": self.retrieval.dense_weight,
+                "sparse_weight": self.retrieval.sparse_weight,
+                "rerank": self.retrieval.rerank,
+                "top_k": self.retrieval.top_k,
             }
-        )
+        if self.chunking is not None:
+            payload["chunking"] = {
+                "strategy": self.chunking.strategy,
+                "chunk_size": self.chunking.chunk_size,
+                "overlap": self.chunking.overlap,
+            }
+        return json.dumps(payload)

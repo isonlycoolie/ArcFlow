@@ -3,7 +3,8 @@
 use std::collections::HashMap;
 
 use arcflow_core::rcs::types::{
-    AgentDefinition, HitlConfig, MemoryConfig, MemoryScope, MemoryType, StepDefinition,
+    AgentDefinition, HitlConfig, MemoryChunkingConfig, MemoryConfig, MemoryRetrievalConfig,
+    MemoryScope, MemoryType, RerankProviderSpec, RetrievalModeSpec, StepDefinition,
     ToolDefinition, WorkflowDefinition,
 };
 use pyo3::prelude::*;
@@ -40,6 +41,9 @@ pub struct MemoryInput {
     pub scope: MemoryScope,
     pub namespace: Option<String>,
     pub ttl_seconds: Option<u64>,
+    pub embedding: Option<String>,
+    pub retrieval: Option<MemoryRetrievalConfig>,
+    pub chunking: Option<MemoryChunkingConfig>,
 }
 
 /// One step in execution order.
@@ -100,6 +104,44 @@ fn parse_memory_json(raw: &str) -> PyResult<MemoryInput> {
             .and_then(|x| x.as_str())
             .map(str::to_string),
         ttl_seconds: v.get("ttl_seconds").and_then(|x| x.as_u64()),
+        embedding: v
+            .get("embedding")
+            .and_then(|x| x.as_str())
+            .map(str::to_string),
+        retrieval: v.get("retrieval").and_then(parse_retrieval_json),
+        chunking: v.get("chunking").and_then(parse_chunking_json),
+    })
+}
+
+fn parse_retrieval_json(v: &Value) -> Option<MemoryRetrievalConfig> {
+    let mode = match v.get("mode").and_then(|x| x.as_str()).unwrap_or("dense") {
+        "dense" => RetrievalModeSpec::Dense,
+        "hybrid" => RetrievalModeSpec::Hybrid,
+        _ => return None,
+    };
+    let rerank = v.get("rerank").and_then(|x| x.as_str()).and_then(|s| match s {
+        "cohere" => Some(RerankProviderSpec::Cohere),
+        "local" => Some(RerankProviderSpec::Local),
+        _ => None,
+    });
+    Some(MemoryRetrievalConfig {
+        mode,
+        dense_weight: v.get("dense_weight").and_then(|x| x.as_f64()).unwrap_or(0.7) as f32,
+        sparse_weight: v.get("sparse_weight").and_then(|x| x.as_f64()).unwrap_or(0.3) as f32,
+        rerank,
+        top_k: v.get("top_k").and_then(|x| x.as_u64()).map(|n| n as u32),
+    })
+}
+
+fn parse_chunking_json(v: &Value) -> Option<MemoryChunkingConfig> {
+    Some(MemoryChunkingConfig {
+        strategy: v
+            .get("strategy")
+            .and_then(|x| x.as_str())
+            .unwrap_or("recursive")
+            .to_string(),
+        chunk_size: v.get("chunk_size").and_then(|x| x.as_u64()).unwrap_or(512) as usize,
+        overlap: v.get("overlap").and_then(|x| x.as_u64()).unwrap_or(64) as usize,
     })
 }
 
@@ -213,6 +255,9 @@ pub fn build_workflow(
             scope: m.scope,
             namespace: m.namespace.clone(),
             ttl_seconds: m.ttl_seconds,
+            embedding: m.embedding.clone(),
+            retrieval: m.retrieval.clone(),
+            chunking: m.chunking.clone(),
         });
         agent_map.insert(
             a.id,
