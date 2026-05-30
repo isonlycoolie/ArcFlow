@@ -93,3 +93,61 @@ impl RunStore {
             status: parse_status(r.get::<String, _>("status")),
             result_json: r.get("result_json"),
             error_json: r.get("error_json"),
+            created_at: r.get::<DateTime<Utc>, _>("created_at"),
+            completed_at: r.get("completed_at"),
+            workflow_json: r.get("workflow_json"),
+            agents_json: r.get("agents_json"),
+            input_text: r.get("input_text"),
+            exec_config_json: r.get("exec_config_json"),
+        }))
+    }
+
+    pub async fn find_by_idempotency(&self, key: &str) -> Result<Option<StoredRun>, sqlx::Error> {
+        use sqlx::Row;
+        let row = sqlx::query(
+            "SELECT run_id, trace_id, status, result_json, error_json, created_at, completed_at,
+                    workflow_json, agents_json, input_text, exec_config_json
+             FROM arcflow_runs WHERE idempotency_key = $1",
+        )
+        .bind(key)
+        .fetch_optional(&self.pool)
+        .await?;
+        Ok(row.map(|r| StoredRun {
+            run_id: r.get("run_id"),
+            trace_id: r.get("trace_id"),
+            status: parse_status(r.get::<String, _>("status")),
+            result_json: r.get("result_json"),
+            error_json: r.get("error_json"),
+            created_at: r.get::<DateTime<Utc>, _>("created_at"),
+            completed_at: r.get("completed_at"),
+            workflow_json: r.get("workflow_json"),
+            agents_json: r.get("agents_json"),
+            input_text: r.get("input_text"),
+            exec_config_json: r.get("exec_config_json"),
+        }))
+    }
+}
+
+fn status_str(status: ExecutionStatus) -> &'static str {
+    match status {
+        ExecutionStatus::Pending => "pending",
+        ExecutionStatus::Running => "running",
+        ExecutionStatus::Completed => "completed",
+        ExecutionStatus::Failed => "failed",
+        ExecutionStatus::Retrying => "retrying",
+        ExecutionStatus::Cancelled => "cancelled",
+        ExecutionStatus::Interrupted => "interrupted",
+    }
+}
+
+fn parse_status(raw: String) -> ExecutionStatus {
+    match raw.as_str() {
+        "running" => ExecutionStatus::Running,
+        "completed" => ExecutionStatus::Completed,
+        "failed" => ExecutionStatus::Failed,
+        "retrying" => ExecutionStatus::Retrying,
+        "cancelled" => ExecutionStatus::Cancelled,
+        "interrupted" => ExecutionStatus::Interrupted,
+        _ => ExecutionStatus::Pending,
+    }
+}
