@@ -473,3 +473,21 @@ class Workflow:
                 self._graph_payload() if self._graph_mode else None,
             )
             expected = case.get("expected_output")
+            passed = expected is None or result.output == expected
+            results.append(
+                {
+                    "name": name,
+                    "passed": passed,
+                    "output": result.output,
+                }
+            )
+        return results
+
+    def trace(self) -> TraceResult:
+        if not self._last_run_id:
+            raise TraceNotFoundError(
+                "[ArcFlow] No workflow run yet. Call workflow.run() before trace()."
+            )
+        from arcflow._internal import runtime
+
+        return runtime.get_trace(self._last_run_id)
