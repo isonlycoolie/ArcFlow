@@ -188,3 +188,25 @@ fn build_partial_from_recovery(recovery: &crate::recovery::state::RecoveryState)
     let run_id = Uuid::parse_str(&recovery.original_run_id).unwrap_or_else(|_| Uuid::new_v4());
     let workflow_id =
         Uuid::parse_str(&recovery.workflow_definition_id).unwrap_or_else(|_| Uuid::new_v4());
+    let step_outputs: Vec<ExecutionStepOutput> = recovery
+        .completed_steps
+        .iter()
+        .filter_map(|s| {
+            let step_id = Uuid::parse_str(&s.step_id).ok()?;
+            let agent_id = Uuid::parse_str(&s.agent_id).ok()?;
+            Some(ExecutionStepOutput {
+                step_id,
+                agent_id,
+                content: s.content.clone(),
+                status: ExecutionStatus::Completed,
+            })
+        })
+        .collect();
+    WorkflowExecutionRecord {
+        run_id,
+        workflow_id,
+        step_outputs,
+        final_state: crate::state::StateEngine::new().snapshot(),
+        trace_events: vec![],
+    }
+}
