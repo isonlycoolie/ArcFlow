@@ -283,3 +283,98 @@
       },
       "required": ["id", "step_ref"],
       "additionalProperties": false
+    },
+    "GraphEdge": {
+      "type": "object",
+      "description": "Directed edge between graph nodes. Phase 1.1.",
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Source node id."
+        },
+        "to": {
+          "type": "string",
+          "description": "Target node id; omit for terminal."
+        },
+        "condition": {
+          "type": "string",
+          "description": "Edge key returned by source node; omit for unconditional."
+        }
+      },
+      "required": ["from"],
+      "additionalProperties": false
+    },
+    "JoinNode": {
+      "type": "object",
+      "description": "Fan-in join waiting for parallel branches. Phase 1.1.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Join node id (must exist in nodes)."
+        },
+        "wait_for": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Branch node ids that must complete before join proceeds."
+        }
+      },
+      "required": ["id", "wait_for"],
+      "additionalProperties": false
+    },
+    "GraphDefinition": {
+      "type": "object",
+      "description": "Graph execution topology for graph-mode workflows. Phase 1.1.",
+      "properties": {
+        "entry_node": {
+          "type": "string",
+          "description": "First node to execute."
+        },
+        "max_iterations": {
+          "type": "integer",
+          "default": 100,
+          "minimum": 1,
+          "maximum": 10000,
+          "description": "Maximum cycle iterations before GraphIterationLimitReached."
+        },
+        "nodes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/GraphNode" },
+          "minItems": 1
+        },
+        "edges": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/GraphEdge" }
+        },
+        "join_nodes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/JoinNode" }
+        }
+      },
+      "required": ["entry_node", "nodes", "edges"],
+      "additionalProperties": false
+    },
+    "WorkflowDefinition": {
+      "type": "object",
+      "description": "Complete workflow registered with the runtime. Sprint 2–3, Sprint 7 retry.",
+      "properties": {
+        "id": { "$ref": "#/$defs/Uuid" },
+        "name": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Human-readable workflow name for traces and errors. Sprint 2–3."
+        },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/StepDefinition" },
+          "description": "Steps comprising the workflow. Sprint 2–3."
+        },
+        "retry_policy": {
+          "$ref": "#/$defs/RetryPolicy",
+          "description": "Default retry policy for all steps. Sprint 7."
+        },
+        "execution_mode": {
+          "$ref": "#/$defs/ExecutionMode",
+          "description": "linear (default) or graph. Phase 1.1."
+        },
+        "graph": {
