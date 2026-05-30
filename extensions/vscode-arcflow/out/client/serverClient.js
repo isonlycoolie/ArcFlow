@@ -93,3 +93,19 @@ class ServerClient {
             return response.json();
         }
         catch {
+            return undefined;
+        }
+    }
+}
+exports.ServerClient = ServerClient;
+async function connectToLocalServer() {
+    const client = ServerClient.fromConfig();
+    const ok = await client.ping();
+    if (ok) {
+        void vscode.window.showInformationMessage(`ArcFlow: connected to ${client.getBaseUrl()}`);
+    }
+    else {
+        void vscode.window.showWarningMessage(`ArcFlow: could not reach server at ${client.getBaseUrl()}. Start arcflow-server locally.`);
+    }
+}
+//# sourceMappingURL=serverClient.js.map
