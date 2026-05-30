@@ -93,3 +93,23 @@ fn load_trace_file(path: &PathBuf) -> Result<ExecutionTrace, i32> {
     ))
 }
 
+fn load_trace_server(server: &str, run_id: &str) -> Result<ExecutionTrace, i32> {
+    let url = format!(
+        "{}/v1/runs/{}/trace",
+        server.trim_end_matches('/'),
+        run_id.trim()
+    );
+    let api_key = std::env::var("ARCFLOW_SERVER_API_KEY").ok();
+    let mut req = ureq::get(&url);
+    if let Some(key) = api_key {
+        req = req.set("X-ArcFlow-Api-Key", &key);
+    }
+    let response = req.call().map_err(|e| {
+        eprintln!("[ArcFlow] Failed to fetch trace: {e}");
+        1
+    })?;
+    response.into_json().map_err(|e| {
+        eprintln!("[ArcFlow] Invalid trace response: {e}");
+        1
+    })
+}
