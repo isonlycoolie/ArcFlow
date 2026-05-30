@@ -93,3 +93,98 @@ impl QdrantVectorStore {
                                 size: self.dim as u64,
                                 distance: Distance::Cosine.into(),
                                 ..Default::default()
+                            },
+                        )),
+                    }),
+                    ..Default::default()
+                })
+                .await;
+            if let Err(ref err) = create_result {
+                let msg = err.to_string().to_lowercase();
+                if !msg.contains("already exists") {
+                    return Err(map_qdrant_client_error(err));
+                }
+            }
+            self.client = Some(client);
+        }
+        self.client.as_ref().ok_or(MemoryError::OperationFailed {
+            reason: "qdrant client missing after connect".into(),
+        })
+    }
+
+    /// Dense search returning cosine score and payload text for hybrid fusion.
+    pub async fn search_scored(
+        &mut self,
+        collection: &str,
+        vector: &[f32],
+        limit: usize,
+    ) -> Result<Vec<(f32, String)>, MemoryError> {
+        let client = self.client().await?;
+        let results = client
+            .search_points(SearchPoints {
+                collection_name: collection.into(),
+                vector: vector.to_vec(),
+                limit: limit as u64,
+                with_payload: Some(true.into()),
+                ..Default::default()
+            })
+            .await
+            .map_err(map_qdrant_client_error)?;
+        let mut out = Vec::new();
+        for point in results.result {
+            let score = point.score;
+            if let Some(payload) = point.payload.get("payload") {
+                if let Some(s) = payload.as_str() {
+                    out.push((score, s.to_string()));
+                }
+            }
+        }
+        Ok(out)
+    }
+}
+
+#[async_trait]
+impl VectorStoreProvider for QdrantVectorStore {
+    async fn upsert(
+        &mut self,
+        collection: &str,
+        point_id: &str,
+        vector: &[f32],
+        payload: &[u8],
+    ) -> Result<(), MemoryError> {
+        let client = self.client().await?;
+        let mut payload_map = HashMap::new();
+        payload_map.insert(
+            "payload".to_string(),
+            QdrantValue::from(String::from_utf8_lossy(payload).to_string()),
+        );
+        let qdrant_id = point_id_from_key(point_id);
+        let point = PointStruct::new(qdrant_id, vector.to_vec(), payload_map);
+        client
+            .upsert_points(UpsertPoints {
+                collection_name: collection.into(),
+                points: vec![point],
+                ..Default::default()
+            })
+            .await
+            .map_err(map_qdrant_client_error)?;
+        Ok(())
+    }
+
+    async fn search(
+        &mut self,
+        collection: &str,
+        vector: &[f32],
+        limit: usize,
+    ) -> Result<Vec<Vec<u8>>, MemoryError> {
+        let client = self.client().await?;
+        let results = client
+            .search_points(SearchPoints {
+                collection_name: collection.into(),
+                vector: vector.to_vec(),
+                limit: limit as u64,
+                with_payload: Some(true.into()),
+                ..Default::default()
+            })
+            .await
+            .map_err(map_qdrant_client_error)?;
