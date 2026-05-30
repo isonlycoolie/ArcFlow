@@ -61,7 +61,11 @@ pub fn init_tracing_subscriber(default_directive: &str) {
 }
 
 /// Opens an `arcflow.workflow` span when OTel is enabled.
-pub fn workflow_span(run_id: &str, workflow_name: &str) -> SpanGuard {
+pub fn workflow_span(
+    run_id: &str,
+    workflow_name: &str,
+    workflow_version: Option<&str>,
+) -> SpanGuard {
     if !otel_config::otel_enabled() {
         return SpanGuard::none();
     }
@@ -72,6 +76,7 @@ pub fn workflow_span(run_id: &str, workflow_name: &str) -> SpanGuard {
                 "arcflow.workflow",
                 run_id = run_id,
                 workflow_name = workflow_name,
+                workflow.version = workflow_version.unwrap_or(""),
             )
             .entered(),
         ),

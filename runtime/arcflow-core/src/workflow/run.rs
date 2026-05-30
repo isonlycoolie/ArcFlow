@@ -528,8 +528,11 @@ pub(crate) fn run_sorted_steps(
 
     with_store(|store| {
         #[cfg(feature = "otel")]
-        let _otel_workflow =
-            crate::tracing::otel_live::workflow_span(&run_key, &workflow.name);
+        let _otel_workflow = crate::tracing::otel_live::workflow_span(
+            &run_key,
+            &workflow.name,
+            exec_config.workflow_version.as_deref(),
+        );
 
         let mut steps = workflow.steps.clone();
         steps.sort_by_key(|s| s.order);
