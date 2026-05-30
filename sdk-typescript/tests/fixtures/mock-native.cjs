@@ -1,3 +1,23 @@
+function stubOutputFromExecConfig(execConfigJson) {
+  let output = "[stub] writer (author): Reply briefly.";
+  if (!execConfigJson) {
+    return output;
+  }
+  try {
+    const cfg = JSON.parse(execConfigJson);
+    const stub = cfg.test?.stub_responses?.step_1;
+    if (stub && typeof stub.then_output === "string" && stub.fail_times != null) {
+      return stub.then_output;
+    }
+    if (typeof stub?.output === "string") {
+      return stub.output;
+    }
+  } catch {
+    // ignore malformed exec config in mock
+  }
+  return output;
+}
+
 exports.executeWorkflow = async (
   _workflowName,
   _workflowId,
@@ -8,18 +28,7 @@ exports.executeWorkflow = async (
   execConfigJson,
   graphJson,
 ) => {
-  let output = "[stub] writer (author): Reply briefly.";
-  if (execConfigJson) {
-    try {
-      const cfg = JSON.parse(execConfigJson);
-      const stub = cfg.test?.stub_responses?.step_1?.output;
-      if (typeof stub === "string") {
-        output = stub;
-      }
-    } catch {
-      // ignore malformed exec config in mock
-    }
-  }
+  const output = stubOutputFromExecConfig(execConfigJson);
   const stepCount = graphJson ? JSON.parse(graphJson).nodes.length : 1;
   return {
     output,
@@ -81,18 +90,7 @@ exports.startWorkflowStream = (
   _provider,
   execConfigJson,
 ) => {
-  let output = "[stub] writer (author): Reply briefly.";
-  if (execConfigJson) {
-    try {
-      const cfg = JSON.parse(execConfigJson);
-      const stub = cfg.test?.stub_responses?.step_1?.output;
-      if (typeof stub === "string") {
-        output = stub;
-      }
-    } catch {
-      // ignore malformed exec config in mock
-    }
-  }
+  const output = stubOutputFromExecConfig(execConfigJson);
   const queued = [
     JSON.stringify({ type: "step_start", step_id: "step-1" }),
     JSON.stringify({ type: "step_complete", step_id: "step-1", duration_ms: 1 }),
