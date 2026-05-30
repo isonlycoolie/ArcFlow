@@ -93,3 +93,98 @@ export interface WorkflowConfig {
 
 export interface RunOptions {
   provider?: Provider;
+}
+
+interface GraphNodeRecord {
+  nodeId: string;
+  agent: Agent;
+  stepId: string;
+}
+
+export class Workflow {
+  private readonly name: string;
+  private readonly graphMode: boolean;
+  readonly runtimeUrl: string | undefined;
+  private readonly steps: Array<{ agent: Agent; hitl?: HitlConfig }> = [];
+  private readonly graphNodes = new Map<string, GraphNodeRecord>();
+  private readonly graphEdges: Array<{
+    from: string;
+    to?: string | null;
+    condition?: string | null;
+  }> = [];
+  private readonly graphJoins: Array<{ id: string; waitFor: string[] }> = [];
+  private entryNode: string | null = null;
+  private maxIterations = 100;
+  private workflowId: string | null = null;
+  private lastRunId: string | null = null;
+  private hasRun = false;
+  private retryOptions: RetryOptions | undefined;
+  private workflowTimeoutSeconds: number | undefined;
+  private stepTimeoutSeconds: number | undefined;
+  private recoveryEnabled = false;
+
+  constructor(config: WorkflowConfig = {}) {
+    const trimmed = (config.name ?? "default").trim();
+    if (!trimmed) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] Workflow name must be a non-empty string.",
+      );
+    }
+    this.name = trimmed;
+    this.graphMode = config.graph === true;
+    this.runtimeUrl = config.runtime?.trim().replace(/\/$/, "") || undefined;
+  }
+
+  step(agent: Agent, options: { hitl?: HitlConfig } = {}): this {
+    if (this.graphMode) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] Graph workflows use node() — step() is not allowed when graph=true.",
+      );
+    }
+    if (!(agent instanceof Agent)) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] workflow.step() requires an Agent instance.",
+      );
+    }
+    this.steps.push({ agent, hitl: options.hitl });
+    return this;
+  }
+
+  node(nodeId: string, agent: Agent): this {
+    if (!this.graphMode) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] node() requires Workflow({ graph: true }).",
+      );
+    }
+    if (this.hasRun) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] workflow.node() must be called before workflow.run().",
+      );
+    }
+    const trimmed = nodeId.trim();
+    if (!trimmed) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] Graph node id must be a non-empty string.",
+      );
+    }
+    if (!(agent instanceof Agent)) {
+      throw new WorkflowConfigurationError(
+        "[ArcFlow] workflow.node() requires an Agent instance.",
+      );
+    }
+    if (this.graphNodes.has(trimmed)) {
+      throw new WorkflowConfigurationError(
+        `[ArcFlow] Duplicate graph node id '${trimmed}'.`,
+      );
+    }
+    this.graphNodes.set(trimmed, {
+      nodeId: trimmed,
+      agent,
+      stepId: randomUUID(),
+    });
+    if (!this.entryNode) {
+      this.entryNode = trimmed;
+    }
+    return this;
+  }
+
