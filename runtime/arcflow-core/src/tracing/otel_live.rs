@@ -74,3 +74,35 @@ pub fn step_span(run_id: &str, step_id: &str, step_index: usize, agent_name: &st
         ),
     }
 }
+
+/// Opens an `arcflow.llm.invoke` span under the active step span.
+pub fn llm_span(run_id: &str, step_id: &str, provider: &str, model: &str) -> SpanGuard {
+    if !otel_config::otel_enabled() {
+        return SpanGuard::none();
+    }
+    try_init_live_tracing();
+    SpanGuard {
+        _inner: Some(
+            tracing::info_span!(
+                "arcflow.llm.invoke",
+                run_id = run_id,
+                step_id = step_id,
+                provider = provider,
+                model = model,
+                tokens.prompt = tracing::field::Empty,
+                tokens.completion = tracing::field::Empty,
+            )
+            .entered(),
+        ),
+    }
+}
+
+/// Records token counts on the active LLM span (SEC-1: counts only).
+pub fn record_llm_tokens(prompt_tokens: u32, completion_tokens: u32) {
+    if !otel_config::otel_enabled() {
+        return;
+    }
+    let span = tracing::Span::current();
+    span.record("tokens.prompt", prompt_tokens);
+    span.record("tokens.completion", completion_tokens);
+}

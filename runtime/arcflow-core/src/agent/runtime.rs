@@ -231,6 +231,14 @@ impl AgentRuntime {
             prompt_size_bytes: prompt_size,
         });
 
+        #[cfg(feature = "otel")]
+        let _otel_llm = crate::tracing::otel_live::llm_span(
+            &ctx.run_id,
+            &step_id_str,
+            provider.provider_id(),
+            provider.model_id(),
+        );
+
         let started = std::time::Instant::now();
         let limit = effective_provider_timeout(ctx);
         let provider_arc = provider.clone();
@@ -378,6 +386,11 @@ impl AgentRuntime {
                     agent_name: agent.name.clone(),
                     tokens: response.tokens.clone(),
                 });
+                #[cfg(feature = "otel")]
+                crate::tracing::otel_live::record_llm_tokens(
+                    response.tokens.prompt_tokens,
+                    response.tokens.completion_tokens,
+                );
                 Ok((response.content, response.tokens))
             }
             Err(err) => Err(err),
@@ -395,6 +408,14 @@ impl AgentRuntime {
         request: crate::providers::ProviderRequest,
     ) -> Result<(String, TokenUsage), RuntimeError> {
         use futures_util::StreamExt;
+
+        #[cfg(feature = "otel")]
+        let _otel_llm = crate::tracing::otel_live::llm_span(
+            &ctx.run_id,
+            step_id_str,
+            provider.provider_id(),
+            provider.model_id(),
+        );
 
         let limit = effective_provider_timeout(ctx);
         let stream = if let Some(limit) = limit {
@@ -483,6 +504,11 @@ impl AgentRuntime {
             agent_name: agent.name.clone(),
             tokens: tokens.clone(),
         });
+        #[cfg(feature = "otel")]
+        crate::tracing::otel_live::record_llm_tokens(
+            tokens.prompt_tokens,
+            tokens.completion_tokens,
+        );
         Ok((output, tokens))
     }
 
