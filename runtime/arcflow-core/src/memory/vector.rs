@@ -283,3 +283,98 @@ impl VectorMemory {
     pub fn from_provider_spec(spec: &str) -> Result<Self, EmbeddingError> {
         let provider = resolve_provider(spec)?;
         Ok(Self::with_provider(provider, VectorMemoryConfig::default()))
+    }
+
+    /// Resolves the embedding provider from environment variables.
+    pub fn from_env() -> Result<Self, EmbeddingError> {
+        let provider = resolve_from_env()?;
+        Ok(Self::with_provider(provider, VectorMemoryConfig::default()))
+    }
+
+    /// Builds vector memory with chunking and hybrid retrieval settings.
+    pub fn with_config(spec: &str, config: VectorMemoryConfig) -> Result<Self, EmbeddingError> {
+        let provider = resolve_provider(spec)?;
+        Ok(Self::with_provider(provider, config))
+    }
+
+    fn with_provider(provider: Arc<dyn EmbeddingProvider>, config: VectorMemoryConfig) -> Self {
+        let splitter = RecursiveCharacterSplitter::new(
+            config.chunking.chunk_size,
+            config.chunking.overlap,
+        );
+        let hybrid = HybridRetriever::new(
+            config.retrieval.dense_weight,
+            config.retrieval.sparse_weight,
+        );
+        Self {
+            store: QdrantVectorStore::new(provider.dimensions()),
+            provider,
+            config,
+            splitter,
+            hybrid,
+        }
+    }
+
+    /// Active configuration (chunking + retrieval).
+    pub fn config(&self) -> &VectorMemoryConfig {
+        &self.config
+    }
+
+    async fn embed_text(&self, text: &str) -> Result<Vec<f32>, MemoryError> {
+        let mut vectors = self
+            .provider
+            .embed(&[text.to_string()])
+            .await
+            .map_err(map_embedding)?;
+        vectors.pop().ok_or(MemoryError::OperationFailed {
+            reason: "embedding provider returned no vectors".into(),
+        })
+    }
+
+    /// Stores text under namespace using semantic embedding of the payload.
+    pub async fn write(
+        &mut self,
+        namespace: &str,
+        logical_key: &str,
+        value: &[u8],
+    ) -> Result<(), MemoryError> {
+        let storage_key = durable_key(namespace, logical_key);
+        let text = String::from_utf8_lossy(value).into_owned();
+        let vector = self.embed_text(&text).await?;
+        self.store
+            .upsert(COLLECTION, &storage_key, &vector, value)
+            .await
+    }
+
+    /// Retrieves nearest payload for a semantic query (`logical_key` text).
+    pub async fn read(
+        &mut self,
+        namespace: &str,
+        logical_key: &str,
+    ) -> Result<Option<Vec<u8>>, MemoryError> {
+        let hits = self.search(namespace, logical_key, 1).await?;
+        Ok(hits.into_iter().next())
+    }
+
+    /// Chunks `text`, embeds each chunk, and upserts under `{key}#chunkN`.
+    pub async fn write_document(
+        &mut self,
+        namespace: &str,
+        key: &str,
+        text: &str,
+    ) -> Result<usize, MemoryError> {
+        let chunks = self.splitter.split(text);
+        let count = chunks.len();
+        for (idx, chunk) in chunks.into_iter().enumerate() {
+            let chunk_key = format!("{key}#chunk{idx}");
+            self.write(namespace, &chunk_key, chunk.as_bytes()).await?;
+        }
+        Ok(count)
+    }
+
+    /// Semantic search returning up to `top_k` payload blobs.
+    pub async fn search(
+        &mut self,
+        namespace: &str,
+        query: &str,
+        top_k: usize,
