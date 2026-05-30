@@ -568,3 +568,45 @@ export class Workflow {
       const execConfigJson = buildExecConfigJson({
         retry: this.retryOptions,
         workflowTimeoutSeconds: this.workflowTimeoutSeconds,
+        stepTimeoutSeconds: this.stepTimeoutSeconds,
+        recoveryEnabled: false,
+        test: { stub_responses: stubResponses ?? {} },
+      });
+      const workflowId = randomUUID();
+      try {
+        const result = await native.executeWorkflow(
+          this.name,
+          workflowId,
+          agents.map((agent) => agent.bindingRow()),
+          steps,
+          runInput,
+          undefined,
+          execConfigJson,
+          this.graphJson(),
+        );
+        const expected = testCase.expected_output;
+        const passed = expected === undefined || result.output === expected;
+        results.push({ name, passed, output: result.output });
+      } catch (err) {
+        throw mapNativeError(err);
+      }
+    }
+    return results;
+  }
+
+  trace(): TraceResult {
+    if (!this.lastRunId) {
+      throw new TraceNotFoundError(
+        "[ArcFlow] No workflow run yet. Call workflow.run() before trace().",
+      );
+    }
+    const native = loadNative();
+    try {
+      return traceFromJson(native.getExecutionTraceJson(this.lastRunId));
+    } catch (err) {
+      throw mapNativeError(err);
+    }
+  }
+}
+
+export { WorkflowExecutionError };
