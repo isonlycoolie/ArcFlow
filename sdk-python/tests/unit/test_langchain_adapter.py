@@ -66,6 +66,61 @@ def test_from_langchain_tool_mock(monkeypatch: pytest.MonkeyPatch) -> None:
     assert tool.execute({"query": "hello"}) == "ok:hello"
 
 
+def test_from_langchain_tool_in_workflow_test(monkeypatch: pytest.MonkeyPatch) -> None:
+    import arcflow_langchain.adapter as adapter_mod
+
+    monkeypatch.setattr(adapter_mod, "require_langchain_core", lambda: None)
+    from arcflow import Agent
+
+    tool = adapter_mod.from_langchain_tool(_MockLangChainTool())
+    agent = Agent(
+        name="researcher",
+        role="analyst",
+        instructions="Use search.",
+        tools=(tool,),
+    )
+    wf = Workflow("lc_tool_wf").step(agent)
+    results = wf.test(
+        [
+            {
+                "input": "hello",
+                "expected_output": "done",
+                "stub_responses": {"step_1": {"output": "done"}},
+            }
+        ]
+    )
+    assert results[0]["passed"] is True
+
+
+def test_langgraph_rcs_validates_against_schema(monkeypatch: pytest.MonkeyPatch) -> None:
+    import json
+    from pathlib import Path
+
+    import jsonschema
+
+    import arcflow_langchain.langgraph_convert as lg_mod
+
+    monkeypatch.setattr(lg_mod, "require_langchain_core", lambda: None)
+    raw = lg_mod.langgraph_to_rcs_json(_MockLangGraph(), workflow_name="demo")
+    body = json.loads(raw)
+    schema_path = (
+        Path(__file__).resolve().parents[3]
+        / "contracts"
+        / "normative"
+        / "rcs"
+        / "v1.schema.json"
+    )
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    jsonschema.validate(instance=body, schema=schema)
+
+
+def test_arcflow_langchain_shim_import() -> None:
+    from arcflow.langchain import from_langchain_tool, to_arcflow_step
+
+    assert callable(from_langchain_tool)
+    assert callable(to_arcflow_step)
+
+
 def test_to_arcflow_step_mock(monkeypatch: pytest.MonkeyPatch) -> None:
     import arcflow_langchain.prompts as prompts_mod
 
