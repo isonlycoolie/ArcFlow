@@ -93,3 +93,33 @@ function buildGraphHtml(
   <link rel="stylesheet" href="${cssUri}">
   <title>ArcFlow Graph</title>
 </head>
+<body>
+  <header class="toolbar">
+    <span id="workflow-name"></span>
+    <span id="mode-badge" class="badge"></span>
+    <span class="hint">Read-only preview</span>
+  </header>
+  <div id="warnings"></div>
+  <div class="canvas-wrap">
+    <svg id="graph-canvas" role="img" aria-label="Workflow graph"></svg>
+  </div>
+  <script nonce="${nonce}">
+    window.__ARCFLOW_INITIAL__ = ${initialPayload};
+  </script>
+  <script nonce="${nonce}" src="${jsUri}"></script>
+</body>
+</html>`;
+}
+
+function getNonce(): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let nonce = "";
+  for (let i = 0; i < 32; i++) {
+    nonce += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return nonce;
+}
+
+export function isArcflowWorkflowDocument(document: vscode.TextDocument): boolean {
+  return document.fileName.endsWith(".arcflow.json");
+}
