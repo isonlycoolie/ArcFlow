@@ -32,7 +32,6 @@ impl WorkflowRegistryStore {
         definition_json: Value,
         published_by: Option<&str>,
     ) -> Result<PublishedWorkflow, sqlx::Error> {
-        use sqlx::Row;
         let row = sqlx::query(
             "INSERT INTO arcflow_workflows
              (name, version, schema_hash, definition_json, published_by)
@@ -55,7 +54,7 @@ impl WorkflowRegistryStore {
         .bind(published_by)
         .fetch_one(&self.pool)
         .await?;
-        Ok(map_row(row))
+        Ok(map_row(&row))
     }
 
     pub async fn get(
@@ -63,7 +62,6 @@ impl WorkflowRegistryStore {
         name: &str,
         version: &str,
     ) -> Result<Option<PublishedWorkflow>, sqlx::Error> {
-        use sqlx::Row;
         let row = sqlx::query(
             "SELECT name, version, schema_hash, definition_json, published_by, published_at, deprecated
              FROM arcflow_workflows WHERE name = $1 AND version = $2",
@@ -72,7 +70,7 @@ impl WorkflowRegistryStore {
         .bind(version)
         .fetch_optional(&self.pool)
         .await?;
-        Ok(row.map(map_row))
+        Ok(row.map(|r| map_row(&r)))
     }
 
     pub async fn list_versions(&self, name: &str) -> Result<Vec<String>, sqlx::Error> {
@@ -122,7 +120,7 @@ impl WorkflowRegistryStore {
     }
 }
 
-fn map_row(row: sqlx::postgres::PgRow) -> PublishedWorkflow {
+fn map_row(row: &sqlx::postgres::PgRow) -> PublishedWorkflow {
     use sqlx::Row;
     PublishedWorkflow {
         name: row.get("name"),

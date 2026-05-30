@@ -50,6 +50,19 @@ async fn main() {
             "/v1/runs/:run_id/approve/:approval_key",
             post(handlers::approve::approve_run),
         )
+        .route(
+            "/v1/workflows/:name/versions/:version",
+            get(handlers::registry::get_workflow_version)
+                .put(handlers::registry::publish_workflow),
+        )
+        .route(
+            "/v1/workflows/:name/resolve",
+            get(handlers::registry::resolve_workflow),
+        )
+        .route(
+            "/v1/workflows/:name/aliases/:alias",
+            post(handlers::registry::set_workflow_alias),
+        )
         .layer(axum_middleware::from_fn_with_state(
             state.clone(),
             crate::middleware::auth::require_api_key,
