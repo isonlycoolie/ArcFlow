@@ -93,3 +93,32 @@ mod tests {
     use super::*;
 
     #[test]
+    fn resolve_stub_spec() {
+        let p = resolve_provider("stub").expect("stub");
+        assert_eq!(p.id(), "stub");
+        assert_eq!(p.dimensions(), 8);
+    }
+
+    #[test]
+    fn resolve_local_spec() {
+        let p = resolve_provider("local/all-MiniLM-L6-v2").expect("local");
+        assert_eq!(p.id(), "local");
+        assert_eq!(p.dimensions(), 384);
+    }
+
+    #[test]
+    fn local_only_blocks_openai() {
+        std::env::set_var(LOCAL_ONLY_ENV, "true");
+        let err = resolve_provider("openai/text-embedding-3-small");
+        assert!(matches!(err, Err(EmbeddingError::LocalOnlyViolation { .. })));
+        std::env::remove_var(LOCAL_ONLY_ENV);
+    }
+
+    #[test]
+    fn local_only_blocks_voyage() {
+        std::env::set_var(LOCAL_ONLY_ENV, "true");
+        let err = resolve_provider("voyage/voyage-3");
+        assert!(matches!(err, Err(EmbeddingError::LocalOnlyViolation { .. })));
+        std::env::remove_var(LOCAL_ONLY_ENV);
+    }
+}
