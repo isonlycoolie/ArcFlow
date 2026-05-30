@@ -6,6 +6,7 @@ import {
 describe("arcflow testing helpers", () => {
   it("builds test exec config with recovery disabled", () => {
     enableStubMode();
+    expect(process.env.ARCFLOW_STUB_MODE).toBe("true");
     const json = buildTestExecConfig({
       stubResponses: { step_1: { output: "fixed" } },
     });

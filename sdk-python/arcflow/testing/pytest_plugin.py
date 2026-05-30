@@ -6,12 +6,25 @@ from typing import Any
 
 import pytest
 
+from arcflow import Agent, Workflow
+
 
 def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
         "markers",
+        "arcflow: ArcFlow workflow integration test (stub mode, no real LLM)",
+    )
+    config.addinivalue_line(
+        "markers",
         "arcflow_stub_responses(step_1=dict): inject stub responses for workflow.test()",
     )
+
+
+@pytest.fixture
+def arcflow_workflow() -> Workflow:
+    """Linear one-step workflow for deterministic stub tests."""
+    agent = Agent(name="writer", role="author", instructions="Write briefly.")
+    return Workflow("pytest_wf").step(agent)
 
 
 @pytest.fixture

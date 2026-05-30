@@ -666,20 +666,39 @@ export class Workflow {
       input?: string;
       expected_output?: string;
       stub_responses?: Record<string, unknown>;
+      mock_step_failure?: string;
+      mock_fail_count?: number;
+      assert_retries?: number;
     }>,
-  ): Promise<Array<{ name: string; passed: boolean; output: string }>> {
+  ): Promise<
+    Array<{ name: string; passed: boolean; output: string; attempts_made?: number }>
+  > {
     const { agents, steps } = this.agentsAndSteps();
     const native = loadNative();
-    const results: Array<{ name: string; passed: boolean; output: string }> = [];
-    for (const testCase of cases) {
+    const { normalizeTestCase, attemptsFromStub } = await import("./testing/vitest.js");
+    const results: Array<{
+      name: string;
+      passed: boolean;
+      output: string;
+      attempts_made?: number;
+    }> = [];
+    for (const rawCase of cases) {
+      const testCase = normalizeTestCase(rawCase);
       const name = String(testCase.name ?? "case");
       const runInput = String(testCase.input ?? "");
       let stubResponses = testCase.stub_responses;
       if (stubResponses === undefined && testCase.expected_output !== undefined) {
         stubResponses = { step_1: { output: testCase.expected_output } };
       }
+      let retryOptions = this.retryOptions;
+      if (testCase.assert_retries !== undefined && retryOptions === undefined) {
+        retryOptions = {
+          maxAttempts: testCase.assert_retries,
+          backoff: { kind: "constant", delayMs: 1, jitterMs: 0 },
+        };
+      }
       const execConfigJson = buildExecConfigJson({
-        retry: this.retryOptions,
+        retry: retryOptions,
         workflowTimeoutSeconds: this.workflowTimeoutSeconds,
         stepTimeoutSeconds: this.stepTimeoutSeconds,
         recoveryEnabled: false,
@@ -698,8 +717,24 @@ export class Workflow {
           this.graphJson(),
         );
         const expected = testCase.expected_output;
-        const passed = expected === undefined || result.output === expected;
-        results.push({ name, passed, output: result.output });
+        let passed = expected === undefined || result.output === expected;
+        const mockStep =
+          testCase.mock_step_failure ??
+          (testCase.mock_fail_count !== undefined ? "step_1" : undefined);
+        const attemptsMade = attemptsFromStub(stubResponses, mockStep, passed);
+        if (testCase.assert_retries !== undefined) {
+          passed = passed && attemptsMade === testCase.assert_retries;
+        }
+        const row: {
+          name: string;
+          passed: boolean;
+          output: string;
+          attempts_made?: number;
+        } = { name, passed, output: result.output };
+        if (attemptsMade !== undefined) {
+          row.attempts_made = attemptsMade;
+        }
+        results.push(row);
       } catch (err) {
         throw mapNativeError(err);
       }

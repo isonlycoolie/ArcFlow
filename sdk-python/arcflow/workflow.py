@@ -591,19 +591,27 @@ class Workflow:
         """Run deterministic stub cases without real LLM calls (Phase 2.3)."""
         from arcflow._internal.exec_config import build_exec_config_json
         from arcflow._internal import runtime
+        from arcflow.testing.case_helpers import assert_retries_met, normalize_test_case
 
         results: list[dict[str, object]] = []
         agents, step_rows = self._agents_and_steps()
         steps = [agent for agent in agents]
-        for case in cases:
+        for raw_case in cases:
+            case = normalize_test_case(raw_case)
             name = str(case.get("name", "case"))
             run_input = str(case.get("input", ""))
             stub_responses = case.get("stub_responses")
             if stub_responses is None and "expected_output" in case:
                 stub_responses = {"step_1": {"output": case["expected_output"]}}
             test_block = {"stub_responses": stub_responses or {}}
+            retry = self._retry
+            assert_retries = case.get("assert_retries")
+            if assert_retries is not None and retry is None:
+                from arcflow.retry import ConstantBackoff
+
+                retry = (int(assert_retries), ConstantBackoff(delay_ms=1))
             exec_json = build_exec_config_json(
-                retry=self._retry,
+                retry=retry,
                 workflow_timeout_seconds=self._workflow_timeout_seconds,
                 step_timeout_seconds=self._step_timeout_seconds,
                 recovery_enabled=False,
@@ -622,13 +630,24 @@ class Workflow:
             )
             expected = case.get("expected_output")
             passed = expected is None or result.output == expected
-            results.append(
-                {
-                    "name": name,
-                    "passed": passed,
-                    "output": result.output,
-                }
+            attempts_made: int | None = None
+            mock_step = case.get("mock_step_failure") or (
+                "step_1" if case.get("mock_fail_count") is not None else None
             )
+            if mock_step is not None and stub_responses:
+                entry = (stub_responses or {}).get(str(mock_step), {})
+                if isinstance(entry, dict) and entry.get("fail_times") is not None:
+                    fail_times = int(entry["fail_times"])
+                    attempts_made = fail_times + 1 if passed else fail_times
+            passed = assert_retries_met(case, attempts_made, passed)
+            row: dict[str, object] = {
+                "name": name,
+                "passed": passed,
+                "output": result.output,
+            }
+            if attempts_made is not None:
+                row["attempts_made"] = attempts_made
+            results.append(row)
         return results
 
     def trace(self) -> TraceResult:

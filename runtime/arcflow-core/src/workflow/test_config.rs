@@ -43,6 +43,17 @@ impl TestConfig {
             .and_then(|s| s.fail_times)
             .is_some_and(|n| attempt <= n)
     }
+
+    /// Attempts consumed for a stub step (fail_times + 1 on success, else fail_times).
+    pub fn stub_attempts_made(&self, key: &str, succeeded: bool) -> Option<u32> {
+        let step = self.stub_responses.get(key)?;
+        let fail_times = step.fail_times?;
+        Some(if succeeded {
+            fail_times.saturating_add(1)
+        } else {
+            fail_times
+        })
+    }
 }
 
 /// Keys: `step_{order}` or step UUID string.

@@ -61,3 +61,21 @@ fn test_stub_overrides_step_output() {
         .expect("run");
     assert_eq!(record.step_outputs[0].content, "fixed-output");
 }
+
+#[test]
+fn stub_attempts_made_counts_fail_times_plus_one() {
+    let mut stubs = HashMap::new();
+    stubs.insert(
+        "step_1".to_string(),
+        TestStubStep {
+            output: None,
+            fail_times: Some(2),
+            then_output: Some("ok".into()),
+        },
+    );
+    let cfg = TestConfig {
+        stub_responses: stubs,
+    };
+    assert_eq!(cfg.stub_attempts_made("step_1", true), Some(3));
+    assert_eq!(cfg.stub_attempts_made("step_1", false), Some(2));
+}
