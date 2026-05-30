@@ -21,6 +21,8 @@ export interface ExecConfigPayload {
   workflow_timeout_secs?: number;
   step_timeout_secs?: number;
   recovery_enabled?: boolean;
+  stream?: { enabled: boolean };
+  test?: { stub_responses: Record<string, unknown> };
 }
 
 export function buildExecConfigJson(options: {
@@ -28,6 +30,8 @@ export function buildExecConfigJson(options: {
   workflowTimeoutSeconds?: number;
   stepTimeoutSeconds?: number;
   recoveryEnabled?: boolean;
+  stream?: boolean;
+  test?: { stub_responses: Record<string, unknown> };
 }): string | undefined {
   const payload: ExecConfigPayload = {};
   if (options.retry) {
@@ -72,6 +76,12 @@ export function buildExecConfigJson(options: {
   }
   if (options.recoveryEnabled) {
     payload.recovery_enabled = true;
+  }
+  if (options.stream) {
+    payload.stream = { enabled: true };
+  }
+  if (options.test) {
+    payload.test = options.test;
   }
   if (Object.keys(payload).length === 0) {
     return undefined;

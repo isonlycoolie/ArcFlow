@@ -7,6 +7,6 @@ mod types;
 mod workflow;
 
 pub use workflow::{
-    execute_resume_workflow, execute_workflow, get_execution_trace_json, get_version,
-    JsWorkflowResult,
+    execute_resume_workflow, execute_workflow, execute_workflow_stream,
+    get_execution_trace_json, get_version, JsStreamWorkflowResult, JsWorkflowResult,
 };

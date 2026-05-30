@@ -48,3 +48,20 @@ exports.getExecutionTraceJson = () =>
   });
 
 exports.getVersion = () => "0.1.0";
+
+exports.executeWorkflowStream = async (
+  _workflowName,
+  _workflowId,
+  _agents,
+  _steps,
+  _runInput,
+) => ({
+  eventsJson: JSON.stringify([
+    { type: "step_start", step_id: "step-1" },
+    { type: "step_complete", step_id: "step-1", duration_ms: 1 },
+  ]),
+  output: "[stub] writer (author): Reply briefly.",
+  runId: "00000000-0000-4000-8000-000000000003",
+  stepCount: 1,
+  traceEventsJson: "[]",
+});
