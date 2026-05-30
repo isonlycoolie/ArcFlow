@@ -93,3 +93,20 @@ pub fn parse_execution_config(raw: Option<&str>) -> Result<ExecutionConfig, Stri
         backoff: r.backoff.into_strategy(),
     });
     let mut timeouts = RetryTimeoutConfig::default();
+    if let Some(secs) = parsed.workflow_timeout_secs {
+        timeouts.workflow_timeout = Some(Duration::from_secs_f64(secs));
+    }
+    if let Some(secs) = parsed.step_timeout_secs {
+        timeouts.step_timeout = Some(Duration::from_secs_f64(secs));
+    }
+    Ok(ExecutionConfig {
+        retry,
+        timeouts,
+        recovery_enabled: parsed.recovery_enabled.unwrap_or(false),
+        run_id: None,
+        test: parsed.test,
+        stream: parsed.stream.map(|s| StreamConfig {
+            enabled: s.enabled,
+        }),
+    })
+}
