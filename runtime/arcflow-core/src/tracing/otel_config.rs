@@ -104,28 +104,24 @@ mod tests {
     }
 
     fn with_env(test: impl FnOnce()) {
-        let _guard = ENV_LOCK.lock().expect("otel env test lock");
+        let _guard = ENV_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         clear_otel_env();
         test();
         clear_otel_env();
     }
 
     #[test]
-    fn export_off_by_default() {
+    fn otel_env_config_matrix() {
         with_env(|| assert!(!export_requested()));
-    }
 
-    #[test]
-    fn otel_enabled_requires_explicit_true() {
         with_env(|| {
             std::env::set_var("ARCFLOW_OTEL_ENABLED", "true");
             assert!(otel_enabled());
             assert!(export_requested());
         });
-    }
 
-    #[test]
-    fn legacy_endpoint_still_requests_export() {
         with_env(|| {
             std::env::set_var("ARCFLOW_OTLP_ENDPOINT", "http://localhost:4317");
             assert!(export_requested());
@@ -134,10 +130,7 @@ mod tests {
                 Some("http://localhost:4317")
             );
         });
-    }
 
-    #[test]
-    fn standard_endpoint_overrides_legacy_when_set() {
         with_env(|| {
             std::env::set_var("ARCFLOW_OTLP_ENDPOINT", "http://legacy:4317");
             std::env::set_var("OTEL_EXPORTER_OTLP_ENDPOINT", "http://collector:4318");
@@ -146,10 +139,7 @@ mod tests {
                 Some("http://collector:4318")
             );
         });
-    }
 
-    #[test]
-    fn parses_resource_attributes() {
         with_env(|| {
             std::env::set_var(
                 "OTEL_RESOURCE_ATTRIBUTES",
