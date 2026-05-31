@@ -93,3 +93,17 @@ except WorkflowExecutionError as err:
 
 **Message format drill.** Pick any `WorkflowConfigurationError` from this track (empty name, no steps). Confirm both sentences are present: problem, then remediation.
 
+## Next steps
+
+You have finished the fundamentals track. Continue with:
+
+| Goal | Link |
+|------|------|
+| Shortest end-to-end example | [First workflow in five minutes](../first-workflow-in-five-minutes.md) |
+| OpenAI, traces, remote runtime | [Python quickstart](../quickstart-python.md) |
+| Step-by-step verification lab | [Track A: First workflow](../../tutorials/track-a-first-workflow.md) |
+| Full exception list | [Python SDK exception reference](../../sdks/python/exception-reference.md) |
+
+Return to the [Fundamentals track overview](README.md) if you want the lesson index.
+
+**Source:** `sdk-python/arcflow/exceptions.py`, `sdk-python/arcflow/agent.py`, `sdk-python/arcflow/workflow.py`, `documentation/sdks/python/exception-reference.md`; capabilities reference §16.2.
