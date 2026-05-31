@@ -188,3 +188,40 @@ From the repository root, with the same Python process still holding the in-proc
 cargo run -p arcflow-cli -- trace YOUR_RUN_ID --format json --verbose
 ```
 
+Replace `YOUR_RUN_ID` with the UUID printed by your script. This is optional for Track A but previews operator tooling used in Track H.
+
+## Expected output (summary)
+
+You should see:
+
+1. Printed output text from the stub pipeline (content varies by version).
+2. `step_count=2`, `status=completed`, and a UUID `run_id`.
+3. Trace kind set containing at least `WorkflowStarted`, `StepCompleted`, and `WorkflowCompleted`.
+4. `trace.summary()` reporting two steps and zero or stub token counts.
+
+Exact stub strings are not part of the pass criteria; the integration tests assert structure, not LLM prose.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `ImportError: arcflow` | SDK not built | `maturin develop` in `sdk-python/` or `npm run build` in `sdk-typescript/` |
+| `TraceNotFoundError` on `trace()` | `trace()` before `run()` | Call `run()` first on the same `Workflow` instance |
+| Empty `trace_events` | Very old binding | Rebuild native extension |
+| `WorkflowConfigurationError` | Invalid agent or empty name | Match the example field names exactly |
+
+## What you learned
+
+Track A establishes the core loop: define agents, register ordered steps, call `run()`, read `output`, and confirm observability through trace events. Later tracks add server HTTP (Track B), vector memory (Track C), graph routing (Track D), and human-in-the-loop flows (Track E).
+
+## Next tracks
+
+| Track | Focus | When to start |
+|-------|-------|---------------|
+| B | Server API, Docker, `POST /v1/runs` | After A or in parallel if you are a platform engineer |
+| C | RAG and Qdrant | After A; requires Docker dev stack |
+| H | CLI and VS Code | After A; local tooling |
+
+Continue with [Python quickstart](../getting-started/quickstart-python.md) or [TypeScript quickstart](../getting-started/quickstart-typescript.md) when you want a real LLM provider.
+
+**Source:** capabilities reference §28 Track A, §16.2; `sdk-python/tests/integration/test_first_five_minutes.py`, `sdk-python/tests/integration/test_workflow_trace.py`; `contracts/normative/observability/trace-events-v1.md`.
