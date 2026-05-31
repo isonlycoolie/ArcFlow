@@ -93,3 +93,29 @@ Failed (recovery_enabled) + resume → WorkflowRecoveryStarted → Running → .
 | `original_run_id` | Run being recovered |
 | `completed_steps` | Steps finished before failure |
 | `failed_at_step_index` | Linear resume pointer |
+| `execution_mode` | `linear` or `graph` |
+| `current_node_id` | Graph checkpoint (FP-1.01) |
+| `graph_iteration_count` | Graph guard counter |
+| `pending_join` | Join node state JSON |
+
+## Idempotent polling behavior
+
+Once `status` is `Completed`, `Failed`, or `Cancelled`, repeated `GET /v1/runs/{run_id}` returns the same `result_json` or `error_json` snapshot. Safe for client retry loops and cache-friendly integrations.
+
+## Trace alignment
+
+Trace events follow the same lifecycle: `WorkflowStarted`, step events, optional `RetryAttempted`, `WorkflowInterrupted`, `WorkflowCompleted` or `WorkflowFailed`. Fetch trace:
+
+```bash
+curl -s "http://localhost:8080/v1/runs/RUN_ID/trace" \
+  -H "Authorization: Bearer dev-secret"
+```
+
+## Related pages
+
+- [idempotency.md](idempotency.md) for safe create retries
+- [guides/human-in-the-loop/hitl-overview.md](../guides/human-in-the-loop/hitl-overview.md)
+- [guides/reliability/recovery-and-resume.md](../guides/reliability/recovery-and-resume.md)
+- [postgres-schema.md](postgres-schema.md)
+
+**Source:** capabilities reference Appendix F; `arcflow_core::rcs::types::ExecutionStatus`; `server/arcflow-server/src/handlers/runs.rs`, `server/arcflow-server/src/handlers/approve.rs`.
