@@ -93,3 +93,47 @@ BYO Relay optional second phase per [relay-byo-deployment](../examples/relay-byo
 ### SEC-1 verification
 
 | Check | Method |
+|-------|--------|
+| Trace export | CLI or GET trace; confirm metadata fields only |
+| Logs | No full user messages at info level |
+| Static bundle | No server runtime key in client JS |
+| Relay | Site token only in frontend env |
+
+### Key rotation without downtime
+
+Document ordered steps:
+
+1. Issue new runtime key or site token alongside old
+2. Update Relay site JSON or server env on rolling instance
+3. Deploy frontend new site token if rotated
+4. Drain old key after traffic confirms success
+5. Revoke old key
+
+Demonstrate at least one rotation in dev with zero failed chat requests during rolling update.
+
+### Pass criteria checklist
+
+| Check | Pass |
+|-------|------|
+| `/ready` 200 at head | yes |
+| Idempotent migrate | yes |
+| Static chat end-to-end | yes |
+| Origin enforcement | yes |
+| SEC-1 sample audit signed off | yes |
+| Rotation procedure executed | yes |
+| OTel or documented exception | yes |
+
+## Self-assessment checklist
+
+| Question | Answer must be yes |
+|----------|-------------------|
+| Can you explain three auth tiers and which routes use each? | |
+| Can you restore Postgres without replaying user prompts from traces? | |
+| Can you operate Relay rate limits per site? | |
+| Can you block a compromised site token in minutes? | |
+
+## Next level
+
+Proceed to [Level 4: Architect](level-4-certified-arcflow-architect.md) for multi-tenant design, RCS evolution, and enterprise tradeoffs.
+
+**Source:** Sprint 8 curriculum, static product system, deployment guides; ARCFLOW-DOCS-ORGANIZATION-PLAN Level 3 brief; Tracks F and G; [`examples/static/`](../../examples/static/), [`examples/relay/byo-docker/`](../../examples/relay/byo-docker/).
