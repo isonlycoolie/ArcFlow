@@ -93,3 +93,40 @@ Verify `/ready` still **200** after re-migration.
 | Check | Expected |
 |-------|----------|
 | First migrate | Success, server starts |
+| `/ready` | 200 at head |
+| CLI trace | JSON with event kinds |
+| HTTP trace | Consistent with CLI for server runs |
+| Second migrate | Idempotent, no failures |
+| SEC-1 | No raw prompts in export |
+
+## Expected output
+
+Migrate logs show applied revisions once. CLI trace prints indented JSON event array. Re-migrate prints already at head or equivalent no-op message.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `/ready` 503 | Postgres down or migrate failed | Inspect logs; restart postgres service |
+| CLI trace not found | Wrong id or local-only SDK run | Use server-persisted run id from POST |
+| Migrate conflict | Manual schema edit | Restore from backup; never patch prod schema by hand |
+| Secrets in trace | Misconfiguration | Escalate; traces must stay metadata-only |
+
+## What you learned
+
+Track G covers operational contracts operators rely on daily: migration idempotency, readiness gating, and auditable trace export without leaking user content.
+
+## Next tracks
+
+| Track | Focus |
+|-------|-------|
+| H | IDE graph view and local CLI runs |
+| Level 3 cert | Production deployment and token rotation |
+
+Stop stack when done:
+
+```bash
+docker compose -f docker/docker-compose.server.yml down
+```
+
+**Source:** capabilities reference §28 Track G; `docker/docker-compose.server.yml`, `server/arcflow-server/README.md`; [execution traces](../guides/observability/execution-traces.md), [SEC-1 rules](../guides/observability/sec-1-rules.md).
