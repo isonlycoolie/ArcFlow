@@ -93,3 +93,22 @@ Set `ARCFLOW_WEBHOOK_SECRET` before enabling external bindings. See [Webhook HMA
 
 ## Compliance data in knowledge ingest
 
+Operators may ingest PII into site knowledge namespaces. Your organization owns data retention and lawful basis for that content. Dashboard and BFF must not forward ingest bodies to third-party analytics.
+
+## Incident response hints
+
+| Event | First steps |
+|-------|-------------|
+| Site token leak | Rotate token; review origin allowlist; check usage tables |
+| Admin key leak | Rotate admin key; audit admin API access logs |
+| Server key leak | Rotate server key; review run history for anomaly |
+
+## Related pages
+
+- [API key management](api-key-management.md)
+- [Relay security model](relay-security-model.md)
+- [Production checklist](../deployment/production-checklist.md)
+
+## Source
+
+Derived from Sprint 7 and 8 security rules; [contracts/guides/deployment/self-hosted.md](../../contracts/guides/deployment/self-hosted.md); [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §12, §23.
