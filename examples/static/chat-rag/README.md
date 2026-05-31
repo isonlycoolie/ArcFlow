@@ -1,26 +1,35 @@
-# Static Chat RAG Example
+# Landing-Page Support Chat (Production)
 
-Minimal static-site chat using `@arcflow/static` with inline workflow + vector memory config.
+Production static-site chatbot for a marketing or support landing page. Visitors ask questions; answers come from knowledge you uploaded in the **ArcFlow Dashboard** — not from code in this repo.
 
-## Prerequisites
+## Who does what
+
+| Role | Work |
+|------|------|
+| **Site owner / dashboard user** | Upload docs, write chat instructions, publish workflow |
+| **Frontend developer** | Wire UI + two env vars + `runPublished()` |
+
+The frontend file [`src/main.ts`](src/main.ts) is intentionally minimal (~30 lines). No agents, no memory config, no ingest logic.
+
+## Dashboard setup (before frontend work)
+
+1. **Create site** — Sites → Create; copy relay URL and site token once
+2. **Upload knowledge** — Knowledge tab → add your FAQs and docs  
+   See [RAG document upload guide](../../ArcFlow_Improvement_Plans/arcflow-static-product-vision/10-rag-document-upload-guide.md) for how to structure uploads for good chunking
+3. **Configure chat** — Chat tab → instructions (e.g. “You are Acme Corp support…”) → **Save & publish**
+
+After publish, the published workflow name is `chat` (default). The frontend calls that by name — no workflow definition in browser code.
+
+## Frontend env (production)
 
 ```bash
-docker run -d -p 6333:6333 qdrant/qdrant:v1.12.5
-export ARCFLOW_SERVER_API_KEY=dev-secret
-export ARCFLOW_QDRANT_URL=http://localhost:6333
-export ARCFLOW_CORS_ORIGINS=http://localhost:5173
-export OPENAI_API_KEY=sk-...
-# Start arcflow-server with Postgres (see server/README.md)
+VITE_ARCFLOW_RELAY_URL=https://relay.arcflow.app/v1/sites/s_abc123
+VITE_ARCFLOW_SITE_TOKEN=st_live_xxxxxxxx
 ```
 
-Ingest knowledge (server-side once):
+Add your production origin in Dashboard → Sites → Allowed origins (e.g. `https://www.yoursite.com` and `http://localhost:5173` for local dev).
 
-```python
-from arcflow.memory import VectorStore
-VectorStore().ingest("support-kb", "kb", open("kb.txt").read())
-```
-
-## Run demo UI
+## Run locally
 
 ```bash
 cd examples/static/chat-rag
@@ -28,6 +37,55 @@ npm install
 npm run dev
 ```
 
-## SDK usage
+Open http://localhost:5173 — chat hits Relay with your site token.
 
-See `src/main.ts` — defines `Agent` + `MemoryConfig` in browser, calls `ArcFlowClient.runWorkflow()` in `direct` mode.
+## Frontend code (all you ship)
+
+```typescript
+import { ArcFlowClient, StepForm } from "@arcflow/static";
+
+const client = new ArcFlowClient({
+  baseUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
+  apiKey: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
+  mode: "relay",
+});
+
+await client.runPublished("chat", "^1.0.0", userMessage, {
+  initialState: form.toInitialState(), // optional multi-turn
+});
+```
+
+See [`src/main.ts`](src/main.ts) for the full UI wiring.
+
+## Local dev without dashboard UI
+
+Use the admin API until the dashboard ships:
+
+```bash
+docker compose -f docker/docker-compose.server.yml up -d
+bash scripts/relay-provision-site.sh
+
+# Ingest sample knowledge (dashboard will replace this UX)
+curl -X POST "http://localhost:8080/v1/admin/sites/{site_id}/knowledge/ingest" \
+  -H "X-ArcFlow-Admin-Key: dev-admin" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "'"$(cat kb.txt)"'", "key": "faq"}'
+
+# Publish chat workflow
+curl -X POST "http://localhost:8080/v1/admin/sites/{site_id}/workflows/chat/publish" \
+  -H "X-ArcFlow-Admin-Key: dev-admin" \
+  -H "Content-Type: application/json" \
+  -d '{"instructions": "Answer using the knowledge base. Be concise."}'
+```
+
+[`kb.txt`](kb.txt) is sample content for dashboard upload testing — **do not** embed or ingest it from frontend code.
+
+## Advanced: direct mode (internal only)
+
+[`src/main-dev-direct.ts`](src/main-dev-direct.ts) defines inline `Agent` + `MemoryConfig` for local engine debugging with CORS. Not for production — keys and workflow shape belong in dashboard/Relay, not the static bundle.
+
+## Tests
+
+```bash
+pytest examples/static/chat-rag/test_static.py -q
+```

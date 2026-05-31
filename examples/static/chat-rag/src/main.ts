@@ -1,27 +1,25 @@
-import {
-  Agent,
-  ArcFlowClient,
-  MemoryConfig,
-  StepForm,
-  Workflow,
-} from "@arcflow/static";
+/**
+ * Production entry — landing-page support chat via ArcFlow Relay.
+ *
+ * Setup (dashboard): create site → upload knowledge → publish chat workflow.
+ * Frontend: two env vars + runPublished(). No inline workflow definitions here.
+ */
+import { ArcFlowClient, StepForm } from "@arcflow/static";
 
-const baseUrl = import.meta.env.VITE_ARCFLOW_URL ?? "http://localhost:8080";
-const apiKey = import.meta.env.VITE_ARCFLOW_KEY ?? "dev-secret";
+const relayUrl = import.meta.env.VITE_ARCFLOW_RELAY_URL;
+const siteToken = import.meta.env.VITE_ARCFLOW_SITE_TOKEN;
 
-const bot = new Agent({
-  name: "support",
-  role: "support",
-  instructions: "Answer using the knowledge base. Be concise.",
-  memory: new MemoryConfig({
-    type: "Vector",
-    namespace: "support-kb",
-    embedding: "stub/384",
-  }),
+if (!relayUrl || !siteToken) {
+  throw new Error(
+    "Set VITE_ARCFLOW_RELAY_URL and VITE_ARCFLOW_SITE_TOKEN from ArcFlow Dashboard → Sites.",
+  );
+}
+
+const client = new ArcFlowClient({
+  baseUrl: relayUrl,
+  apiKey: siteToken,
+  mode: "relay",
 });
-
-const workflow = new Workflow({ name: "static_chat", runtime: baseUrl }).step(bot);
-const client = new ArcFlowClient({ baseUrl, apiKey, mode: "direct" });
 const form = new StepForm();
 
 const input = document.getElementById("input") as HTMLTextAreaElement;
@@ -34,7 +32,7 @@ send.addEventListener("click", async () => {
   output.textContent = "Running...";
   form.addTurn("user", message);
   try {
-    const result = await client.runWorkflow(workflow, message, {
+    const result = await client.runPublished("chat", "^1.0.0", message, {
       initialState: form.toInitialState(),
     });
     form.addTurn("assistant", result.output);
