@@ -1,0 +1,10 @@
+{
+  "workflow": "online_application",
+  "input": "Apply for business license",
+  "initial_state": {
+    "conversation_turns": [
+      { "role": "user", "content": "I need to apply for a business license" },
+      { "role": "assistant", "content": "What is the applicant legal name?" }
+    ]
+  }
+}

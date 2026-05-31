@@ -1,0 +1,8 @@
+schedules:
+  - id: daily_application_intake
+    cron: "0 9 * * *"
+    timezone: America/New_York
+    workflow:
+      name: online_application
+    run_input_template: "Process pending applications"
+    external_trigger_token_env: ARCFLOW_TRIGGER_TOKEN
