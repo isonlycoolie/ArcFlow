@@ -1,10 +1,11 @@
-//! Google Gemini generateContent provider (Sprint 6).
+//! Google Gemini generateContent provider (Sprint 6 + Phase 2-Pro tools).
 
 use std::time::Duration;
 
 use async_trait::async_trait;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
 
 use crate::constants::{
     endpoint_from_env, ARCFLOW_USER_AGENT, GEMINI_API_ENDPOINT, GEMINI_API_ENDPOINT_ENV,
@@ -14,7 +15,7 @@ use crate::tracing::types::TokenUsage;
 
 use super::error::ProviderCallError;
 use super::model_provider::ModelProvider;
-use super::request::{MessageRole, ProviderRequest};
+use super::request::{MessageRole, ProviderRequest, ToolCallRequest};
 use super::response::{FinishReason, ProviderResponse, ProviderStream};
 
 pub struct GeminiProvider {
@@ -61,15 +62,94 @@ impl GeminiProvider {
     fn url(&self) -> String {
         format!("{}/{}:generateContent", self.base_url, self.model)
     }
+
+    fn build_contents(messages: &[super::request::ProviderMessage]) -> Vec<GeminiContent> {
+        messages
+            .iter()
+            .map(|m| {
+                let role = match m.role {
+                    MessageRole::Assistant => "model".into(),
+                    _ => "user".into(),
+                };
+                let parts = match m.role {
+                    MessageRole::Tool => vec![GeminiPart {
+                        text: None,
+                        function_call: None,
+                        function_response: Some(GeminiFunctionResponse {
+                            name: m.tool_call_id.clone().unwrap_or_default(),
+                            response: json!({"result": m.content}),
+                        }),
+                    }],
+                    MessageRole::Assistant if m.tool_calls.is_some() => {
+                        let mut parts = Vec::new();
+                        if !m.content.is_empty() {
+                            parts.push(GeminiPart {
+                                text: Some(m.content.clone()),
+                                function_call: None,
+                                function_response: None,
+                            });
+                        }
+                        for call in m.tool_calls.as_ref().unwrap() {
+                            let args: Value =
+                                serde_json::from_str(&call.arguments).unwrap_or_else(|_| json!({}));
+                            parts.push(GeminiPart {
+                                text: None,
+                                function_call: Some(GeminiFunctionCall {
+                                    name: call.name.clone(),
+                                    args,
+                                }),
+                                function_response: None,
+                            });
+                        }
+                        parts
+                    }
+                    _ => vec![GeminiPart {
+                        text: Some(m.content.clone()),
+                        function_call: None,
+                        function_response: None,
+                    }],
+                };
+                GeminiContent { role, parts }
+            })
+            .collect()
+    }
+
+    fn build_tools(tools: &[super::request::ToolSchema]) -> Option<Vec<GeminiTool>> {
+        if tools.is_empty() {
+            return None;
+        }
+        Some(vec![GeminiTool {
+            function_declarations: tools
+                .iter()
+                .map(|t| GeminiFunctionDeclaration {
+                    name: t.name.clone(),
+                    description: t.description.clone(),
+                    parameters: t.input_schema.clone(),
+                })
+                .collect(),
+        }])
+    }
 }
 
 #[derive(Serialize)]
 struct GeminiRequest {
     contents: Vec<GeminiContent>,
-    #[serde(rename = "systemInstruction")]
-    system_instruction: Option<GeminiPart>,
+    #[serde(rename = "systemInstruction", skip_serializing_if = "Option::is_none")]
+    system_instruction: Option<GeminiSystemInstruction>,
     #[serde(rename = "generationConfig")]
     generation_config: GeminiGenConfig,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tools: Option<Vec<GeminiTool>>,
+}
+
+#[derive(Serialize)]
+struct GeminiSystemInstruction {
+    parts: Vec<GeminiTextPart>,
+}
+
+#[derive(Serialize)]
+struct GeminiTextPart {
+    text: String,
 }
 
 #[derive(Serialize)]
@@ -85,9 +165,40 @@ struct GeminiContent {
     parts: Vec<GeminiPart>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 struct GeminiPart {
-    text: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    text: Option<String>,
+    #[serde(rename = "functionCall", skip_serializing_if = "Option::is_none")]
+    function_call: Option<GeminiFunctionCall>,
+    #[serde(rename = "functionResponse", skip_serializing_if = "Option::is_none")]
+    function_response: Option<GeminiFunctionResponse>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct GeminiFunctionCall {
+    name: String,
+    args: Value,
+}
+
+#[derive(Serialize, Deserialize)]
+struct GeminiFunctionResponse {
+    name: String,
+    response: Value,
+}
+
+#[derive(Serialize)]
+struct GeminiTool {
+    #[serde(rename = "functionDeclarations")]
+    function_declarations: Vec<GeminiFunctionDeclaration>,
+}
+
+#[derive(Serialize)]
+struct GeminiFunctionDeclaration {
+    name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    description: Option<String>,
+    parameters: Value,
 }
 
 #[derive(Deserialize)]
@@ -128,29 +239,16 @@ impl ModelProvider for GeminiProvider {
         &self,
         request: ProviderRequest,
     ) -> Result<ProviderResponse, ProviderCallError> {
-        let contents: Vec<GeminiContent> = request
-            .messages
-            .iter()
-            .map(|m| GeminiContent {
-                role: match m.role {
-                    MessageRole::Assistant => "model".into(),
-                    _ => "user".into(),
-                },
-                parts: vec![GeminiPart {
-                    text: m.content.clone(),
-                }],
-            })
-            .collect();
         let body = GeminiRequest {
-            contents,
-            system_instruction: request
-                .system_prompt
-                .as_ref()
-                .map(|s| GeminiPart { text: s.clone() }),
+            contents: Self::build_contents(&request.messages),
+            system_instruction: request.system_prompt.as_ref().map(|s| GeminiSystemInstruction {
+                parts: vec![GeminiTextPart { text: s.clone() }],
+            }),
             generation_config: GeminiGenConfig {
                 max_output_tokens: request.max_tokens,
                 temperature: request.temperature,
             },
+            tools: Self::build_tools(&request.tools),
         };
         let response = self
             .client
@@ -204,29 +302,44 @@ impl ModelProvider for GeminiProvider {
                 reason: "no candidates".into(),
             }
         })?;
-        let content = candidate
-            .content
-            .parts
-            .into_iter()
-            .map(|p| p.text)
-            .collect::<Vec<_>>()
-            .join("");
+        let mut text_parts = Vec::new();
+        let mut tool_calls = Vec::new();
+        for part in candidate.content.parts {
+            if let Some(text) = part.text {
+                text_parts.push(text);
+            }
+            if let Some(call) = part.function_call {
+                tool_calls.push(ToolCallRequest {
+                    id: format!("call_{}", call.name),
+                    name: call.name,
+                    arguments: call.args.to_string(),
+                });
+            }
+        }
         let finish_reason = match candidate.finish_reason.as_deref() {
             Some("STOP") => FinishReason::Stop,
             Some("MAX_TOKENS") => FinishReason::MaxTokens,
             Some(other) => FinishReason::Other(other.to_string()),
             None => FinishReason::Stop,
         };
-        let tokens = parsed.usage_metadata.map(|u| TokenUsage {
-            prompt_tokens: u.prompt_token_count,
-            completion_tokens: u.candidates_token_count,
-            total_tokens: u.total_token_count,
-        }).unwrap_or_default();
+        let tokens = parsed
+            .usage_metadata
+            .map(|u| TokenUsage {
+                prompt_tokens: u.prompt_token_count,
+                completion_tokens: u.candidates_token_count,
+                total_tokens: u.total_token_count,
+            })
+            .unwrap_or_default();
         Ok(ProviderResponse {
-            content,
+            content: text_parts.join(""),
             tokens,
             model_id: self.model.clone(),
             finish_reason,
+            tool_calls: if tool_calls.is_empty() {
+                None
+            } else {
+                Some(tool_calls)
+            },
         })
     }
 

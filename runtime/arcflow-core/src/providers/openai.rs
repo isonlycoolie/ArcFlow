@@ -14,7 +14,7 @@ use crate::tracing::types::TokenUsage;
 
 use super::error::ProviderCallError;
 use super::model_provider::ModelProvider;
-use super::request::{MessageRole, ProviderRequest};
+use super::request::{MessageRole, ProviderRequest, ToolCallRequest, ToolSchema};
 use super::response::{FinishReason, ProviderResponse, ProviderStream};
 
 pub struct OpenAIProvider {
@@ -80,17 +80,45 @@ impl OpenAIProvider {
 }
 
 #[derive(Serialize)]
-struct OpenAIChatRequest<'a> {
-    model: &'a str,
-    messages: Vec<OpenAIMessage<'a>>,
+struct OpenAIChatRequest {
+    model: String,
+    messages: Vec<serde_json::Value>,
     max_tokens: u32,
     temperature: f32,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    tools: Vec<OpenAIToolDef>,
 }
 
 #[derive(Serialize)]
-struct OpenAIMessage<'a> {
-    role: &'a str,
-    content: &'a str,
+struct OpenAIToolDef {
+    r#type: &'static str,
+    function: OpenAIFunctionDef,
+}
+
+#[derive(Serialize)]
+struct OpenAIFunctionDef {
+    name: String,
+    parameters: serde_json::Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    description: Option<String>,
+}
+
+#[derive(Deserialize)]
+struct OpenAIMessageOwned {
+    content: Option<String>,
+    tool_calls: Option<Vec<OpenAIToolCall>>,
+}
+
+#[derive(Deserialize)]
+struct OpenAIToolCall {
+    id: String,
+    function: OpenAIToolFunction,
+}
+
+#[derive(Deserialize)]
+struct OpenAIToolFunction {
+    name: String,
+    arguments: String,
 }
 
 #[derive(Deserialize)]
@@ -104,11 +132,6 @@ struct OpenAIChatResponse {
 struct OpenAIChoice {
     message: OpenAIMessageOwned,
     finish_reason: Option<String>,
-}
-
-#[derive(Deserialize)]
-struct OpenAIMessageOwned {
-    content: String,
 }
 
 #[derive(Deserialize)]
@@ -132,29 +155,75 @@ impl ModelProvider for OpenAIProvider {
         &self,
         request: ProviderRequest,
     ) -> Result<ProviderResponse, ProviderCallError> {
-        let mut messages = Vec::new();
+        let mut messages: Vec<serde_json::Value> = Vec::new();
         if let Some(system) = &request.system_prompt {
-            messages.push(OpenAIMessage {
-                role: "system",
-                content: system,
-            });
+            messages.push(serde_json::json!({
+                "role": "system",
+                "content": system,
+            }));
         }
         for msg in &request.messages {
-            let role = match msg.role {
-                MessageRole::System => "system",
-                MessageRole::User => "user",
-                MessageRole::Assistant => "assistant",
-            };
-            messages.push(OpenAIMessage {
-                role,
-                content: &msg.content,
-            });
+            match msg.role {
+                MessageRole::System => messages.push(serde_json::json!({
+                    "role": "system",
+                    "content": msg.content,
+                })),
+                MessageRole::User => messages.push(serde_json::json!({
+                    "role": "user",
+                    "content": msg.content,
+                })),
+                MessageRole::Assistant => {
+                    if let Some(calls) = &msg.tool_calls {
+                        let tool_calls: Vec<serde_json::Value> = calls
+                            .iter()
+                            .map(|c| {
+                                serde_json::json!({
+                                    "id": c.id,
+                                    "type": "function",
+                                    "function": {
+                                        "name": c.name,
+                                        "arguments": c.arguments,
+                                    }
+                                })
+                            })
+                            .collect();
+                        messages.push(serde_json::json!({
+                            "role": "assistant",
+                            "content": msg.content,
+                            "tool_calls": tool_calls,
+                        }));
+                    } else {
+                        messages.push(serde_json::json!({
+                            "role": "assistant",
+                            "content": msg.content,
+                        }));
+                    }
+                }
+                MessageRole::Tool => messages.push(serde_json::json!({
+                    "role": "tool",
+                    "tool_call_id": msg.tool_call_id,
+                    "content": msg.content,
+                })),
+            }
         }
+        let tools: Vec<OpenAIToolDef> = request
+            .tools
+            .iter()
+            .map(|t| OpenAIToolDef {
+                r#type: "function",
+                function: OpenAIFunctionDef {
+                    name: t.name.clone(),
+                    parameters: t.input_schema.clone(),
+                    description: t.description.clone(),
+                },
+            })
+            .collect();
         let body = OpenAIChatRequest {
-            model: &self.model,
+            model: self.model.clone(),
             messages,
             max_tokens: request.max_tokens,
             temperature: request.temperature,
+            tools,
         };
         let response = self
             .client
@@ -207,11 +276,22 @@ impl ModelProvider for OpenAIProvider {
                 total_tokens: u.total_tokens,
             })
             .unwrap_or_default();
+        let tool_calls = choice.message.tool_calls.map(|calls| {
+            calls
+                .into_iter()
+                .map(|c| ToolCallRequest {
+                    id: c.id,
+                    name: c.function.name,
+                    arguments: c.function.arguments,
+                })
+                .collect()
+        });
         Ok(ProviderResponse {
-            content: choice.message.content,
+            content: choice.message.content.unwrap_or_default(),
             tokens,
             model_id: parsed.model,
             finish_reason,
+            tool_calls,
         })
     }
 

@@ -40,10 +40,13 @@ pub fn build_agent_request(
         messages: vec![super::request::ProviderMessage {
             role: super::request::MessageRole::User,
             content: run_input.to_string(),
+            tool_calls: None,
+            tool_call_id: None,
         }],
         system_prompt: Some(instructions.to_string()),
         max_tokens,
         temperature,
+        tools: vec![],
     }
 }
 

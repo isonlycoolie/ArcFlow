@@ -1,10 +1,11 @@
-//! Anthropic messages API provider (Sprint 6).
+//! Anthropic messages API provider (Sprint 6 + Phase 2-Pro tools).
 
 use std::time::Duration;
 
 use async_trait::async_trait;
 use reqwest::Client;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde_json::{json, Value};
 
 use crate::constants::{
     endpoint_from_env, ANTHROPIC_API_ENDPOINT, ANTHROPIC_API_ENDPOINT_ENV, ANTHROPIC_API_KEY_ENV,
@@ -14,7 +15,7 @@ use crate::tracing::types::TokenUsage;
 
 use super::error::ProviderCallError;
 use super::model_provider::ModelProvider;
-use super::request::{MessageRole, ProviderRequest};
+use super::request::{MessageRole, ProviderRequest, ToolCallRequest};
 use super::response::{FinishReason, ProviderResponse, ProviderStream};
 
 pub struct AnthropicProvider {
@@ -58,21 +59,54 @@ impl AnthropicProvider {
             endpoint,
         })
     }
-}
 
-#[derive(Serialize)]
-struct AnthropicRequest<'a> {
-    model: &'a str,
-    max_tokens: u32,
-    temperature: f32,
-    system: Option<&'a str>,
-    messages: Vec<AnthropicMessage<'a>>,
-}
+    fn build_messages(messages: &[super::request::ProviderMessage]) -> Vec<Value> {
+        messages
+            .iter()
+            .map(|m| match m.role {
+                MessageRole::Tool => json!({
+                    "role": "user",
+                    "content": [{
+                        "type": "tool_result",
+                        "tool_use_id": m.tool_call_id,
+                        "content": m.content,
+                    }]
+                }),
+                MessageRole::Assistant if m.tool_calls.is_some() => {
+                    let mut blocks: Vec<Value> = Vec::new();
+                    if !m.content.is_empty() {
+                        blocks.push(json!({"type": "text", "text": m.content}));
+                    }
+                    for call in m.tool_calls.as_ref().unwrap() {
+                        let input: Value =
+                            serde_json::from_str(&call.arguments).unwrap_or_else(|_| json!({}));
+                        blocks.push(json!({
+                            "type": "tool_use",
+                            "id": call.id,
+                            "name": call.name,
+                            "input": input,
+                        }));
+                    }
+                    json!({"role": "assistant", "content": blocks})
+                }
+                MessageRole::Assistant => json!({"role": "assistant", "content": m.content}),
+                _ => json!({"role": "user", "content": m.content}),
+            })
+            .collect()
+    }
 
-#[derive(Serialize)]
-struct AnthropicMessage<'a> {
-    role: &'a str,
-    content: &'a str,
+    fn build_tools(tools: &[super::request::ToolSchema]) -> Vec<Value> {
+        tools
+            .iter()
+            .map(|t| {
+                json!({
+                    "name": t.name,
+                    "description": t.description,
+                    "input_schema": t.input_schema,
+                })
+            })
+            .collect()
+    }
 }
 
 #[derive(Deserialize)]
@@ -85,7 +119,12 @@ struct AnthropicResponse {
 
 #[derive(Deserialize)]
 struct AnthropicBlock {
-    text: String,
+    #[serde(rename = "type")]
+    block_type: String,
+    text: Option<String>,
+    id: Option<String>,
+    name: Option<String>,
+    input: Option<Value>,
 }
 
 #[derive(Deserialize)]
@@ -108,24 +147,18 @@ impl ModelProvider for AnthropicProvider {
         &self,
         request: ProviderRequest,
     ) -> Result<ProviderResponse, ProviderCallError> {
-        let messages: Vec<AnthropicMessage> = request
-            .messages
-            .iter()
-            .map(|m| AnthropicMessage {
-                role: match m.role {
-                    MessageRole::Assistant => "assistant",
-                    _ => "user",
-                },
-                content: &m.content,
-            })
-            .collect();
-        let body = AnthropicRequest {
-            model: &self.model,
-            max_tokens: request.max_tokens,
-            temperature: request.temperature,
-            system: request.system_prompt.as_deref(),
-            messages,
-        };
+        let mut body = json!({
+            "model": self.model,
+            "max_tokens": request.max_tokens,
+            "temperature": request.temperature,
+            "messages": Self::build_messages(&request.messages),
+        });
+        if let Some(system) = &request.system_prompt {
+            body["system"] = json!(system);
+        }
+        if !request.tools.is_empty() {
+            body["tools"] = json!(Self::build_tools(&request.tools));
+        }
         let response = self
             .client
             .post(&self.endpoint)
@@ -173,21 +206,40 @@ impl ModelProvider for AnthropicProvider {
                 reason: e.to_string(),
             }
         })?;
-        let content = parsed
-            .content
-            .into_iter()
-            .map(|b| b.text)
-            .collect::<Vec<_>>()
-            .join("");
+        let mut text_parts = Vec::new();
+        let mut tool_calls = Vec::new();
+        for block in parsed.content {
+            match block.block_type.as_str() {
+                "text" => {
+                    if let Some(t) = block.text {
+                        text_parts.push(t);
+                    }
+                }
+                "tool_use" => {
+                    if let (Some(id), Some(name)) = (block.id, block.name) {
+                        tool_calls.push(ToolCallRequest {
+                            id,
+                            name,
+                            arguments: block
+                                .input
+                                .map(|v| v.to_string())
+                                .unwrap_or_else(|| "{}".into()),
+                        });
+                    }
+                }
+                _ => {}
+            }
+        }
         let finish_reason = match parsed.stop_reason.as_deref() {
             Some("end_turn") => FinishReason::Stop,
+            Some("tool_use") => FinishReason::Other("tool_use".into()),
             Some("max_tokens") => FinishReason::MaxTokens,
             Some(other) => FinishReason::Other(other.to_string()),
             None => FinishReason::Stop,
         };
         let total = parsed.usage.input_tokens + parsed.usage.output_tokens;
         Ok(ProviderResponse {
-            content,
+            content: text_parts.join(""),
             tokens: TokenUsage {
                 prompt_tokens: parsed.usage.input_tokens,
                 completion_tokens: parsed.usage.output_tokens,
@@ -195,6 +247,11 @@ impl ModelProvider for AnthropicProvider {
             },
             model_id: parsed.model,
             finish_reason,
+            tool_calls: if tool_calls.is_empty() {
+                None
+            } else {
+                Some(tool_calls)
+            },
         })
     }
 
