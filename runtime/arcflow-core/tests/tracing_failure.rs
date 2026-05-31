@@ -46,6 +46,8 @@ fn failed_step_emits_step_failed_then_workflow_failed() {
             instructions: "i".into(),
             tools: None,
             memory_config: None,
+        context: None,
+        tool_execution: None,
         },
     );
     agents.insert(
@@ -57,6 +59,8 @@ fn failed_step_emits_step_failed_then_workflow_failed() {
             instructions: "i".into(),
             tools: None,
             memory_config: None,
+        context: None,
+        tool_execution: None,
         },
     );
 

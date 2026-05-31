@@ -44,6 +44,8 @@ fn identical_inputs_produce_identical_step_contents() {
             instructions: "i".into(),
             tools: None,
             memory_config: None,
+        context: None,
+        tool_execution: None,
         },
     );
     let e = WorkflowEngine::new();

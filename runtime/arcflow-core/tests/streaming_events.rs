@@ -40,6 +40,7 @@ impl ModelProvider for MockStreamProvider {
             tokens: TokenUsage::default(),
             model_id: self.model_id().to_string(),
             finish_reason: FinishReason::Stop,
+            tool_calls: None,
         })
     }
 
@@ -72,6 +73,8 @@ fn single_step_workflow(agent_id: Uuid, step_id: Uuid) -> (WorkflowDefinition, H
         instructions: "Write.".into(),
         tools: None,
         memory_config: None,
+        context: None,
+        tool_execution: None,
     };
     let mut agents = HashMap::new();
     agents.insert(agent_id, agent);

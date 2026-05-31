@@ -45,6 +45,8 @@ fn workflow_runs_agent_with_tool() {
                 permissions: None,
             }]),
             memory_config: None,
+        context: None,
+        tool_execution: None,
         },
     );
     let wf = WorkflowDefinition {
@@ -102,6 +104,8 @@ fn workflow_with_session_memory_records_trace_events() {
                 retrieval: None,
                 chunking: None,
             }),
+            context: None,
+            tool_execution: None,
         },
     );
     let wf = WorkflowDefinition {

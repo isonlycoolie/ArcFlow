@@ -15,6 +15,8 @@ fn ag(id: Uuid, role: &str) -> AgentDefinition {
         instructions: "i".into(),
         tools: None,
         memory_config: None,
+        context: None,
+        tool_execution: None,
     }
 }
 

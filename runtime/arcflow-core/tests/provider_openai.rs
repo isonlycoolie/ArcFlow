@@ -34,10 +34,13 @@ async fn openai_complete_uses_mock_server() {
             messages: vec![ProviderMessage {
                 role: MessageRole::User,
                 content: "hello".into(),
+                tool_calls: None,
+                tool_call_id: None,
             }],
             system_prompt: Some("sys".into()),
             max_tokens: 100,
             temperature: 0.5,
+            tools: vec![],
         })
         .await
         .unwrap();

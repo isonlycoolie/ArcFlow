@@ -18,6 +18,8 @@ fn agent(id: Uuid, name: &str) -> AgentDefinition {
         instructions: "i".into(),
         tools: None,
         memory_config: None,
+        context: None,
+        tool_execution: None,
     }
 }
 
