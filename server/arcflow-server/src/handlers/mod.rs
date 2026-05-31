@@ -1,3 +1,4 @@
+pub mod admin;
 pub mod approve;
 pub mod authz;
 pub mod external;
