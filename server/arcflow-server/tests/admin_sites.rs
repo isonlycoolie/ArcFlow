@@ -8,9 +8,8 @@ use axum::http::{Request, StatusCode};
 use sqlx::PgPool;
 use tower::ServiceExt;
 
-async fn apply_site_migration(pool: &PgPool) {
-    let migration = include_str!("../../../runtime/arcflow-core/migrations/007_arcflow_sites.sql");
-    sqlx::raw_sql(migration).execute(pool).await.ok();
+async fn apply_migrations(pool: &PgPool) {
+    arcflow_core::migrate::run(pool).await.expect("migrate");
 }
 
 async fn test_state() -> Option<Arc<AppState>> {
@@ -18,7 +17,7 @@ async fn test_state() -> Option<Arc<AppState>> {
         .or_else(|_| std::env::var("ARCFLOW_POSTGRESQL_URL"))
         .unwrap_or_else(|_| "postgres://arcflow:arcflow@127.0.0.1:5432/arcflow".into());
     let pool = PgPool::connect(&db_url).await.ok()?;
-    apply_site_migration(&pool).await;
+    apply_migrations(&pool).await;
     std::env::set_var("ARCFLOW_POSTGRESQL_URL", &db_url);
     std::env::set_var("ARCFLOW_ADMIN_API_KEY", "admin-test-key");
     std::env::set_var("ARCFLOW_DEFAULT_UPSTREAM_RUNTIME_KEY", "runtime-key");

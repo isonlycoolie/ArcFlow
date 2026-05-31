@@ -35,14 +35,20 @@ All of that lives in the **ArcFlow Dashboard** (Knowledge tab, Chat tab, Publish
 4. **Frontend**, add env vars, implement chat UI calling `runPublished("chat", "^1.0.0", message)`
 5. **Deploy** to CDN, no server-side code required
 
-## Local development without dashboard UI
+## Operator setup (dashboard or scripts)
 
-Until the dashboard ships, use the admin API + provision script:
+Use the private **ArcFlow-Dashboard** (meta-repo `dashboard/` submodule) or OSS scripts:
 
 ```bash
-bash scripts/relay-provision-site.sh
-# Then ingest + publish via admin API (see chat-rag/README.md)
+docker compose -f docker/docker-compose.server.yml up -d
+bash scripts/static-provision-site.sh
+export SITE_ID=...  # from script output
+export TEXT_FILE=examples/static/chat-rag/kb.txt
+bash scripts/static-ingest-knowledge.sh
+bash scripts/static-publish-chat.sh
 ```
+
+Dashboard starter: [deploy/arcflow-dashboard-v0/](../../deploy/arcflow-dashboard-v0/). Meta-repo layout: [contracts/guides/deployment/meta-repo.md](../../contracts/guides/deployment/meta-repo.md).
 
 ## Advanced: direct mode (internal dev only)
 

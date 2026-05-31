@@ -1,0 +1,36 @@
+name: static-e2e
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  static-chat-rag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Start stack
+        run: |
+          docker compose -f docker/docker-compose.server.yml up -d --build
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:8080/ready && break
+            sleep 2
+          done
+      - name: Provision site
+        run: |
+          bash scripts/static-provision-site.sh | tee /tmp/site.env
+          echo "SITE_ID=$(grep '^SITE_ID=' /tmp/site.env | cut -d= -f2-)" >> "$GITHUB_ENV"
+      - name: Ingest and publish
+        run: |
+          export SITE_ID
+          export TEXT_FILE=examples/static/chat-rag/kb.txt
+          bash scripts/static-ingest-knowledge.sh
+          bash scripts/static-publish-chat.sh
+        env:
+          SITE_ID: ${{ env.SITE_ID }}
+      - name: Pytest static example
+        run: pip install pytest requests && pytest examples/static/chat-rag/test_static.py -q
