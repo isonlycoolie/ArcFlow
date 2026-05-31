@@ -93,3 +93,20 @@ The engine entry for all paths is `WorkflowEngine::execute_with_config`. Validat
 
 Recovery gates Postgres persistence. Test mode (`exec_config.test`) allows deterministic CI with per-step `output`, `fail_times`, and `then_output` without live LLM calls.
 
+## Observability contract
+
+Trace event names and allowed fields are normative under [contracts/normative/observability/trace-events-v1.md](../../contracts/normative/observability/trace-events-v1.md). SEC-1 requires metadata-only payloads (see [SEC-1 and data safety](sec-1-and-data-safety.md)).
+
+## Validation today
+
+Rust validates before run. CI should validate workflow JSON against `v1.schema.json` until `arcflow validate` ships (FP-5.04). Graph recovery resume uses checkpoint schema in Postgres but dispatch is incomplete (FP-1.01).
+
+## Related pages
+
+- [Execution model](execution-model.md) for linear vs graph scheduling
+- [Architecture overview](architecture-overview.md) for where RCS crosses HTTP boundaries
+- [contracts/rcs-schema.md](../contracts/rcs-schema.md) for narrative schema guide
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §2 (Design principles), §4 (Workflow execution), §22 (Contracts and schemas), Appendix A (RCS type reference).
