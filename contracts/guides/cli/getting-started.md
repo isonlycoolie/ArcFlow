@@ -8,4 +8,9 @@ cd my-project
 arcflow trace <run-id>
 ```
 
-Commands: `init`, `run`, `trace`, `validate`. See [CLI spec v1](../../normative/cli/spec-v1.md).
+```bash
+export ARCFLOW_POSTGRESQL_URL=postgres://arcflow:arcflow@localhost:5432/arcflow
+arcflow migrate up
+```
+
+Commands: `init`, `run`, `trace`, `validate`, `migrate up`, `schedule validate`. See [CLI spec v1](../../normative/cli/spec-v1.md).

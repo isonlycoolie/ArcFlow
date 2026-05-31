@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-MAX_CODE_LINES=150
+MAX_CODE_LINES=100
 
 # Extensions treated as "code" for the line budget (not markdown / sprint plans).
 code_path() {
