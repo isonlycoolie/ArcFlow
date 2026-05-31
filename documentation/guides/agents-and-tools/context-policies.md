@@ -93,3 +93,98 @@ Raise the limit for long-document workflows:
 ```
 
 Balance against model context window and cost.
+
+## Graph workflows and initial_state
+
+Graph nodes may write keys via `outputs`:
+
+```json
+{
+  "id": "n-classify",
+  "step_ref": "s-classify",
+  "outputs": { "route": "category" }
+}
+```
+
+Seed or resume graph state through exec_config:
+
+```json
+{
+  "exec_config": {
+    "initial_state": {
+      "route": "billing",
+      "observation": "Customer mentioned invoice 8842"
+    }
+  }
+}
+```
+
+Context policy and graph state compose: policy controls step output text; graph state supplies structured fields the engine merges into agent context per scheduler rules.
+
+## Memory vs context policy
+
+| Mechanism | Purpose |
+|-----------|---------|
+| Context policy | Ephemeral prompt assembly from run history |
+| [Memory types](../memory-and-rag/memory-types.md) | Durable or scoped key-value and vector retrieval |
+
+Use shared memory for multi-agent handoff that must survive truncation limits:
+
+```json
+{
+  "memory_config": {
+    "memory_type": "shared",
+    "scope": "workflow",
+    "namespace": "pipeline-state"
+  }
+}
+```
+
+## Multi-agent linear example
+
+Step 1 researcher with full user input; step 2 writer with last step only:
+
+```json
+{
+  "agents": [
+    {
+      "id": "a-research",
+      "name": "researcher",
+      "role": "Research",
+      "instructions": "Research the topic.",
+      "context": {
+        "include_prior_steps": "none",
+        "include_run_input": true,
+        "max_prior_step_chars": 4096
+      }
+    },
+    {
+      "id": "a-write",
+      "name": "writer",
+      "role": "Writer",
+      "instructions": "Write a summary of the research.",
+      "context": {
+        "include_prior_steps": "last",
+        "include_run_input": false,
+        "max_prior_step_chars": 8192
+      }
+    }
+  ]
+}
+```
+
+## Trace visibility
+
+Context assembly is not a separate trace event. Related events:
+
+- `AgentInvoked` with `input_size_bytes`
+- `ProviderRequestSent` with `prompt_size_bytes`
+
+No prompt text appears in traces (SEC-1).
+
+## Related pages
+
+- [Defining agents](defining-agents.md)
+- [Linear workflows](../workflows/linear-workflows.md)
+- [Graph workflows](../workflows/graph-workflows.md)
+- [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md)
