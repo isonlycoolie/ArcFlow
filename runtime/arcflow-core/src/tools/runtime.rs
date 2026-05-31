@@ -70,6 +70,9 @@ impl ToolRuntime {
             });
         };
         validate_tool_input(name, &tool.input_schema, &input)?;
+        let step_key = step_id.map(|s| s.to_string()).unwrap_or_default();
+        #[cfg(feature = "otel")]
+        let _tool_span = crate::tracing::otel_live::tool_span(run_id, &step_key, name);
         if let Some(sid) = step_id {
             tool_started(sprint5, run_id, sid, name);
         }
@@ -86,6 +89,11 @@ impl ToolRuntime {
         };
         let ok = result.is_ok();
         let duration_ms = started.elapsed().as_millis() as u64;
+        #[cfg(feature = "otel")]
+        crate::tracing::otel_live::record_tool_result(
+            duration_ms,
+            if ok { "ok" } else { "error" },
+        );
         let out_len = result.as_ref().map(|s| s.len()).unwrap_or(0);
         tool_finished(
             legacy,
