@@ -142,7 +142,9 @@ dependencies = [
  "ratatui",
  "serde_json",
  "serde_yaml",
+ "sqlx",
  "tempfile",
+ "tokio",
  "ureq 2.12.1",
 ]
 

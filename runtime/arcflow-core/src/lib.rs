@@ -68,3 +68,6 @@ pub mod debug;
 
 /// Embedding providers for vector memory (Phase 1.5).
 pub mod embedding;
+
+/// PostgreSQL schema migrations (Phase A).
+pub mod migrate;

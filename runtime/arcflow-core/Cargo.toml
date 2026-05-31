@@ -26,6 +26,8 @@ sqlx = { version = "0.8", default-features = false, features = [
     "postgres",
     "uuid",
     "chrono",
+    "migrate",
+    "macros",
 ] }
 qdrant-client = "1.12"
 async-trait = "0.1"
