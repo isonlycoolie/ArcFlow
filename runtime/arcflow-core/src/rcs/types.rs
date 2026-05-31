@@ -462,6 +462,96 @@ pub struct GraphDefinition {
     pub join_nodes: Vec<JoinNode>,
 }
 
+/// External system kind (RCS v0.7).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ExternalBindingKind {
+    BrowserAutomation,
+    ScheduleTrigger,
+    Custom,
+}
+
+/// How an external binding is invoked (RCS v0.7).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ExternalBindingMode {
+    SyncTool,
+    AsyncCallback,
+}
+
+/// Recovery action when external outcome needs user input (RCS v0.7).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum ExternalNeedsInputAction {
+    #[default]
+    AgentReask,
+    FailRun,
+}
+
+/// Recovery action when external outcome is fatal (RCS v0.7).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum ExternalFatalAction {
+    HitlEscalate,
+    #[default]
+    FailRun,
+}
+
+/// Retry and escalation policy for an external binding (RCS v0.7).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ExternalRecoveryPolicy {
+    #[serde(default)]
+    pub max_retries: u32,
+    #[serde(default)]
+    pub on_needs_input: ExternalNeedsInputAction,
+    #[serde(default)]
+    pub on_fatal: ExternalFatalAction,
+}
+
+impl Default for ExternalRecoveryPolicy {
+    fn default() -> Self {
+        Self {
+            max_retries: 0,
+            on_needs_input: ExternalNeedsInputAction::AgentReask,
+            on_fatal: ExternalFatalAction::FailRun,
+        }
+    }
+}
+
+/// Declarative attachment of a developer-owned external system (RCS v0.7).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ExternalBinding {
+    pub id: String,
+    pub kind: ExternalBindingKind,
+    pub attach_to_step_id: Uuid,
+    pub mode: ExternalBindingMode,
+    pub outcome_schema: Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recovery: Option<ExternalRecoveryPolicy>,
+}
+
+/// Outcome status in an external callback report (RCS v0.7).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ExternalOutcomeStatus {
+    Success,
+    Failed,
+    NeedsInput,
+}
+
+/// Callback body from developer-owned automation (RCS v0.7).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ExternalOutcomeReport {
+    pub binding_id: String,
+    pub status: ExternalOutcomeStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fields: Option<Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub artifact_refs: Option<Vec<String>>,
+}
+
 /// Complete workflow specification submitted by an SDK.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct WorkflowDefinition {
@@ -479,6 +569,9 @@ pub struct WorkflowDefinition {
     /// Required when `execution_mode` is graph.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub graph: Option<GraphDefinition>,
+    /// Developer-owned external systems attached to steps (RCS v0.7).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_bindings: Option<Vec<ExternalBinding>>,
 }
 
 /// Request to execute a registered workflow.
@@ -669,6 +762,7 @@ mod tests {
             retry_policy: None,
             execution_mode: ExecutionMode::Linear,
             graph: None,
+            external_bindings: None,
         });
     }
 
