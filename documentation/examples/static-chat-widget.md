@@ -93,3 +93,35 @@ Pass criteria:
 | No secrets in bundle | Only site token env at build time |
 
 ## Trace events you should see
+
+Fetch trace via Relay or server (operator tools):
+
+| Event kind | When |
+|------------|------|
+| `WorkflowStarted` | Published chat workflow run |
+| `MemoryRetrieved` | When knowledge base matches query |
+| `StepCompleted` | Chat agent step |
+| `WorkflowCompleted` | Successful reply |
+
+Traces are metadata only (SEC-1). End users do not receive raw trace JSON in the widget unless you add operator tooling.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| CORS or 403 from Relay | Origin not allowlisted | Add exact scheme + host in site settings |
+| Empty answers | Knowledge not ingested | Re-run ingest script or dashboard upload |
+| 401 on Relay | Wrong site token | Regenerate token; update env |
+| Agents defined in browser | Wrong integration path | Remove inline Agent code; use publish flow only |
+
+Internal dev only: [`src/main-dev-direct.ts`](../../examples/static/chat-rag/src/main-dev-direct.ts) bypasses Relay for engine debugging. Do not ship to production.
+
+## Related
+
+| Resource | Link |
+|----------|------|
+| Relay BYO | [relay-byo-deployment.md](relay-byo-deployment.md) |
+| Multi-turn intake bot | [`online-application-chatbot`](../../examples/static/online-application-chatbot/README.md) |
+| Tutorial track | [Track F](../tutorials/track-f-static-product.md) |
+
+**Source:** [`examples/static/chat-rag/`](../../examples/static/chat-rag/), [`examples/static/README.md`](../../examples/static/README.md); capabilities reference §25, §28 Track F; [knowledge ingestion](../guides/memory-and-rag/knowledge-ingestion.md).
