@@ -93,3 +93,19 @@ Debug routes are compiled behind the `debug-endpoints` feature and gated at runt
 | `ARCFLOW_SERVER_API_KEY` | Deploy new value, update all backend callers and Relay `upstream_runtime_key` entries, revoke old value |
 | `ARCFLOW_ADMIN_API_KEY` | Deploy new value, update operator scripts and CI provision jobs |
 | Site token | `POST /v1/admin/sites/{id}/tokens/rotate`, update frontend env (Vite/build injection) |
+
+For external webhooks, `ARCFLOW_WEBHOOK_SECRET` supports dual-verify during rotation (see [webhook-security.md](../guides/external-integrations/webhook-security.md)).
+
+## Compliance notes
+
+- Keys never appear in SEC-1 execution traces.
+- Logs should not print `Authorization` headers or site tokens.
+- Browser bundles must not contain `ARCFLOW_SERVER_API_KEY` or `ARCFLOW_ADMIN_API_KEY`. Use Relay + site token for static product.
+
+## Related pages
+
+- [http-api-reference.md](http-api-reference.md) for per-route auth column
+- [static-product/security-model.md](../static-product/security-model.md) for browser exposure rules
+- [relay/origin-and-rate-limiting.md](../relay/origin-and-rate-limiting.md) for Origin enforcement
+
+**Source:** capabilities reference §12.1; `server/arcflow-server/src/middleware/auth.rs`, `server/arcflow-server/src/middleware/admin_auth.rs`; Appendix H; dashboard spec [04-api-enforcement.md](../../dashboard/spec/04-api-enforcement.md).
