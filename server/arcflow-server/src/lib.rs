@@ -18,9 +18,28 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use tower_http::cors::{AllowOrigin, CorsLayer};
 use tower_http::limit::RequestBodyLimitLayer;
 
 pub use state::AppState;
+
+fn cors_layer() -> CorsLayer {
+    let origins = std::env::var("ARCFLOW_CORS_ORIGINS").unwrap_or_default();
+    let layer = CorsLayer::new()
+        .allow_methods(tower_http::cors::Any)
+        .allow_headers(tower_http::cors::Any);
+    if origins.trim().is_empty() {
+        return layer;
+    }
+    let list: Vec<_> = origins
+        .split(',')
+        .filter_map(|o| o.trim().parse().ok())
+        .collect();
+    if list.is_empty() {
+        return layer;
+    }
+    layer.allow_origin(AllowOrigin::list(list))
+}
 
 /// Builds the full Axum router for integration tests and `main`.
 pub fn build_app(state: Arc<AppState>) -> Router {
@@ -63,5 +82,5 @@ pub fn build_app(state: Arc<AppState>) -> Router {
         ))
         .layer(RequestBodyLimitLayer::new(1024 * 1024));
 
-    public.merge(protected).with_state(state)
+    public.merge(protected).with_state(state).layer(cors_layer())
 }

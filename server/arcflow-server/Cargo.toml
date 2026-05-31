@@ -24,7 +24,7 @@ sha2 = "0.10"
 semver = "1"
 subtle = "2"
 tower = "0.5"
-tower-http = { version = "0.6", features = ["limit"] }
+tower-http = { version = "0.6", features = ["limit", "cors"] }
 uuid = { workspace = true }
 chrono = { workspace = true }
 sqlx = { version = "0.8", default-features = false, features = [
@@ -39,6 +39,7 @@ axum = { version = "0.7", features = ["json"] }
 tower = { version = "0.5", features = ["util"] }
 http-body-util = "0.1"
 hyper = "1"
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 
 [features]
 default = ["debug-endpoints"]
