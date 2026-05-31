@@ -19,6 +19,7 @@ struct ExecConfigJson {
     step_timeout_secs: Option<f64>,
     recovery_enabled: Option<bool>,
     stream: Option<StreamJson>,
+    initial_state: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -112,5 +113,8 @@ pub fn parse_exec_config(
             enabled: s.enabled,
         }),
         debug: None,
+        initial_state: parsed
+            .initial_state
+            .and_then(|v| v.as_object().cloned()),
     })
 }

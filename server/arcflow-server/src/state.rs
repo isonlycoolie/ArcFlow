@@ -1,6 +1,7 @@
 //! Shared application state.
 
-use std::sync::Arc;
+use std::collections::HashSet;
+use std::sync::{Arc, Mutex};
 
 use arcflow_core::tracing::PostgresTracePersistence;
 use sqlx::PgPool;
@@ -11,15 +12,18 @@ use crate::store::workflow_registry::WorkflowRegistryStore;
 #[derive(Clone)]
 pub struct AppState {
     pub api_key: String,
+    pub webhook_secret: Option<String>,
     pub runs: Option<Arc<RunStore>>,
     pub registry: Option<Arc<WorkflowRegistryStore>>,
     pub traces: Option<Arc<PostgresTracePersistence>>,
+    pub external_idempotency: Arc<Mutex<HashSet<String>>>,
     #[cfg(feature = "debug-endpoints")]
     pub debug: Option<Arc<crate::debug::DebugRunStore>>,
 }
 
 impl AppState {
     pub async fn from_env(api_key: String) -> Self {
+        let webhook_secret = std::env::var("ARCFLOW_WEBHOOK_SECRET").ok();
         let (runs, registry, traces) = match std::env::var("ARCFLOW_POSTGRESQL_URL") {
             Ok(url) => match PgPool::connect(&url).await {
                 Ok(pool) => {
@@ -55,9 +59,11 @@ impl AppState {
         };
         Self {
             api_key,
+            webhook_secret,
             runs,
             registry,
             traces,
+            external_idempotency: Arc::new(Mutex::new(HashSet::new())),
             #[cfg(feature = "debug-endpoints")]
             debug: std::env::var("ARCFLOW_DEBUG")
                 .map(|v| v == "true" || v == "1")
