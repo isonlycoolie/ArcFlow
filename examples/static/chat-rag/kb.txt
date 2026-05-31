@@ -1,0 +1,2 @@
+Ticket #1001: Reset password via Settings > Security.
+Ticket #1002: SSO failures — verify IdP certificate rotation.

@@ -1,0 +1,16 @@
+{
+  "name": "chat-rag-static-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@arcflow/static": "file:../../../packages/arcflow-static"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3"
+  }
+}

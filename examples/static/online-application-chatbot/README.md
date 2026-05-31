@@ -5,8 +5,22 @@ Static-site example for Phase 2-Pro v2 conversation intake + external callback.
 ## Files
 
 - `arcflow.schedule.yaml` — schedule manifest (validate only)
-- `sample_run.json` — POST body for `/v1/runs`
+- `sample_run.json` — POST body shape reference (inline RCS via `@arcflow/static`)
 - `test_e2e.py` — pytest validation
+
+## Static SDK
+
+Use `@arcflow/static` to build the same payload:
+
+```typescript
+import { ArcFlowClient, StepForm, Workflow, resolveWorkflow } from "@arcflow/static";
+
+const client = new ArcFlowClient({ baseUrl, apiKey, mode: "bff" });
+const wf = resolveWorkflow("online_application", "1.0.0", baseUrl);
+await client.runWorkflow(wf, "Apply for business license", {
+  initialState: new StepForm().addTurn("user", "...").toInitialState(),
+});
+```
 
 ## Run tests
 
