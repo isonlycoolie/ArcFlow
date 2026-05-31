@@ -118,6 +118,16 @@ fn fail_step(
         error_code: "step_failed".into(),
         error_message: err.to_string(),
     });
+    #[cfg(feature = "otel")]
+    {
+        let duration_ms = step_started.elapsed().as_millis() as u64;
+        crate::tracing::otel_metrics::record_step_duration_ms(
+            duration_ms,
+            &step.id.to_string(),
+            "failed",
+        );
+        crate::tracing::otel_metrics::record_workflow_active(-1);
+    }
     sprint5.emit(TraceEventKind::WorkflowFailed {
         run_id: run_key.to_string(),
         duration_ms: workflow_started.elapsed().as_millis() as u64,
@@ -479,6 +489,15 @@ fn commit_step_output(
         tokens: TokenUsage::default(),
         output_size_bytes: out.content.len(),
     });
+    #[cfg(feature = "otel")]
+    {
+        let duration_ms = step_started.elapsed().as_millis() as u64;
+        crate::tracing::otel_metrics::record_step_duration_ms(
+            duration_ms,
+            &step.id.to_string(),
+            "completed",
+        );
+    }
     try_emit_stream(
         stream_tx,
         StreamEvent::StepComplete {
@@ -561,6 +580,8 @@ pub(crate) fn run_sorted_steps(
                 original_run_id: r.original_run_id.to_string(),
                 resume_from_step: r.start_step_index,
             });
+            #[cfg(feature = "otel")]
+            crate::tracing::otel_metrics::record_workflow_active(1);
         } else {
             sprint5.emit(TraceEventKind::WorkflowStarted {
                 run_id: run_key.clone(),
@@ -568,6 +589,8 @@ pub(crate) fn run_sorted_steps(
                 step_count,
             });
             legacy.workflow_started();
+            #[cfg(feature = "otel")]
+            crate::tracing::otel_metrics::record_workflow_active(1);
         }
         info!(run_id = %run_id, workflow_id = %workflow.id, "workflow execution started");
 
@@ -611,6 +634,8 @@ pub(crate) fn run_sorted_steps(
                     failed_step_index: Some(step_index),
                     error_code: "workflow_timeout".into(),
                 });
+                #[cfg(feature = "otel")]
+                crate::tracing::otel_metrics::record_workflow_active(-1);
                 let partial = partial_record(&loop_ctx, &legacy);
                 return Err(WorkflowRunError::Failed {
                     error: err,
@@ -674,11 +699,14 @@ pub(crate) fn run_sorted_steps(
         legacy.workflow_completed();
         info!(run_id = %run_id, "workflow execution completed");
         #[cfg(feature = "otel")]
-        crate::tracing::otel_metrics::record_workflow_duration_ms(
-            duration_ms,
-            "completed",
-            &workflow.name,
-        );
+        {
+            crate::tracing::otel_metrics::record_workflow_duration_ms(
+                duration_ms,
+                "completed",
+                &workflow.name,
+            );
+            crate::tracing::otel_metrics::record_workflow_active(-1);
+        }
         let trace_events = legacy.events().to_vec();
         drop(sprint5);
 
