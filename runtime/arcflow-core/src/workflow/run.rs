@@ -49,6 +49,8 @@ pub(crate) struct RunLoop<'a> {
     pub(crate) step_outputs: &'a mut Vec<ExecutionStepOutput>,
     pub(crate) run_input: &'a str,
     pub(crate) test_config: Option<crate::workflow::TestConfig>,
+    /// Serialized graph state JSON for context assembly (Phase 2-Pro).
+    pub(crate) graph_state: Option<String>,
 }
 
 pub(crate) fn check_workflow_timeout(
@@ -187,6 +189,7 @@ fn execute_agent_for_step(
         test_config: loop_ctx.test_config.clone(),
         test_attempt: 1,
         stream_tx: stream_tx.clone(),
+        graph_state: loop_ctx.graph_state.clone(),
     };
     agent_runtime.execute_with_context(
         agent,
@@ -589,6 +592,7 @@ pub(crate) fn run_sorted_steps(
             step_outputs: &mut step_outputs,
             run_input: effective_input,
             test_config: exec_config.test.clone(),
+            graph_state: None,
         };
 
         for (step_index, step) in steps.iter().enumerate() {
