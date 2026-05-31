@@ -5,7 +5,7 @@ use std::sync::OnceLock;
 use std::time::Duration;
 
 use opentelemetry::global;
-use opentelemetry::metrics::{Counter, Histogram, Meter};
+use opentelemetry::metrics::{Counter, Histogram, Meter, UpDownCounter};
 use opentelemetry::KeyValue;
 use opentelemetry_otlp::WithExportConfig;
 use opentelemetry_sdk::metrics::{PeriodicReader, SdkMeterProvider};
@@ -15,7 +15,12 @@ use super::otel_config::{self, OtlpProtocol};
 
 static METER: OnceLock<Meter> = OnceLock::new();
 static WORKFLOW_DURATION: OnceLock<Histogram<u64>> = OnceLock::new();
+static STEP_DURATION: OnceLock<Histogram<u64>> = OnceLock::new();
 static LLM_TOKENS: OnceLock<Counter<u64>> = OnceLock::new();
+static WORKFLOW_ACTIVE: OnceLock<UpDownCounter<i64>> = OnceLock::new();
+static RETRY_ATTEMPTS: OnceLock<Counter<u64>> = OnceLock::new();
+static RECOVERY_RESUMES: OnceLock<Counter<u64>> = OnceLock::new();
+static GRAPH_ITERATIONS: OnceLock<Counter<u64>> = OnceLock::new();
 
 fn metrics_resource() -> Resource {
     let mut attrs = vec![KeyValue::new(
@@ -64,6 +69,9 @@ pub fn init_metrics() -> Result<(), String> {
     WORKFLOW_DURATION
         .set(meter.u64_histogram("arcflow.workflow.duration_ms").build())
         .ok();
+    STEP_DURATION
+        .set(meter.u64_histogram("arcflow.step.duration_ms").build())
+        .ok();
     LLM_TOKENS
         .set(
             meter
@@ -71,6 +79,23 @@ pub fn init_metrics() -> Result<(), String> {
                 .with_description("LLM token usage by direction")
                 .build(),
         )
+        .ok();
+    WORKFLOW_ACTIVE
+        .set(
+            meter
+                .i64_up_down_counter("arcflow.workflow.active")
+                .with_description("In-flight workflow runs")
+                .build(),
+        )
+        .ok();
+    RETRY_ATTEMPTS
+        .set(meter.u64_counter("arcflow.retry.attempts").build())
+        .ok();
+    RECOVERY_RESUMES
+        .set(meter.u64_counter("arcflow.recovery.resumes").build())
+        .ok();
+    GRAPH_ITERATIONS
+        .set(meter.u64_counter("arcflow.graph.iterations").build())
         .ok();
     METER.set(meter).map_err(|_| "metrics meter already set".to_string())
 }
@@ -105,5 +130,76 @@ pub fn record_llm_tokens(provider: &str, model: &str, direction: &str, count: u6
                 KeyValue::new("direction", direction.to_string()),
             ],
         );
+    }
+}
+
+pub fn record_step_duration_ms(duration_ms: u64, step_id: &str, status: &str) {
+    if !otel_config::otel_enabled() {
+        return;
+    }
+    let _ = init_metrics();
+    if let Some(hist) = STEP_DURATION.get() {
+        hist.record(
+            duration_ms,
+            &[
+                KeyValue::new("step_id", step_id.to_string()),
+                KeyValue::new("status", status.to_string()),
+            ],
+        );
+    }
+}
+
+pub fn record_workflow_active(delta: i64) {
+    if !otel_config::otel_enabled() || delta == 0 {
+        return;
+    }
+    let _ = init_metrics();
+    if let Some(counter) = WORKFLOW_ACTIVE.get() {
+        counter.add(delta, &[]);
+    }
+}
+
+pub fn record_retry_attempt(step_id: &str) {
+    if !otel_config::otel_enabled() {
+        return;
+    }
+    let _ = init_metrics();
+    if let Some(counter) = RETRY_ATTEMPTS.get() {
+        counter.add(1, &[KeyValue::new("step_id", step_id.to_string())]);
+    }
+}
+
+pub fn record_recovery_resume() {
+    if !otel_config::otel_enabled() {
+        return;
+    }
+    let _ = init_metrics();
+    if let Some(counter) = RECOVERY_RESUMES.get() {
+        counter.add(1, &[]);
+    }
+}
+
+pub fn record_graph_iteration(node_id: &str) {
+    if !otel_config::otel_enabled() {
+        return;
+    }
+    let _ = init_metrics();
+    if let Some(counter) = GRAPH_ITERATIONS.get() {
+        counter.add(1, &[KeyValue::new("node_id", node_id.to_string())]);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn metrics_noop_when_otel_disabled() {
+        std::env::remove_var("ARCFLOW_OTEL_ENABLED");
+        record_step_duration_ms(10, "step-1", "completed");
+        record_workflow_active(1);
+        record_retry_attempt("step-1");
+        record_recovery_resume();
+        record_graph_iteration("node-a");
     }
 }
