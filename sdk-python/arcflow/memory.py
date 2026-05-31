@@ -142,3 +142,34 @@ class MemoryConfig:
                 "overlap": self.chunking.overlap,
             }
         return json.dumps(payload)
+
+
+class ChunkHit:
+    """One retrieved vector chunk."""
+
+    def __init__(self, text: str, byte_len: int) -> None:
+        self.text = text
+        self.byte_len = byte_len
+
+
+class VectorStore:
+    """SDK binding for vector ingest and search (Phase 2-Pro)."""
+
+    def __init__(self) -> None:
+        from arcflow._arcflow_binding import PyVectorStore
+
+        self._native = PyVectorStore()
+
+    def ingest(self, namespace: str, key: str, text: str) -> int:
+        ns = (namespace or "").strip()
+        if not ns:
+            raise MemoryConfigurationError("[ArcFlow] VectorStore.ingest requires namespace.")
+        return int(self._native.ingest(ns, key, text))
+
+    def search(self, namespace: str, query: str, top_k: int = 5) -> list[ChunkHit]:
+        ns = (namespace or "").strip()
+        if not ns:
+            raise MemoryConfigurationError("[ArcFlow] VectorStore.search requires namespace.")
+        hits = self._native.search_hits(ns, query, top_k)
+        return [ChunkHit(text=t, byte_len=n) for t, n in hits]
+

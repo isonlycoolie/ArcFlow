@@ -5,6 +5,7 @@
 mod errors;
 mod execution_config;
 mod graph;
+mod memory;
 mod stream;
 mod tools;
 mod types;
@@ -12,6 +13,7 @@ mod workflow;
 
 use pyo3::prelude::*;
 
+use memory::PyVectorStore;
 use stream::{start_workflow_stream, PyWorkflowStreamIterator};
 use workflow::{
     execute_resume_with_approval, execute_resume_workflow, execute_workflow,
@@ -28,5 +30,6 @@ fn _arcflow_binding(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_execution_trace_json, m)?)?;
     m.add_class::<PyWorkflowResult>()?;
     m.add_class::<PyWorkflowStreamIterator>()?;
+    m.add_class::<PyVectorStore>()?;
     Ok(())
 }

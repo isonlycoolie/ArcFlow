@@ -20,6 +20,7 @@ struct ExecConfigJson {
     recovery_enabled: Option<bool>,
     test: Option<TestConfig>,
     stream: Option<StreamJson>,
+    initial_state: Option<serde_json::Map<String, serde_json::Value>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -104,9 +105,12 @@ pub fn parse_execution_config(raw: Option<&str>) -> Result<ExecutionConfig, Stri
         timeouts,
         recovery_enabled: parsed.recovery_enabled.unwrap_or(false),
         run_id: None,
+        workflow_version: None,
         test: parsed.test,
         stream: parsed.stream.map(|s| StreamConfig {
             enabled: s.enabled,
         }),
+        debug: None,
+        initial_state: parsed.initial_state,
     })
 }
