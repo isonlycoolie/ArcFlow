@@ -93,3 +93,29 @@ bash examples/hitl/approve_cli.sh RUN_ID
 
 Poll again until `status` is `Completed` and read `result.output`.
 
+## Verify
+
+| Check | Expected |
+|-------|----------|
+| Run stops after manager step | `status` is `Interrupted` |
+| Accounting step before approve | Does not run |
+| Approve with `approved: true` | Run completes; accounting step runs |
+| Reject with `approved: false` | `Failed` with `HumanRejected` |
+| Wrong `approval_key` | `ApprovalNotFound` (404) |
+
+Trace exports remain SEC-1 metadata only. You see step lifecycle events, not approver notes, in trace storage.
+
+## Next
+
+| Goal | Document |
+|------|----------|
+| Step-level HITL fields | [Configuring interrupts](../../guides/human-in-the-loop/configuring-interrupts.md) |
+| Approve API detail | [Approve and reject](../../guides/human-in-the-loop/approve-and-reject.md) |
+| Full tutorial | [Track E: HITL and external](../../tutorials/track-e-hitl-and-external.md) |
+| Static browser client | [Static site chatbot](../paths/static-site-chatbot.md) |
+
+When external binding recovery sets `on_fatal: hitl_escalate`, failed external work can route into the same HITL approve flow. See [External callbacks](../../guides/external-integrations/external-callbacks.md).
+
+## Source
+
+`runtime/arcflow-core/src/human/`, `server/arcflow-server/src/handlers/approve.rs`, `examples/hitl/`; [HITL overview](../../guides/human-in-the-loop/hitl-overview.md); capabilities reference §8, Appendix E.
