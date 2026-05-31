@@ -93,3 +93,17 @@ Admin routes are stable; bind new tools to `03-admin-api-contract.md`.
 ## Normative contracts
 
 Dashboard and server integrations should cross-check:
+
+- [contracts/normative/runtime/server-api-v1.md](../../contracts/normative/runtime/server-api-v1.md) (note: partially stale, K-10)
+- [contracts/normative/rcs/v1.schema.json](../../contracts/normative/rcs/v1.schema.json)
+- [contracts/normative/observability/trace-events-v1.md](../../contracts/normative/observability/trace-events-v1.md)
+
+## Related pages
+
+- [Sites management](sites-management.md)
+- [Deployment overview](../deployment/overview.md)
+- [SEC-1 compliance](../security/sec-1-compliance.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §21; `dashboard/spec/` index; FP-3.01 / §27 known gaps.
