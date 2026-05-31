@@ -93,3 +93,30 @@ HTTP API uses PascalCase statuses (`Interrupted`, `Completed`). SDK embedded run
 
 | Event kind | When |
 |------------|------|
+| `WorkflowStarted` | Run begins |
+| `StepCompleted` | Submit step finishes |
+| `HitlInterruptRequested` or HITL interrupt metadata | Manager gate triggers |
+| Run status `Interrupted` | Awaiting approval (HTTP poll) |
+| `StepCompleted` | Manager and accounting after resume |
+| `WorkflowCompleted` | Full pipeline success |
+
+Exact HITL kind names appear in [trace event reference](../guides/observability/trace-event-reference.md). Trace exports remain SEC-1 metadata only.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| Workflow fails instead of interrupting | Recovery not enabled or no Postgres | Call `.enable_recovery()` and confirm server `/ready` |
+| `approve_cli.sh` returns 404 | Wrong run id or approval key | Use `manager_approval` key from script |
+| Stuck in `Interrupted` | Approval not applied | Re-run approve curl; check API key header |
+| `WorkflowInterruptedError` in tests | Expected first-phase behavior | Catch and approve, do not treat as hard failure |
+
+## Related
+
+| Resource | Link |
+|----------|------|
+| Approve and reject guide | [approve-and-reject](../guides/human-in-the-loop/approve-and-reject.md) |
+| Configuring interrupts | [configuring-interrupts](../guides/human-in-the-loop/configuring-interrupts.md) |
+| Tutorial track | [Track E](../tutorials/track-e-hitl-and-external.md) |
+
+**Source:** [`examples/hitl/expense_approval.py`](../../examples/hitl/expense_approval.py), [`examples/hitl/approve_cli.sh`](../../examples/hitl/approve_cli.sh); capabilities reference §25, §28 Track E; [HITL guides](../guides/human-in-the-loop/hitl-overview.md).
