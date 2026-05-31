@@ -93,3 +93,28 @@ The static SDK polls until terminal status. Each poll hits Relay, which proxies 
 ```bash
 curl -s "http://localhost:8090/v1/sites/s_dev/runs/RUN_ID" \
   -H "Authorization: Bearer st_live_devtoken" \
+  -H "Origin: http://localhost:5173"
+```
+
+## Step 5: Trace for streaming UX
+
+For progressive UI, poll trace and read `TokenEmitted` events (byte/token counts only, SEC-1). No server SSE until FP-2.
+
+```bash
+curl -s "http://localhost:8090/v1/sites/s_dev/runs/RUN_ID/trace" \
+  -H "Authorization: Bearer st_live_devtoken" \
+  -H "Origin: http://localhost:5173"
+```
+
+See [guides/streaming/streaming-in-the-browser.md](../guides/streaming/streaming-in-the-browser.md).
+
+## HITL through Relay
+
+When a run returns `Interrupted`, the static SDK throws `WorkflowInterruptedError` with `approvalKey`. Approval may go through server API from a trusted backend; Relay approve proxy depends on scoped key configuration.
+
+## Related pages
+
+- [relay/overview.md](overview.md)
+- [static-product/browser-sdk-api.md](../static-product/browser-sdk-api.md)
+
+**Source:** capabilities reference §14.1, §2; `server/arcflow-relay/src/handlers/proxy.rs`, `server/arcflow-relay/src/middleware/site_auth.rs`; Appendix B (Relay routes).
