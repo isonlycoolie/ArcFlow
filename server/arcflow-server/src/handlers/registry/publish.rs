@@ -6,13 +6,16 @@ use std::sync::Arc;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
-    Json,
+    Extension, Json,
 };
 use uuid::Uuid;
 
 use arcflow_core::rcs::types::AgentDefinition;
 
 use crate::dto::registry::{PublishWorkflowRequest, PublishWorkflowResponse};
+use crate::handlers::authz::deny_publish;
+use crate::middleware::static_limits::validate_static_payload;
+use crate::middleware::AuthPrincipal;
 use crate::registry::hash;
 use crate::state::AppState;
 
@@ -20,11 +23,14 @@ use super::common::{bad_request, internal, registry_store};
 
 pub async fn publish_workflow(
     State(state): State<Arc<AppState>>,
+    Extension(principal): Extension<AuthPrincipal>,
     Path((name, version)): Path<(String, String)>,
     Json(body): Json<PublishWorkflowRequest>,
 ) -> Result<Json<PublishWorkflowResponse>, (StatusCode, String)> {
+    deny_publish(&principal)?;
     semver::Version::parse(&version).map_err(|_| bad_request("version must be valid semver"))?;
     validate_agents(&body.workflow, &body.agents).map_err(bad_request)?;
+    validate_static_payload(&body.workflow, &body.agents).map_err(bad_request)?;
 
     let store = registry_store(&state)?;
     let bundle = serde_json::json!({

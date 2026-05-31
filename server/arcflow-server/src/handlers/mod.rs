@@ -1,4 +1,5 @@
 pub mod approve;
+pub mod authz;
 pub mod external;
 pub mod health;
 pub mod ready;

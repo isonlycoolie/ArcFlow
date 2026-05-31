@@ -6,7 +6,7 @@ use std::sync::Arc;
 use axum::{
     extract::{Path, State},
     http::{HeaderMap, StatusCode},
-    Json,
+    Extension, Json,
 };
 use uuid::Uuid;
 
@@ -16,10 +16,14 @@ use arcflow_core::workflow::{WorkflowEngine, WorkflowRunError};
 
 use crate::dto::runs::{CreateRunRequest, CreateRunResponse, RunStatusResponse};
 use crate::exec_config::parse_exec_config;
+use crate::handlers::authz::ensure_run_workflow;
+use crate::middleware::static_limits::validate_static_payload;
+use crate::middleware::AuthPrincipal;
 use crate::state::AppState;
 
 pub async fn create_run(
     State(state): State<Arc<AppState>>,
+    Extension(principal): Extension<AuthPrincipal>,
     headers: HeaderMap,
     Json(body): Json<CreateRunRequest>,
 ) -> Result<Json<CreateRunResponse>, (StatusCode, String)> {
@@ -53,6 +57,10 @@ pub async fn create_run(
         return Err(bad_request("input must be non-empty"));
     }
 
+    if let Some(workflow_ref) = &body.workflow_ref {
+        ensure_run_workflow(&principal, &workflow_ref.name)?;
+    }
+
     let (workflow, agents, registry_version) = if let Some(workflow_ref) = &body.workflow_ref {
         if body.workflow.is_some() || body.agents.is_some() {
             return Err(bad_request(
@@ -81,7 +89,11 @@ pub async fn create_run(
         (workflow, agents, None)
     };
 
+    ensure_run_workflow(&principal, &workflow.name)?;
     validate_agents(&workflow, &agents).map_err(bad_request)?;
+    if body.workflow_ref.is_none() {
+        validate_static_payload(&workflow, &agents).map_err(bad_request)?;
+    }
     validate_hitl(&workflow, body.exec_config.as_ref()).map_err(bad_request)?;
 
     let run_id = Uuid::new_v4();
