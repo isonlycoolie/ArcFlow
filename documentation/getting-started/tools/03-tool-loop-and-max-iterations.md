@@ -93,3 +93,15 @@ from arcflow.exceptions import WorkflowConfigurationError
 
 for bad in (0, 21):
     try:
+        ToolExecutionConfig(max_iterations=bad)
+    except WorkflowConfigurationError as err:
+        print(f"max_iterations={bad} rejected:", err)
+```
+
+## Next
+
+[04 Common tools bundle](04-common-tools-bundle.md) introduces prebuilt web and document tools you can attach instead of writing your own.
+
+## Source
+
+`sdk-python/arcflow/context.py` (`ToolExecutionConfig`); [Tool execution loop](../../guides/agents-and-tools/tool-execution-loop.md); `sdk-python/tests/integration/test_memory_workflow.py` (tool timeout behavior).
