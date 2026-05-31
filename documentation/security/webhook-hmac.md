@@ -93,3 +93,49 @@ Reject signatures whose hex length does not match expected digest length before 
 
 ## Secret rotation with dual-verify window
 
+ArcFlow R1 supports a single active `ARCFLOW_WEBHOOK_SECRET`. For rotation without dropping callbacks:
+
+1. Deploy server accepting **both** old and new secret (requires custom gateway dual-verify or brief maintenance window).
+2. Update integrators to sign with new secret.
+3. Switch server env to new secret only.
+4. Revoke old secret.
+
+Standard single-secret rotation: pause integrator traffic, update secret, resume (expect brief 401/422 on mismatched signatures).
+
+## Failure behavior
+
+| Condition | HTTP | Notes |
+|-----------|------|-------|
+| Missing Bearer | 401 | |
+| Bad HMAC | 401 or 422 | Signature rejected before outcome persist |
+| Missing webhook secret on server | 503 | Configuration error |
+| Duplicate idempotency key | 200 with `already_processed` | Safe retry |
+
+Failed verification must not parse or persist outcome fields.
+
+## curl example
+
+```bash
+BODY='{"binding_id":"payment_webhook","status":"success"}'
+SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$ARCFLOW_WEBHOOK_SECRET" | awk '{print $2}')
+
+curl -X POST "http://localhost:8080/v1/runs/$RUN_ID/external/payment_webhook" \
+  -H "Authorization: Bearer $ARCFLOW_SERVER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "X-ArcFlow-Signature: sha256=$SIG" \
+  -d "$BODY"
+```
+
+## Network reachability
+
+Integrators must reach `arcflow-server` over HTTPS in production. Do not embed webhook secrets in browser JavaScript; post from backend workers.
+
+## Related pages
+
+- [External callbacks](../guides/external-integrations/external-callbacks.md)
+- [SEC-1 compliance](sec-1-compliance.md)
+- [Self-hosted security](self-hosted-security.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §9.3; K-07, K-17; `runtime/arcflow-core/src/external/webhook.rs`.
