@@ -93,3 +93,25 @@ Workers WASM packaging details change with platform versions; treat this as illu
 
 - **arcflow-server** for durable runs, registry, admin
 - **Embedded SDK** for in-process LLM and RAG
+- **Relay + static SDK** for browser production
+
+WASM alpha does not replace any of the above today.
+
+## Testing
+
+```bash
+cargo test -p arcflow-wasm
+```
+
+Includes `execute_workflow_json_round_trip` in `lib.rs` tests.
+
+## Related gaps
+
+| ID | Note |
+|----|------|
+| FP-2 | Server SSE not related to WASM; browser uses trace poll |
+| FP-1.01 | Graph recovery partial on server; WASM has no graph |
+
+Maturity: [maturity-and-known-gaps.md](../concepts/maturity-and-known-gaps.md).
+
+**Source:** capabilities reference §20; `runtime/arcflow-wasm/src/lib.rs`, `runtime/arcflow-wasm/Cargo.toml`; Appendix I (WASM column).
