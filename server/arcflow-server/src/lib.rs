@@ -6,7 +6,7 @@ pub mod handlers;
 mod middleware;
 mod registry;
 pub mod state;
-mod store;
+pub mod store;
 
 #[cfg(feature = "debug-endpoints")]
 pub mod debug;
@@ -82,5 +82,29 @@ pub fn build_app(state: Arc<AppState>) -> Router {
         ))
         .layer(RequestBodyLimitLayer::new(1024 * 1024));
 
-    public.merge(protected).with_state(state).layer(cors_layer())
+    let admin = Router::new()
+        .route("/v1/admin/sites", post(handlers::admin::sites::create_site))
+        .route(
+            "/v1/admin/sites/:site_id",
+            get(handlers::admin::sites::get_site).patch(handlers::admin::sites::patch_site),
+        )
+        .route(
+            "/v1/admin/sites/:site_id/tokens/rotate",
+            post(handlers::admin::sites::rotate_token),
+        )
+        .route(
+            "/v1/admin/sites/:site_id/knowledge/ingest",
+            post(handlers::admin::knowledge::ingest_knowledge),
+        )
+        .route(
+            "/v1/admin/sites/:site_id/workflows/chat/publish",
+            post(handlers::admin::workflows::publish_chat),
+        )
+        .layer(axum_middleware::from_fn_with_state(
+            state.clone(),
+            crate::middleware::admin_auth::require_admin_key,
+        ))
+        .layer(RequestBodyLimitLayer::new(1024 * 1024));
+
+    public.merge(protected).merge(admin).with_state(state).layer(cors_layer())
 }
