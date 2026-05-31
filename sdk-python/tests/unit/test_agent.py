@@ -20,7 +20,9 @@ def test_agent_rejects_empty_name() -> None:
 def test_binding_tuple_has_sprint4_fields() -> None:
     agent = Agent(name="n", role="role", instructions="inst")
     row = agent.binding_tuple()
-    assert len(row) == 6
+    assert len(row) == 8
     assert row[1] == "n"
     assert row[4] == []
     assert row[5] is None
+    assert row[6] is None
+    assert row[7] is None
