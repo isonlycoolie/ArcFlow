@@ -214,4 +214,12 @@ pub enum TraceEventKind {
         completion_token_delta: u32,
         prompt_token_delta: u32,
     },
+    /// Vector retrieval metadata — chunk count and sizes only (Phase 2-Pro, SEC-1).
+    MemoryRetrieved {
+        run_id: String,
+        step_id: String,
+        agent_name: String,
+        chunk_count: usize,
+        total_bytes: usize,
+    },
 }
