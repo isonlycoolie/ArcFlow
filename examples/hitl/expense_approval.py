@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Expense reimbursement with human manager approval (<50 lines)."""
+# Expense reimbursement workflow with manager approval gate (HITL + recovery).
 
 import os
 import sys
 
-from arcflow import Agent, HitlConfig, Workflow
-from arcflow.hitl import WorkflowInterruptedError
+from arcflow import Agent, HitlConfig, Workflow, WorkflowInterruptedError
 
 RUNTIME = os.environ.get("ARCFLOW_RUNTIME", "http://localhost:8080")
 APPROVAL_KEY = "manager_approval"

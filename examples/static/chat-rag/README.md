@@ -13,10 +13,10 @@ The frontend file [`src/main.ts`](src/main.ts) is intentionally minimal (~30 lin
 
 ## Dashboard setup (before frontend work)
 
-1. **Create site**, Sites → Create; copy relay URL and site token once
-2. **Upload knowledge**, Knowledge tab → add your FAQs and docs  
+1. **Create site** (Sites, Create): copy relay URL and site token once
+2. **Upload knowledge** (Knowledge tab): add your FAQs and docs  
    See [RAG document upload guide](../../ArcFlow_Improvement_Plans/arcflow-static-product-vision/10-rag-document-upload-guide.md) for how to structure uploads for good chunking
-3. **Configure chat**, Chat tab → instructions (e.g. “You are Acme Corp support…”) → **Save & publish**
+3. **Configure chat** (Chat tab): set instructions (e.g. “You are Acme Corp support…”), then **Save & publish**
 
 After publish, the published workflow name is `chat` (default). The frontend calls that by name, no workflow definition in browser code.
 
@@ -27,7 +27,7 @@ VITE_ARCFLOW_RELAY_URL=https://relay.arcflow.app/v1/sites/s_abc123
 VITE_ARCFLOW_SITE_TOKEN=st_live_xxxxxxxx
 ```
 
-Add your production origin in Dashboard → Sites → Allowed origins (e.g. `https://www.yoursite.com` and `http://localhost:5173` for local dev).
+Add your production origin under Dashboard, Sites, Allowed origins (e.g. `https://www.yoursite.com` and `http://localhost:5173` for local dev).
 
 ## Run locally
 

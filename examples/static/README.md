@@ -29,9 +29,9 @@ All of that lives in the **ArcFlow Dashboard** (Knowledge tab, Chat tab, Publish
 
 ## Setup flow (every production site)
 
-1. **Dashboard → Sites → Create site**, copy `VITE_ARCFLOW_RELAY_URL` and `VITE_ARCFLOW_SITE_TOKEN`
-2. **Dashboard → Knowledge**, upload FAQs, docs, policies ([upload guide](../../ArcFlow_Improvement_Plans/arcflow-static-product-vision/10-rag-document-upload-guide.md))
-3. **Dashboard → Chat**, set instructions, click **Save & publish**
+1. **Dashboard, Sites, Create site**: copy `VITE_ARCFLOW_RELAY_URL` and `VITE_ARCFLOW_SITE_TOKEN`
+2. **Dashboard, Knowledge tab**: upload FAQs, docs, policies ([upload guide](../../ArcFlow_Improvement_Plans/arcflow-static-product-vision/10-rag-document-upload-guide.md))
+3. **Dashboard, Chat tab**: set instructions, click **Save & publish**
 4. **Frontend**, add env vars, implement chat UI calling `runPublished("chat", "^1.0.0", message)`
 5. **Deploy** to CDN, no server-side code required
 

@@ -51,7 +51,7 @@ VITE_ARCFLOW_SITE_TOKEN=st_live_xxxxxxxx
 When a step triggers an external binding (e.g. Playwright form fill), your **backend** receives the webhook and calls ArcFlow server with the server key, never from the static bundle:
 
 ```bash
-python examples/external/playwright_stub_callback.py --run-id <run_id>
+python examples/external/portal_outcome_callback.py --run-id <run_id>
 ```
 
 ## Tests

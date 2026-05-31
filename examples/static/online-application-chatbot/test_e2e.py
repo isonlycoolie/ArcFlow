@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from arcflow.external import ExternalBindingConfig, report_outcome
+from arcflow.external import ExternalBindingConfig, ExternalOutcome
 from arcflow.schedule import ScheduleManifest
 
 
@@ -41,7 +41,7 @@ def test_sample_run_json_shape():
 )
 def test_report_outcome_live():
     run_id = __import__("os").environ["ARCFLOW_E2E_RUN_ID"]
-    resp = report_outcome(
+    resp = ExternalOutcome.report(
         run_id,
         "gov_portal_submit",
         {"status": "needs_input", "error_code": "INVALID_NAME"},
