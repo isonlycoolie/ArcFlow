@@ -45,7 +45,7 @@ pub fn run_linear_stub(bundle: &WorkflowBundle, input: &str) -> Result<RunResult
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::{parse_bundle, StepDefinition, WorkflowDefinition};
+    use crate::types::parse_bundle;
     use uuid::Uuid;
 
     fn sample_bundle_json() -> String {
