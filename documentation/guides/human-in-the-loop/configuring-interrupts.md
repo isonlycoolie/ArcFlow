@@ -93,3 +93,38 @@ When status is `Interrupted`, the response includes an `interrupt` object (metad
 
 Build approver UIs from `approval_key`, `expires_at`, and `step_index`. Fetch business context from your own ticket store; do not expect full LLM transcripts in this payload.
 
+## Designing approval_key values
+
+Use stable, human-meaningful keys per gate type, not per run:
+
+| Pattern | Example key | Use |
+|---------|-------------|-----|
+| Role gate | `manager_approval` | One manager gate per workflow |
+| Domain gate | `clinical_disclaimer` | Regulated content review |
+| Action gate | `trade_execute` | Financial execution |
+
+Multi-step approval in one workflow uses different keys on different steps (for example `legal_review` then `cfo_signoff`). The approve URL always includes the key that matches the step currently interrupted.
+
+Avoid embedding PII or secrets in `approval_key`. Keys appear in URLs and audit logs.
+
+## Graph workflows
+
+Graph steps reference the same `hitl` block on the underlying `StepDefinition`. The interrupted step index in the run payload helps UIs show which node is waiting. Graph recovery resume has a known partial gap (FP-1.01); validate HITL plus graph combinations in your environment before production.
+
+## Checklist before first HITL run
+
+1. Postgres reachable and migrations applied (`arcflow-server` returns 503 without it).
+2. `recovery_enabled: true` on the run.
+3. Server API key on run creation and on approve calls.
+4. Approver tooling polls `GET /v1/runs/{id}` or receives `WorkflowInterruptedError` in SDK tests.
+5. Timeout aligned with business SLA (`timeout_seconds`).
+
+## Related pages
+
+- [HITL overview](hitl-overview.md) for the interrupt model and error codes
+- [Approve and reject](approve-and-reject.md) for POST bodies and outcomes
+- [Quickstart server API](../../getting-started/quickstart-server-api.md) for Docker stack setup
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §8.1, §8.2; `sdk-python/arcflow/hitl.py`, `server/arcflow-server/src/dto/runs.rs`, `examples/hitl/`.
