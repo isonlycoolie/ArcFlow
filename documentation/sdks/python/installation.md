@@ -93,3 +93,26 @@ Session and shared memory types work without Docker.
 ## Provider API keys
 
 Set keys in the environment before calling `run(..., provider=...)`:
+
+| Provider | Environment variable |
+|----------|---------------------|
+| OpenAI | `OPENAI_API_KEY` |
+| Anthropic | `ANTHROPIC_API_KEY` |
+| Gemini | `GEMINI_API_KEY` |
+
+Credentials are never passed through workflow JSON. The runtime reads them at execution time.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `ImportError: arcflow._arcflow_binding` | Extension not built | Run `maturin develop` from `sdk-python/` |
+| Linker errors on Windows | Missing MSVC | Install VS Build Tools, restart shell |
+| `InfrastructureUnavailableError` on vector run | Qdrant URL unset or down | Start Docker stack, export `ARCFLOW_QDRANT_URL` |
+| `InfrastructureUnavailableError` on recovery | Postgres URL unset | Export `ARCFLOW_POSTGRESQL_URL`, run migrations |
+
+For shared install guidance across Python and TypeScript, see [install and build](../../getting-started/install-and-build.md).
+
+## Source
+
+`sdk-python/README.md`, `sdk-python/pyproject.toml`, `documentation/getting-started/install-and-build.md`; capabilities reference §16.
