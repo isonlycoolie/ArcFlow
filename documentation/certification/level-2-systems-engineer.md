@@ -93,3 +93,38 @@ bash examples/hitl/approve_cli.sh RUN_ID   # when escalated
 python examples/external/playwright_stub_callback.py --run-id RUN_ID --status success
 curl -s "http://localhost:8080/v1/runs/RUN_ID/trace" -H "Authorization: Bearer dev-secret"
 ```
+
+Pass criteria:
+
+| Check | Pass |
+|-------|------|
+| Wrong branch not executed | Graph trace proves branch taken |
+| `MemoryRetrieved` on FAQ path | yes |
+| HITL `Interrupted` then `Completed` after approve | yes |
+| External callback accepted | run advances |
+| Retry event in trace when failure injected | yes |
+| SEC-1 | no prompts in exported trace |
+
+## Known gaps to acknowledge
+
+| ID | Impact on project |
+|----|-------------------|
+| FP-1.01 | Graph checkpoint resume partial; design linear recovery fallback |
+| FP-2 | Server SSE streaming deferred; use SDK streaming or poll |
+
+Note these in your README.
+
+## Self-assessment checklist
+
+| Question | Answer must be yes |
+|----------|-------------------|
+| Can you explain join preconditions? | |
+| Can you rotate HITL approval keys conceptually? | |
+| Can you verify webhook HMAC without disabling checks? | |
+| Can you read `MemoryRetrieved` without seeing chunk text? | |
+
+## Next level
+
+Proceed to [Level 3: Platform Engineer](level-3-platform-engineer.md) for deployment, static product, and SEC-1 operations.
+
+**Source:** Sprint 4 through 7 curriculum, Tracks C through E; ARCFLOW-DOCS-ORGANIZATION-PLAN Level 2 brief; [graph routing](../examples/graph-routing.md), [RAG chatbot](../examples/rag-chatbot.md), [HITL](../examples/hitl-approval-flow.md), [external webhook](../examples/external-webhook.md).
