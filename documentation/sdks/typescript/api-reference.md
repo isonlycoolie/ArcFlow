@@ -93,3 +93,98 @@ Type alias: `Provider = OpenAI | Anthropic | Gemini`.
 
 Produced by `toWorkflowResult()` from native execution output.
 
+## Trace types
+
+### TraceResult
+
+| Field | Notes |
+|-------|-------|
+| `runId`, `workflowName`, `status` | Identity |
+| `startedAt`, `completedAt` | ISO strings |
+| `totalDurationSeconds`, `totalTokensConsumed` | Aggregates |
+| `steps` | `StepTrace[]` |
+
+Parsed via `traceFromJson()` from native JSON.
+
+### StepTrace
+
+Step-level timing, tokens, tool calls, memory operations, optional error.
+
+### TokenUsage
+
+`promptTokens`, `completionTokens`, `totalTokens`.
+
+## Streaming
+
+### StreamEvent (discriminated union)
+
+| `type` | Fields |
+|--------|--------|
+| `token` | `text`, `step_id` |
+| `step_start` | `step_id`, `node_id?` |
+| `step_complete` | `step_id`, `duration_ms` |
+| `tool_call` | `tool_name`, `args_keys` |
+| `error` | `code`, `message`, `step_id` |
+
+### StreamRunResult
+
+`output`, `runId`, `stepCount`, `traceEventsJson`.
+
+## HITL
+
+### HitlConfig
+
+`new HitlConfig(options)` or `new HitlConfig("approval_key")` shorthand.
+
+| Field | Default |
+|-------|---------|
+| `approvalKey` | required |
+| `timeoutSeconds` | 3600 |
+| `interrupt` | true |
+
+Method: `toJson()` for step attachment.
+
+### HumanRejectedError
+
+`approvalKey?: string`
+
+### WorkflowInterruptedError
+
+`runId`, `approvalKey`, `expiresAt?`
+
+## Memory
+
+### VectorStore
+
+```typescript
+const store = new VectorStore();
+store.ingest(namespace, key, text);  // returns chunk count
+store.search(namespace, query, topK?);  // ChunkHit[]
+```
+
+### ChunkHit
+
+`text`, `byteLen`.
+
+No TypeScript equivalents for `MemoryConfig`, `MemoryType`, or agent-attached memory. Use Python SDK or server-side agent definitions for RAG agent memory config.
+
+## Graph helpers
+
+### buildGraphJson
+
+Utility to serialize graph structure for tests or RCS payloads. Used internally by `Workflow` graph mode.
+
+## Fault tolerance helpers
+
+### buildExecConfigJson
+
+Builds `exec_config` JSON for retry, timeout, recovery, stream, and test blocks. Lower-level; most callers use `Workflow` fluent methods instead.
+
+Exported from `./arcflow/types/fault.js`.
+
+## External bindings
+
+### externalBinding
+
+```typescript
+externalBinding(
