@@ -188,3 +188,98 @@ curl -s -X PUT "http://localhost:8080/v1/workflows/chat/versions/1.0.0" \
   -H "Content-Type: application/json" \
   -d '{"definition":{"id":"00000000-0000-4000-8000-000000000099","name":"chat","execution_mode":"linear","steps":[]},"agents":[]}'
 ```
+
+Note: handler expects publish payload per `handlers/registry.rs` (definition + agents structure).
+
+### GET /v1/workflows/{name}/versions/{version}
+
+Fetch exact version.
+
+```bash
+curl -s "http://localhost:8080/v1/workflows/chat/versions/1.0.0" \
+  -H "Authorization: Bearer dev-secret"
+```
+
+### GET /v1/workflows/{name}/resolve?range={semver}
+
+Resolve semver range to highest matching version.
+
+```bash
+curl -s "http://localhost:8080/v1/workflows/chat/resolve?range=%5E1.0.0" \
+  -H "Authorization: Bearer dev-secret"
+```
+
+Response:
+
+```json
+{ "name": "chat", "version": "1.0.2", "definition": { } }
+```
+
+### POST /v1/workflows/{name}/aliases/{alias}
+
+Point alias (e.g. `latest`) at a version.
+
+```bash
+curl -s -X POST "http://localhost:8080/v1/workflows/chat/aliases/latest" \
+  -H "Authorization: Bearer dev-secret" \
+  -H "Content-Type: application/json" \
+  -d '{"version": "1.0.2"}'
+```
+
+## Deprecated
+
+### POST /v1/workflows/run
+
+Legacy single-shot run. Prefer `POST /v1/runs`. Still registered for backward compatibility.
+
+```bash
+curl -s -X POST http://localhost:8080/v1/workflows/run \
+  -H "Authorization: Bearer dev-secret" \
+  -H "Content-Type: application/json" \
+  -d @run-payload.json
+```
+
+## Admin (admin API key)
+
+Auth: `Authorization: Bearer <ARCFLOW_ADMIN_API_KEY>`.
+
+### POST /v1/admin/sites
+
+Create site; `site_token` returned once.
+
+```bash
+curl -s -X POST http://localhost:8080/v1/admin/sites \
+  -H "Authorization: Bearer dev-admin" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "display_name": "Acme Support",
+    "allowed_origins": ["https://www.acme.com"],
+    "rate_limit_rpm": 60,
+    "allow_inline": false,
+    "default_workflow_name": "chat",
+    "chat_instructions": "Answer from knowledge only."
+  }'
+```
+
+Response:
+
+```json
+{
+  "site_id": "site_abc123",
+  "relay_url": "http://localhost:8090/v1/sites/site_abc123",
+  "site_token": "st_live_...",
+  "kb_namespace": "site-site_abc123-kb"
+}
+```
+
+### GET /v1/admin/sites/{site_id}
+
+```bash
+curl -s "http://localhost:8080/v1/admin/sites/site_abc123" \
+  -H "Authorization: Bearer dev-admin"
+```
+
+### PATCH /v1/admin/sites/{site_id}
+
+Update origins, rate limits, defaults.
+
