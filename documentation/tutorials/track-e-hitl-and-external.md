@@ -93,3 +93,31 @@ HITL first phase prints approval instructions with run id. After approve, comple
 ## Trace events you should see
 
 | Phase | Events |
+|-------|--------|
+| HITL | `WorkflowStarted`, submit `StepCompleted`, interrupt metadata, post-approve steps, `WorkflowCompleted` |
+| External | Step waiting state, `StepCompleted` after outcome, terminal workflow events |
+
+All exports remain SEC-1 metadata. See [trace event reference](../guides/observability/trace-event-reference.md).
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| No interrupt | Recovery disabled | `.enable_recovery()` and Postgres |
+| Approve 404 | Wrong approval key | Use `manager_approval` from expense script |
+| Callback auth failure | Secret mismatch | Align binding HMAC secret |
+| Callback from browser | Architecture violation | Call from backend only |
+
+## What you learned
+
+Track E covers operator-facing controls: pausing automation for human decisions and re-entering flows from external systems with verified callbacks. Compliance reviewers focus on auth boundaries and metadata-only traces here.
+
+## Next tracks
+
+| Track | Focus |
+|-------|-------|
+| F | Static product embedding |
+| G | Operator migrations and CLI |
+| Level 2 cert | Combined support workflow project |
+
+**Source:** capabilities reference §28 Track E; [hitl-approval-flow](../examples/hitl-approval-flow.md), [external-webhook](../examples/external-webhook.md); [approve-and-reject](../guides/human-in-the-loop/approve-and-reject.md), [webhook security](../guides/external-integrations/webhook-security.md).
