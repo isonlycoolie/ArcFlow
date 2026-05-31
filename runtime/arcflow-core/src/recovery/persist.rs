@@ -31,15 +31,19 @@ pub fn persist_if_enabled(
         }
     };
     let _ = rt.block_on(async {
-        let pool = match sqlx::postgres::PgPoolOptions::new()
-            .max_connections(2)
-            .connect(&url)
-            .await
-        {
-            Ok(p) => p,
-            Err(e) => {
-                tracing::warn!(error = %e, "recovery postgres connect failed");
-                return;
+        let pool = if let Some(p) = super::pool::shared_pool() {
+            p.clone()
+        } else {
+            match sqlx::postgres::PgPoolOptions::new()
+                .max_connections(2)
+                .connect(&url)
+                .await
+            {
+                Ok(p) => p,
+                Err(e) => {
+                    tracing::warn!(error = %e, "recovery postgres connect failed");
+                    return;
+                }
             }
         };
         let completed_steps: Vec<CompletedStepSnapshot> = completed
@@ -80,12 +84,16 @@ pub async fn load_recovery(
             reason: "ARCFLOW_POSTGRESQL_URL is not set".into(),
         }
     })?;
-    let pool = sqlx::postgres::PgPoolOptions::new()
-        .max_connections(2)
-        .connect(&url)
-        .await
-        .map_err(|e| crate::error::RuntimeError::RecoveryStorageError {
-            reason: format!("postgres connect failed: {e}"),
-        })?;
+    let pool = if let Some(p) = super::pool::shared_pool() {
+        p.clone()
+    } else {
+        sqlx::postgres::PgPoolOptions::new()
+            .max_connections(2)
+            .connect(&url)
+            .await
+            .map_err(|e| crate::error::RuntimeError::RecoveryStorageError {
+                reason: format!("postgres connect failed: {e}"),
+            })?
+    };
     RecoveryStorage::new(pool).load(original_run_id).await
 }
