@@ -188,3 +188,11 @@ Full list in capabilities reference Appendix E.
 
 ## Related pages
 
+- [Tool execution loop](tool-execution-loop.md)
+- [Context policies](context-policies.md)
+- [Linear workflows](../workflows/linear-workflows.md)
+- [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §5.1; Appendix A (AgentDefinition, ToolDefinition, ProviderConfig, MemoryConfig).
