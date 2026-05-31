@@ -93,3 +93,72 @@ When fallback activates:
   { "kind": "StepStarted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000012", "agent_name": "fallback_analyst" },
   { "kind": "StepCompleted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000012", "duration_ms": 650 }
 ]
+```
+
+If the fallback step also fails and has no further fallback, the workflow terminal state is `Failed` with the last `error_code` (for example `StepExecutionFailed` or `ProviderError` per [Appendix E error codes](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md)).
+
+## Combining with retry
+
+Workflow or step retry may run before fallback triggers. Typical flow: transient error → `RetryAttempted` → success, or `RetryExhausted` → fallback if configured.
+
+```json
+{
+  "exec_config": {
+    "retry": {
+      "max_attempts": 2,
+      "backoff": {
+        "kind": "exponential",
+        "base_ms": 1000,
+        "multiplier": 2.0,
+        "max_ms": 10000,
+        "jitter_ms": 50
+      }
+    }
+  }
+}
+```
+
+Step-level `retry_policy` on the primary step overrides or merges per engine rules; validate behavior in [Validation and testing](validation-and-testing.md) with `exec_config.test`.
+
+## Test mode for fallback paths
+
+Drive primary failure without live LLM:
+
+```json
+{
+  "recovery_enabled": false,
+  "test": {
+    "steps": {
+      "00000000-0000-4000-8000-000000000010": {
+        "fail_times": 1,
+        "output": "primary fail",
+        "then_output": "should not reach"
+      },
+      "00000000-0000-4000-8000-000000000012": {
+        "output": "fallback success"
+      }
+    }
+  }
+}
+```
+
+Expect `StepFallbackActivated` then completion with fallback output.
+
+## Graph workflows
+
+Fallback steps work on graph-backed steps referenced by nodes. Failure at a node step may activate that step's `fallback_step_id` before the scheduler evaluates outgoing edges. Test graph + fallback combinations in CI; edge routing after fallback depends on which step id completed.
+
+## Examples
+
+Resilience samples under `examples/` demonstrate fallback patterns alongside retry. Compare with [Recovery and resume](../reliability/recovery-and-resume.md) for run-level persistence, not step-level alternate agents.
+
+## Related pages
+
+- [Linear workflows](linear-workflows.md)
+- [Graph workflows](graph-workflows.md)
+- [Retry and backoff](../reliability/retry-and-backoff.md)
+- [Execution model](../../concepts/execution-model.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §5.4; Appendix A (StepDefinition.fallback_step_id); trace event `StepFallbackActivated`.
