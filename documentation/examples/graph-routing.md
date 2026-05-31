@@ -93,3 +93,44 @@ Reflection loop:
 run_id=<uuid> steps=<n>
 ```
 
+Parallel search prints similar `run_id` and `steps` lines. Step count reflects graph iterations, not only node count. Values vary with routing and stub output.
+
+Pass criteria:
+
+| Check | Expected |
+|-------|----------|
+| `result.status` | `completed` |
+| `result.run_id` | UUID |
+| Graph trace kinds | Present for each executed node |
+| Parallel join | Synthesize after both branches in trace order |
+
+## Trace events you should see
+
+| Event kind | When |
+|------------|------|
+| `WorkflowStarted` | Graph run begins |
+| `GraphNodeStarted` | Each node begins (includes iteration metadata) |
+| `GraphNodeCompleted` | Node finishes |
+| `StepStarted` / `StepCompleted` | Underlying step execution per node |
+| `WorkflowCompleted` | Terminal success |
+
+Conditional re-entry adds repeated `GraphNodeStarted` for the same node id across iterations until exit or `max_iterations`.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| Infinite loop or early exit | Condition string mismatch | Ensure agent output trim matches edge `condition` values |
+| Join never fires | Missing `join_node` or wrong branch ids | Match `wait_for` ids to node names in parallel_search pattern |
+| `WorkflowExecutionError: max iterations` | Loop guard hit | Increase `max_iterations` or fix termination edge |
+| No graph events in trace | Old SDK build | Rebuild; confirm `graph=True` on Workflow |
+
+## Related
+
+| Resource | Link |
+|----------|------|
+| Tutorial track | [Track D](../tutorials/track-d-graph-workflows.md) |
+| Graph guide | [Graph workflows](../guides/workflows/graph-workflows.md) |
+| Maturity note | [FP-1.01 graph resume](../../concepts/maturity-and-known-gaps.md) |
+
+**Source:** [`examples/graph/reflection_loop.py`](../../examples/graph/reflection_loop.py), [`examples/graph/parallel_search.py`](../../examples/graph/parallel_search.py), [`examples/graph/react_agent.py`](../../examples/graph/react_agent.py); capabilities reference §25, §28 Track D; [graph workflows](../guides/workflows/graph-workflows.md).
