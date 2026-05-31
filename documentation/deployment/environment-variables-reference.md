@@ -93,3 +93,35 @@ See [OpenTelemetry guide](../guides/observability/opentelemetry.md).
 
 These are build-time Vite variables, documented for operator handoff:
 
+| Variable | Purpose |
+|----------|---------|
+| `VITE_ARCFLOW_RELAY_URL` | Public Relay base URL |
+| `VITE_ARCFLOW_SITE_ID` | Site id from admin create |
+| `VITE_ARCFLOW_SITE_TOKEN` | One-time site token |
+
+Dashboard dev (private repo): `ARCFLOW_ADMIN_URL`, admin key in BFF only.
+
+## Critical production triple
+
+Minimum for a working server deployment:
+
+1. `ARCFLOW_SERVER_API_KEY` and `ARCFLOW_ADMIN_API_KEY`
+2. `ARCFLOW_POSTGRESQL_URL`
+3. At least one LLM key (`OPENAI_API_KEY`, etc.)
+
+## Security checklist for operators
+
+- Store secrets in a secret manager or orchestrator secrets, not in git.
+- Rotate keys on schedule or on personnel change. See [Token rotation](../operator/token-rotation.md).
+- Restrict `.env` file permissions (`chmod 600`).
+- Never log environment dumps in production support bundles.
+
+## Related pages
+
+- [Server deployment](server-deployment.md)
+- [API key management](../security/api-key-management.md)
+- [Production checklist](production-checklist.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §24, Appendix H; `server/arcflow-server/src/state.rs`, `main.rs`.
