@@ -67,6 +67,13 @@ impl MemoryCoordinator {
         run_id: &str,
         step_id: Option<Uuid>,
     ) -> Result<(), MemoryError> {
+        #[cfg(feature = "otel")]
+        let _mem = crate::tracing::otel_live::memory_span(
+            run_id,
+            step_id.map(|s| s.to_string()).as_deref(),
+            "session",
+            "write",
+        );
         let started = Instant::now();
         self.session
             .write(self.run_id, agent_id, logical_key, value)?;
@@ -94,6 +101,13 @@ impl MemoryCoordinator {
         run_id: &str,
         step_id: Option<Uuid>,
     ) -> Result<Option<Vec<u8>>, MemoryError> {
+        #[cfg(feature = "otel")]
+        let _mem = crate::tracing::otel_live::memory_span(
+            run_id,
+            step_id.map(|s| s.to_string()).as_deref(),
+            "session",
+            "read",
+        );
         let started = Instant::now();
         let out = self
             .session
