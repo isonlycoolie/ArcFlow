@@ -188,3 +188,7 @@ No prompt text appears in traces (SEC-1).
 - [Linear workflows](../workflows/linear-workflows.md)
 - [Graph workflows](../workflows/graph-workflows.md)
 - [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §5.1; Appendix A (ContextPolicy); K-15 default 4096 chars.
