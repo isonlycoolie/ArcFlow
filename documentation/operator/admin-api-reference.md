@@ -93,3 +93,98 @@ Partial update. All body fields optional.
   "allowed_origins": ["https://eu.acme.com"],
   "rate_limit_rpm": 120,
   "allow_inline": false,
+  "chat_instructions": "You are Acme EU support."
+}
+```
+
+**Response 200:** same shape as GET.
+
+**Errors:** 400 invalid origin or rate limit, 401, 403, 404.
+
+## POST /v1/admin/sites/{site_id}/tokens/rotate
+
+Invalidate previous site token; issue new token.
+
+**Response 200:**
+
+```json
+{
+  "site_token": "st_live_newtoken"
+}
+```
+
+Shown once. Update frontend env and redeploy or reload config.
+
+**Errors:** 401, 403, 404.
+
+## POST /v1/admin/sites/{site_id}/knowledge/ingest
+
+Ingest text into the site vector namespace (requires Postgres + Qdrant + embedding provider).
+
+**Request:**
+
+```json
+{
+  "text": "FAQ: How do I reset my password? ...",
+  "key": "faq-password"
+}
+```
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `text` | Yes | Non-empty; chunked server-side |
+| `key` | No | Stable id for re-ingest overwrite |
+
+**Response 200:**
+
+```json
+{
+  "chunks_ingested": 12,
+  "namespace": "site_s_abc123"
+}
+```
+
+**Errors:** 400 empty text, 401, 403, 404, 503 Postgres/Qdrant unavailable.
+
+## POST /v1/admin/sites/{site_id}/workflows/chat/publish
+
+Publish default chat workflow to semver registry and bind site.
+
+**Request:**
+
+```json
+{
+  "instructions": "You are Acme Corp support. Answer from knowledge only.",
+  "version": "1.0.0"
+}
+```
+
+**Response 200:**
+
+```json
+{
+  "name": "chat",
+  "version": "1.0.0",
+  "schema_hash": "blake3:..."
+}
+```
+
+Browser clients call `runPublished("chat", "^1.0.0", message)` via static SDK.
+
+**Errors:** 400 invalid semver, 401, 403, 404, 500 publish failure.
+
+## Error shape summary
+
+| Status | Meaning |
+|--------|---------|
+| 400 | Validation (empty name, bad origin, empty ingest text) |
+| 401 | Missing or invalid admin key |
+| 403 | Scoped runtime key attempted admin route |
+| 404 | Unknown `site_id` |
+| 500 | Server or storage failure |
+| 503 | Postgres required but unavailable |
+
+Dashboard UI (FP-3.01 deferred) maps 401 to key configuration screens. Until the private [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) ships, use curl, HTTP clients, or OSS scripts:
+
+- `scripts/static-provision-site.sh`
+- `scripts/static-ingest-knowledge.sh`
