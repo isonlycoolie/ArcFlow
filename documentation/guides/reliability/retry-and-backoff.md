@@ -93,3 +93,98 @@ Workflow definition may set per-step overrides:
         "max_attempts": 5,
         "backoff": {
           "kind": "exponential",
+          "base_ms": 500,
+          "multiplier": 2.0,
+          "max_ms": 10000,
+          "jitter_ms": 25
+        }
+      }
+    }
+  ],
+  "retry_policy": {
+    "max_attempts": 2,
+    "backoff": { "kind": "fixed", "base_ms": 1000 }
+  }
+}
+```
+
+Step policy applies to that step; workflow policy applies as default where step policy is absent.
+
+## Trace events
+
+### RetryAttempted
+
+```json
+{
+  "kind": "RetryAttempted",
+  "run_id": "r1",
+  "step_id": "s1",
+  "attempt_number": 2,
+  "max_attempts": 3,
+  "backoff_ms": 2000,
+  "trigger_error_code": "ProviderError"
+}
+```
+
+### RetryExhausted
+
+```json
+{
+  "kind": "RetryExhausted",
+  "run_id": "r1",
+  "step_id": "s1",
+  "total_attempts": 3,
+  "last_error_code": "ProviderError"
+}
+```
+
+After exhaustion, the step fails unless [Step fallbacks](../workflows/step-fallbacks.md) routes to a fallback step (`StepFallbackActivated`).
+
+## Provider rate limits
+
+`ProviderRateLimited` traces may include `retry_after_seconds`. Combine retry policy with provider guidance; respect 429 semantics from [Provider configuration](../agents-and-tools/provider-configuration.md).
+
+Terminal mapping: `RateLimited` error code (HTTP 429) when retries do not recover.
+
+## Test mode without live LLM
+
+```json
+{
+  "exec_config": {
+    "recovery_enabled": false,
+    "retry": {
+      "max_attempts": 3,
+      "backoff": { "kind": "fixed", "base_ms": 10 }
+    },
+    "test": {
+      "steps": {
+        "s1": {
+          "fail_times": 2,
+          "output": "fail",
+          "then_output": "success on third try"
+        }
+      }
+    }
+  }
+}
+```
+
+Expect two `RetryAttempted` events then `StepCompleted`. See [Validation and testing](../workflows/validation-and-testing.md).
+
+## External bindings
+
+HTTP callbacks use separate recovery on bindings:
+
+```json
+{
+  "external_bindings": [
+    {
+      "id": "payment_webhook",
+      "kind": "http_callback",
+      "attach_to_step_id": "s-pay",
+      "mode": "async",
+      "recovery": {
+        "max_attempts": 3,
+        "on_failure": "retry_with_backoff"
+      }
+    }
