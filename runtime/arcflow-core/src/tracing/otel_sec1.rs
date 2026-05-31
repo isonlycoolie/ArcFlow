@@ -60,4 +60,24 @@ mod tests {
         assert!(!blob.contains("prompt.text"));
         assert!(!blob.contains("completion.text"));
     }
+
+    #[test]
+    fn live_span_field_names_are_sec1_clean() {
+        let fields = [
+            "run_id",
+            "step_id",
+            "tool_name",
+            "duration_ms",
+            "status",
+            "memory_type",
+            "operation",
+            "tokens.prompt",
+            "tokens.completion",
+            "provider",
+            "model",
+        ];
+        let blob = fields.join(",");
+        assert!(attributes_are_sec1_clean(&blob));
+        assert!(!blob.contains("prompt.text"));
+    }
 }

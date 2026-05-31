@@ -37,4 +37,21 @@ mod tests {
         assert_eq!(spans.len(), 1);
         assert_eq!(spans[0].name, "arcflow.workflow");
     }
+
+    #[test]
+    fn workflow_step_llm_span_hierarchy() {
+        let (exporter, _provider) = install_inmemory_provider();
+        let tracer = global::tracer("arcflow-test");
+        tracer.in_span("arcflow.workflow", |_| {
+            tracer.in_span("arcflow.step", |_| {
+                tracer.in_span("arcflow.llm.invoke", |_| {});
+            });
+        });
+        let spans = finished_spans(&exporter);
+        assert_eq!(spans.len(), 3);
+        let names: Vec<String> = spans.iter().map(|s| s.name.to_string()).collect();
+        assert!(names.iter().any(|n| n == "arcflow.workflow"));
+        assert!(names.iter().any(|n| n == "arcflow.step"));
+        assert!(names.iter().any(|n| n == "arcflow.llm.invoke"));
+    }
 }
