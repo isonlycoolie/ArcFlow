@@ -188,3 +188,74 @@ curl -s "http://localhost:8080/v1/runs/RUN_ID/trace" \
 
 The response is an `ExecutionTrace` JSON document with metadata-only events (SEC-1). Expect lifecycle kinds such as `WorkflowStarted`, `StepCompleted`, and `WorkflowCompleted`.
 
+From the repo root you can also inspect a run with the CLI:
+
+```bash
+cargo run -p arcflow-cli -- trace RUN_ID --format json --verbose
+```
+
+## Auth tiers (summary)
+
+| Routes | Auth |
+|--------|------|
+| `/health`, `/ready` | None |
+| `/v1/runs`, registry, trace | `Authorization: Bearer <ARCFLOW_SERVER_API_KEY>` or `X-ArcFlow-Api-Key` |
+| `/v1/admin/*` | Bearer `ARCFLOW_ADMIN_API_KEY` |
+| `/v1/debug/*` | Localhost and `ARCFLOW_DEBUG=true` |
+
+Full route index is in capabilities reference Appendix B and [HTTP API reference](../server/http-api-reference.md).
+
+## SDK client pointing at the server
+
+Save as `server_client.py`:
+
+```python
+import os
+
+os.environ["ARCFLOW_SERVER_API_KEY"] = "dev-secret"
+
+from arcflow import Agent, Workflow
+
+wf = Workflow("demo", runtime="http://localhost:8080")
+wf.step(Agent(name="writer", role="author", instructions="Summarize."))
+result = wf.run("hello")
+print(result.output)
+```
+
+Run after the Docker stack is up:
+
+```bash
+python server_client.py
+```
+
+## Stop the stack
+
+```bash
+docker compose -f docker/docker-compose.server.yml down
+```
+
+Add `-v` only if you intend to wipe the Postgres volume.
+
+## Verify
+
+| Check | Expected |
+|-------|----------|
+| `/ready` | HTTP 200 |
+| Create run | HTTP 201 with `run_id` |
+| Poll | Terminal `Completed` for sample payload |
+| Trace | Lifecycle events present, no prompt text |
+
+## Next
+
+| Topic | Link |
+|-------|------|
+| Tutorial with verification checklist | [Track B: Server API](../tutorials/track-b-server-api.md) |
+| HITL and external on server | [Integrating track](integrating/README.md) |
+| Workflow registry and semver | [Workflow registry](../guides/workflows/workflow-registry.md) |
+| Production compose | `docker/docker-compose.prod.yml`, `contracts/guides/deployment/self-hosted.md` |
+| Full HTTP reference | [Server overview](../server/overview.md) |
+| Static browser product | [Static site chatbot](paths/static-site-chatbot.md) |
+
+## Source
+
+capabilities reference §12, Appendix B; `docker/docker-compose.server.yml`, `server/arcflow-server/README.md`, `scripts/load-test-runs.sh`.
