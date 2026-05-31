@@ -93,3 +93,73 @@ Semantic retrieval from Qdrant. Requires embedding provider and Qdrant URL in pr
       "chunk_size": 512,
       "chunk_overlap": 64
     }
+  }
+}
+```
+
+See [Vector RAG pipeline](vector-rag-pipeline.md), [Hybrid retrieval and reranking](hybrid-retrieval-and-reranking.md), and [Knowledge ingestion](knowledge-ingestion.md).
+
+## Trace events
+
+| Event | Fields of note |
+|-------|----------------|
+| `MemoryWrite` | memory_type, key, duration_ms |
+| `MemoryRead` | hit (boolean), key |
+| `MemoryRetrieved` | chunk_count, total_bytes (vector only) |
+| `MemoryDegraded` | backend, reason |
+| `MemoryEvicted` | key, eviction_reason |
+
+SEC-1: no chunk text or values in traces. [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md).
+
+Example vector retrieval trace:
+
+```json
+{
+  "kind": "MemoryRetrieved",
+  "run_id": "r1",
+  "step_id": "s1",
+  "agent_name": "researcher",
+  "chunk_count": 5,
+  "total_bytes": 3840
+}
+```
+
+## Degradation behavior
+
+| Event | Meaning |
+|-------|---------|
+| `MemoryDegraded` | Backend unavailable; engine may continue with reduced capability |
+| `MemoryEvicted` | TTL or capacity eviction |
+| `MemoryRead` hit=false | Key miss; agent proceeds without that context |
+
+Production vector setups need `ARCFLOW_QDRANT_URL` and non-stub `ARCFLOW_EMBEDDING_PROVIDER`. Stub embedding is dev-only.
+
+## Environment variables
+
+| Variable | Purpose |
+|----------|---------|
+| `ARCFLOW_QDRANT_URL` | Qdrant endpoint |
+| `ARCFLOW_EMBEDDING_PROVIDER` | Embedding backend |
+| `ARCFLOW_QDRANT_HYBRID` | Enable hybrid dense+sparse search |
+| `ARCFLOW_POSTGRESQL_URL` | Persistent memory and server runs |
+| `OPENAI_API_KEY` | Embeddings when using OpenAI embedding strings |
+
+## Choosing a type
+
+| Need | Choice |
+|------|--------|
+| Single agent scratch pad | `session` / `agent` |
+| Pass structured state between agents | `shared` / `workflow` |
+| Remember user prefs next week | `persistent` / `workflow` + namespace |
+| Answer from documentation | `vector` + ingest pipeline |
+
+## Related pages
+
+- [Vector RAG pipeline](vector-rag-pipeline.md)
+- [Knowledge ingestion](knowledge-ingestion.md)
+- [Provider configuration](../agents-and-tools/provider-configuration.md)
+- [Install and build](../../getting-started/install-and-build.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §6.1, §6.3; Appendix A (MemoryConfig).
