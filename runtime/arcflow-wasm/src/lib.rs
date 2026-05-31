@@ -4,3 +4,4 @@
 //! Full `arcflow-core` linkage is deferred until native deps are wasm-gated.
 
 pub mod types;
+pub mod runner;
