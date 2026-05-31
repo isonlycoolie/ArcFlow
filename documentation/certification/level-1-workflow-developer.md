@@ -93,3 +93,30 @@ Pass criteria checklist:
 | Trace kinds include lifecycle trio | yes |
 | Configuration error recovery | you can explain a fixed config mistake |
 
+## Error handling competency
+
+Reproduce and fix:
+
+| Error | Trigger | Fix pattern |
+|-------|---------|-------------|
+| `WorkflowConfigurationError` | Empty agent name | Correct agent definition |
+| `WorkflowExecutionError` | Invalid tool args or provider failure | Validate inputs; check provider env |
+
+Document one intentional misconfiguration and your fix in the project README.
+
+## Self-assessment checklist
+
+Before claiming Level 1:
+
+| Question | Answer must be yes |
+|----------|-------------------|
+| Can you explain linear vs graph mode at a high level? | |
+| Can you read a trace export without prompt text? | |
+| Can you run Track A in Python or TypeScript cold? | |
+| Does your project README let a peer reproduce runs? | |
+
+## Next level
+
+Proceed to [Level 2: Systems Engineer](level-2-systems-engineer.md) after graph, RAG, and server patterns in Tracks B through E.
+
+**Source:** Sprint 3 curriculum, [Track A](../tutorials/track-a-first-workflow.md); ARCFLOW-DOCS-ORGANIZATION-PLAN Level 1 brief; `sdk-python/tests/integration/test_first_five_minutes.py`.
