@@ -23,6 +23,7 @@ enum Commands {
     Trace(commands::trace::TraceArgs),
     Validate(commands::validate::ValidateArgs),
     Schedule(commands::schedule::ScheduleArgs),
+    Migrate(commands::migrate::MigrateArgs),
 }
 
 fn main() -> ExitCode {
@@ -42,6 +43,7 @@ fn main() -> ExitCode {
         Commands::Trace(a) => commands::trace::run(a),
         Commands::Validate(a) => commands::validate::run(a),
         Commands::Schedule(a) => commands::schedule::run(a),
+        Commands::Migrate(a) => commands::migrate::run(a),
     };
     ExitCode::from(code as u8)
 }

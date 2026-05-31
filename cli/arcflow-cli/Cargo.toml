@@ -13,6 +13,12 @@ path = "src/main.rs"
 [dependencies]
 arcflow-core = { path = "../../runtime/arcflow-core" }
 clap = { version = "4", features = ["derive"] }
+tokio = { workspace = true }
+sqlx = { version = "0.8", default-features = false, features = [
+    "runtime-tokio",
+    "postgres",
+    "migrate",
+] }
 serde_json = { workspace = true }
 serde_yaml = "0.9"
 ratatui = "0.28"
