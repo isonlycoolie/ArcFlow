@@ -188,3 +188,60 @@ Exported from `./arcflow/types/fault.js`.
 
 ```typescript
 externalBinding(
+  id: string,
+  attachToStepId: string,
+  outcomeSchema: Record<string, unknown>,
+  options?: {
+    kind?: ExternalBindingKind;
+    mode?: ExternalBindingMode;
+    recovery?: ExternalRecoveryPolicy;
+  },
+): ExternalBinding
+```
+
+### Types
+
+| Type | Purpose |
+|------|---------|
+| `ExternalBinding` | Publish payload fragment |
+| `ExternalOutcomeReport` | Callback body shape |
+| `ExternalBindingKind` | `browser_automation`, `schedule_trigger`, `custom` |
+| `ExternalBindingMode` | `sync_tool`, `async_callback` |
+| `ExternalRecoveryPolicy` | Retry and escalation policy |
+
+**Parity gap:** Python provides `report_outcome()` HTTP client. TypeScript exports types only; implement POST to `/v1/runs/{runId}/external/{bindingId}` with HMAC header yourself (see `examples/external/`).
+
+There is no symbol named `ExternalOutcome`. Use `ExternalOutcomeReport`.
+
+## Testing (Vitest)
+
+| Export | Purpose |
+|--------|---------|
+| `buildTestExecConfig(options?)` | Stub exec config for tests |
+| `enableStubMode()` | Test harness hook |
+| `TestExecConfigOptions` | Options type |
+
+## Constants
+
+`VERSION` from `./arcflow/constants.js`.
+
+## Error mapping
+
+`mapNativeError(err: unknown): ArcFlowError` converts native error strings into typed exceptions. See [exception reference](exception-reference.md).
+
+## Not in TypeScript SDK
+
+Searched symbols from Python ecosystem:
+
+| Requested / Python name | TypeScript status |
+|-------------------------|-------------------|
+| `FromLangChain` | Not present; use Python `from_langchain_tool` |
+| `LangChainToArcflow` | Not present; use Python `langgraph_to_arcflow` |
+| `CommonTools` | Not in codebase |
+| `Tool` class | Not exported |
+| `ScheduleManifest` | Not exported |
+| `ContextPolicy`, `ToolExecutionConfig` | Not exported |
+
+## Source
+
+`sdk-typescript/index.ts`, `sdk-typescript/index.d.ts`, `sdk-typescript/arcflow/workflow.ts`, `sdk-typescript/arcflow/agent.ts`, `sdk-typescript/arcflow/provider.ts`, `sdk-typescript/arcflow/memory.ts`, `sdk-typescript/arcflow/external.ts`, `sdk-typescript/arcflow/stream.ts`, `sdk-typescript/arcflow/hitl.ts`, `sdk-typescript/arcflow/trace.ts`; capabilities reference §17, Appendix I.
