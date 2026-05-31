@@ -93,3 +93,76 @@ from arcflow.external import ExternalBindingConfig, report_outcome
 
 # ExternalOutcome.report
 response = report_outcome(
+    "550e8400-e29b-41d4-a716-446655440000",
+    "gov_portal_submit",
+    {
+        "status": "success",
+        "fields": {"confirmation_number": "APP-2026-9912"},
+    },
+    base_url="http://localhost:8080",
+)
+print(response)
+```
+
+Outcome statuses:
+
+| status | Meaning |
+|--------|---------|
+| `success` | External work succeeded; engine resumes workflow |
+| `failed` | Fatal external error; recovery policy applies |
+| `needs_input` | More user input required; may trigger agent re-ask |
+
+Optional fields: `error_code`, `fields` (object), `artifact_refs` (string array).
+
+Requires environment variables:
+
+| Variable | Purpose |
+|----------|---------|
+| `ARCFLOW_SERVER_API_KEY` | Bearer auth on callback POST |
+| `ARCFLOW_WEBHOOK_SECRET` | HMAC signing secret (must match server) |
+
+See `examples/external/playwright_stub_callback.py` for a CLI stub.
+
+## HTTP callback (without SDK)
+
+```bash
+BODY='{"binding_id":"payment_webhook","status":"success","fields":{"transaction_id":"tx_123"}}'
+SIG="sha256=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$ARCFLOW_WEBHOOK_SECRET" | awk '{print $2}')"
+
+curl -sS -X POST "http://localhost:8080/v1/runs/${RUN_ID}/external/payment_webhook" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${ARCFLOW_SERVER_API_KEY}" \
+  -H "X-ArcFlow-Signature: ${SIG}" \
+  -d "$BODY"
+```
+
+Send `X-Idempotency-Key` on retries; duplicate keys return `202` with `already_processed`.
+
+## Async vs sync modes
+
+| Mode | Behavior |
+|------|----------|
+| `async_callback` | Step completes in engine; run waits at `Interrupted` until callback |
+| `sync_tool` | External work modeled as in-process tool completion (no HTTP wait) |
+
+Production integrations (Playwright workers, payment processors) typically use `async_callback`.
+
+## Recovery policy
+
+When status is `failed` or `needs_input`, `recovery` controls the next action:
+
+| Field | Values | Effect |
+|-------|--------|--------|
+| `max_retries` | integer | Retry external attempt; emits `ExternalRecoveryTriggered` |
+| `on_needs_input` | `agent_reask`, `fail_run` | Re-enter agent loop or fail |
+| `on_fatal` | `hitl_escalate`, `fail_run` | Escalate to HITL or fail run |
+
+## Related pages
+
+- [Webhook security](webhook-security.md) for HMAC verification and logging rules
+- [HITL overview](../human-in-the-loop/hitl-overview.md) when `on_fatal` is `hitl_escalate`
+- [Recovery and resume](../reliability/recovery-and-resume.md) for Postgres requirements
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §9.1, §9.2; `sdk-python/arcflow/external.py`, `server/arcflow-server/src/handlers/external.rs`, `runtime/arcflow-core/src/external/`, `examples/external/`.
