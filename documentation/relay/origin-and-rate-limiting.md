@@ -93,3 +93,27 @@ When exceeded, Relay returns **429**:
   }
 }
 ```
+
+### Tuning guidance
+
+| Site type | Suggested RPM |
+|-----------|---------------|
+| Internal demo | 60 |
+| Customer support widget | 120 to 300 |
+| High-traffic marketing page | Scale Relay replicas; raise RPM with monitoring |
+
+Rate limits protect upstream LLM cost and server capacity. They do not replace WAF or bot management at the CDN edge.
+
+## Security implications
+
+- **Wrong Origin config** is the most common production misconfiguration. Symptom: browser CORS-like failures with 403 from Relay.
+- **Leaked site token** plus correct Origin still allows abuse within RPM. Rotate token immediately via admin rotate endpoint.
+- Site tokens are not LLM keys, but they still authorize workflow runs billed to your infrastructure.
+
+## Related pages
+
+- [static-product/site-lifecycle.md](../static-product/site-lifecycle.md)
+- [static-product/security-model.md](../static-product/security-model.md)
+- [byo-relay-deployment.md](byo-relay-deployment.md)
+
+**Source:** capabilities reference §14.2; `server/arcflow-relay/src/middleware/site_auth.rs`, `server/arcflow-relay/src/state/mod.rs`; K-08; dashboard spec [05-security-model.md](../../dashboard/spec/05-security-model.md).
