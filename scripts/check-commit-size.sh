@@ -10,7 +10,8 @@ code_path() {
   local f="$1"
   [[ "$f" =~ \.(rs|json|toml|ya?ml|sh)$ ]] || return 1
   case "$f" in
-    Cargo.lock|package-lock.json|docs/*|arcflow_sprint*) return 1 ;;
+    Cargo.lock|docs/*|arcflow_sprint*) return 1 ;;
+    *package-lock.json) return 1 ;;
     *) return 0 ;;
   esac
 }
