@@ -93,3 +93,9 @@ Full matrix: capabilities reference Appendix I.
 
 - [Surfaces and when to use them](surfaces-and-when-to-use-them.md) for Postgres and Relay requirements
 - [Execution model](execution-model.md) for graph and recovery behavior
+- [SEC-1 and data safety](sec-1-and-data-safety.md) for trace policy
+- [home/index.md](../home/index.md) for entry paths
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §26 (Maturity matrix), §27 (Known gaps and deferred work).
