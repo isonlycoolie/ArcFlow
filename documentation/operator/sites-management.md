@@ -93,3 +93,68 @@ curl -sf -X POST "$ARCFLOW_ADMIN_URL/v1/admin/sites/s_abc123/workflows/chat/publ
     "instructions": "Answer only from ingested knowledge. Say when unsure.",
     "version": "1.0.0"
   }'
+```
+
+Frontend static SDK:
+
+```typescript
+import { runPublished } from "@arcflow/static";
+
+const result = await runPublished("chat", "^1.0.0", userMessage, {
+  mode: "relay",
+  relayUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
+  siteId: import.meta.env.VITE_ARCFLOW_SITE_ID,
+  siteToken: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
+});
+```
+
+## Embed credentials in frontend
+
+Production static sites inject env at build time:
+
+```bash
+VITE_ARCFLOW_RELAY_URL=https://relay.example.com/v1/sites/s_abc123
+VITE_ARCFLOW_SITE_ID=s_abc123
+VITE_ARCFLOW_SITE_TOKEN=st_live_xxxxxxxx
+```
+
+Never embed `ARCFLOW_ADMIN_API_KEY` or LLM keys in the browser bundle.
+
+## Verify end-to-end
+
+```bash
+bash scripts/static-smoke.sh
+```
+
+Manual checks:
+
+1. Chat from allowed origin succeeds.
+2. Same request from wrong origin returns 403 at Relay.
+3. `GET .../runs/{id}/trace` contains metadata events only (SEC-1).
+
+## Monitor usage
+
+Daily usage aggregates land in `arcflow_site_usage_daily` (migration 000007). Tier 2 dashboard charts read this table. Until dashboard ships, query Postgres directly for run counts per site if needed.
+
+Watch Relay logs for 429 rate limit responses.
+
+## Typical operator flow
+
+1. Create site, copy env vars.
+2. Ingest knowledge documents.
+3. Write chat instructions, publish workflow.
+4. Patch origins to match deployed frontend URL.
+5. Smoke test from production origin.
+
+Matches `dashboard/spec/02-information-architecture.md` default operator flow.
+
+## Related pages
+
+- [Admin API reference](admin-api-reference.md)
+- [Token rotation](token-rotation.md)
+- [Relay deployment](../deployment/relay-deployment.md)
+- [Knowledge ingestion guide](../guides/memory-and-rag/knowledge-ingestion.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §13.1; [dashboard/spec/02-information-architecture.md](../../dashboard/spec/02-information-architecture.md), [03-admin-api-contract.md](../../dashboard/spec/03-admin-api-contract.md).
