@@ -93,3 +93,13 @@ foreach ($rel in @(
     "examples\langchain\migration_demo.py"
 )) {
     if (-not (Test-Path (Join-Path $Root $rel))) {
+        Write-Host "MISSING example on disk: $rel"
+        $Fail = 1
+    }
+}
+
+if ($Fail -eq 0) {
+    Write-Host "validate_documentation_claims: OK"
+    exit 0
+}
+exit 1
