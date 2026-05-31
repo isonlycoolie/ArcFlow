@@ -93,3 +93,33 @@ Stub run prints stub answer text plus:
 ```
 
 Full RAG run prints an answer grounded on ingested content. Pass criteria: non-empty `result.output`, `status == "completed"`, and `MemoryRetrieved` when the store contains matching namespace data.
+
+## Trace events you should see
+
+| Event kind | When |
+|------------|------|
+| `WorkflowStarted` | Run begins |
+| `MemoryRetrieved` | Vector query returns chunks (when store populated) |
+| `StepCompleted` | Agent step finishes |
+| `WorkflowCompleted` | Success |
+
+Optional: `MemoryIngested` during separate ingest operations, not during query-only runs.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| No `MemoryRetrieved` events | Empty namespace or stub-only run without ingest | Ingest documents into `doc_qa` namespace or accept stub-only lifecycle events |
+| Qdrant connection errors | Wrong URL or service down | Verify `ARCFLOW_QDRANT_URL` and container health |
+| Generic answers despite ingest | Namespace mismatch | Align `MemoryConfig.namespace` with ingest key |
+| `WorkflowConfigurationError` on memory | Invalid retrieval weights | Ensure dense and sparse weights sum reasonably; see guide |
+
+## Related
+
+| Resource | Link |
+|----------|------|
+| Tutorial track | [Track C](../tutorials/track-c-rag.md) |
+| Static landing-page RAG | [static-chat-widget.md](static-chat-widget.md) |
+| Hybrid retrieval guide | [hybrid retrieval and reranking](../guides/memory-and-rag/hybrid-retrieval-and-reranking.md) |
+
+**Source:** [`examples/rag/document_qa.py`](../../examples/rag/document_qa.py), [`examples/support/ticket_rag_bot.py`](../../examples/support/ticket_rag_bot.py); capabilities reference §25, §28 Track C; [vector RAG pipeline](../guides/memory-and-rag/vector-rag-pipeline.md).
