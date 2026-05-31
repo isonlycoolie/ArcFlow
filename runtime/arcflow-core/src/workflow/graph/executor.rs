@@ -42,6 +42,8 @@ impl GraphExecutor {
     pub fn record_visit(&mut self, node_id: &str) -> Result<(), RuntimeError> {
         let count = self.node_visits.entry(node_id.to_string()).or_insert(0);
         *count += 1;
+        #[cfg(feature = "otel")]
+        crate::tracing::otel_metrics::record_graph_iteration(node_id);
         if *count > self.graph.max_iterations {
             return Err(RuntimeError::InvalidWorkflowDefinition {
                 reason: format!(
