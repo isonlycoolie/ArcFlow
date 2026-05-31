@@ -93,3 +93,17 @@ Sanity check for invalid policy:
 ```python
 from arcflow import ContextPolicy
 from arcflow.exceptions import WorkflowConfigurationError
+
+try:
+    ContextPolicy(include_prior_steps="sometimes")
+except WorkflowConfigurationError:
+    print("Invalid include_prior_steps rejected as expected")
+```
+
+## Next
+
+[03 Graph workflows intro](03-graph-workflows-intro.md) covers conditional routing when linear order is not enough.
+
+## Source
+
+`sdk-python/arcflow/context.py` (`ContextPolicy`, `PriorStepsMode`); [Context policies](../../guides/agents-and-tools/context-policies.md); [04 Context and prior steps](../writing-agents/04-context-and-prior-steps.md).
