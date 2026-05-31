@@ -93,3 +93,40 @@ If the extension provides run commands, trigger run from the editor and open tra
 | Check | Expected |
 |-------|----------|
 | Graph preview | Nodes and edges visible |
+| SDK run | `completed` status |
+| CLI run | Zero exit, run id emitted |
+| Trace kinds | SDK and CLI agree on major kinds |
+| SEC-1 | Trace JSON has no prompt bodies |
+
+## Expected output
+
+SDK:
+
+```
+run_id=<uuid> steps=<n>
+```
+
+CLI trace export: JSON array of events with `kind` or `event_kind` fields per bridge version.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| Extension graph empty | Invalid JSON or unsupported shape | Open `react-preview.arcflow.json` sample |
+| CLI run not found | Wrong path or subcommand | Read `arcflow-cli --help` |
+| Trace mismatch | Different run ids compared | Export trace for same uuid |
+| `TraceNotFoundError` | In-process SDK run without server persist | Use server runtime or same process trace |
+
+## What you learned
+
+Track H connects authoring (IDE graph), execution (CLI), and observability (trace export). Teams use this loop for local debugging before promoting workflows to server registry or static publish.
+
+## Next steps
+
+| Topic | Link |
+|-------|------|
+| Server promotion | [Track B](track-b-server-api.md) |
+| Certification Level 1 | [level-1-workflow-developer](../certification/level-1-workflow-developer.md) |
+| Extension docs | `extensions/vscode-arcflow/README.md` |
+
+**Source:** capabilities reference §28 Track H; `extensions/vscode-arcflow/`, `arcflow-cli`; [`examples/graph/reflection_loop.py`](../../examples/graph/reflection_loop.py); [Track A](track-a-first-workflow.md), [Track D](track-d-graph-workflows.md).
