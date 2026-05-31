@@ -188,3 +188,98 @@ Source of truth: `runtime/arcflow-core/src/tracing/events.rs`. Normative names: 
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
 | `provider_id` | string | Provider slug | Safe |
+| `model_id` | string | Model id | Safe |
+| `tokens` | TokenUsage | Usage counts | Safe |
+| `latency_ms` | u64 | Round-trip time | Safe |
+
+**Emitter:** provider adapter.
+
+### ProviderRateLimited
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `provider_id` | string | Provider slug | Safe |
+| `retry_after_seconds` | u64 optional | Provider hint | Safe |
+
+**Emitter:** provider adapter.
+
+### ProviderError
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `provider_id` | string | Provider slug | Safe |
+| `error_code` | string | Provider or RCS code | Safe |
+| `error_message` | string | Safe summary | Safe if bounded |
+
+**Emitter:** provider adapter.
+
+## Tools
+
+### ToolCallStarted
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `tool_name` | string | Registered tool name | Safe |
+| `input_schema_hash` | string | Hash of input schema, not args | Safe |
+
+**Emitter:** tool executor.
+
+### ToolCallCompleted
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `tool_name` | string | Tool name | Safe |
+| `duration_ms` | u64 | Tool runtime | Safe |
+| `output_size_bytes` | usize | Result size, not payload | Safe |
+
+**Emitter:** tool executor.
+
+### ToolCallFailed
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `tool_name` | string | Tool name | Safe |
+| `duration_ms` | u64 | Time until failure | Safe |
+| `failure_reason` | string | Bounded reason | Safe if bounded |
+| `error_code` | string | RCS code | Safe |
+
+**Emitter:** tool executor.
+
+### ToolInputValidationFailed
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `tool_name` | string | Tool name | Safe |
+| `violation_description` | string | Schema violation summary | Safe if no raw args |
+
+**Emitter:** tool validator.
+
+## Memory
+
+### MemoryWrite
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `agent_name` | string | Agent name | Safe |
+| `memory_type` | string | Backend type slug | Safe |
+| `key` | string | Memory key (avoid PII in keys) | Caution |
+| `duration_ms` | u64 | Operation time | Safe |
+
+**Emitter:** memory coordinator.
+
+### MemoryRead
+
