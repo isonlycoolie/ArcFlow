@@ -6,12 +6,14 @@ use std::sync::{Arc, Mutex};
 use arcflow_core::tracing::PostgresTracePersistence;
 use sqlx::PgPool;
 
+use crate::middleware::principal::{load_static_keys_from_env, StaticKeyMap};
 use crate::store::runs::RunStore;
 use crate::store::workflow_registry::WorkflowRegistryStore;
 
 #[derive(Clone)]
 pub struct AppState {
     pub api_key: String,
+    pub static_runtime_keys: StaticKeyMap,
     pub webhook_secret: Option<String>,
     pub runs: Option<Arc<RunStore>>,
     pub registry: Option<Arc<WorkflowRegistryStore>>,
@@ -59,6 +61,7 @@ impl AppState {
         };
         Self {
             api_key,
+            static_runtime_keys: load_static_keys_from_env(),
             webhook_secret,
             runs,
             registry,
