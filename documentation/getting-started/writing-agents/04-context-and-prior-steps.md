@@ -93,3 +93,29 @@ The researcher policy keeps the first step focused on the user input without emp
 | `result.status` | `"completed"` |
 | `result.step_count` | `2` |
 
+Sanity-check invalid policy values:
+
+```python
+from arcflow import ContextPolicy
+from arcflow.exceptions import WorkflowConfigurationError
+
+try:
+    ContextPolicy(include_prior_steps="sometimes")
+except WorkflowConfigurationError:
+    print("Invalid include_prior_steps rejected as expected")
+```
+
+Trace metadata records sizes, not prompt content. After a run, `ProviderRequestSent` (when using a real provider) includes `prompt_size_bytes`; no instruction or user text is logged (SEC-1).
+
+## Next
+
+| Goal | Document |
+|------|----------|
+| Full context reference and JSON shape | [Context policies](../../guides/agents-and-tools/context-policies.md) |
+| Trace verification walkthrough | [Track A: First workflow](../../tutorials/track-a-first-workflow.md) |
+| Tools and memory on agents | [Defining agents](../../guides/agents-and-tools/defining-agents.md) |
+| OpenAI or other live providers | [Python quickstart](../quickstart-python.md) |
+
+## Source
+
+`sdk-python/arcflow/context.py` (`ContextPolicy`, `PriorStepsMode`); [Context policies](../../guides/agents-and-tools/context-policies.md); [Execution model](../../concepts/execution-model.md); capabilities reference Appendix A (ContextPolicy).
