@@ -93,3 +93,78 @@ For runs that still invoke the agent loop but need deterministic LLM behavior, s
 }
 ```
 
+Stub is for tests only. [First workflow in five minutes](../../getting-started/first-workflow-in-five-minutes.md) uses stub by default.
+
+## Graph validation checklist
+
+For [Graph workflows](graph-workflows.md):
+
+1. Every `step_ref` in `nodes` matches a step `id`
+2. `entry_node` exists in `nodes`
+3. All `edges.from` and `edges.to` reference valid node ids (or `to: null`)
+4. `join_nodes[].wait_for` lists nodes reachable on parallel paths
+5. `max_iterations` is set to a sane bound
+
+Test routing with test mode outputs that match edge conditions:
+
+```json
+{
+  "test": {
+    "steps": {
+      "s-classify": { "output": "billing" },
+      "s-billing": { "output": "billing resolution" },
+      "s-merge": { "output": "merged summary" }
+    }
+  }
+}
+```
+
+## Server test run
+
+```bash
+curl -s -X POST http://localhost:8080/v1/runs \
+  -H "Authorization: Bearer $ARCFLOW_SERVER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d @test-run.json
+```
+
+Poll `GET /v1/runs/{run_id}/trace` and assert event kinds. Traces are SEC-1 safe; see [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md).
+
+## Recovery testing
+
+Linear recovery with test mode:
+
+```json
+{
+  "recovery_enabled": true,
+  "test": {
+    "steps": {
+      "00000000-0000-4000-8000-000000000010": { "output": "step one" },
+      "00000000-0000-4000-8000-000000000011": { "fail_times": 999, "output": "never" }
+    }
+  }
+}
+```
+
+Simulate interrupt mid-run, then resume per [Recovery and resume](../reliability/recovery-and-resume.md). **Graph checkpoint resume is partial (FP-1.01)**; do not treat graph resume tests as release gates until FP-1.01 closes.
+
+## Verification matrix
+
+| Goal | Mechanism | Expected trace |
+|------|-----------|----------------|
+| Happy path | `output` only | `WorkflowCompleted` |
+| Retry | `fail_times: 1`, retry config | `RetryAttempted` |
+| Fallback | primary fail + `fallback_step_id` | `StepFallbackActivated` |
+| Invalid graph | bad `step_ref` | `WorkflowValidationFailed` |
+| Timeout | low `step_timeout_secs` | `TimeoutEnforced` |
+
+## Related pages
+
+- [Linear workflows](linear-workflows.md)
+- [Graph workflows](graph-workflows.md)
+- [Maturity and known gaps](../../concepts/maturity-and-known-gaps.md) (FP-5.04, FP-1.01)
+- [Install and build](../../getting-started/install-and-build.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §4.5, Appendix C (test mode); FP-5.04 CLI validate stub; §27 known gaps.
