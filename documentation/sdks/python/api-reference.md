@@ -93,3 +93,98 @@ Enum: `ALL`, `LAST`, `NONE`.
 Enum: `SESSION`, `SHARED`, `PERSISTENT`, `VECTOR`.
 
 ### MemoryScope
+
+Enum: `AGENT`, `WORKFLOW`, `GLOBAL`.
+
+### MemoryConfig
+
+`MemoryConfig(memory_type, scope=MemoryScope.AGENT, namespace=None, ttl_seconds=None, embedding=None, retrieval=None, chunking=None)`
+
+| Type | Backend | Env var |
+|------|---------|---------|
+| Session / Shared | In-process | none |
+| Persistent | PostgreSQL | `ARCFLOW_POSTGRESQL_URL` |
+| Vector | Qdrant | `ARCFLOW_QDRANT_URL` |
+
+`namespace` is required for persistent and vector types.
+
+### MemoryRetrievalConfig
+
+`MemoryRetrievalConfig(mode="dense", dense_weight=0.7, sparse_weight=0.3, rerank=None, top_k=None)`
+
+Hybrid retrieval for vector memory. `rerank` may be `"cohere"` or `"local"`.
+
+### MemoryChunkingConfig
+
+`MemoryChunkingConfig(strategy="recursive", chunk_size=512, overlap=64)`
+
+### VectorStore (submodule, not in `__all__`)
+
+```python
+from arcflow.memory import VectorStore, ChunkHit
+```
+
+| Method | Returns |
+|--------|---------|
+| `ingest(namespace, key, text)` | Chunk count (`int`) |
+| `search(namespace, query, top_k=5)` | `list[ChunkHit]` |
+
+`ChunkHit` has `text` and `byte_len`.
+
+## Providers
+
+Frozen dataclasses. Credentials from environment only.
+
+| Class | Env var | Constructor |
+|-------|---------|-------------|
+| `OpenAI` | `OPENAI_API_KEY` | `OpenAI(model, max_tokens=..., temperature=...)` |
+| `Anthropic` | `ANTHROPIC_API_KEY` | `Anthropic(model, max_tokens=..., temperature=...)` |
+| `Gemini` | `GEMINI_API_KEY` | `Gemini(model, max_tokens=..., temperature=...)` |
+
+Pass to `workflow.run(..., provider=OpenAI(model="gpt-4o"))`.
+
+## WorkflowResult
+
+| Field | Type | Meaning |
+|-------|------|---------|
+| `output` | `str` | Final step text |
+| `run_id` | `str` | UUID for trace and CLI |
+| `step_count` | `int` | Steps executed |
+| `trace_events` | `tuple[dict, ...]` | Metadata-only RCS events |
+| `status` | `str` | Terminal status (e.g. `completed`) |
+| `approval_key` | `str \| None` | Set when HITL interrupt occurs |
+
+## Trace types
+
+### TraceResult
+
+| Field | Notes |
+|-------|-------|
+| `run_id`, `workflow_name`, `status` | Run identity |
+| `started_at`, `completed_at` | UTC datetimes |
+| `total_duration_seconds`, `total_tokens_consumed` | Aggregates |
+| `steps` | `tuple[StepTrace, ...]` |
+| `warnings` | e.g. dropped trace events |
+
+Methods: `summary()`, `failed_step()`, iteration support.
+
+### StepTrace
+
+Per-step timing, tokens, tool calls, memory ops, optional `StepError`.
+
+### TokenUsage
+
+`prompt_tokens`, `completion_tokens`, `total_tokens`.
+
+### ToolCallTrace
+
+Metadata only: `tool_name`, `status`, `duration_seconds`, `input_schema_hash`, `output_size_bytes`, `error_code`.
+
+### MemoryOperationTrace
+
+`operation`, `memory_type`, `key`, `hit`, `duration_seconds`.
+
+### StepError
+
+`error_code`, `message`.
+
