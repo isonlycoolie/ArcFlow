@@ -93,3 +93,29 @@ Pending → Running → Completed
                  └→ Interrupted (HITL) → (approve) → Running
                  └→ Cancelled
 ```
+
+### Human-in-the-loop
+
+A step with `hitl` config requires `recovery_enabled`. When the gate fires, status becomes `Interrupted`. `GET /v1/runs/{id}` returns interrupt payload with `approval_key` and metadata (no SEC-1 violations). Approver calls `POST /v1/runs/{id}/approve/{approval_key}` with `{ "approved": true, "data": {} }` or rejection with `approved: false`. Approve resumes; reject yields `HumanRejected`; timeout yields `HumanTimeout`.
+
+### Recovery
+
+With `recovery_enabled`, failed or interrupted runs can persist `RecoveryState` in Postgres: `completed_steps`, `failed_at_step_index`, and for graphs `current_node_id`, `graph_iteration_count`, `pending_join`. Linear resume is production-ready. Graph resume dispatch remains partial (FP-1.01).
+
+## Streaming vs polling
+
+SDKs support `run_stream()` with token deltas at the SDK layer; engine emits `StreamChunkReceived` and `TokenEmitted` (counts and sizes only). Server SSE at `GET /v1/runs/{id}/events` is **not implemented (FP-2)**. Server and static browser clients poll run status or trace.
+
+## Test mode
+
+`exec_config.test` with per-step `fail_times`, `output`, and `then_output` drives deterministic runs without live LLM for CI. Useful for retry and fallback traces without provider cost.
+
+## Related pages
+
+- [The RCS contract](the-rcs-contract.md) for workflow and agent types
+- [SEC-1 and data safety](sec-1-and-data-safety.md) for trace contents
+- [Maturity and known gaps](maturity-and-known-gaps.md) for FP-1.01 and FP-2
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §4 (Workflow execution), Appendix F (Run state machines).
