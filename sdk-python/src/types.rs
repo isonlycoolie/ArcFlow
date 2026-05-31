@@ -3,9 +3,10 @@
 use std::collections::HashMap;
 
 use arcflow_core::rcs::types::{
-    AgentDefinition, HitlConfig, MemoryChunkingConfig, MemoryConfig, MemoryRetrievalConfig,
-    MemoryScope, MemoryType, RerankProviderSpec, RetrievalModeSpec, StepDefinition,
-    ToolDefinition, WorkflowDefinition,
+    AgentDefinition, ContextPolicy, HitlConfig, MemoryChunkingConfig, MemoryConfig,
+    MemoryRetrievalConfig, MemoryScope, MemoryType, PriorStepsMode, RerankProviderSpec,
+    RetrievalModeSpec, StepDefinition, ToolDefinition, ToolExecutionConfig, ToolExecutionMode,
+    WorkflowDefinition,
 };
 use pyo3::prelude::*;
 use pyo3::types::{PyList, PyTuple};
@@ -23,6 +24,8 @@ pub struct AgentInput {
     pub instructions: String,
     pub tools: Vec<ToolInput>,
     pub memory: Option<MemoryInput>,
+    pub context: Option<ContextPolicy>,
+    pub tool_execution: Option<ToolExecutionConfig>,
 }
 
 #[derive(Debug, Clone)]
@@ -145,11 +148,63 @@ fn parse_chunking_json(v: &Value) -> Option<MemoryChunkingConfig> {
     })
 }
 
+fn parse_context_json(raw: &str) -> PyResult<ContextPolicy> {
+    let v: Value = serde_json::from_str(raw)
+        .map_err(|e| configuration_error(format!("Invalid context JSON: {e}")))?;
+    let include_prior_steps = match v
+        .get("include_prior_steps")
+        .and_then(|x| x.as_str())
+        .unwrap_or("all")
+    {
+        "all" => PriorStepsMode::All,
+        "last" => PriorStepsMode::Last,
+        "none" => PriorStepsMode::None,
+        other => {
+            return Err(configuration_error(format!(
+                "Unknown include_prior_steps: {other}"
+            )))
+        }
+    };
+    Ok(ContextPolicy {
+        include_prior_steps,
+        include_run_input: v
+            .get("include_run_input")
+            .and_then(|x| x.as_bool())
+            .unwrap_or(true),
+        max_prior_step_chars: v
+            .get("max_prior_step_chars")
+            .and_then(|x| x.as_u64())
+            .unwrap_or(4096) as usize,
+    })
+}
+
+fn parse_tool_execution_json(raw: &str) -> PyResult<ToolExecutionConfig> {
+    let v: Value = serde_json::from_str(raw).map_err(|e| {
+        configuration_error(format!("Invalid tool_execution JSON: {e}"))
+    })?;
+    let mode = match v.get("mode").and_then(|x| x.as_str()).unwrap_or("llm_select") {
+        "legacy_eager" => ToolExecutionMode::LegacyEager,
+        "llm_select" => ToolExecutionMode::LlmSelect,
+        other => {
+            return Err(configuration_error(format!(
+                "Unknown tool_execution.mode: {other}"
+            )))
+        }
+    };
+    Ok(ToolExecutionConfig {
+        mode,
+        max_iterations: v
+            .get("max_iterations")
+            .and_then(|x| x.as_u64())
+            .unwrap_or(5) as u32,
+    })
+}
+
 pub fn parse_agent_tuple(item: Bound<'_, PyAny>) -> PyResult<AgentInput> {
     let tuple = item.downcast::<PyTuple>()?;
-    if tuple.len() != 6 {
+    if tuple.len() != 8 {
         return Err(configuration_error(
-            "Internal agent tuple must have six fields (id, name, role, instructions, tools, memory).",
+            "Internal agent tuple must have eight fields (id, name, role, instructions, tools, memory, context, tool_execution).",
         ));
     }
     let id = parse_uuid("agent_id", tuple.get_item(0)?.extract::<String>()?.as_str())?;
@@ -163,6 +218,15 @@ pub fn parse_agent_tuple(item: Bound<'_, PyAny>) -> PyResult<AgentInput> {
         Some(raw) => Some(parse_memory_json(&raw)?),
         None => None,
     };
+    let context: Option<ContextPolicy> = match tuple.get_item(6)?.extract::<Option<String>>()? {
+        Some(raw) if !raw.is_empty() => Some(parse_context_json(&raw)?),
+        _ => None,
+    };
+    let tool_execution: Option<ToolExecutionConfig> =
+        match tuple.get_item(7)?.extract::<Option<String>>()? {
+            Some(raw) if !raw.is_empty() => Some(parse_tool_execution_json(&raw)?),
+            _ => None,
+        };
     Ok(AgentInput {
         id,
         name: tuple.get_item(1)?.extract()?,
@@ -170,6 +234,8 @@ pub fn parse_agent_tuple(item: Bound<'_, PyAny>) -> PyResult<AgentInput> {
         instructions: tuple.get_item(3)?.extract()?,
         tools,
         memory,
+        context,
+        tool_execution,
     })
 }
 
@@ -268,6 +334,8 @@ pub fn build_workflow(
                 instructions: a.instructions,
                 tools: tool_defs,
                 memory_config,
+                context: a.context.clone(),
+                tool_execution: a.tool_execution.clone(),
             },
         );
     }

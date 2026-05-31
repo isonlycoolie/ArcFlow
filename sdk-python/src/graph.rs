@@ -25,6 +25,8 @@ struct JoinNodePayload {
 struct GraphNodePayload {
     id: String,
     step_id: String,
+    #[serde(default)]
+    outputs: Option<Vec<String>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -47,7 +49,7 @@ pub fn apply_graph_json(workflow: &mut WorkflowDefinition, raw: &str) -> Result<
                 id: n.id.clone(),
                 step_ref,
                 inputs: None,
-                outputs: None,
+                outputs: n.outputs.clone(),
             })
         })
         .collect();

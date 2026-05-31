@@ -29,7 +29,7 @@ class Workflow:
         self._graph_mode = graph
         self._steps: list[Agent] = []
         self._step_rows: list[tuple[str, str, int, str | None, str | None]] = []
-        self._graph_nodes: dict[str, tuple[Agent, str]] = {}
+        self._graph_nodes: dict[str, tuple[Agent, str, list[str] | None]] = {}
         self._graph_edges: list[tuple[str, str | None, str | None]] = []
         self._graph_joins: list[tuple[str, list[str]]] = []
         self._entry_node: str | None = None
@@ -84,7 +84,13 @@ class Workflow:
         self._steps.append(agent)
         return self
 
-    def node(self, node_id: str, agent: Agent) -> Workflow:
+    def node(
+        self,
+        node_id: str,
+        agent: Agent,
+        *,
+        outputs: list[str] | None = None,
+    ) -> Workflow:
         if not self._graph_mode:
             raise WorkflowConfigurationError(
                 "[ArcFlow] node() requires Workflow(graph=True)."
@@ -107,7 +113,13 @@ class Workflow:
                 f"[ArcFlow] Duplicate graph node id '{trimmed}'."
             )
         step_id = str(uuid4())
-        self._graph_nodes[trimmed] = (agent, step_id)
+        out_keys = [k.strip() for k in outputs] if outputs else None
+        if out_keys is not None:
+            if not out_keys or any(not k for k in out_keys):
+                raise WorkflowConfigurationError(
+                    "[ArcFlow] node outputs must be non-empty strings when set."
+                )
+        self._graph_nodes[trimmed] = (agent, step_id, out_keys)
         if self._entry_node is None:
             self._entry_node = trimmed
         return self
@@ -232,8 +244,12 @@ class Workflow:
                 "[ArcFlow] Graph workflow has no entry node."
             )
         nodes = [
-            {"id": node_id, "step_id": step_id}
-            for node_id, (_, step_id) in self._graph_nodes.items()
+            {
+                "id": node_id,
+                "step_id": step_id,
+                **({"outputs": outs} if outs else {}),
+            }
+            for node_id, (_, step_id, outs) in self._graph_nodes.items()
         ]
         edges = [
             {"from": f, "to": t, "condition": c}
@@ -256,7 +272,7 @@ class Workflow:
         if self._graph_mode:
             agents: list[Agent] = []
             rows: list[tuple[str, str, int, str | None, str | None]] = []
-            for order, (node_id, (agent, step_id)) in enumerate(
+            for order, (node_id, (agent, step_id, _)) in enumerate(
                 self._graph_nodes.items(), start=1
             ):
                 agents.append(agent)
@@ -464,6 +480,7 @@ class Workflow:
         input: str,
         *,
         provider: ProviderConfig | None = None,
+        initial_state: dict[str, object] | None = None,
     ) -> WorkflowResult:
         trimmed = input.strip()
         if not trimmed:
@@ -488,6 +505,7 @@ class Workflow:
             workflow_timeout_seconds=self._workflow_timeout_seconds,
             step_timeout_seconds=self._step_timeout_seconds,
             recovery_enabled=self._recovery_enabled,
+            initial_state=initial_state,
         )
         if self._runtime_url:
             from arcflow._internal import remote
