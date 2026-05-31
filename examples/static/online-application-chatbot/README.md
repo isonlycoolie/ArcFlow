@@ -1,42 +1,73 @@
-# Online Application Chatbot
+# Online Application Chatbot (Production)
 
-Static-site example for Phase 2-Pro v2 conversation intake + external callback.
+Multi-turn application intake on a static site — e.g. business license, permit, or onboarding forms. Workflow shape, steps, and external callbacks are **published from the dashboard**; the static frontend only drives conversation turns via Relay.
 
-## Files
+## Who does what
 
-- `arcflow.schedule.yaml` — schedule manifest (validate only)
-- `sample_run.json` — POST body shape reference (inline RCS via `@arcflow/static`)
-- `test_e2e.py` — pytest validation
+| Role | Work |
+|------|------|
+| **Dashboard user** | Publish `online_application` workflow, configure HITL/external bindings |
+| **Frontend developer** | Chat UI, `runPublished()`, optional external callback handler on your backend |
 
-## Static SDK
-
-Use `@arcflow/static` to build the same payload:
+## Production frontend
 
 ```typescript
-import { ArcFlowClient, StepForm, Workflow, resolveWorkflow } from "@arcflow/static";
+import { ArcFlowClient, StepForm } from "@arcflow/static";
 
-const client = new ArcFlowClient({ baseUrl, apiKey, mode: "bff" });
-const wf = resolveWorkflow("online_application", "1.0.0", baseUrl);
-await client.runWorkflow(wf, "Apply for business license", {
-  initialState: new StepForm().addTurn("user", "...").toInitialState(),
+const client = new ArcFlowClient({
+  baseUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
+  apiKey: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
+  mode: "relay",
+});
+
+const form = new StepForm()
+  .addTurn("user", "I need to apply for a business license")
+  .addTurn("assistant", "What is the applicant legal name?");
+
+await client.runPublished("online_application", "^1.0.0", "Apply for business license", {
+  initialState: form.toInitialState(),
 });
 ```
 
-## Run tests
+No inline `Workflow` or `Agent` definitions in the browser bundle.
+
+## Env vars
+
+```bash
+VITE_ARCFLOW_RELAY_URL=https://relay.arcflow.app/v1/sites/s_abc123
+VITE_ARCFLOW_SITE_TOKEN=st_live_xxxxxxxx
+```
+
+## Files in this example
+
+| File | Purpose |
+|------|---------|
+| `arcflow.schedule.yaml` | Schedule manifest (validate only) |
+| `sample_run.json` | Legacy payload shape reference — dashboard owns workflow definition in production |
+| `test_e2e.py` | Structure and optional live callback tests |
+
+## External callback (production)
+
+When a step triggers an external binding (e.g. Playwright form fill), your **backend** receives the webhook and calls ArcFlow server with the server key — never from the static bundle:
+
+```bash
+python examples/external/playwright_stub_callback.py --run-id <run_id>
+```
+
+## Tests
 
 ```bash
 pytest examples/static/online-application-chatbot/test_e2e.py -q
 ```
 
-## Live callback (optional)
+Live callback (requires running server):
 
 ```bash
 export ARCFLOW_E2E=1 ARCFLOW_E2E_RUN_ID=<run_id>
 pytest examples/static/online-application-chatbot/test_e2e.py -q -k live
 ```
 
-## Playwright stub
+## Related
 
-```bash
-python examples/external/playwright_stub_callback.py --run-id <run_id>
-```
+- [Static examples index](../README.md)
+- [RAG upload guide](../../ArcFlow_Improvement_Plans/arcflow-static-product-vision/10-rag-document-upload-guide.md) — if this bot also uses knowledge base docs
