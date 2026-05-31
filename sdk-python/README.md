@@ -156,3 +156,68 @@ result = wf.run("topic", provider=OpenAI(model="gpt-4o"))
 Set `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GEMINI_API_KEY` in the environment. Without `provider=`, workflows use the stub agent (backwards compatible).
 
 See [contracts/guides/providers/getting-started.md](../contracts/guides/providers/getting-started.md).
+
+## LangChain integration (optional)
+
+```bash
+pip install -e ".[langchain]"
+```
+
+```python
+from arcflow import Agent, Workflow
+from arcflow.langchain import FromLangChain, LangChainToArcflow
+
+answer = FromLangChain.prompt(prompt_template, name="answer")
+tool = FromLangChain.tool(lc_tool)
+wf = LangChainToArcflow.convert(compiled_graph, workflow_name="demo")
+rcs_json = LangChainToArcflow.to_rcs_json(compiled_graph)
+```
+
+See [examples/langchain/](../examples/langchain/).
+
+## Common tools (optional)
+
+```python
+from arcflow import Agent
+from arcflow.tools import CommonTools
+
+agent = Agent(
+    name="researcher",
+    role="researcher",
+    instructions="Use built-in tools when helpful.",
+    tools=CommonTools.bundle(),
+)
+```
+
+`CommonTools.bundle()` returns `web_search`, `http_fetch`, and `read_document` stubs suitable for demos and tests.
+
+## External bindings (Phase 2-Pro)
+
+```python
+from arcflow import ExternalBindingConfig, ExternalOutcome
+
+cfg = ExternalBindingConfig(
+    "gov_portal_submit",
+    attach_to_step_id="550e8400-e29b-41d4-a716-446655440000",
+)
+resp = ExternalOutcome.report(
+    run_id,
+    "gov_portal_submit",
+    {"status": "needs_input", "error_code": "INVALID_NAME"},
+)
+```
+
+See [examples/external/](../examples/external/).
+
+## Migration (deprecated import paths)
+
+The top-level packages `arcflow_langchain` and `arcflow_tools` remain for one release with `DeprecationWarning` on import. Use the canonical paths below.
+
+| Deprecated | Canonical |
+|------------|-----------|
+| `from arcflow_langchain import from_langchain_tool` | `FromLangChain.tool(...)` |
+| `from arcflow_langchain import to_arcflow_step` | `FromLangChain.prompt(...)` |
+| `from arcflow_langchain import langgraph_to_arcflow` | `LangChainToArcflow.convert(...)` |
+| `from arcflow_langchain import langgraph_to_rcs_json` | `LangChainToArcflow.to_rcs_json(...)` |
+| `from arcflow_tools import common_tools` | `CommonTools.bundle()` |
+| `report_outcome(...)` | `ExternalOutcome.report(...)` |
