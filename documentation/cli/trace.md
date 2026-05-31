@@ -93,3 +93,14 @@ Events are SEC-1 metadata only (no prompt text).
 ## Exit codes
 
 | Code | Meaning |
+|------|---------|
+| 0 | Trace printed |
+| 1 | Trace not found or invalid file |
+| 2 | Store lock failure |
+
+## Related pages
+
+- [guides/observability/execution-traces.md](../guides/observability/execution-traces.md)
+- [vscode/trace-timeline.md](../vscode/trace-timeline.md)
+
+**Source:** capabilities reference §18, §11.2; `cli/arcflow-cli/src/commands/trace.rs`; Sprint 5 trace store.
