@@ -9,6 +9,8 @@ use crate::tracing::types::TokenUsage;
 
 use super::error::ProviderCallError;
 
+use super::request::ToolCallRequest;
+
 /// Why the model stopped generating.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum FinishReason {
@@ -26,6 +28,8 @@ pub struct ProviderResponse {
     pub tokens: TokenUsage,
     pub model_id: String,
     pub finish_reason: FinishReason,
+    /// Tool calls when the model requests tool execution (Phase 2-Pro).
+    pub tool_calls: Option<Vec<ToolCallRequest>>,
 }
 
 impl ProviderResponse {
