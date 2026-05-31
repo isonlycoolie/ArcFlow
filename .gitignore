@@ -3,6 +3,9 @@
 # Documentation pipeline
 /docs/
 
+# Private webapp (nested repo → github.com/isonlycoolie/ArcFlow-WebApp)
+/webapp/
+
 # Sprint working plans (local only — never commit)
 arcflow_sprint01.md
 arcflow_sprint*.md

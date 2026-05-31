@@ -20,6 +20,7 @@
     <a href="#deployment-modes">Deployment</a> •
     <a href="#sdks--tools">SDKs</a> •
     <a href="#examples">Examples</a> •
+    <a href="documentation/README.md">Documentation</a> •
     <a href="#contracts--api">Contracts</a> •
     <a href="#quick-start">Quick Start</a>
   </strong>
