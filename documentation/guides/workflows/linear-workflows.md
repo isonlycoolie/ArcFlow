@@ -93,3 +93,79 @@ print(result.output)
 
 With [Server API quickstart](../../getting-started/quickstart-server-api.md) prerequisites (Postgres, migrations, API key):
 
+```json
+{
+  "workflow": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "name": "research_pipeline",
+    "execution_mode": "linear",
+    "steps": [
+      { "id": "00000000-0000-4000-8000-000000000010", "agent_id": "00000000-0000-4000-8000-000000000020", "order": 1 },
+      { "id": "00000000-0000-4000-8000-000000000011", "agent_id": "00000000-0000-4000-8000-000000000021", "order": 2 }
+    ]
+  },
+  "agents": [
+    {
+      "id": "00000000-0000-4000-8000-000000000020",
+      "name": "researcher",
+      "role": "Research analyst",
+      "instructions": "Gather facts on the topic."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000021",
+      "name": "writer",
+      "role": "Writer",
+      "instructions": "Summarize the research clearly."
+    }
+  ],
+  "input": "Renewable energy trends in 2026",
+  "exec_config": {
+    "recovery_enabled": true,
+    "workflow_timeout_secs": 600,
+    "step_timeout_secs": 120
+  }
+}
+```
+
+POST to `/v1/runs` with `Authorization: Bearer <ARCFLOW_SERVER_API_KEY>`. Poll `GET /v1/runs/{run_id}` until status is terminal.
+
+## Trace events to expect
+
+A successful linear run typically emits:
+
+```json
+[
+  { "kind": "WorkflowStarted", "run_id": "r1", "workflow_name": "research_pipeline", "step_count": 2 },
+  { "kind": "StepStarted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000010", "step_index": 0, "agent_name": "researcher", "agent_role": "Research analyst" },
+  { "kind": "StepCompleted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000010", "step_index": 0, "duration_ms": 920, "output_size_bytes": 180 },
+  { "kind": "StateCommitted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000010", "committed_step_count": 1 },
+  { "kind": "StepStarted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000011", "step_index": 1, "agent_name": "writer", "agent_role": "Writer" },
+  { "kind": "StepCompleted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000011", "step_index": 1, "duration_ms": 850, "output_size_bytes": 240 },
+  { "kind": "WorkflowCompleted", "run_id": "r1", "duration_ms": 1800 }
+]
+```
+
+Traces are metadata-only per [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md).
+
+## Recovery
+
+When `exec_config.recovery_enabled` is true, linear progress persists to Postgres after each committed step. On resume, the engine continues from the last committed step index (`WorkflowRecoveryStarted`, `WorkflowRecoveryCompleted`). Linear recovery is production-ready. See [Recovery and resume](../reliability/recovery-and-resume.md).
+
+## Optional resilience
+
+| Mechanism | Config location | Guide |
+|-----------|-----------------|-------|
+| Step fallback | `fallback_step_id` on step | [Step fallbacks](step-fallbacks.md) |
+| Retry | `exec_config.retry`, step `retry_policy` | [Retry and backoff](../reliability/retry-and-backoff.md) |
+| Timeouts | `workflow_timeout_secs`, `step_timeout_secs` | [Timeouts](../reliability/timeouts.md) |
+| Validation | Schema + engine validate | [Validation and testing](validation-and-testing.md) |
+
+## Related pages
+
+- [Graph workflows](graph-workflows.md) for conditional routing and joins
+- [The RCS contract](../../concepts/the-rcs-contract.md) for type definitions
+- [Python quickstart](../../getting-started/quickstart-python.md) and [TypeScript quickstart](../../getting-started/quickstart-typescript.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §4.1, §4.2; Appendix A (WorkflowDefinition, StepDefinition).
