@@ -93,3 +93,11 @@ Monitor 429 rates and origin validation failures in Relay logs. Spikes may indic
 Run multiple Relay replicas behind a load balancer. All instances need the same upstream URL and Postgres URL. Rate limiting is per-site in-process; for strict global limits at scale, add edge rate limiting (CDN, API gateway).
 
 ## Related pages
+
+- [Relay security model](../security/relay-security-model.md)
+- [Environment variables reference](environment-variables-reference.md)
+- [Streaming in the browser](../guides/streaming/streaming-in-the-browser.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §14, Appendix H; `docker/docker-compose.prod.yml`, `server/arcflow-relay/`.
