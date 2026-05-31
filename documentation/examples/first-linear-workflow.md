@@ -93,3 +93,36 @@ Example shape (values will differ):
 
 ```
 [stub blog draft and SEO suggestions...]
+```
+
+When you add the verification block, expect `linear workflow checks passed` and `trace kinds ok: [...]`.
+
+## Trace events you should see
+
+| Event kind | When |
+|------------|------|
+| `WorkflowStarted` | Run begins with workflow name and step count |
+| `StepStarted` | Each of the three agents begins |
+| `StepCompleted` | Each agent finishes (three times) |
+| `WorkflowCompleted` | All steps succeed |
+
+Events are metadata only per SEC-1. See [trace event reference](../guides/observability/trace-event-reference.md).
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `ImportError: arcflow` | SDK not installed in active venv | Run `maturin develop` in `sdk-python/` |
+| `WorkflowConfigurationError` | Empty agent name or invalid step order | Match field names in the example script |
+| Empty `trace_events` | Stale native binding | Rebuild the Python extension |
+| `step_count` not 3 | Edited script removed a step | Restore three `.step()` calls |
+
+## Related
+
+| Resource | Link |
+|----------|------|
+| Minimal two-step tutorial | [Track A](../tutorials/track-a-first-workflow.md) |
+| Linear workflow guide | [Linear workflows](../guides/workflows/linear-workflows.md) |
+| Examples catalog | [catalog.md](catalog.md) |
+
+**Source:** [`examples/personal/blog_pipeline.py`](../../examples/personal/blog_pipeline.py), capabilities reference §25; [Track A](../tutorials/track-a-first-workflow.md), §28 Track A; `sdk-python/tests/integration/test_first_five_minutes.py`.
