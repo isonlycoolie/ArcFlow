@@ -93,3 +93,64 @@ SEC-1: traces record schema hashes and byte sizes, not tool arguments or results
 
 ## Python tool registration
 
+Examples use `@tool` decorator patterns:
+
+```python
+from arcflow import Agent, tool, Workflow
+
+@tool
+def search_kb(query: str) -> str:
+    """Search the knowledge base."""
+    return f"Results for: {query}"
+
+agent = Agent(
+    name="researcher",
+    role="Analyst",
+    instructions="Use search_kb when you need facts.",
+    tools=[search_kb],
+    tool_execution={"mode": "llm_select", "max_iterations": 5},
+)
+```
+
+## Multi-tool turns
+
+The model may request multiple tools in one provider response. The runtime executes each validated call before the next provider round. Order is deterministic within the engine implementation; do not rely on cross-tool side effects for correctness.
+
+## Provider errors during tool loop
+
+| Event | Meaning |
+|-------|---------|
+| `ProviderRateLimited` | Backoff or retry per [Retry and backoff](../reliability/retry-and-backoff.md) |
+| `ProviderError` | Terminal if not recovered |
+| `ToolCallFailed` | Handler threw or returned error |
+
+Rate limits may include `retry_after_seconds` in trace metadata.
+
+## Testing tool loops
+
+Use stub provider and test mode to avoid live API:
+
+```json
+{
+  "exec_config": {
+    "test": {
+      "steps": {
+        "s1": { "output": "Final answer without live tools" }
+      }
+    }
+  }
+}
+```
+
+For integration tests with real tool validation, use minimal schemas and stub handlers in SDK examples under `examples/`.
+
+## Related pages
+
+- [Defining agents](defining-agents.md)
+- [Provider configuration](provider-configuration.md)
+- [Validation and testing](../workflows/validation-and-testing.md)
+- [Vector RAG pipeline](../memory-and-rag/vector-rag-pipeline.md) (retrieval as memory, not custom tools)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §5.2; Appendix A (ToolExecutionConfig); Appendix D (tool trace events); K-14 default LlmSelect.
