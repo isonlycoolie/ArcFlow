@@ -1,14 +1,15 @@
-"""Unit tests for arcflow_langchain (no langchain-core required for mocks)."""
+"""Unit tests for arcflow.langchain (no langchain-core required for mocks)."""
 
 from __future__ import annotations
 
 import json
-from typing import Any
+import warnings
 
 import pytest
 
 from arcflow import Tool, Workflow
 from arcflow.exceptions import WorkflowConfigurationError
+from arcflow.langchain import FromLangChain, LangChainToArcflow
 
 
 class _MockLangChainTool:
@@ -51,28 +52,28 @@ def test_import_without_langchain_core(monkeypatch: pytest.MonkeyPatch) -> None:
         return real_import(name, *args, **kwargs)
 
     monkeypatch.setattr(builtins, "__import__", _fake_import)
-    from arcflow_langchain._deps import require_langchain_core
+    from arcflow.langchain.deps import require_langchain_core
 
     with pytest.raises(ImportError, match=r"langchain-core"):
         require_langchain_core()
 
 
 def test_from_langchain_tool_mock(monkeypatch: pytest.MonkeyPatch) -> None:
-    import arcflow_langchain.adapter as adapter_mod
+    import arcflow.langchain.tool_adapter as adapter_mod
 
     monkeypatch.setattr(adapter_mod, "require_langchain_core", lambda: None)
-    tool = adapter_mod.from_langchain_tool(_MockLangChainTool())
+    tool = FromLangChain.tool(_MockLangChainTool())
     assert isinstance(tool, Tool)
     assert tool.execute({"query": "hello"}) == "ok:hello"
 
 
 def test_from_langchain_tool_in_workflow_test(monkeypatch: pytest.MonkeyPatch) -> None:
-    import arcflow_langchain.adapter as adapter_mod
+    import arcflow.langchain.tool_adapter as adapter_mod
 
     monkeypatch.setattr(adapter_mod, "require_langchain_core", lambda: None)
     from arcflow import Agent
 
-    tool = adapter_mod.from_langchain_tool(_MockLangChainTool())
+    tool = FromLangChain.tool(_MockLangChainTool())
     agent = Agent(
         name="researcher",
         role="analyst",
@@ -93,15 +94,14 @@ def test_from_langchain_tool_in_workflow_test(monkeypatch: pytest.MonkeyPatch) -
 
 
 def test_langgraph_rcs_validates_against_schema(monkeypatch: pytest.MonkeyPatch) -> None:
-    import json
     from pathlib import Path
 
     import jsonschema
 
-    import arcflow_langchain.langgraph_convert as lg_mod
+    import arcflow.langchain.graph_convert as lg_mod
 
     monkeypatch.setattr(lg_mod, "require_langchain_core", lambda: None)
-    raw = lg_mod.langgraph_to_rcs_json(_MockLangGraph(), workflow_name="demo")
+    raw = LangChainToArcflow.to_rcs_json(_MockLangGraph(), workflow_name="demo")
     body = json.loads(raw)
     schema_path = (
         Path(__file__).resolve().parents[3]
@@ -114,29 +114,43 @@ def test_langgraph_rcs_validates_against_schema(monkeypatch: pytest.MonkeyPatch)
     jsonschema.validate(instance=body, schema=schema)
 
 
-def test_arcflow_langchain_shim_import() -> None:
-    from arcflow.langchain import from_langchain_tool, to_arcflow_step
+def test_canonical_import_no_deprecation_warning() -> None:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", DeprecationWarning)
+        from arcflow.langchain import FromLangChain as _fl  # noqa: F401
 
-    assert callable(from_langchain_tool)
-    assert callable(to_arcflow_step)
+        assert _fl.prompt is not None
+
+
+def test_deprecated_arcflow_langchain_import_warns() -> None:
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        import importlib
+
+        import arcflow_langchain
+
+        importlib.reload(arcflow_langchain)
+    assert any(
+        issubclass(w.category, DeprecationWarning) for w in caught
+    )
 
 
 def test_to_arcflow_step_mock(monkeypatch: pytest.MonkeyPatch) -> None:
-    import arcflow_langchain.prompts as prompts_mod
+    import arcflow.langchain.prompt_adapter as prompts_mod
 
     monkeypatch.setattr(prompts_mod, "require_langchain_core", lambda: None)
-    agent = prompts_mod.to_arcflow_step(_MockPrompt(), name="answer")
+    agent = FromLangChain.prompt(_MockPrompt(), name="answer")
     assert agent.name == "answer"
     assert "{question}" in agent.instructions
 
 
 def test_langgraph_three_node_rcs(monkeypatch: pytest.MonkeyPatch) -> None:
-    import arcflow_langchain.langgraph_convert as lg_mod
+    import arcflow.langchain.graph_convert as lg_mod
 
     monkeypatch.setattr(lg_mod, "require_langchain_core", lambda: None)
-    wf = lg_mod.langgraph_to_arcflow(_MockLangGraph(), workflow_name="demo")
+    wf = LangChainToArcflow.convert(_MockLangGraph(), workflow_name="demo")
     assert isinstance(wf, Workflow)
-    raw = lg_mod.langgraph_to_rcs_json(_MockLangGraph(), workflow_name="demo")
+    raw = LangChainToArcflow.to_rcs_json(_MockLangGraph(), workflow_name="demo")
     body = json.loads(raw)
     assert body["execution_mode"] == "graph"
     assert body["name"] == "demo"
@@ -148,8 +162,29 @@ def test_langgraph_three_node_rcs(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_langgraph_empty_nodes_raises(monkeypatch: pytest.MonkeyPatch) -> None:
-    import arcflow_langchain.langgraph_convert as lg_mod
+    import arcflow.langchain.graph_convert as lg_mod
 
     monkeypatch.setattr(lg_mod, "require_langchain_core", lambda: None)
     with pytest.raises(WorkflowConfigurationError, match=r"at least one node"):
-        lg_mod.langgraph_to_arcflow(type("G", (), {"nodes": {}})())
+        LangChainToArcflow.convert(type("G", (), {"nodes": {}})())
+
+
+def test_common_tools_bundle() -> None:
+    from arcflow.tools import CommonTools
+
+    tools = CommonTools.bundle()
+    assert len(tools) == 3
+    assert {t.name for t in tools} == {"web_search", "http_fetch", "read_document"}
+
+
+def test_deprecated_arcflow_tools_import_warns() -> None:
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        import importlib
+
+        import arcflow_tools
+
+        importlib.reload(arcflow_tools)
+    assert any(
+        issubclass(w.category, DeprecationWarning) for w in caught
+    )
