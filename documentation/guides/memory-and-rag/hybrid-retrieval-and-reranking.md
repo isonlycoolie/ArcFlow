@@ -93,3 +93,68 @@ Disable rerank during dev to reduce dependencies:
 
 ```json
 {
+  "retrieval": {
+    "mode": "hybrid",
+    "top_k": 5
+  }
+}
+```
+
+(Omit `rerank` object entirely.)
+
+## Full memory_config example
+
+```json
+{
+  "memory_type": "vector",
+  "scope": "workflow",
+  "namespace": "product-docs",
+  "embedding": "openai/text-embedding-3-small",
+  "retrieval": {
+    "mode": "hybrid",
+    "top_k": 8,
+    "dense_weight": 0.65,
+    "sparse_weight": 0.35,
+    "rerank": {
+      "provider": "cohere",
+      "model": "rerank-english-v3.0",
+      "top_n": 4
+    }
+  },
+  "chunking": {
+    "chunk_size": 512,
+    "chunk_overlap": 64
+  }
+}
+```
+
+## Tuning workflow
+
+1. Ingest representative docs ([Knowledge ingestion](knowledge-ingestion.md))
+2. Run fixed queries with `top_k=12`, no rerank; record answers
+3. Enable hybrid; sweep weights in 0.1 steps on eval set
+4. Add rerank with `top_n=4`; compare quality vs latency
+5. Lock config in registry-published chat workflow
+
+Trace metadata to watch:
+
+```json
+{ "kind": "MemoryRetrieved", "chunk_count": 4, "total_bytes": 3100 }
+```
+
+Lower `total_bytes` after rerank usually means tighter context and faster provider turns.
+
+## Static product note
+
+Site knowledge ingests into site `kb_namespace`. Published chat agents should use the same namespace in `memory_config` so browser runs retrieve the operator-ingested corpus. See [Workflow registry](../workflows/workflow-registry.md).
+
+## Related pages
+
+- [Vector RAG pipeline](vector-rag-pipeline.md)
+- [Provider configuration](../agents-and-tools/provider-configuration.md)
+- [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md)
+- [Validation and testing](../workflows/validation-and-testing.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §6.2, §6.4; Appendix A (MemoryRetrievalConfig); Appendix H (`ARCFLOW_QDRANT_HYBRID`, `COHERE_API_KEY`).
