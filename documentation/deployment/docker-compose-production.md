@@ -93,3 +93,29 @@ docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.otel.y
 Set `ARCFLOW_OTEL_ENABLED=true` and `ARCFLOW_OTLP_ENDPOINT` on the server. OTel metrics remain alpha under FP-4; core operation does not require them.
 
 See `docker/observability-otel.md` and [OpenTelemetry guide](../guides/observability/opentelemetry.md).
+
+## When to prefer Kubernetes over Compose
+
+Compose suits single-node or small teams. Move to Kubernetes when you need:
+
+- Horizontal pod autoscaling for server or relay
+- Managed Postgres/Qdrant instead of container volumes
+- Secret stores (Vault, cloud SM) integrated at pod level
+- Zero-downtime rolling deploys with readiness probes
+
+Translate the same startup order: migrate job as init container or Helm pre-hook, then server Deployment with `/ready` probe.
+
+## HTTPS and network boundary
+
+Compose exposes plain HTTP on 8080 and 8090. Terminate TLS at a reverse proxy or cloud load balancer. Restrict Postgres and Qdrant ports to internal networks only in production.
+
+## Related pages
+
+- [Server deployment](server-deployment.md)
+- [Relay deployment](relay-deployment.md)
+- [Production checklist](production-checklist.md)
+- [Self-hosted security](../security/self-hosted-security.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §23.1; `docker/docker-compose.prod.yml`, `server/arcflow-server/Dockerfile`.
