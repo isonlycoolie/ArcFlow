@@ -26,3 +26,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  static-demo:
+    image: nginx:alpine
+    ports:
+      - "3000:80"
+    volumes:
+      - ../examples/static/online-application-chatbot:/usr/share/nginx/html:ro
+    depends_on:
+      - arcflow-server
