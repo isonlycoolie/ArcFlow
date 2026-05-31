@@ -93,3 +93,32 @@ python common_tools_demo.py
 ```
 
 ## Verify
+
+| Check | Expected |
+|-------|----------|
+| Agent construction | Three tools attached, no duplicate name error |
+| No network keys | Run completes; tool results are stub or JSON error strings |
+| Local-only mode | With `ARCFLOW_EMBEDDING_LOCAL_ONLY=1`, search returns stub JSON |
+
+Inspect tool names on the agent:
+
+```python
+from arcflow.tools import CommonTools
+
+names = [t.name for t in CommonTools.bundle()]
+print(names)
+```
+
+Expected: `['web_search', 'http_fetch', 'read_document']`.
+
+## Next
+
+| Goal | Document |
+|------|----------|
+| Full tool loop reference | [Tool execution loop](../../guides/agents-and-tools/tool-execution-loop.md) |
+| Provider-backed tool selection | [Python quickstart](../quickstart-python.md) |
+| LangChain tool import | `arcflow.langchain.from_langchain_tool` |
+
+## Source
+
+`sdk-python/arcflow/tools/common.py` and `sdk-python/arcflow/tools/__init__.py` on `feat/sdk-pascalcase-facades`; `sdk-python/arcflow_tools/__init__.py` on `main`; facade migration table in `sdk-python/README.md` on the facade branch.
