@@ -43,4 +43,6 @@ pub struct ExecutionContext<'a, 's> {
     pub test_attempt: u32,
     /// Optional per-run stream channel (Phase 2.1).
     pub stream_tx: Option<StreamChannelSender>,
+    /// Serialized graph state for context assembly (Phase 2-Pro).
+    pub graph_state: Option<String>,
 }

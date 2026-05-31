@@ -104,6 +104,7 @@ mod tests {
                 tokens: TokenUsage::default(),
                 model_id: self.model_id().to_string(),
                 finish_reason: FinishReason::Stop,
+                tool_calls: None,
             })
         }
 
@@ -139,6 +140,8 @@ mod tests {
             instructions: "Write.".into(),
             tools: None,
             memory_config: None,
+            context: None,
+            tool_execution: None,
         };
         let mut agents = HashMap::new();
         agents.insert(agent_id, agent);
