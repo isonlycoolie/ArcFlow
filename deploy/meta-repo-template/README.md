@@ -2,6 +2,15 @@
 
 Private meta-repo: submodules OSS runtime + operator dashboard.
 
+## Submodule URLs
+
+| Submodule | Path | Repository |
+|-----------|------|------------|
+| ArcFlow OSS | `arcflow/` | https://github.com/isonlycoolie/ArcFlow.git |
+| ArcFlow Dashboard | `dashboard/` | https://github.com/isonlycoolie/ArcFlow-Dashboard.git |
+
+Copy [`.gitmodules`](.gitmodules) to your meta-repo root and run `git submodule update --init --recursive`.
+
 ## Setup
 
 ```bash
@@ -15,6 +24,15 @@ npm install && npm run dev
 
 Open http://localhost:5174 and set admin URL `http://localhost:8080` with `ARCFLOW_ADMIN_API_KEY` from compose.
 
+Admin API contract (in OSS submodule): `arcflow/dashboard/spec/03-admin-api-contract.md`.
+
 ## Release tags
 
-Pin submodule SHAs on each release tag so server and dashboard stay aligned.
+Pin submodule SHAs on each release tag so server and dashboard stay aligned:
+
+```bash
+cd arcflow && git checkout <oss-sha> && cd ../dashboard && git checkout <dashboard-sha> && cd ..
+git add arcflow dashboard
+git commit -m "chore: pin arcflow and dashboard submodules for release"
+git tag v1.0.0
+```
