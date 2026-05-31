@@ -93,3 +93,16 @@ On the examples restructure branch the same wiring appears in `examples/rag/memo
 
 ## Verify
 
+| Check | Expected |
+|-------|----------|
+| `MemoryConfig(MemoryType.VECTOR, MemoryScope.AGENT)` without namespace | `MemoryConfigurationError` |
+| `MemoryConfig(MemoryType.SESSION, MemoryScope.AGENT, namespace="scratch")` | Constructs; `namespace` is `"scratch"` |
+| Vector config with `embedding="stub/8"` | Constructs; no env vars required for the enum exercise |
+
+## Next
+
+[02 Session and shared memory](02-session-and-shared-memory.md) covers in-run backends that do not need Qdrant or Postgres.
+
+## Source
+
+`sdk-python/arcflow/memory.py` (`MemoryType`, `MemoryScope`, `MemoryConfig`); [Memory types](../../guides/memory-and-rag/memory-types.md); [`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py).
