@@ -1,0 +1,95 @@
+# Python SDK installation
+
+**Audience:** `[developer]`
+
+The Python SDK ships as a native extension built with maturin against `arcflow-core`. There is no published PyPI wheel in this repository workflow; you build from source in the monorepo or from a release artifact your team provides.
+
+## Requirements
+
+| Requirement | Version / notes |
+|-------------|-----------------|
+| Python | 3.9 or newer |
+| Rust toolchain | `rustup` with a working linker (MSVC on Windows) |
+| pip | Current pip for editable install |
+| maturin | Builds and installs the PyO3 extension |
+
+Optional for memory backends and server integration:
+
+| Backend | Environment variable |
+|---------|---------------------|
+| PostgreSQL (persistent memory, recovery) | `ARCFLOW_POSTGRESQL_URL` |
+| Qdrant (vector memory) | `ARCFLOW_QDRANT_URL` |
+| OTLP trace export | `ARCFLOW_OTLP_ENDPOINT` |
+
+## Install from repository root
+
+```bash
+cd sdk-python
+pip install maturin
+maturin develop
+pip install -e ".[dev]"
+```
+
+Verify:
+
+```bash
+python -c "from arcflow import Agent, Workflow; print('import ok')"
+```
+
+## Virtual environment (recommended)
+
+### macOS and Linux
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+cd sdk-python
+pip install maturin
+maturin develop
+pip install -e ".[dev]"
+```
+
+### Windows (PowerShell)
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+cd sdk-python
+pip install maturin
+maturin develop
+pip install -e ".[dev]"
+```
+
+On Windows, install [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with the C++ workload so Rust native crates link correctly.
+
+## LangChain adapter (optional)
+
+LangChain conversion lives in the `arcflow_langchain` package inside `sdk-python/`. It is not installed by default unless your editable install includes it:
+
+```bash
+pip install -e ".[dev,langchain]"
+```
+
+Import path:
+
+```python
+from arcflow.langchain import from_langchain_tool, langgraph_to_arcflow
+```
+
+If the extra is not installed, `import arcflow.langchain` fails with a missing dependency error.
+
+## Local memory stack (Docker)
+
+For persistent or vector memory during development:
+
+```bash
+docker compose -f docker/docker-compose.dev.yml up -d
+export ARCFLOW_POSTGRESQL_URL=postgresql://arcflow:arcflow@localhost:5432/arcflow
+export ARCFLOW_QDRANT_URL=http://localhost:6333
+```
+
+Session and shared memory types work without Docker.
+
+## Provider API keys
+
+Set keys in the environment before calling `run(..., provider=...)`:
