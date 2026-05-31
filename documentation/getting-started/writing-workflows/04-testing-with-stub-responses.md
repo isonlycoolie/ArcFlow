@@ -93,3 +93,41 @@ Failure recovery stub (single step):
 
 ```python
 from arcflow import Agent, Workflow
+
+agent = Agent(name="writer", role="Writer", instructions="Write.")
+wf = Workflow("fail-times-demo").step(agent)
+
+results = wf.test(
+    [
+        {
+            "name": "recover after stub failures",
+            "input": "hello",
+            "expected_output": "recovered",
+            "stub_responses": {
+                "step_1": {"fail_times": 2, "then_output": "recovered"},
+            },
+        }
+    ]
+)
+print(results[0]["passed"], results[0]["output"])
+```
+
+Expected: `True recovered`.
+
+Optional pytest marker (requires `arcflow.testing.pytest_plugin`):
+
+```python
+import pytest
+
+pytestmark = pytest.mark.arcflow_stub_responses(step_1={"output": "from-marker"})
+```
+
+See `sdk-python/tests/test_workflow_test.py` for full fixture examples.
+
+## Next
+
+[05 Retry and timeouts basics](05-retry-and-timeouts-basics.md) configures runtime retry and timeout limits that pair with test mode for failure drills.
+
+## Source
+
+`sdk-python/arcflow/workflow.py` (`test`); `sdk-python/arcflow/testing/case_helpers.py`; `sdk-python/tests/test_workflow_test.py`, `sdk-python/tests/test_workflow_test_fail_times.py`; [Validation and testing](../../guides/workflows/validation-and-testing.md).
