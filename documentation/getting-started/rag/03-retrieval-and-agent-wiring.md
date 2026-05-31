@@ -93,3 +93,15 @@ Assertion used in [Track C](../../tutorials/track-c-rag.md):
 
 ```python
 kinds = {e.get("event_kind") for e in result.trace_events}
+assert "MemoryRetrieved" in kinds, f"missing MemoryRetrieved; got {kinds}"
+```
+
+With a live LLM provider, answers should reference ingested facts. With stub provider, focus on trace presence and completed status.
+
+## Next
+
+[04 Hybrid retrieval intro](04-hybrid-retrieval-intro.md) explains dense versus hybrid mode and environment flags.
+
+## Source
+
+[`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py); `examples/rag/memory_guide_qa.py` (restructure branch); [Track C: RAG and vector memory](../../tutorials/track-c-rag.md); [RAG chatbot example](../../examples/rag-chatbot.md).
