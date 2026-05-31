@@ -93,3 +93,88 @@ The resolver picks the highest matching version per semver rules. Pin exact vers
 ## Set alias
 
 Point `latest` (or any alias name) at a concrete version:
+
+```http
+POST /v1/workflows/chat/aliases/latest
+Authorization: Bearer <ARCFLOW_SERVER_API_KEY>
+Content-Type: application/json
+```
+
+```json
+{
+  "version": "1.0.2"
+}
+```
+
+## Run via workflow_ref
+
+Clients omit inline `workflow` and pass `workflow_ref` instead (not both):
+
+```json
+{
+  "workflow_ref": {
+    "name": "chat",
+    "version": "^1.0.0"
+  },
+  "input": "What is your refund policy?",
+  "exec_config": {
+    "recovery_enabled": true
+  }
+}
+```
+
+POST `/v1/runs`. Response:
+
+```json
+{
+  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "trace_id": "trace-7c9e6679",
+  "status": "Running"
+}
+```
+
+Missing registry entries return `WorkflowNotFound` (HTTP 404). Invalid definitions return `InvalidWorkflowDefinition` (HTTP 400).
+
+## Static product publish flow
+
+Operators using the static chat product:
+
+1. Create site via admin API (`POST /v1/admin/sites`).
+2. Ingest knowledge to site `kb_namespace`.
+3. Publish chat workflow:
+
+```json
+POST /v1/admin/sites/{site_id}/workflows/chat/publish
+
+{
+  "instructions": "Answer only from ingested knowledge. Say when unsure.",
+  "version": "1.0.1"
+}
+```
+
+4. Browser calls `runPublished("chat", "^1.0.0", userMessage)` through Relay.
+
+Scoped runtime keys (`ARCFLOW_STATIC_RUNTIME_KEYS`) can limit which workflow names a Relay site key may invoke.
+
+## Postgres tables
+
+Registry data lives in `arcflow_workflows` and `arcflow_workflow_aliases`. Apply migrations with `arcflow migrate up` before first publish. Server `/ready` fails if migrations are pending.
+
+## Validation before publish
+
+Validate workflow JSON against [contracts/normative/rcs/v1.schema.json](../../../contracts/normative/rcs/v1.schema.json) in CI. Engine runs `validate_workflow` and `validate_graph` before execution. CLI `arcflow validate` is a stub (**FP-5.04**); see [Validation and testing](validation-and-testing.md).
+
+## Idempotency on runs
+
+Registry resolves workflow at run creation time. Re-posting the same run body with the same `Idempotency-Key` deduplicates within the server window without re-resolving if the original run is returned. New runs always resolve the current highest matching version for the range.
+
+## Related pages
+
+- [Linear workflows](linear-workflows.md) and [Graph workflows](graph-workflows.md) for definition authoring
+- [The RCS contract](../../concepts/the-rcs-contract.md)
+- [Server API quickstart](../../getting-started/quickstart-server-api.md)
+- [Surfaces and when to use them](../../concepts/surfaces-and-when-to-use-them.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §4.4, §13.2; Appendix B (registry routes); Appendix G (migrations 000006).
