@@ -93,3 +93,23 @@ Names like `FromLangChain`, `LangChainToArcflow`, and `CommonTools` do not exist
 Python is the reference SDK surface. TypeScript matches core workflow, graph, recovery, HITL, streaming, and vector ingest, but its `Agent` class does not yet expose tools, memory, or context policy in the TypeScript binding layer. See [parity matrix](../parity-matrix.md) for a full cross-surface comparison.
 
 Known runtime gaps that affect both SDKs:
+
+| Gap | Impact on Python SDK |
+|-----|----------------------|
+| FP-1.01 Graph recovery resume | `resume()` works for linear runs; mid-graph resume incomplete |
+| FP-2 Server SSE | Use `run_stream()` in-process or poll server GET run |
+| Remote runtime + streaming | `run_stream()` raises `WorkflowConfigurationError` when `runtime=` is set |
+
+## Related pages
+
+| Page | Content |
+|------|---------|
+| [Installation](installation.md) | maturin, pip, platform notes |
+| [API reference](api-reference.md) | All `__all__` exports and extension modules |
+| [Exception reference](exception-reference.md) | Error hierarchy and remediation |
+| [Python quickstart](../../getting-started/quickstart-python.md) | First run with traces |
+| [Parity matrix](../parity-matrix.md) | Python vs TypeScript vs server |
+
+## Source
+
+`sdk-python/arcflow/__init__.py`, `sdk-python/README.md`, `sdk-python/arcflow/workflow.py`; capabilities reference §16, §16.1, §16.2.
