@@ -93,3 +93,31 @@ curl -s http://localhost:8080/ready
 
 ## Smoke test scripts
 
+Reference implementations:
+
+```bash
+bash scripts/load-test-runs.sh
+bash scripts/static-smoke.sh   # requires full server + relay + site provisioned
+```
+
+## Stop and reset
+
+```bash
+docker compose -f docker/docker-compose.dev.yml down
+```
+
+To wipe data volumes (destructive):
+
+```bash
+docker compose -f docker/docker-compose.dev.yml down -v
+```
+
+## Related pages
+
+- [Deployment overview](overview.md)
+- [Environment variables reference](environment-variables-reference.md)
+- [Install and build](../getting-started/install-and-build.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §23.1; `docker/docker-compose.dev.yml`.
