@@ -1,0 +1,67 @@
+//! ArcFlow HTTP server library (Phase 2-Pro v2 — testable router).
+
+mod dto;
+mod exec_config;
+pub mod handlers;
+mod middleware;
+mod registry;
+pub mod state;
+mod store;
+
+#[cfg(feature = "debug-endpoints")]
+pub mod debug;
+
+use std::sync::Arc;
+
+use axum::{
+    middleware as axum_middleware,
+    routing::{get, post},
+    Router,
+};
+use tower_http::limit::RequestBodyLimitLayer;
+
+pub use state::AppState;
+
+/// Builds the full Axum router for integration tests and `main`.
+pub fn build_app(state: Arc<AppState>) -> Router {
+    let public = Router::new()
+        .route("/health", get(handlers::health::health))
+        .route("/ready", get(handlers::ready::ready));
+
+    let protected = Router::new()
+        .route("/v1/workflows/run", post(handlers::workflow::run_workflow))
+        .route("/v1/runs", post(handlers::runs::create_run))
+        .route("/v1/runs/:run_id", get(handlers::runs::get_run))
+        .route(
+            "/v1/runs/:run_id/trace",
+            get(handlers::runs::get_run_trace),
+        )
+        .route(
+            "/v1/runs/:run_id/approve/:approval_key",
+            post(handlers::approve::approve_run),
+        )
+        .route(
+            "/v1/runs/:run_id/external/:binding_id",
+            post(handlers::external::external_callback),
+        )
+        .route(
+            "/v1/workflows/:name/versions/:version",
+            get(handlers::registry::get_workflow_version)
+                .put(handlers::registry::publish_workflow),
+        )
+        .route(
+            "/v1/workflows/:name/resolve",
+            get(handlers::registry::resolve_workflow),
+        )
+        .route(
+            "/v1/workflows/:name/aliases/:alias",
+            post(handlers::registry::set_workflow_alias),
+        )
+        .layer(axum_middleware::from_fn_with_state(
+            state.clone(),
+            crate::middleware::auth::require_api_key,
+        ))
+        .layer(RequestBodyLimitLayer::new(1024 * 1024));
+
+    public.merge(protected).with_state(state)
+}

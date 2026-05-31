@@ -1,27 +1,9 @@
 //! ArcFlow runtime HTTP server (Sprint 8 + Phase 1.3).
 
-mod dto;
-mod exec_config;
-mod handlers;
-mod middleware;
-mod registry;
-mod state;
-mod store;
-
-#[cfg(feature = "debug-endpoints")]
-mod debug;
-
 use std::net::SocketAddr;
 use std::sync::Arc;
 
-use axum::{
-    middleware as axum_middleware,
-    routing::{get, post},
-    Router,
-};
-use tower_http::limit::RequestBodyLimitLayer;
-
-use state::AppState;
+use arcflow_server::{build_app, AppState};
 
 #[tokio::main]
 async fn main() {
@@ -37,55 +19,24 @@ async fn main() {
         .unwrap_or(8080);
 
     let state = Arc::new(AppState::from_env(api_key).await);
-    let public = Router::new()
-        .route("/health", get(handlers::health::health))
-        .route("/ready", get(handlers::ready::ready));
-
-    let protected = Router::new()
-        .route("/v1/workflows/run", post(handlers::workflow::run_workflow))
-        .route("/v1/runs", post(handlers::runs::create_run))
-        .route("/v1/runs/:run_id", get(handlers::runs::get_run))
-        .route(
-            "/v1/runs/:run_id/trace",
-            get(handlers::runs::get_run_trace),
-        )
-        .route(
-            "/v1/runs/:run_id/approve/:approval_key",
-            post(handlers::approve::approve_run),
-        )
-        .route(
-            "/v1/workflows/:name/versions/:version",
-            get(handlers::registry::get_workflow_version)
-                .put(handlers::registry::publish_workflow),
-        )
-        .route(
-            "/v1/workflows/:name/resolve",
-            get(handlers::registry::resolve_workflow),
-        )
-        .route(
-            "/v1/workflows/:name/aliases/:alias",
-            post(handlers::registry::set_workflow_alias),
-        )
-        .layer(axum_middleware::from_fn_with_state(
-            state.clone(),
-            crate::middleware::auth::require_api_key,
-        ))
-        .layer(RequestBodyLimitLayer::new(1024 * 1024));
-
-    let app = public.merge(protected).with_state(state.clone());
+    let app = build_app(state.clone());
 
     #[cfg(feature = "debug-endpoints")]
     let app = if std::env::var("ARCFLOW_DEBUG")
         .map(|v| v == "true" || v == "1")
         .unwrap_or(false)
     {
-        use axum::routing::post;
+        use axum::routing::{get, post};
+        use axum::Router;
         let debug_routes = Router::new()
-            .route("/v1/debug/runs/start", post(debug::start_debug_run))
-            .route("/v1/debug/runs/:run_id/state", get(debug::get_debug_state))
+            .route("/v1/debug/runs/start", post(arcflow_server::debug::start_debug_run))
+            .route(
+                "/v1/debug/runs/:run_id/state",
+                get(arcflow_server::debug::get_debug_state),
+            )
             .route(
                 "/v1/debug/runs/:run_id/continue",
-                post(debug::continue_debug_run),
+                post(arcflow_server::debug::continue_debug_run),
             )
             .with_state(state);
         app.merge(debug_routes)
@@ -93,7 +44,6 @@ async fn main() {
         app
     };
 
-    let app = app;
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     tracing::info!(%addr, "arcflow-server listening");
     let listener = tokio::net::TcpListener::bind(addr).await.expect("bind");

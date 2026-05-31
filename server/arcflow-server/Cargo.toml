@@ -4,6 +4,10 @@ version.workspace = true
 edition.workspace = true
 description = "ArcFlow self-hosted HTTP runtime server"
 
+[lib]
+name = "arcflow_server"
+path = "src/lib.rs"
+
 [[bin]]
 name = "arcflow-server"
 path = "src/main.rs"
@@ -29,6 +33,12 @@ sqlx = { version = "0.8", default-features = false, features = [
     "json",
     "chrono",
 ] }
+
+[dev-dependencies]
+axum = { version = "0.7", features = ["json"] }
+tower = { version = "0.5", features = ["util"] }
+http-body-util = "0.1"
+hyper = "1"
 
 [features]
 default = ["debug-endpoints"]
