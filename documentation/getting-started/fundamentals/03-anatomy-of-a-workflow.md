@@ -93,3 +93,4 @@ You should see `[ArcFlow] Cannot run a workflow with no steps.`
 
 [Default runtime vs live LLM](04-stub-vs-live-provider.md): why no API key is required by default and how to opt into OpenAI when you are ready.
 
+**Source:** `sdk-python/arcflow/workflow.py`, `sdk-python/arcflow/result.py`, `sdk-python/tests/integration/test_first_five_minutes.py`; capabilities reference §16.2.
