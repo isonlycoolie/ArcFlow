@@ -423,6 +423,67 @@
       "required": ["entry_node", "nodes", "edges"],
       "additionalProperties": false
     },
+    "ExternalBindingKind": {
+      "type": "string",
+      "enum": ["browser_automation", "schedule_trigger", "custom"],
+      "description": "Kind of developer-owned external system. RCS v0.7."
+    },
+    "ExternalBindingMode": {
+      "type": "string",
+      "enum": ["sync_tool", "async_callback"],
+      "description": "Invocation mode for external binding. RCS v0.7."
+    },
+    "ExternalNeedsInputAction": {
+      "type": "string",
+      "enum": ["agent_reask", "fail_run"],
+      "default": "agent_reask"
+    },
+    "ExternalFatalAction": {
+      "type": "string",
+      "enum": ["hitl_escalate", "fail_run"],
+      "default": "fail_run"
+    },
+    "ExternalRecoveryPolicy": {
+      "type": "object",
+      "properties": {
+        "max_retries": { "type": "integer", "minimum": 0, "default": 0 },
+        "on_needs_input": { "$ref": "#/$defs/ExternalNeedsInputAction" },
+        "on_fatal": { "$ref": "#/$defs/ExternalFatalAction" }
+      },
+      "additionalProperties": false
+    },
+    "ExternalBinding": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "$ref": "#/$defs/ExternalBindingKind" },
+        "attach_to_step_id": { "$ref": "#/$defs/Uuid" },
+        "mode": { "$ref": "#/$defs/ExternalBindingMode" },
+        "outcome_schema": { "type": "object" },
+        "recovery": { "$ref": "#/$defs/ExternalRecoveryPolicy" }
+      },
+      "required": ["id", "kind", "attach_to_step_id", "mode", "outcome_schema"],
+      "additionalProperties": false
+    },
+    "ExternalOutcomeStatus": {
+      "type": "string",
+      "enum": ["success", "failed", "needs_input"]
+    },
+    "ExternalOutcomeReport": {
+      "type": "object",
+      "properties": {
+        "binding_id": { "type": "string" },
+        "status": { "$ref": "#/$defs/ExternalOutcomeStatus" },
+        "error_code": { "type": "string" },
+        "fields": { "type": "object" },
+        "artifact_refs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["binding_id", "status"],
+      "additionalProperties": false
+    },
     "WorkflowDefinition": {
       "type": "object",
       "description": "Complete workflow registered with the runtime. Sprint 2–3, Sprint 7 retry.",
@@ -449,6 +510,11 @@
         "graph": {
           "$ref": "#/$defs/GraphDefinition",
           "description": "Required when execution_mode is graph. Phase 1.1."
+        },
+        "external_bindings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ExternalBinding" },
+          "description": "Developer-owned external systems (RCS v0.7)."
         }
       },
       "required": ["id", "name", "steps"],
