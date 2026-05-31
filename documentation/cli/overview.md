@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[operator]`
 
 # ArcFlow CLI overview
 
@@ -45,7 +44,7 @@ Global flag: `--no-color` disables ANSI colors (CI friendly).
 | `ARCFLOW_POSTGRESQL_URL` | `migrate up` |
 | `ARCFLOW_SERVER_API_KEY` | `trace --server URL` |
 
-Full env reference: capabilities reference Appendix H.
+Full env reference: [Environment variables reference](../deployment/environment-variables-reference.md).
 
 ## Exit codes (summary)
 
@@ -75,5 +74,3 @@ Per-command detail in linked pages.
 | [trace.md](trace.md) | Trace inspection |
 | [migrate.md](migrate.md) | Database migrations |
 | [validate.md](validate.md) | Stub validate + CI workaround |
-
-**Source:** capabilities reference §18; `cli/arcflow-cli/src/main.rs`; Sprint 8 implementation plan.

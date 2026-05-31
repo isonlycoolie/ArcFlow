@@ -1,10 +1,9 @@
 # Relay BYO deployment example
 
-**Audience:** `[operator]` `[platform]`
 
 This walkthrough self-hosts ArcFlow Relay beside your own `arcflow-server` using Docker Compose. Browser clients use site tokens and Origin checks identical to managed Relay.
 
-Primary example: [`examples/relay/byo-docker/`](../../examples/relay/byo-docker/).
+Primary example: [Relay BYO deployment walkthrough](../examples/relay-byo-deployment.md).
 
 ## What this example demonstrates
 
@@ -31,7 +30,7 @@ curl -sf http://localhost:8080/ready
 
 ## Step 2: Configure Relay sites JSON
 
-Export upstream URL and site definition (from [`README.md`](../../examples/relay/byo-docker/README.md)):
+Export upstream URL and site definition (from [`README.md`](../examples/relay-byo-deployment.md)):
 
 ```bash
 export ARCFLOW_UPSTREAM_URL=http://host.docker.internal:8080
@@ -70,7 +69,7 @@ VITE_ARCFLOW_RELAY_URL=http://localhost:8090/v1/sites/s_dev
 VITE_ARCFLOW_SITE_TOKEN=st_live_devtoken
 ```
 
-Run [`examples/static/chat-rag/`](../../examples/static/chat-rag/) or your own static bundle against port 8090.
+Run [Static chat widget walkthrough](../examples/static-chat-widget.md) or your own static bundle against port 8090.
 
 ## Relay routes
 
@@ -114,7 +113,5 @@ Retrieve via Relay trace route or server admin tools. Expect standard workflow l
 | Resource | Link |
 |----------|------|
 | Static chat widget | [static-chat-widget.md](static-chat-widget.md) |
-| Static examples index | [`examples/static/README.md`](../../examples/static/README.md) |
+| Static examples index | [Static chat widget walkthrough](../examples/static-chat-widget.md) |
 | Tutorial track | [Track F](../tutorials/track-f-static-product.md) |
-
-**Source:** [`examples/relay/byo-docker/README.md`](../../examples/relay/byo-docker/README.md), [`examples/relay/byo-docker/compose.yml`](../../examples/relay/byo-docker/compose.yml); capabilities reference §25, §28 Track F; `docker/docker-compose.server.yml`.

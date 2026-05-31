@@ -1,4 +1,3 @@
-**Audience:** `[platform]` `[operator]`
 
 # Health and readiness
 
@@ -152,7 +151,3 @@ Relay does not share the same `/ready` semantics as the server. Monitor Relay by
 - [Migrations runbook](migrations-runbook.md)
 - [Server deployment](server-deployment.md)
 - [Production checklist](production-checklist.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §23.2; `server/arcflow-server/src/handlers/health.rs`, `ready.rs`.

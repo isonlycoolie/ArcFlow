@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[platform]`
 
 # Execution model
 
@@ -115,7 +114,3 @@ SDKs support `run_stream()` with token deltas at the SDK layer; engine emits `St
 - [The RCS contract](the-rcs-contract.md) for workflow and agent types
 - [SEC-1 and data safety](sec-1-and-data-safety.md) for trace contents
 - [Maturity and known gaps](maturity-and-known-gaps.md) for FP-1.01 and FP-2
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §4 (Workflow execution), Appendix F (Run state machines).

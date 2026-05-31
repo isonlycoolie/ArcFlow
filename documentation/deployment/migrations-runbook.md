@@ -1,12 +1,11 @@
-**Audience:** `[platform]` `[operator]`
 
 # Migrations runbook
 
-Postgres schema for ArcFlow is versioned under `server/arcflow-server/migrations/`. Apply migrations before routing production traffic to a new server version. This runbook lists commands and recovery steps; schema details are in Appendix G.
+Postgres schema for ArcFlow is versioned under `server/arcflow-server/migrations/`. Apply migrations before routing production traffic to a new server version. This runbook lists commands and recovery steps; schema details are in [Postgres schema](../server/postgres-schema.md).
 
 Migrations path: `server/arcflow-server/migrations/`.
 
-Normative recovery DDL (partial): [contracts/normative/runtime/recovery-schema-v1.sql](../../contracts/normative/runtime/recovery-schema-v1.sql).
+Normative recovery DDL (partial): [Postgres schema](../server/postgres-schema.md).
 
 ## Migration inventory
 
@@ -132,7 +131,3 @@ Relay reads site tables from migration 000007. Deploy server migrations before e
 - [Health and readiness](health-and-readiness.md)
 - [Recovery and resume](../guides/reliability/recovery-and-resume.md)
 - [Server deployment](server-deployment.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §23.2, §23.3, Appendix G; `server/arcflow-server/migrations/`, `arcflow_core::migrate`.

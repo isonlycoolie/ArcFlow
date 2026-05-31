@@ -1,14 +1,13 @@
-**Audience:** `[developer]` `[platform]`
 
 # RCS schema reference
 
-Authoritative reference for the Runtime Contract Specification (RCS) type system used by workflows, agents, runs, and server API bodies. JSON Schema: [contracts/normative/rcs/v1.schema.json](../../contracts/normative/rcs/v1.schema.json). Rust types: `runtime/arcflow-core/src/rcs/types.rs`.
+Authoritative reference for the Runtime Contract Specification (RCS) type system used by workflows, agents, runs, and server API bodies. This page documents the JSON Schema and field semantics.
 
 Validate workflows against schema in CI where possible until `arcflow validate` ships (FP-5.04).
 
 Conceptual intro: [The RCS contract](../concepts/the-rcs-contract.md).
 
-**Drift note (K-10):** [contracts/normative/runtime/server-api-v1.md](../../contracts/normative/runtime/server-api-v1.md) is partially stale. Prefer this page, Appendix A in the capabilities reference, and live server handlers for HTTP shapes.
+**Drift note (K-10):** Some older HTTP summaries may lag the live server. Prefer this page and the [HTTP API reference](../server/http-api-reference.md) when integrating.
 
 ## Core workflow types
 
@@ -223,17 +222,13 @@ See [Error codes](error-codes.md).
 
 | Path | Content |
 |------|---------|
-| [contracts/normative/rcs/v1.schema.json](../../contracts/normative/rcs/v1.schema.json) | JSON Schema |
-| [contracts/normative/runtime/recovery-schema-v1.sql](../../contracts/normative/runtime/recovery-schema-v1.sql) | Recovery DDL (partial) |
-| [contracts/normative/providers/api-v1.md](../../contracts/normative/providers/api-v1.md) | Provider API |
-| [contracts/normative/README.md](../../contracts/normative/README.md) | Index |
+| [RCS schema](../contracts/rcs-schema.md) | JSON Schema |
+| [Postgres schema](../server/postgres-schema.md) | Recovery DDL (partial) |
+| [Provider configuration](../guides/agents-and-tools/provider-configuration.md) | Provider API |
+| [RCS schema](../contracts/rcs-schema.md) | Index |
 
 ## Related pages
 
 - [Error codes](error-codes.md)
 - [Trace events normative](trace-events-normative.md)
 - [Graph workflows](../guides/workflows/graph-workflows.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) Appendix A, §22; K-10; [contracts/normative/rcs/v1.schema.json](../../contracts/normative/rcs/v1.schema.json).

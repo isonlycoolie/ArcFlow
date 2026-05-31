@@ -1,6 +1,5 @@
 # ArcFlow certification program
 
-**Audience:** `[developer]` `[platform]` `[operator]` `[compliance]` `[frontend]`
 
 ArcFlow certification is a self-assessed competency path from first workflow to certified architect. Each level defines what you must understand, what you must build, and how you verify success. There is no external exam today; you certify yourself when your project meets the stated criteria.
 
@@ -85,5 +84,3 @@ Do not submit screenshots alone. Commands and run ids are evidence.
 | 2 | [Certified ArcFlow Systems Engineer](level-2-systems-engineer.md) |
 | 3 | [Certified ArcFlow Platform Engineer](level-3-platform-engineer.md) |
 | 4 | [Certified ArcFlow Architect](level-4-certified-arcflow-architect.md) |
-
-**Source:** ARCFLOW-DOCS-ORGANIZATION-PLAN certification brief; capabilities reference §28 tutorial tracks; Sprint 3 through 8 curriculum references in organization plan.

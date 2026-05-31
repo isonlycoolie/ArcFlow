@@ -1,10 +1,9 @@
 # Static chat widget example
 
-**Audience:** `[frontend]` `[operator]`
 
 This walkthrough provisions a static-site support chat using ArcFlow Relay and published workflows. The browser bundle calls `runPublished()` only; agents, memory, and knowledge live in the dashboard or admin API.
 
-Primary example: [`examples/static/chat-rag/`](../../examples/static/chat-rag/). Index: [`examples/static/README.md`](../../examples/static/README.md).
+Primary example: [Static chat widget walkthrough](../examples/static-chat-widget.md). Index: [Static chat widget walkthrough](../examples/static-chat-widget.md).
 
 ## What this example demonstrates
 
@@ -56,7 +55,7 @@ npm run dev
 
 Open http://localhost:5173 and send a message. Traffic goes to Relay with Bearer site token and Origin header.
 
-Production client pattern from [`src/main.ts`](../../examples/static/chat-rag/src/main.ts):
+Production client pattern from [`src/main.ts`](../examples/static-chat-widget.md):
 
 ```typescript
 import { ArcFlowClient } from "@arcflow/static";
@@ -114,14 +113,12 @@ Traces are metadata only (SEC-1). End users do not receive raw trace JSON in the
 | 401 on Relay | Wrong site token | Regenerate token; update env |
 | Agents defined in browser | Wrong integration path | Remove inline Agent code; use publish flow only |
 
-Internal dev only: [`src/main-dev-direct.ts`](../../examples/static/chat-rag/src/main-dev-direct.ts) bypasses Relay for engine debugging. Do not ship to production.
+Internal dev only: [`src/main-dev-direct.ts`](../examples/static-chat-widget.md) bypasses Relay for engine debugging. Do not ship to production.
 
 ## Related
 
 | Resource | Link |
 |----------|------|
 | Relay BYO | [relay-byo-deployment.md](relay-byo-deployment.md) |
-| Multi-turn intake bot | [`online-application-chatbot`](../../examples/static/online-application-chatbot/README.md) |
+| Multi-turn intake bot | [`online-application-chatbot`](../examples/static-chat-widget.md) |
 | Tutorial track | [Track F](../tutorials/track-f-static-product.md) |
-
-**Source:** [`examples/static/chat-rag/`](../../examples/static/chat-rag/), [`examples/static/README.md`](../../examples/static/README.md); capabilities reference §25, §28 Track F; [knowledge ingestion](../guides/memory-and-rag/knowledge-ingestion.md).

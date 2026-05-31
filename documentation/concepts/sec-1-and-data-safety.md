@@ -1,4 +1,3 @@
-**Audience:** `[compliance]` `[platform]` `[developer]` `[frontend]`
 
 # SEC-1 and data safety
 
@@ -17,7 +16,7 @@ Traces and persisted trace events **must not** include:
 | RAG content | Retrieved chunk text, raw embedding inputs |
 | PII | Personal data unless your deployment policy explicitly allows it and you have controls |
 
-This aligns with normative guidance in [contracts/guides/observability/](../../contracts/guides/observability/) and [trace-events-v1.md](../../contracts/normative/observability/trace-events-v1.md). Engine implementation: `runtime/arcflow-core/src/tracing/events.rs`.
+This aligns with normative guidance in [contracts/guides/observability/](../../contracts/guides/observability/) and [trace-events-v1.md](../contracts/trace-events-normative.md). Engine implementation: `runtime/arcflow-core/src/tracing/events.rs`.
 
 ### Why the boundary exists
 
@@ -78,7 +77,7 @@ Opt-in metrics via `ARCFLOW_OTEL_ENABLED` and `ARCFLOW_OTLP_ENDPOINT` are **alph
 
 ## Operator dashboards
 
-Operator UI is specified in OSS [dashboard/spec/](../../dashboard/spec/) but implemented in the private ArcFlow-Dashboard repository. Dashboard v1 UI is deferred (FP-3.01). Until exit criteria pass in private repo CI, operators use admin API, CLI trace, and SQL against `arcflow_trace_events`.
+Operator UI is specified in OSS [Dashboard spec](dashboard-spec.md) but implemented in the private ArcFlow-Dashboard repository. Dashboard v1 UI is deferred (FP-3.01). Until exit criteria pass in private repo CI, operators use admin API, CLI trace, and SQL against `arcflow_trace_events`.
 
 ## Review checklist
 
@@ -96,7 +95,3 @@ If any answer is yes, redesign the field or gate it behind localhost debug with 
 - [Architecture overview](architecture-overview.md) for Relay and trace poll flow
 - [Maturity and known gaps](maturity-and-known-gaps.md) for FP-4 (OTel)
 - [security/sec-1-compliance.md](../security/sec-1-compliance.md) for auth and webhook hardening
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §11.1 (SEC-1 rules), §11.2 (Trace access surfaces), Appendix D (Trace events).

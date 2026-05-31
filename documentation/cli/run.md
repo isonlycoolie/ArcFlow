@@ -1,4 +1,3 @@
-**Audience:** `[developer]`
 
 # arcflow run
 
@@ -76,5 +75,3 @@ Until native remote run ships, use curl `POST /v1/runs` or Python `Workflow(...,
 - [cli/init.md](init.md)
 - [getting-started/quickstart-python.md](../getting-started/quickstart-python.md)
 - [server/http-api-reference.md](../server/http-api-reference.md)
-
-**Source:** capabilities reference §18; `cli/arcflow-cli/src/commands/run.rs`; Sprint 8 CLI spec.

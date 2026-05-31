@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[platform]` `[frontend]` `[operator]`
 
 # Architecture overview
 
@@ -8,7 +7,7 @@ ArcFlow stacks a single Rust execution engine under multiple language and networ
 
 At the top sit the **surfaces**: Python SDK, TypeScript SDK, `arcflow-server`, `arcflow-relay`, static browser SDK (`@arcflow/static`), CLI, VS Code extension, and WASM (alpha). Each surface translates its native API into the same workflow and run envelope the engine expects.
 
-Below that is **RCS v1 JSON**: workflow definitions, agent definitions, run requests, and `exec_config`. Normative schemas live under [contracts/normative/rcs/](../../contracts/normative/rcs/v1.schema.json). See [The RCS contract](the-rcs-contract.md) for how contract-first design keeps SDK and HTTP behavior aligned.
+Below that is **RCS v1 JSON**: workflow definitions, agent definitions, run requests, and `exec_config`. Normative schemas are documented in [RCS schema](../contracts/rcs-schema.md). See [The RCS contract](the-rcs-contract.md) for how contract-first design keeps SDK and HTTP behavior aligned.
 
 The **engine** (`arcflow-core`) performs validate, schedule, execute, trace, and recover. Entry point for runs is `WorkflowEngine::execute_with_config`. Linear runs use sorted steps; graph runs use the graph scheduler in `workflow/graph/scheduler.rs`.
 
@@ -96,7 +95,3 @@ If Postgres is unavailable, `POST /v1/runs` returns **503**. Health checks: `GET
 | Linear vs graph execution | [Execution model](execution-model.md) |
 | Trace field rules | [SEC-1 and data safety](sec-1-and-data-safety.md) |
 | Production vs deferred | [Maturity and known gaps](maturity-and-known-gaps.md) |
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §2 (Architecture), including static product and backend integration sequence diagrams.

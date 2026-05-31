@@ -1,12 +1,11 @@
 # First linear workflow
 
-**Audience:** `[developer]`
 
 This walkthrough runs a multi-step linear pipeline with the Python SDK and stub provider. You define ordered agents, call `run()`, and confirm completion through status fields and trace events. No server, Postgres, or API keys are required.
 
 ## What this example demonstrates
 
-A linear workflow chains agents in fixed order: each step receives the prior step output as context. The pattern matches Track A and production pipelines where routing is not conditional. The runnable script is [`examples/personal/blog_pipeline.py`](../../examples/personal/blog_pipeline.py): research, write, then SEO review on one topic string.
+A linear workflow chains agents in fixed order: each step receives the prior step output as context. The pattern matches Track A and production pipelines where routing is not conditional. The runnable script is [First linear workflow walkthrough](../examples/first-linear-workflow.md): research, write, then SEO review on one topic string.
 
 ## Prerequisites
 
@@ -19,7 +18,7 @@ A linear workflow chains agents in fixed order: each step receives the prior ste
 
 ## Step 1: Inspect the script
 
-Open [`examples/personal/blog_pipeline.py`](../../examples/personal/blog_pipeline.py). It registers three agents and three ordered steps:
+Open [First linear workflow walkthrough](../examples/first-linear-workflow.md). It registers three agents and three ordered steps:
 
 ```python
 from arcflow import Agent, Workflow
@@ -124,5 +123,3 @@ Events are metadata only per SEC-1. See [trace event reference](../guides/observ
 | Minimal two-step tutorial | [Track A](../tutorials/track-a-first-workflow.md) |
 | Linear workflow guide | [Linear workflows](../guides/workflows/linear-workflows.md) |
 | Examples catalog | [catalog.md](catalog.md) |
-
-**Source:** [`examples/personal/blog_pipeline.py`](../../examples/personal/blog_pipeline.py), capabilities reference §25; [Track A](../tutorials/track-a-first-workflow.md), §28 Track A; `sdk-python/tests/integration/test_first_five_minutes.py`.

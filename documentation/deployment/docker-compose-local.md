@@ -1,4 +1,3 @@
-**Audience:** `[developer]`
 
 # Docker Compose local development stack
 
@@ -117,7 +116,3 @@ docker compose -f docker/docker-compose.dev.yml down -v
 - [Deployment overview](overview.md)
 - [Environment variables reference](environment-variables-reference.md)
 - [Install and build](../getting-started/install-and-build.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §23.1; `docker/docker-compose.dev.yml`.

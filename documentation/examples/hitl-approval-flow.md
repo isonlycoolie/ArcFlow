@@ -1,8 +1,7 @@
 # HITL approval flow example
 
-**Audience:** `[developer]` `[compliance]`
 
-This walkthrough runs a workflow that interrupts for human approval, resumes via the HTTP approve API, and completes the remaining steps. Primary script: [`examples/hitl/expense_approval.py`](../../examples/hitl/expense_approval.py). Approval helper: [`examples/hitl/approve_cli.sh`](../../examples/hitl/approve_cli.sh).
+This walkthrough runs a workflow that interrupts for human approval, resumes via the HTTP approve API, and completes the remaining steps. Primary script: [HITL approval walkthrough](../examples/hitl-approval-flow.md). Approval helper: [HITL approval walkthrough](../examples/hitl-approval-flow.md).
 
 ## What this example demonstrates
 
@@ -118,5 +117,3 @@ Exact HITL kind names appear in [trace event reference](../guides/observability/
 | Approve and reject guide | [approve-and-reject](../guides/human-in-the-loop/approve-and-reject.md) |
 | Configuring interrupts | [configuring-interrupts](../guides/human-in-the-loop/configuring-interrupts.md) |
 | Tutorial track | [Track E](../tutorials/track-e-hitl-and-external.md) |
-
-**Source:** [`examples/hitl/expense_approval.py`](../../examples/hitl/expense_approval.py), [`examples/hitl/approve_cli.sh`](../../examples/hitl/approve_cli.sh); capabilities reference §25, §28 Track E; [HITL guides](../guides/human-in-the-loop/hitl-overview.md).

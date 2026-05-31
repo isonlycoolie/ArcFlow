@@ -1,4 +1,3 @@
-**Audience:** `[platform]`
 
 # Server deployment
 
@@ -120,7 +119,3 @@ Back up Postgres (runs, recovery, registry, sites, trace events). Qdrant volumes
 - [Environment variables reference](environment-variables-reference.md)
 - [API key management](../security/api-key-management.md)
 - [Production checklist](production-checklist.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §12, §23; `server/arcflow-server/src/main.rs`, `state.rs`, `handlers/runs.rs`; [contracts/guides/deployment/self-hosted.md](../../contracts/guides/deployment/self-hosted.md).

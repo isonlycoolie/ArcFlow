@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[operator]` `[platform]` `[frontend]` `[compliance]`
 
 # What is ArcFlow?
 
@@ -45,7 +44,3 @@ Recovery, HITL, and the workflow registry require Postgres when enabled on the s
 ## How this doc fits the rest of the site
 
 [Architecture overview](architecture-overview.md) shows how surfaces, the engine, Postgres, and Qdrant connect. [Surfaces and when to use them](surfaces-and-when-to-use-them.md) helps pick SDK vs server vs Relay. [Execution model](execution-model.md) covers linear vs graph and run state machines. [Maturity and known gaps](maturity-and-known-gaps.md) lists what is production-ready vs deferred (server SSE FP-2, dashboard UI FP-3.01, OTel FP-4, CLI validate FP-5.04).
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §1 (What ArcFlow is).

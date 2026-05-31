@@ -1,6 +1,5 @@
 # Level 4: Certified ArcFlow Architect
 
-**Audience:** `[platform]` `[compliance]`
 
 **Title:** Certified ArcFlow Architect
 
@@ -40,8 +39,8 @@ All prior level reading plus:
 | RAG ops | [Knowledge ingestion](../guides/memory-and-rag/knowledge-ingestion.md), [vector RAG pipeline](../guides/memory-and-rag/vector-rag-pipeline.md) |
 | Reliability | Full [reliability](../guides/reliability/recovery-and-resume.md) and [workflow](../guides/workflows/step-fallbacks.md) guides |
 | Trace complete | [Trace event reference](../guides/observability/trace-event-reference.md) |
-| Normative contracts | `contracts/normative/` in repository |
-| Capabilities appendices | Appendices A through K in capabilities reference (when published) |
+| Normative contracts | published contract pages in repository |
+| Capabilities appendices | Appendices A through K in this documentation site (when published) |
 | Sprint plans | Implementation plans as architecture reference in repo |
 
 ## Tutorial tracks
@@ -148,5 +147,3 @@ Document ingestion for at least two document types (PDF export, HTML, or markdow
 ## Program completion
 
 Level 4 is the current top tier. Maintain certification by re-running SEC-1 audits after major upgrades and revisiting deferred feature recommendations each release.
-
-**Source:** Full capabilities reference, all sprint implementation plans; ARCFLOW-DOCS-ORGANIZATION-PLAN Level 4 brief; [maturity and known gaps](../concepts/maturity-and-known-gaps.md); `runtime/arcflow-core/`, `contracts/normative/`.

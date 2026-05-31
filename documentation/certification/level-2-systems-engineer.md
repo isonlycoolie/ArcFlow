@@ -1,6 +1,5 @@
 # Level 2: Certified ArcFlow Systems Engineer
 
-**Audience:** `[developer]`
 
 **Title:** Certified ArcFlow Systems Engineer
 
@@ -78,11 +77,11 @@ escalation branch → HITL manager approve → external notify webhook
 
 | Pattern | Example |
 |---------|---------|
-| Graph join | [`parallel_search.py`](../../examples/graph/parallel_search.py) |
-| RAG | [`document_qa.py`](../../examples/rag/document_qa.py) |
-| HITL | [`expense_approval.py`](../../examples/hitl/expense_approval.py) |
-| External | [`playwright_stub_callback.py`](../../examples/external/playwright_stub_callback.py) |
-| Streaming (optional UX) | [`chat_stream.py`](../../examples/streaming/chat_stream.py) |
+| Graph join | [`parallel_search.py`](../examples/graph-routing.md) |
+| RAG | [`document_qa.py`](../examples/rag-chatbot.md) |
+| HITL | [`expense_approval.py`](../examples/hitl-approval-flow.md) |
+| External | [`playwright_stub_callback.py`](../examples/external-webhook.md) |
+| Streaming (optional UX) | [`chat_stream.py`](../examples/streaming-responses.md) |
 
 ### Verification commands
 
@@ -126,5 +125,3 @@ Note these in your README.
 ## Next level
 
 Proceed to [Level 3: Platform Engineer](level-3-platform-engineer.md) for deployment, static product, and SEC-1 operations.
-
-**Source:** Sprint 4 through 7 curriculum, Tracks C through E; ARCFLOW-DOCS-ORGANIZATION-PLAN Level 2 brief; [graph routing](../examples/graph-routing.md), [RAG chatbot](../examples/rag-chatbot.md), [HITL](../examples/hitl-approval-flow.md), [external webhook](../examples/external-webhook.md).

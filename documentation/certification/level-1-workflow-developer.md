@@ -1,6 +1,5 @@
 # Level 1: Certified ArcFlow Workflow Developer
 
-**Audience:** `[developer]`
 
 **Title:** Certified ArcFlow Workflow Developer
 
@@ -65,7 +64,7 @@ Build a three-step **research, analyze, summarize** pipeline:
 
 | Resource | Link |
 |----------|------|
-| Blog pipeline sample | [`examples/personal/blog_pipeline.py`](../../examples/personal/blog_pipeline.py) |
+| Blog pipeline sample | [First linear workflow walkthrough](../examples/first-linear-workflow.md) |
 | First linear doc | [first-linear-workflow](../examples/first-linear-workflow.md) |
 
 Extend the blog pipeline pattern with an analyze step and real provider on one agent.
@@ -118,5 +117,3 @@ Before claiming Level 1:
 ## Next level
 
 Proceed to [Level 2: Systems Engineer](level-2-systems-engineer.md) after graph, RAG, and server patterns in Tracks B through E.
-
-**Source:** Sprint 3 curriculum, [Track A](../tutorials/track-a-first-workflow.md); ARCFLOW-DOCS-ORGANIZATION-PLAN Level 1 brief; `sdk-python/tests/integration/test_first_five_minutes.py`.

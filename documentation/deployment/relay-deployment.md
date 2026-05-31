@@ -1,4 +1,3 @@
-**Audience:** `[operator]` `[platform]`
 
 # Relay deployment
 
@@ -97,7 +96,3 @@ Run multiple Relay replicas behind a load balancer. All instances need the same 
 - [Relay security model](../security/relay-security-model.md)
 - [Environment variables reference](environment-variables-reference.md)
 - [Streaming in the browser](../guides/streaming/streaming-in-the-browser.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §14, Appendix H; `docker/docker-compose.prod.yml`, `server/arcflow-relay/`.

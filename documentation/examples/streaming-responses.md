@@ -1,10 +1,9 @@
 # Streaming responses example
 
-**Audience:** `[developer]`
 
 This walkthrough consumes incremental stream events from the SDK during workflow execution. You iterate `run_stream()` (Python) or `runStream()` (TypeScript) and handle token, step start, and step complete events. Server-side SSE remains deferred (FP-2); this is in-process SDK streaming only.
 
-Scripts: [`examples/streaming/chat_stream.py`](../../examples/streaming/chat_stream.py), [`examples/streaming/chat_stream.ts`](../../examples/streaming/chat_stream.ts).
+Scripts: [Streaming responses walkthrough](../examples/streaming-responses.md), [Streaming responses walkthrough](../examples/streaming-responses.md).
 
 ## What this example demonstrates
 
@@ -114,5 +113,3 @@ Stream iterators may surface token deltas before `StepCompleted` appears in trac
 | SDK streaming guide | [sdk-streaming](../guides/streaming/sdk-streaming.md) |
 | Browser streaming note | [streaming in the browser](../guides/streaming/streaming-in-the-browser.md) |
 | FP-2 gap | [maturity and known gaps](../concepts/maturity-and-known-gaps.md) |
-
-**Source:** [`examples/streaming/chat_stream.py`](../../examples/streaming/chat_stream.py), [`examples/streaming/chat_stream.ts`](../../examples/streaming/chat_stream.ts); capabilities reference §25; [SDK streaming](../guides/streaming/sdk-streaming.md).

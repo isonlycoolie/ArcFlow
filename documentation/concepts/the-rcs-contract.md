@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[platform]`
 
 # The RCS contract
 
@@ -6,15 +5,15 @@ RCS (Runtime Contract Schema) v1 is the shared language between ArcFlow surfaces
 
 ## Why contract-first matters
 
-Without a single schema, each surface would drift: the server might accept a field the Python SDK never sends, or traces might omit fields the VS Code timeline expects. ArcFlow treats [contracts/normative/rcs/v1.schema.json](../../contracts/normative/rcs/v1.schema.json) and Rust types in `runtime/arcflow-core/src/rcs/types.rs` as the source of truth for structure. Surface APIs are adapters, not parallel definitions.
+Without a single schema, each surface would drift: the server might accept a field the Python SDK never sends, or traces might omit fields the VS Code timeline expects. ArcFlow treats [RCS schema](../contracts/rcs-schema.md) and Rust types in `runtime/arcflow-core/src/rcs/types.rs` as the source of truth for structure. Surface APIs are adapters, not parallel definitions.
 
 The hierarchy in practice:
 
-1. **Normative contracts** under `contracts/normative/` when marked current and matching code
-2. **Capabilities reference** for end-to-end flows, parity, and JSON examples
+1. **Normative contracts** under published contract pages when marked current and matching code
+2. **this documentation site** for end-to-end flows, parity, and JSON examples
 3. **Source code** when contracts are silent or known stale
 
-Server route documentation note: [contracts/normative/runtime/server-api-v1.md](../../contracts/normative/runtime/server-api-v1.md) may lag the implemented routes in `server/arcflow-server/src/lib.rs`. Prefer the capabilities reference Appendix B or [server/](../server/overview.md) docs when integrating via HTTP.
+Server route documentation note: [HTTP API reference](../server/http-api-reference.md) may lag the implemented routes in `server/arcflow-server/src/lib.rs`. Prefer the [HTTP API reference](../server/http-api-reference.md) or [server/](../server/overview.md) docs when integrating via HTTP.
 
 ## Core RCS types
 
@@ -95,7 +94,7 @@ Recovery gates Postgres persistence. Test mode (`exec_config.test`) allows deter
 
 ## Observability contract
 
-Trace event names and allowed fields are normative under [contracts/normative/observability/trace-events-v1.md](../../contracts/normative/observability/trace-events-v1.md). SEC-1 requires metadata-only payloads (see [SEC-1 and data safety](sec-1-and-data-safety.md)).
+Trace event names and allowed fields are normative under [Trace events (normative)](../contracts/trace-events-normative.md). SEC-1 requires metadata-only payloads (see [SEC-1 and data safety](sec-1-and-data-safety.md)).
 
 ## Validation today
 
@@ -106,7 +105,3 @@ Rust validates before run. CI should validate workflow JSON against `v1.schema.j
 - [Execution model](execution-model.md) for linear vs graph scheduling
 - [Architecture overview](architecture-overview.md) for where RCS crosses HTTP boundaries
 - [contracts/rcs-schema.md](../contracts/rcs-schema.md) for narrative schema guide
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §2 (Design principles), §4 (Workflow execution), §22 (Contracts and schemas), Appendix A (RCS type reference).

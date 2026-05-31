@@ -1,8 +1,7 @@
 # Graph routing example
 
-**Audience:** `[developer]`
 
-This walkthrough runs graph workflows with conditional edges, loops, and parallel join nodes. You verify branch order through trace metadata (`GraphNodeStarted`, `GraphNodeCompleted`). Scripts live under [`examples/graph/`](../../examples/graph/).
+This walkthrough runs graph workflows with conditional edges, loops, and parallel join nodes. You verify branch order through trace metadata (`GraphNodeStarted`, `GraphNodeCompleted`). Scripts live under [Graph routing walkthrough](../examples/graph-routing.md).
 
 ## What this example demonstrates
 
@@ -10,9 +9,9 @@ Graph mode (`Workflow(..., graph=True)`) schedules nodes instead of a flat step 
 
 | Script | Pattern |
 |--------|---------|
-| [`reflection_loop.py`](../../examples/graph/reflection_loop.py) | Conditional loop with `max_iterations` guard |
-| [`parallel_search.py`](../../examples/graph/parallel_search.py) | Fan-out to two branches, join at synthesize |
-| [`react_agent.py`](../../examples/graph/react_agent.py) | ReAct-style tool loop in graph form |
+| [`reflection_loop.py`](../examples/graph-routing.md) | Conditional loop with `max_iterations` guard |
+| [`parallel_search.py`](../examples/graph-routing.md) | Fan-out to two branches, join at synthesize |
+| [`react_agent.py`](../examples/graph-routing.md) | ReAct-style tool loop in graph form |
 
 This document focuses on reflection and parallel search; open `react_agent.py` for tool-loop routing.
 
@@ -132,5 +131,3 @@ Conditional re-entry adds repeated `GraphNodeStarted` for the same node id acros
 | Tutorial track | [Track D](../tutorials/track-d-graph-workflows.md) |
 | Graph guide | [Graph workflows](../guides/workflows/graph-workflows.md) |
 | Maturity note | [FP-1.01 graph resume](../../concepts/maturity-and-known-gaps.md) |
-
-**Source:** [`examples/graph/reflection_loop.py`](../../examples/graph/reflection_loop.py), [`examples/graph/parallel_search.py`](../../examples/graph/parallel_search.py), [`examples/graph/react_agent.py`](../../examples/graph/react_agent.py); capabilities reference §25, §28 Track D; [graph workflows](../guides/workflows/graph-workflows.md).

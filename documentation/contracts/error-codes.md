@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[platform]`
 
 # Error codes
 
@@ -28,7 +27,7 @@ SDK details: [Python exception reference](../sdks/python/exception-reference.md)
 | HTTP (server) | 400 |
 | Python | `WorkflowConfigurationError` |
 | TypeScript | `WorkflowConfigurationError` |
-| Handling | Fix RCS JSON against [v1.schema.json](../../contracts/normative/rcs/v1.schema.json) |
+| Handling | Fix RCS JSON against [v1.schema.json](../contracts/rcs-schema.md) |
 
 ### UnsupportedRcsVersion
 
@@ -218,7 +217,3 @@ Failed runs emit `WorkflowFailed` or `StepFailed` with `error_code` string match
 - [RCS schema](rcs-schema.md)
 - [Retry and backoff](../guides/reliability/retry-and-backoff.md)
 - [HITL overview](../guides/human-in-the-loop/hitl-overview.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) Appendix E; K-03; `runtime/arcflow-core/src/rcs/types.rs`.

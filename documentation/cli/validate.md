@@ -1,8 +1,7 @@
-**Audience:** `[developer]`
 
 # arcflow validate
 
-Validate workflow definition files before commit or CI deploy. **Current status: stub (FP-5.04).** The command checks file readability only; it does **not** validate against `contracts/normative/rcs/v1.schema.json` yet.
+Validate workflow definition files before commit or CI deploy. **Current status: stub (FP-5.04).** The command checks file readability only; it does **not** validate against [RCS schema](../contracts/rcs-schema.md) yet.
 
 Plan: `feat/fp-5-cli-validate`.
 
@@ -90,5 +89,3 @@ arcflow schedule validate schedules/nightly.yaml
 - [maturity-and-known-gaps.md](../concepts/maturity-and-known-gaps.md) (FP-5.04)
 - [cli/overview.md](overview.md)
 - [guides/workflows/validation-and-testing.md](../guides/workflows/validation-and-testing.md)
-
-**Source:** capabilities reference §18, §27 (FP-5.04); `cli/arcflow-cli/src/commands/validate.rs`; `contracts/normative/rcs/v1.schema.json`.

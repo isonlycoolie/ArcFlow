@@ -1,24 +1,23 @@
 # Examples catalog
 
-**Audience:** `[developer]` `[operator]` `[frontend]`
 
 The `examples/` directory holds runnable samples grouped by concern. Each category below lists what it demonstrates, primary SDK or surface, and whether a README exists in the tree.
 
-Use this catalog to pick a starting point before reading tutorial tracks in capabilities reference §28.
+Use this catalog to pick a starting point before reading [tutorial tracks](../tutorials/track-a-first-workflow.md).
 
 ## Index by category
 
 | Directory | Demonstrates | Primary surface | README |
 |-----------|--------------|-----------------|--------|
-| `examples/static/` | Static site production patterns (Relay + published workflows) | Static SDK, Relay, admin | [README](../../examples/static/README.md) |
-| `examples/static/chat-rag/` | Landing-page support chat with RAG | Static SDK, Relay | [README](../../examples/static/chat-rag/README.md) |
-| `examples/static/online-application-chatbot/` | Multi-turn intake + external callback | Static SDK, Relay, external | [README](../../examples/static/online-application-chatbot/README.md) |
+| `examples/static/` | Static site production patterns (Relay + published workflows) | Static SDK, Relay, admin | [README](../examples/static-chat-widget.md) |
+| `examples/static/chat-rag/` | Landing-page support chat with RAG | Static SDK, Relay | [Static chat widget walkthrough](../examples/static-chat-widget.md) |
+| `examples/static/online-application-chatbot/` | Multi-turn intake + external callback | Static SDK, Relay, external | [README](../examples/static-chat-widget.md) |
 | `examples/graph/` | DAG routing, joins, parallel fan-out, ReAct-style agents | Python SDK | none (see scripts below) |
 | `examples/rag/` | Vector memory, document QA | Python SDK | none |
 | `examples/hitl/` | Interrupt and approve flows | Python SDK | none |
 | `examples/streaming/` | SDK stream iterators | Python + TypeScript | none |
 | `examples/external/` | Webhook callbacks, Playwright stub | Python SDK, server | none |
-| `examples/relay/byo-docker/` | Self-hosted Relay | Relay, Docker | [README](../../examples/relay/byo-docker/README.md) |
+| `examples/relay/byo-docker/` | Self-hosted Relay | Relay, Docker | [README](../examples/relay-byo-deployment.md) |
 | `examples/langchain/` | LangChain / LangGraph interop | Python SDK (`arcflow.langchain`) | none |
 | `examples/education/` | Domain vertical: course QA | Python SDK | none |
 | `examples/healthcare/` | Domain vertical: protocol QA | Python SDK | none |
@@ -32,10 +31,10 @@ Production static-site path: dashboard owns agents, memory, and knowledge; front
 
 | Example | Use case | Frontend responsibility |
 |---------|----------|-------------------------|
-| [chat-rag](../../examples/static/chat-rag/) | Landing-page support chat | ~30 lines: env vars + chat UI |
-| [online-application-chatbot](../../examples/static/online-application-chatbot/) | Multi-turn intake with external step | Relay + published workflow ref |
+| [chat-rag](../examples/static-chat-widget.md) | Landing-page support chat | ~30 lines: env vars + chat UI |
+| [online-application-chatbot](../examples/static-chat-widget.md) | Multi-turn intake with external step | Relay + published workflow ref |
 
-Operator setup flow (from [static README](../../examples/static/README.md)):
+Operator setup flow (from [static README](../examples/static-chat-widget.md)):
 
 1. Dashboard: create site, copy relay URL and site token
 2. Dashboard: upload knowledge, configure chat, publish workflow
@@ -48,9 +47,9 @@ Advanced local-only path: `chat-rag/src/main-dev-direct.ts` (direct runtime key;
 
 | Script | Pattern |
 |--------|---------|
-| [react_agent.py](../../examples/graph/react_agent.py) | ReAct-style tool loop in graph |
-| [reflection_loop.py](../../examples/graph/reflection_loop.py) | Conditional reflection routing |
-| [parallel_search.py](../../examples/graph/parallel_search.py) | Parallel branches and join |
+| [react_agent.py](../examples/graph-routing.md) | ReAct-style tool loop in graph |
+| [reflection_loop.py](../examples/graph-routing.md) | Conditional reflection routing |
+| [parallel_search.py](../examples/graph-routing.md) | Parallel branches and join |
 
 Requires `Workflow(graph=True)` and Postgres for recovery-heavy paths. Graph resume from checkpoint remains partial (FP-1.01).
 
@@ -58,7 +57,7 @@ Requires `Workflow(graph=True)` and Postgres for recovery-heavy paths. Graph res
 
 | Script | Pattern |
 |--------|---------|
-| [document_qa.py](../../examples/rag/document_qa.py) | Ingest + query with vector memory |
+| [document_qa.py](../examples/rag-chatbot.md) | Ingest + query with vector memory |
 
 Prerequisites: Qdrant (`ARCFLOW_QDRANT_URL`), embedding provider env vars. Verify `MemoryRetrieved` events in trace.
 
@@ -66,7 +65,7 @@ Prerequisites: Qdrant (`ARCFLOW_QDRANT_URL`), embedding provider env vars. Verif
 
 | Script | Pattern |
 |--------|---------|
-| [expense_approval.py](../../examples/hitl/expense_approval.py) | Step interrupt, approve/reject |
+| [expense_approval.py](../examples/hitl-approval-flow.md) | Step interrupt, approve/reject |
 
 Requires `enable_recovery()` and Postgres. Server path supports approve API when not using in-process SDK only.
 
@@ -74,8 +73,8 @@ Requires `enable_recovery()` and Postgres. Server path supports approve API when
 
 | Script | Language |
 |--------|----------|
-| [chat_stream.py](../../examples/streaming/chat_stream.py) | Python `run_stream()` |
-| [chat_stream.ts](../../examples/streaming/chat_stream.ts) | TypeScript `runStream()` |
+| [chat_stream.py](../examples/streaming-responses.md) | Python `run_stream()` |
+| [chat_stream.ts](../examples/streaming-responses.md) | TypeScript `runStream()` |
 
 In-process SDK streaming only. Server SSE is deferred (FP-2).
 
@@ -83,15 +82,15 @@ In-process SDK streaming only. Server SSE is deferred (FP-2).
 
 | Script | Pattern |
 |--------|---------|
-| [playwright_stub_callback.py](../../examples/external/playwright_stub_callback.py) | Posts external outcome to server callback |
+| [playwright_stub_callback.py](../examples/external-webhook.md) | Posts external outcome to server callback |
 
-Pair with `ExternalBindingConfig` on publish and `report_outcome()` from Python. See server HMAC requirements in `contracts/normative/`.
+Pair with `ExternalBindingConfig` on publish and `report_outcome()` from Python. See server HMAC requirements in published contract pages.
 
 ## Relay
 
 | Example | Pattern |
 |---------|---------|
-| [byo-docker](../../examples/relay/byo-docker/) | Self-hosted Relay with Docker Compose |
+| [byo-docker](../examples/relay-byo-deployment.md) | Self-hosted Relay with Docker Compose |
 
 Browser env: `VITE_ARCFLOW_RELAY_URL`, `VITE_ARCFLOW_SITE_TOKEN`. Relay validates Origin and rate-limits per site.
 
@@ -99,7 +98,7 @@ Browser env: `VITE_ARCFLOW_RELAY_URL`, `VITE_ARCFLOW_SITE_TOKEN`. Relay validate
 
 | Script | Pattern |
 |--------|---------|
-| [migration_demo.py](../../examples/langchain/migration_demo.py) | `from_langchain_tool`, `langgraph_to_arcflow` |
+| [migration_demo.py](../examples/catalog.md) | `from_langchain_tool`, `langgraph_to_arcflow` |
 
 Requires Python optional `[langchain]` extra. No TypeScript equivalent in repo.
 
@@ -121,7 +120,7 @@ Each is a single-script sample without a dedicated README. Run from repo root wi
 
 | Path | Content |
 |------|---------|
-| [extensions/vscode-arcflow/examples/](../../extensions/vscode-arcflow/examples/) | Workflow preview JSON for extension dev |
+| [extensions/vscode-arcflow/examples/](../vscode/overview.md) | Workflow preview JSON for extension dev |
 
 Separate from top-level `examples/`; targets extension authors.
 
@@ -139,10 +138,10 @@ Static examples use `npm install` and `npm run dev` inside the example directory
 |-------|--------|
 | TypeScript graph sample in `examples/graph/` | Python only today |
 | TypeScript RAG sample | Python only; TS has `VectorStore` but no dedicated example README |
-| Server-only curl tutorials | See Track B in capabilities §28, not duplicated here |
+| Server-only curl tutorials | See [Track B: Server API](../tutorials/track-b-server-api.md), not duplicated here |
 | Per-example README | Only static and relay categories have README files today |
 
-Contributors adding examples should include a README with prerequisites, env vars, and a verify command per capabilities reference §25.
+Contributors adding examples should include a README with prerequisites, env vars, and a verify command per [Example catalog](../examples/catalog.md).
 
 ## Branch note (pending merges)
 
@@ -158,7 +157,3 @@ Documentation and lessons may reference names from branches not yet on `main`:
 Lessons under [getting-started/rag/](../getting-started/rag/README.md) call out both names where relevant. After merge, update this table and remove dual references.
 
 SDK PascalCase facades (`CommonTools`, `FromLangChain`, `ExternalOutcome`) are documented in [getting-started/tools/](../getting-started/tools/README.md) with legacy import notes until `feat/sdk-pascalcase-facades` merges.
-
-## Source
-
-`examples/` tree, [examples/static/README.md](../../examples/static/README.md), [examples/static/chat-rag/README.md](../../examples/static/chat-rag/README.md), [examples/static/online-application-chatbot/README.md](../../examples/static/online-application-chatbot/README.md), [examples/relay/byo-docker/README.md](../../examples/relay/byo-docker/README.md); capabilities reference §25, §28.

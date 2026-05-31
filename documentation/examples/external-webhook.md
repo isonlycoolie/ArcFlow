@@ -1,10 +1,9 @@
 # External webhook example
 
-**Audience:** `[developer]` `[compliance]`
 
 This walkthrough posts an external binding outcome to the ArcFlow server using HMAC-authenticated callbacks. The stub script simulates a Playwright or government portal step reporting success, failure, or needs-input back into the run state machine.
 
-Primary script: [`examples/external/playwright_stub_callback.py`](../../examples/external/playwright_stub_callback.py).
+Primary script: [External webhook walkthrough](../examples/external-webhook.md).
 
 ## What this example demonstrates
 
@@ -22,7 +21,7 @@ Pair this script with published workflows that declare `ExternalBindingConfig` o
 | Server auth | Callback signing secret configured per binding |
 | Tutorial track | [Track E](../tutorials/track-e-hitl-and-external.md) |
 
-Static product context: [`examples/static/online-application-chatbot/`](../../examples/static/online-application-chatbot/) references this callback pattern in production intake flows.
+Static product context: [Static chat widget walkthrough](../examples/static-chat-widget.md) references this callback pattern in production intake flows.
 
 ## Step 1: Obtain a run id with external binding
 
@@ -116,8 +115,6 @@ Failed HMAC or invalid payload does not emit completion; check server logs and [
 
 | Resource | Link |
 |----------|------|
-| Online application bot | [`examples/static/online-application-chatbot/README.md`](../../examples/static/online-application-chatbot/README.md) |
+| Online application bot | [Static chat widget walkthrough](../examples/static-chat-widget.md) |
 | HITL example | [hitl-approval-flow.md](hitl-approval-flow.md) |
 | Tutorial track | [Track E](../tutorials/track-e-hitl-and-external.md) |
-
-**Source:** [`examples/external/playwright_stub_callback.py`](../../examples/external/playwright_stub_callback.py), [`examples/static/online-application-chatbot/`](../../examples/static/online-application-chatbot/); capabilities reference §25, §28 Track E; [external callbacks](../guides/external-integrations/external-callbacks.md), [webhook security](../guides/external-integrations/webhook-security.md).

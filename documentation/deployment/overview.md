@@ -1,4 +1,3 @@
-**Audience:** `[platform]` `[operator]`
 
 # Deployment overview
 
@@ -50,11 +49,11 @@ Relay starts after the upstream server is listening. Relay reads site configurat
 
 Contract guides: [contracts/guides/deployment/self-hosted.md](../../contracts/guides/deployment/self-hosted.md), [meta-repo.md](../../contracts/guides/deployment/meta-repo.md).
 
-Normative HTTP contract (stale in places): [contracts/normative/runtime/server-api-v1.md](../../contracts/normative/runtime/server-api-v1.md). Prefer Appendix B in the capabilities reference or [Admin API reference](../operator/admin-api-reference.md) for current routes.
+Normative HTTP contract (stale in places): [HTTP API reference](../server/http-api-reference.md). Prefer [HTTP API reference](../server/http-api-reference.md) or [Admin API reference](../operator/admin-api-reference.md) for current routes.
 
 ## Operator dashboard (deferred)
 
-The operator UI lives in the private [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) repository. OSS holds the specification under `dashboard/spec/` and a starter scaffold at `deploy/arcflow-dashboard-v0/`. **FP-3.01** (dashboard v1 UI) is deferred until exit criteria in `dashboard/spec/09-exit-criteria.md` pass in private repo CI. Until then, use admin API directly, OSS shell scripts (`scripts/static-*.sh`), or the v0 starter. See [Dashboard spec](../operator/dashboard-spec.md).
+The operator UI lives in the private [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) repository. OSS holds the specification in this documentation and a starter scaffold at `deploy/arcflow-dashboard-v0/`. **FP-3.01** (dashboard v1 UI) is deferred until exit criteria in [Dashboard spec](../operator/dashboard-spec.md) pass in private repo CI. Until then, use admin API directly, OSS shell scripts (`scripts/static-*.sh`), or the v0 starter. See [Dashboard spec](../operator/dashboard-spec.md).
 
 ## Meta-repo layout
 
@@ -70,7 +69,3 @@ Private platform repos submodule OSS ArcFlow and ArcFlow-Dashboard. Template: `d
 - [Environment variables](environment-variables-reference.md)
 - [Health and readiness](health-and-readiness.md)
 - [Production checklist](production-checklist.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §21, §23; [contracts/guides/deployment/self-hosted.md](../../contracts/guides/deployment/self-hosted.md), [meta-repo.md](../../contracts/guides/deployment/meta-repo.md); `docker/docker-compose.*.yml`.

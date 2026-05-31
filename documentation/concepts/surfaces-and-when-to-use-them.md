@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[platform]` `[frontend]` `[operator]`
 
 # Surfaces and when to use them
 
@@ -38,7 +37,7 @@ Native extension over `arcflow-core` via PyO3. Supports linear and graph workflo
 
 ### TypeScript SDK (`sdk-typescript`)
 
-N-API binding to the same Rust engine. Feature parity with Python for in-process execution (see parity matrix in the capabilities reference). Powers the VS Code extension and Node integration tests. Browser bundling is possible but [static-product](../static-product/overview.md) is preferred for production browser use.
+N-API binding to the same Rust engine. Feature parity with Python for in-process execution (see parity matrix in the this documentation site). Powers the VS Code extension and Node integration tests. Browser bundling is possible but [static-product](../static-product/overview.md) is preferred for production browser use.
 
 ### arcflow-server
 
@@ -54,7 +53,7 @@ Browser client for published workflows. Production mode is `relay`. `direct` mod
 
 ### arcflow CLI
 
-Local `arcflow run`, `arcflow trace <run_id> [--tui]`, `arcflow migrate up`. **`arcflow validate` is a stub** (FP-5.04): schema validation in CI should use `contracts/normative/rcs/v1.schema.json` until the CLI command ships.
+Local `arcflow run`, `arcflow trace <run_id> [--tui]`, `arcflow migrate up`. **`arcflow validate` is a stub** (FP-5.04): schema validation in CI should use [RCS schema](../contracts/rcs-schema.md) until the CLI command ships.
 
 ### VS Code extension
 
@@ -80,7 +79,3 @@ In-repo extension for workflow graph visualization, run from workspace, metadata
 - [Architecture overview](architecture-overview.md) for static product and backend sequence flows
 - [What is ArcFlow?](what-is-arcflow.md) for personas
 - [Maturity and known gaps](maturity-and-known-gaps.md) for FP-2 (server SSE), FP-3.01 (dashboard), FP-5.04 (CLI validate)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §3 (Runtime surfaces).

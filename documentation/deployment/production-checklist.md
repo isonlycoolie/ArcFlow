@@ -1,4 +1,3 @@
-**Audience:** `[platform]` `[compliance]`
 
 # Production checklist
 
@@ -103,7 +102,3 @@ bash scripts/static-smoke.sh     # static product end-to-end
 - [SEC-1 compliance](../security/sec-1-compliance.md)
 - [API key management](../security/api-key-management.md)
 - [Deployment overview](overview.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §23, §27 (FP-7); Sprint 8 security rules; [contracts/guides/deployment/self-hosted.md](../../contracts/guides/deployment/self-hosted.md).

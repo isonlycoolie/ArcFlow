@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[platform]` `[operator]` `[compliance]`
 
 # Maturity and known gaps
 
@@ -40,9 +39,9 @@ Verified baseline: 2026-05-31 against `arcflow-core`, `arcflow-server`, and migr
 |----|-----|--------|-------------------|
 | **FP-1.01** | Graph recovery resume from checkpoint | **Partial** | Schema and `persist_graph_checkpoint` exist; resume dispatch incomplete. Plan: `feat/fp-1-graph-recovery`. Do not rely on mid-graph resume in production. Linear recovery works. |
 | **FP-2** | Server SSE `/v1/runs/{id}/events` | **Deferred** | Poll `GET /v1/runs/{id}` or trace. SDK `run_stream()` works in-process. Browser polls Relay trace for `TokenEmitted`. Plan: `feat/fp-2-server-streaming`. |
-| **FP-3.01** | Operator dashboard UI | **Deferred** | OSS [dashboard/spec/](../../dashboard/spec/) and admin API are source of truth. UI lives in private [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git). Use admin API, `scripts/static-*.sh`, or v0 starter until [09-exit-criteria.md](../../dashboard/spec/09-exit-criteria.md) passes in private CI. |
+| **FP-3.01** | Operator dashboard UI | **Deferred** | OSS [Dashboard spec](dashboard-spec.md) and admin API are source of truth. UI lives in private [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git). Use admin API, `scripts/static-*.sh`, or v0 starter until [Dashboard spec](dashboard-spec.md) passes in private CI. |
 | **FP-4** | Stable OTel metrics export | **Alpha** | Core runtime does not need OTel. Enable only with review of label cardinality and SEC-1. Plan: `feat/fp-4-observability`. |
-| **FP-5.04** | Full `arcflow validate` schema check | **Stub** | CLI command exists but does not fully validate. Validate against [v1.schema.json](../../contracts/normative/rcs/v1.schema.json) in CI. Plan: `feat/fp-5-cli-validate`. |
+| **FP-5.04** | Full `arcflow validate` schema check | **Stub** | CLI command exists but does not fully validate. Validate against [v1.schema.json](../contracts/rcs-schema.md) in CI. Plan: `feat/fp-5-cli-validate`. |
 | FP-7 | Production signoff checklist | Tracking | See FINAL-PRODUCTION-READINESS-PLAN in repo planning docs |
 
 ### FP-1.01: Graph recovery (partial)
@@ -83,11 +82,11 @@ Not every surface exposes every capability. Highlights:
 | Recovery | Y | n/a | n/a | migrate | N |
 | Admin / sites | Y | n/a | n/a | n/a | N |
 
-Full matrix: capabilities reference Appendix I.
+Full matrix: [SDK parity matrix](../sdks/parity-matrix.md).
 
 ## Contract drift warning
 
-[server-api-v1.md](../../contracts/normative/runtime/server-api-v1.md) may list only legacy routes. Implemented server routes match `server/arcflow-server/src/lib.rs` and capabilities reference Appendix B. Update normative docs when promoting from draft.
+[server-api-v1.md](../server/http-api-reference.md) may list only legacy routes. Implemented server routes match `server/arcflow-server/src/lib.rs` and [HTTP API reference](../server/http-api-reference.md). Update normative docs when promoting from draft.
 
 ## Related pages
 
@@ -95,7 +94,3 @@ Full matrix: capabilities reference Appendix I.
 - [Execution model](execution-model.md) for graph and recovery behavior
 - [SEC-1 and data safety](sec-1-and-data-safety.md) for trace policy
 - [home/index.md](../home/index.md) for entry paths
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §26 (Maturity matrix), §27 (Known gaps and deferred work).

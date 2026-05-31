@@ -1,4 +1,3 @@
-**Audience:** `[developer]`
 
 # arcflow init
 
@@ -81,5 +80,3 @@ runtime_mode: embedded
 
 - [cli/overview.md](overview.md)
 - [cli/run.md](run.md)
-
-**Source:** capabilities reference §18; `cli/arcflow-cli/src/commands/init.rs`; ADR-018, Sprint 8 Phase 2.

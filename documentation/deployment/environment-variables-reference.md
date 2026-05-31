@@ -1,8 +1,7 @@
-**Audience:** `[platform]`
 
 # Environment variables reference
 
-Complete reference for ArcFlow environment variables across server, Relay, CLI, and tooling. Normative summary: Appendix H in the capabilities reference. Never commit `.env` files containing secrets to source control.
+Complete reference for ArcFlow environment variables across server, Relay, CLI, and tooling. Normative summary: [Environment variables reference](../deployment/environment-variables-reference.md). Never commit `.env` files containing secrets to source control.
 
 ## Server authentication
 
@@ -121,7 +120,3 @@ Minimum for a working server deployment:
 - [Server deployment](server-deployment.md)
 - [API key management](../security/api-key-management.md)
 - [Production checklist](production-checklist.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §24, Appendix H; `server/arcflow-server/src/state.rs`, `main.rs`.

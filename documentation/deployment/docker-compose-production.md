@@ -1,4 +1,3 @@
-**Audience:** `[platform]`
 
 # Docker Compose production stack
 
@@ -115,7 +114,3 @@ Compose exposes plain HTTP on 8080 and 8090. Terminate TLS at a reverse proxy or
 - [Relay deployment](relay-deployment.md)
 - [Production checklist](production-checklist.md)
 - [Self-hosted security](../security/self-hosted-security.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §23.1; `docker/docker-compose.prod.yml`, `server/arcflow-server/Dockerfile`.

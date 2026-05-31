@@ -1,4 +1,3 @@
-**Audience:** `[operator]` `[platform]`
 
 # arcflow migrate up
 
@@ -95,5 +94,3 @@ Expect **200**. **503** indicates connection failure or pending migrations.
 - [server/postgres-schema.md](../server/postgres-schema.md)
 - [server/overview.md](../server/overview.md)
 - [cli/overview.md](overview.md)
-
-**Source:** capabilities reference §18, Appendix G; `cli/arcflow-cli/src/commands/migrate.rs`, `runtime/arcflow-core/src/migrate.rs`.

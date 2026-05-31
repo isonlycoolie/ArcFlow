@@ -1,14 +1,13 @@
 # RAG chatbot example
 
-**Audience:** `[developer]`
 
-This walkthrough runs vector memory retrieval in a single-agent workflow. You configure hybrid dense and sparse retrieval, run a query, and confirm `MemoryRetrieved` events in the trace. The primary script is [`examples/rag/document_qa.py`](../../examples/rag/document_qa.py).
+This walkthrough runs vector memory retrieval in a single-agent workflow. You configure hybrid dense and sparse retrieval, run a query, and confirm `MemoryRetrieved` events in the trace. The primary script is [RAG chatbot walkthrough](../examples/rag-chatbot.md).
 
 ## What this example demonstrates
 
 ArcFlow vector memory attaches to an agent via `MemoryConfig`. Chunking, embedding model selection, and hybrid retrieval weights live in workflow configuration. The sample uses stub embeddings for local runs; production swaps to real embedding providers and Qdrant.
 
-A domain-heavy variant lives at [`examples/support/ticket_rag_bot.py`](../../examples/support/ticket_rag_bot.py) for support-ticket Q&A patterns.
+A domain-heavy variant lives at [RAG chatbot walkthrough](../examples/rag-chatbot.md) for support-ticket Q&A patterns.
 
 ## Prerequisites
 
@@ -22,7 +21,7 @@ A domain-heavy variant lives at [`examples/support/ticket_rag_bot.py`](../../exa
 
 ## Step 1: Review memory configuration
 
-From [`examples/rag/document_qa.py`](../../examples/rag/document_qa.py):
+From [RAG chatbot walkthrough](../examples/rag-chatbot.md):
 
 ```python
 from arcflow import Agent, MemoryChunkingConfig, MemoryConfig, MemoryRetrievalConfig, MemoryScope, MemoryType, Workflow
@@ -121,5 +120,3 @@ Optional: `MemoryIngested` during separate ingest operations, not during query-o
 | Tutorial track | [Track C](../tutorials/track-c-rag.md) |
 | Static landing-page RAG | [static-chat-widget.md](static-chat-widget.md) |
 | Hybrid retrieval guide | [hybrid retrieval and reranking](../guides/memory-and-rag/hybrid-retrieval-and-reranking.md) |
-
-**Source:** [`examples/rag/document_qa.py`](../../examples/rag/document_qa.py), [`examples/support/ticket_rag_bot.py`](../../examples/support/ticket_rag_bot.py); capabilities reference §25, §28 Track C; [vector RAG pipeline](../guides/memory-and-rag/vector-rag-pipeline.md).

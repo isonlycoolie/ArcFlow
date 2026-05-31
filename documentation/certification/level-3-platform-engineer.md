@@ -1,6 +1,5 @@
 # Level 3: Certified ArcFlow Platform Engineer
 
-**Audience:** `[platform]` `[operator]`
 
 **Title:** Certified ArcFlow Platform Engineer
 
@@ -60,7 +59,7 @@ Deploy the **full ArcFlow stack** (server, Relay, Postgres, Qdrant), provision a
 | Qdrant | Vector memory for site knowledge |
 | arcflow-server | Execution and admin APIs |
 | arcflow-relay | Browser proxy with Origin checks |
-| Static frontend | [`chat-rag`](../../examples/static/chat-rag/) or equivalent |
+| Static frontend | [`chat-rag`](../examples/static-chat-widget.md) or equivalent |
 
 ### Requirements
 
@@ -135,5 +134,3 @@ Demonstrate at least one rotation in dev with zero failed chat requests during r
 ## Next level
 
 Proceed to [Level 4: Architect](level-4-certified-arcflow-architect.md) for multi-tenant design, RCS evolution, and enterprise tradeoffs.
-
-**Source:** Sprint 8 curriculum, static product system, deployment guides; ARCFLOW-DOCS-ORGANIZATION-PLAN Level 3 brief; Tracks F and G; [`examples/static/`](../../examples/static/), [`examples/relay/byo-docker/`](../../examples/relay/byo-docker/).

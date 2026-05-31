@@ -1,4 +1,3 @@
-**Audience:** `[compliance]` `[developer]`
 
 # Trace events (normative)
 
@@ -6,9 +5,7 @@ Normative naming contract for ArcFlow engine trace event kinds. This is a refere
 
 **SEC-1 (absolute):** No LLM prompts/responses, tool input/output values, memory values, credentials, raw workflow input, or PII in stored or exported traces.
 
-Source of truth in code: `runtime/arcflow-core/src/tracing/events.rs`.
 
-Canonical normative file: [contracts/normative/observability/trace-events-v1.md](../../contracts/normative/observability/trace-events-v1.md). This documentation page aligns with Appendix D and supersedes stale sections where the repo copy lags engine behavior (K-20).
 
 Tutorial-style reference: [Trace event reference](../guides/observability/trace-event-reference.md).
 
@@ -125,7 +122,7 @@ When Postgres persistence is enabled, events are stored in `arcflow_trace_events
 
 Before merging new `TraceEventKind` variants:
 
-1. Update [contracts/normative/observability/trace-events-v1.md](../../contracts/normative/observability/trace-events-v1.md).
+1. Update this page when engine events change.
 2. Update `events.rs` and this page.
 3. Pass SEC-1 review: no forbidden field categories.
 4. Consider Relay browser exposure path.
@@ -135,7 +132,3 @@ Before merging new `TraceEventKind` variants:
 - [SEC-1 compliance](../security/sec-1-compliance.md)
 - [Execution traces](../guides/observability/execution-traces.md)
 - [RCS schema](rcs-schema.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) Appendix D; K-02, K-20; [contracts/normative/observability/trace-events-v1.md](../../contracts/normative/observability/trace-events-v1.md); `runtime/arcflow-core/src/tracing/events.rs`.
