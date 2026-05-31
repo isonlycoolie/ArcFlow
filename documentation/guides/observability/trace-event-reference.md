@@ -378,3 +378,98 @@ Source of truth: `runtime/arcflow-core/src/tracing/events.rs`. Normative names: 
 **Emitter:** trace ring buffer.
 
 ## Streaming
+
+### StreamChunkReceived
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `chunk_bytes` | usize | Chunk size | Safe |
+
+**Emitter:** streaming provider adapter.
+
+### TokenEmitted
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `completion_token_delta` | u32 | Completion tokens in delta | Safe |
+| `prompt_token_delta` | u32 | Prompt tokens in delta | Safe |
+
+**Emitter:** streaming provider adapter. Browser poll uses this for progress UX.
+
+## External bindings
+
+### ExternalBindingStarted
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `binding_id` | string | Binding id | Safe |
+| `step_id` | string | Attached step UUID | Safe |
+| `mode` | string | `async_callback` or `sync_tool` | Safe |
+
+**Emitter:** external monitor at step completion.
+
+### ExternalBindingCompleted
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `binding_id` | string | Binding id | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `duration_ms` | u64 | Wait duration | Safe |
+
+**Emitter:** external monitor on success callback.
+
+### ExternalBindingFailed
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `binding_id` | string | Binding id | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `error_code` | string | Outcome or RCS code | Safe |
+| `status` | string | Outcome status string | Safe |
+
+**Emitter:** external monitor on failed callback.
+
+### ExternalRecoveryTriggered
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `binding_id` | string | Binding id | Safe |
+| `action` | string | Recovery action name | Safe |
+| `attempt_number` | u32 | Retry attempt | Safe |
+
+**Emitter:** external recovery policy.
+
+## RCS graph kinds (extended exports)
+
+These kinds are documented in RCS types and may appear alongside engine events in graph workflow exports. They follow the same SEC-1 rule (metadata only):
+
+| Event | Typical fields |
+|-------|----------------|
+| `GraphNodeStarted` | run_id, node_id, iteration |
+| `GraphNodeCompleted` | run_id, node_id, duration_ms |
+| `GraphIterationLimitReached` | run_id, node_id, limit |
+
+Confirm availability in your runtime version via a sample graph trace export.
+
+## TokenUsage struct
+
+Nested in multiple events:
+
+| Field | Meaning | SEC-1 |
+|-------|---------|-------|
+| `input` | Prompt token count | Safe |
+| `output` | Completion token count | Safe |
+| `total` | Sum | Safe |
+
+## Example full trace (metadata only)
+
+```json
+[
