@@ -93,3 +93,24 @@ Domain examples that ingest before run:
 
 | Example | Namespace | Key |
 |---------|-----------|-----|
+| `examples/support/ticket_rag_bot.py` | `support-tickets` | `kb` |
+| `examples/education/course_qa.py` | `course-101` | `syllabus` |
+| `examples/healthcare/protocol_qa.py` | `clinical-kb` | `protocols` |
+
+## Verify
+
+| Check | Expected |
+|-------|----------|
+| `store.ingest("", "k", "text")` | `MemoryConfigurationError` |
+| Successful ingest | Positive integer chunk count |
+| `store.search(NAMESPACE, query, top_k=2)` after ingest | Non-empty list when Qdrant is up and namespace matches |
+
+Re-ingesting with the same `key` replaces that document's chunks rather than duplicating under a new id.
+
+## Next
+
+[03 Retrieval and agent wiring](03-retrieval-and-agent-wiring.md) connects ingested namespaces to agents and verifies `MemoryRetrieved` on query runs.
+
+## Source
+
+`sdk-python/arcflow/memory.py` (`VectorStore.ingest`, `VectorStore.search`); [`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py); `examples/rag/memory_guide_qa.py` (restructure branch); [`examples/support/ticket_rag_bot.py`](../../../examples/support/ticket_rag_bot.py).
