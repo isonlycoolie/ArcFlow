@@ -93,3 +93,41 @@ SDKs: `workflow.trace()` after run. Server and Relay: GET trace endpoints. CLI: 
 ### Workflow registry
 
 Server stores semver-published workflows. Static SDK calls `runPublished(name, version, input)`. SDKs can `publish()` and `resolve()` when `runtime=` URL is configured.
+
+### Admin / sites
+
+Server-only admin API for static product (sites, knowledge ingest, chat publish). Not exposed in SDK packages.
+
+### Idempotency-Key
+
+Server honors idempotency on mutating routes. Relay forwards the header to upstream.
+
+## Python vs TypeScript SDK detail
+
+| Feature | Python | TypeScript |
+|---------|:------:|:----------:|
+| `Workflow` linear + graph | Y | Y |
+| `Agent` tools | Y | N (binding gap) |
+| `Agent` memory / context | Y | N (binding gap) |
+| `Tool` class | Y | N |
+| Providers OpenAI/Anthropic/Gemini | Y | Y |
+| `VectorStore` | Y | Y |
+| `run_stream` / `runStream` | Y | Y |
+| Recovery + HITL | Y | Y |
+| `report_outcome()` | Y | N (types only) |
+| `ScheduleManifest` | Y | N |
+| LangChain adapter | Y (`arcflow.langchain`) | N |
+| Vitest test helpers | N | Y |
+| `mapNativeError` | N | Y |
+
+## Related pages
+
+| Page | Content |
+|------|---------|
+| [Python overview](python/overview.md) | Python SDK capabilities |
+| [TypeScript overview](typescript/overview.md) | TypeScript SDK capabilities |
+| [Maturity and known gaps](../concepts/maturity-and-known-gaps.md) | FP-1.01, FP-2, FP-3.01 |
+
+## Source
+
+`docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md` Appendix I; `sdk-python/arcflow/__init__.py`, `sdk-typescript/index.ts`; capabilities reference §16, §17, §26, §27.
