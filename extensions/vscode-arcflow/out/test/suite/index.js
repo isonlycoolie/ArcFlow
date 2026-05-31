@@ -32,32 +32,30 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs = __importStar(require("fs"));
-const os = __importStar(require("os"));
+exports.run = run;
 const path = __importStar(require("path"));
-const test_electron_1 = require("@vscode/test-electron");
-function resolveLocalVsCode() {
-    const candidates = [
-        path.join(os.homedir(), "AppData", "Local", "Programs", "Microsoft VS Code", "Code.exe"),
-        path.join(os.homedir(), "AppData", "Local", "Programs", "cursor", "Cursor.exe"),
-        "/usr/share/code/code",
-        "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
-    ];
-    return candidates.find((candidate) => fs.existsSync(candidate));
-}
-async function main() {
-    const extensionDevelopmentPath = path.resolve(__dirname, "../../");
-    const extensionTestsPath = path.resolve(__dirname, "./suite/index.js");
-    const vscodeExecutablePath = resolveLocalVsCode();
-    await (0, test_electron_1.runTests)({
-        extensionDevelopmentPath,
-        extensionTestsPath,
-        ...(vscodeExecutablePath ? { vscodeExecutablePath } : {}),
+const mocha_1 = __importDefault(require("mocha"));
+function run() {
+    const mocha = new mocha_1.default({ ui: "tdd", color: true, timeout: 60_000 });
+    mocha.addFile(path.resolve(__dirname, "../debugAdapter.test.js"));
+    return new Promise((resolve, reject) => {
+        try {
+            mocha.run((failures) => {
+                if (failures > 0) {
+                    reject(new Error(`${failures} tests failed.`));
+                }
+                else {
+                    resolve();
+                }
+            });
+        }
+        catch (err) {
+            reject(err);
+        }
     });
 }
-main().catch((err) => {
-    console.error(err);
-    process.exit(1);
-});
-//# sourceMappingURL=runTest.js.map
+//# sourceMappingURL=index.js.map
