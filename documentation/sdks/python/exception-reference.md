@@ -188,3 +188,32 @@ Human rejected the approval request.
 ## External callback errors
 
 `report_outcome()` raises standard Python exceptions outside the ArcFlow hierarchy:
+
+| Exception | Cause |
+|-----------|-------|
+| `ValueError` | Missing `ARCFLOW_SERVER_API_KEY` or `ARCFLOW_WEBHOOK_SECRET` |
+| `RuntimeError` | HTTP error or network failure from callback POST |
+
+## Quick lookup table
+
+| Exception | Phase | Typical fix |
+|-----------|-------|-------------|
+| `WorkflowConfigurationError` | Pre-run | Fix workflow definition |
+| `WorkflowExecutionError` | Run | Inspect trace, failed step |
+| `ToolConfigurationError` | Pre-run | Fix tool schema or callable |
+| `ToolExecutionError` | Run | Fix tool implementation |
+| `MemoryConfigurationError` | Pre-run | Fix `MemoryConfig` |
+| `MemoryOperationError` | Run | Fix backend connectivity |
+| `ProviderConfigurationError` | Pre-run | Fix provider constructor args |
+| `ProviderExecutionError` | Run | Fix API key or model |
+| `InfrastructureUnavailableError` | Run | Start Postgres/Qdrant |
+| `TraceNotFoundError` | Post-run | Run workflow first |
+| `TraceStorageWarning` | Post-run | Reduce event volume |
+| `RetryExhaustedError` | Run | Adjust retry or root cause |
+| `WorkflowTimeoutError` | Run | Increase timeout |
+| `WorkflowInterruptedError` | Run (HITL) | Approve or reject |
+| `HumanRejectedError` | Run (HITL) | Handle rejection path |
+
+## Source
+
+`sdk-python/arcflow/exceptions.py`, `sdk-python/arcflow/hitl.py`, `sdk-python/README.md` (Errors section); capabilities reference §16.
