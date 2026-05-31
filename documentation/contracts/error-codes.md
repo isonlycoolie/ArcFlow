@@ -188,3 +188,37 @@ SDK details: [Python exception reference](../sdks/python/exception-reference.md)
 | StepExecutionFailed | 422/500 | Execution |
 | ToolExecutionFailed | 422 | Execution |
 | InternalError | 500 | Execution |
+| ProviderError | 502 | Provider |
+| EmbeddingError | 502 | Provider |
+| RerankError | 502 | Provider |
+| MemoryError | 503 | Infrastructure |
+| Timeout | 408 | Infrastructure |
+| RateLimited | 429 | Infrastructure |
+| HumanTimeout | 408 | HITL |
+| HumanRejected | 422 | HITL |
+| ApprovalNotFound | 404 | HITL |
+| AlreadyApproved | 409 | HITL |
+
+## Recommended handling patterns
+
+| Category | Client behavior |
+|----------|-----------------|
+| Definition | Fail fast; fix workflow before retry |
+| Provider / Memory | Retry with exponential backoff |
+| RateLimited | Honor `retry_after` if present |
+| HITL | Poll GET run; present approve UI |
+| Timeout | Increase limits or split workflow |
+
+## Trace correlation
+
+Failed runs emit `WorkflowFailed` or `StepFailed` with `error_code` string matching enum names. Use trace export for support without logging user input.
+
+## Related pages
+
+- [RCS schema](rcs-schema.md)
+- [Retry and backoff](../guides/reliability/retry-and-backoff.md)
+- [HITL overview](../guides/human-in-the-loop/hitl-overview.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) Appendix E; K-03; `runtime/arcflow-core/src/rcs/types.rs`.
