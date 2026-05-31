@@ -57,6 +57,7 @@ fn expense_workflow(a1: Uuid, a2: Uuid, a3: Uuid, s1: Uuid, s2: Uuid, s3: Uuid) 
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
+            external_bindings: None,
     }
 }
 

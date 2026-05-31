@@ -83,6 +83,7 @@ fn llm_selects_tool_and_result_in_final_output() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
+            external_bindings: None,
     };
     let mut tool_runtime = ToolRuntime::new();
     for t in &tools {

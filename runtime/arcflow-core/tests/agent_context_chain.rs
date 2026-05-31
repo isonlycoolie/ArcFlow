@@ -46,6 +46,7 @@ fn second_step_context_includes_first_step_output() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
+            external_bindings: None,
     };
     let mut agents = HashMap::new();
     agents.insert(a1, ag(a1, "researcher"));

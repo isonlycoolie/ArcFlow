@@ -33,6 +33,7 @@ fn identical_inputs_produce_identical_step_contents() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
+            external_bindings: None,
     };
     let mut m = HashMap::new();
     m.insert(
