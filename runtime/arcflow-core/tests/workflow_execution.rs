@@ -55,6 +55,7 @@ fn three_steps_with_distinct_agents_run_in_order() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
+            external_bindings: None,
     };
     let mut m = HashMap::new();
     m.insert(a1, ag(a1, "A"));
@@ -103,6 +104,7 @@ fn workflow_halts_on_failed_step_with_partial_record() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
+            external_bindings: None,
     };
     let mut m = HashMap::new();
     m.insert(a_ok, ag(a_ok, "ok"));

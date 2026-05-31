@@ -37,6 +37,7 @@ fn one_step_produces_one_output() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
+            external_bindings: None,
     };
     let mut m = HashMap::new();
     m.insert(a, ag(a));
@@ -78,6 +79,7 @@ fn execution_order_sorts_by_step_order_field() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
+            external_bindings: None,
     };
     let mut m = HashMap::new();
     m.insert(a, ag(a));

@@ -38,6 +38,7 @@ fn test_stub_overrides_step_output() {
         retry_policy: None,
         execution_mode: arcflow_core::rcs::types::ExecutionMode::Linear,
         graph: None,
+            external_bindings: None,
     };
     let mut agents = HashMap::new();
     agents.insert(agent_id, agent(agent_id));

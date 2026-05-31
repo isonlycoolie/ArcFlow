@@ -158,6 +158,7 @@ mod tests {
             retry_policy: None,
             execution_mode: ExecutionMode::Linear,
             graph: None,
+            external_bindings: None,
         };
         let provider = Arc::new(MockStreamProvider {
             chunks: vec!["hello".into(), " world".into()],
