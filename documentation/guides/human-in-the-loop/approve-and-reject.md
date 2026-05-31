@@ -93,3 +93,32 @@ Direct server approve from backend services uses the standard Bearer runtime key
 `examples/hitl/approve_cli.sh` approves the expense demo:
 
 ```bash
+export ARCFLOW_SERVER_API_KEY=dev-secret
+./examples/hitl/approve_cli.sh RUN_ID
+```
+
+Replace `RUN_ID` with the UUID printed when `expense_approval.py` raises `WorkflowInterruptedError`.
+
+## Trace visibility (SEC-1)
+
+Traces show lifecycle metadata around the gate, not approval notes:
+
+```json
+[
+  { "kind": "StepCompleted", "run_id": "r1", "step_id": "s1", "step_index": 0, "duration_ms": 400, "output_size_bytes": 120 },
+  { "kind": "StepStarted", "run_id": "r1", "step_id": "s2", "step_index": 1, "agent_name": "manager", "agent_role": "reviewer" },
+  { "kind": "StepCompleted", "run_id": "r1", "step_id": "s2", "step_index": 1, "duration_ms": 300, "output_size_bytes": 80 }
+]
+```
+
+After approval and resume, expect further `StepStarted` / `StepCompleted` events for downstream steps. No field carries `data.notes` from the approve body.
+
+## Related pages
+
+- [Configuring interrupts](configuring-interrupts.md) for `approval_key` and timeout setup
+- [HITL overview](hitl-overview.md) for the state machine
+- [SEC-1 rules](../observability/sec-1-rules.md) for trace field policy
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §8.2, §8.3; `server/arcflow-server/src/handlers/approve.rs`, `examples/hitl/approve_cli.sh`.
