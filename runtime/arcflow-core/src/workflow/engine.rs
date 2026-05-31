@@ -208,6 +208,44 @@ impl WorkflowEngine {
             resolve_in_db,
         )
     }
+
+    /// Resumes an externally interrupted run after callback outcome (Phase 2-Pro v2).
+    #[allow(clippy::result_large_err)]
+    #[allow(clippy::too_many_arguments)]
+    pub fn resume_with_external_outcome(
+        &self,
+        workflow: &WorkflowDefinition,
+        agents: &HashMap<Uuid, AgentDefinition>,
+        original_run_id: &str,
+        binding_id: &str,
+        attach_step_id: Uuid,
+        report: &crate::rcs::types::ExternalOutcomeReport,
+        decision: &crate::external::RecoveryDecision,
+        tool_runtime: Option<&ToolRuntime>,
+        tool_invoker: Option<Arc<dyn ToolInvoker>>,
+        provider: Option<Arc<dyn ModelProvider>>,
+        provider_max_tokens: u32,
+        provider_temperature: f32,
+        exec_config: &ExecutionConfig,
+    ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
+        validate_workflow(workflow, agents)?;
+        crate::external::resume_workflow_with_external_outcome(
+            &self.agent_runtime,
+            workflow,
+            agents,
+            original_run_id,
+            binding_id,
+            attach_step_id,
+            report,
+            decision,
+            tool_runtime,
+            tool_invoker,
+            provider,
+            provider_max_tokens,
+            provider_temperature,
+            exec_config,
+        )
+    }
 }
 
 #[cfg(test)]
@@ -243,6 +281,7 @@ mod tests {
             retry_policy: None,
             execution_mode: ExecutionMode::Linear,
             graph: None,
+            external_bindings: None,
         };
         let err = WorkflowEngine::new()
             .execute(&wf, &HashMap::new(), "in")
@@ -270,6 +309,7 @@ mod tests {
             retry_policy: None,
             execution_mode: ExecutionMode::Linear,
             graph: None,
+            external_bindings: None,
         };
         let err = WorkflowEngine::new()
             .execute(&wf, &HashMap::new(), "in")
@@ -308,6 +348,7 @@ mod tests {
             retry_policy: None,
             execution_mode: ExecutionMode::Linear,
             graph: None,
+            external_bindings: None,
         };
         let err = WorkflowEngine::new().execute(&wf, &m, "in").unwrap_err();
         assert!(matches!(
@@ -335,6 +376,7 @@ mod tests {
             retry_policy: None,
             execution_mode: ExecutionMode::Linear,
             graph: None,
+            external_bindings: None,
         };
         let err = WorkflowEngine::new().execute(&wf, &m, "in").unwrap_err();
         assert!(matches!(

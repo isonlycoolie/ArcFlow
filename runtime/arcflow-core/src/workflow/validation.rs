@@ -53,5 +53,6 @@ pub(crate) fn validate_workflow(
             validate_graph(graph, &workflow.steps)?;
         }
     }
+    crate::external::validate_bindings(workflow)?;
     Ok(())
 }
