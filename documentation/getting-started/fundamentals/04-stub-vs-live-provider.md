@@ -93,3 +93,23 @@ print("completed:", result.status)
 Run:
 
 ```bash
+python openai_live.py
+```
+
+Live output varies by model and temperature. Default-runtime output for the same workflow shape will differ in wording but follows the same `WorkflowResult` fields.
+
+## Verify
+
+**Default path.** `default_runtime.py` completes with no environment variables beyond Python itself.
+
+**Explicit equivalence.** These two calls behave the same for beginner linear workflows: `run("input")` and `run("input", provider=None)`.
+
+**Live path.** With a valid key, `openai_live.py` returns model-generated text. With a missing or invalid key, expect `ProviderConfigurationError` or `ProviderExecutionError` depending on when validation fails. Read the `[ArcFlow]` message for the remediation hint.
+
+**Same workflow, two modes.** Keep one `Workflow` definition and toggle only the `provider=` argument. That is the intended design: declaration stable, provider swappable.
+
+## Next lesson
+
+[When something fails](05-when-something-fails.md): `WorkflowConfigurationError` vs `WorkflowExecutionError`, and how to read ArcFlow error messages.
+
+**Source:** `sdk-python/arcflow/provider.py`, `sdk-python/README.md`, [Python quickstart](../quickstart-python.md); capabilities reference §16, §16.2.
