@@ -10,7 +10,7 @@ use crate::providers::{
     build_agent_request, default_max_tokens, default_temperature, ProviderCallError,
 };
 use crate::retry::engine::{execute_with_retry, RetryError};
-use crate::rcs::types::{AgentDefinition, ExecutionStatus, MemoryScope, MemoryType};
+use crate::rcs::types::{AgentDefinition, ExecutionStatus, MemoryScope, MemoryType, ToolExecutionMode};
 use crate::state::{ExecutionStepOutput, StateSnapshot};
 use crate::streaming::StreamEvent;
 use crate::tools::ToolError;
@@ -19,6 +19,8 @@ use crate::tracing::tokens_consumed;
 use crate::tracing::TokenUsage;
 use crate::workflow::ExecutionContext;
 
+use super::context::{ContextAssembler, ContextExtras};
+use super::tool_loop::ToolLoop;
 use super::stub::STUB_FAIL_ROLE;
 
 fn effective_provider_timeout(
@@ -105,13 +107,36 @@ impl AgentRuntime {
         run_input: &str,
         mut ctx: Option<&mut ExecutionContext<'_, '_>>,
     ) -> Result<ExecutionStepOutput, RuntimeError> {
-        let memory_note = if let Some(ctx) = ctx.as_mut() {
+        let (memory_note, rag_block) = if let Some(ctx) = ctx.as_mut() {
             self.run_memory_if_configured(agent, step_id, state, run_input, ctx)?
         } else {
-            None
+            (None, None)
         };
+
+        let policy = ContextAssembler::effective_policy(agent.context.as_ref());
+        let graph_state = ctx.as_ref().and_then(|c| c.graph_state.clone());
+        let mut extras = ContextExtras {
+            memory_note: memory_note.clone(),
+            rag_block,
+            graph_state,
+            ..ContextExtras::default()
+        };
+        let mut agent_context =
+            ContextAssembler::assemble(run_input, state, &policy, &extras);
+
         if let Some(ctx) = ctx.as_mut() {
-            self.run_tools_if_configured(agent, step_id, run_input, ctx)?;
+            let tool_results = self.run_tools_if_configured(
+                agent,
+                step_id,
+                run_input,
+                &agent_context,
+                ctx,
+            )?;
+            if let Some(results) = tool_results {
+                extras.tool_results = Some(results);
+                agent_context =
+                    ContextAssembler::assemble(run_input, state, &policy, &extras);
+            }
             tokens_consumed(ctx.sprint5, &ctx.run_id, step_id, &agent.name);
         }
         if agent.role == STUB_FAIL_ROLE {
@@ -160,7 +185,13 @@ impl AgentRuntime {
 
         let step_tokens = if let Some(ctx) = ctx.as_mut() {
             if let Some(provider) = ctx.provider.clone() {
-                Some(self.execute_with_provider(agent, step_id, run_input, ctx, provider)?)
+                Some(self.execute_with_provider(
+                    agent,
+                    step_id,
+                    &agent_context,
+                    ctx,
+                    provider,
+                )?)
             } else {
                 None
             }
@@ -174,9 +205,9 @@ impl AgentRuntime {
         } else {
             (
                 format!(
-                    "[{role}] processed: {run_input} (step: {step_id}, prior_steps: {prior})",
+                    "[{role}] processed: {agent_context} (step: {step_id}, prior_steps: {prior})",
                     role = agent.role,
-                    run_input = run_input,
+                    agent_context = agent_context,
                     step_id = step_id,
                     prior = prior,
                 ),
@@ -204,7 +235,7 @@ impl AgentRuntime {
         &self,
         agent: &AgentDefinition,
         step_id: Uuid,
-        run_input: &str,
+        agent_context: &str,
         ctx: &mut ExecutionContext<'_, '_>,
         provider: std::sync::Arc<dyn crate::providers::ModelProvider>,
     ) -> Result<(String, TokenUsage), RuntimeError> {
@@ -218,7 +249,30 @@ impl AgentRuntime {
         } else {
             default_temperature()
         };
-        let request = build_agent_request(&agent.instructions, run_input, max_tokens, temperature);
+        let use_tool_loop = agent
+            .tools
+            .as_ref()
+            .is_some_and(|t| !t.is_empty())
+            && agent
+                .tool_execution
+                .as_ref()
+                .map(|c| c.mode)
+                .unwrap_or(ToolExecutionMode::LlmSelect)
+                == ToolExecutionMode::LlmSelect;
+        if use_tool_loop {
+            return ToolLoop::run_sync(
+                self,
+                agent,
+                step_id,
+                agent_context,
+                ctx,
+                provider,
+                max_tokens,
+                temperature,
+            );
+        }
+        let request =
+            build_agent_request(&agent.instructions, agent_context, max_tokens, temperature);
         let prompt_size = request.prompt_size_bytes();
         let step_id_str = step_id.to_string();
 
@@ -262,7 +316,7 @@ impl AgentRuntime {
                     || {
                         let req = build_agent_request(
                             &agent.instructions,
-                            run_input,
+                            agent_context,
                             max_tokens,
                             temperature,
                         );
@@ -541,25 +595,35 @@ impl AgentRuntime {
         agent: &AgentDefinition,
         step_id: Uuid,
         run_input: &str,
+        _agent_context: &str,
         ctx: &mut ExecutionContext<'_, '_>,
-    ) -> Result<(), RuntimeError> {
+    ) -> Result<Option<String>, RuntimeError> {
         let Some(tools) = agent.tools.as_ref() else {
-            return Ok(());
+            return Ok(None);
         };
         if tools.is_empty() {
-            return Ok(());
+            return Ok(None);
+        }
+        let mode = agent
+            .tool_execution
+            .as_ref()
+            .map(|c| c.mode)
+            .unwrap_or(ToolExecutionMode::LlmSelect);
+        if matches!(mode, ToolExecutionMode::LlmSelect) && ctx.provider.is_some() {
+            return Ok(None);
         }
         let Some(runtime) = ctx.tool_runtime else {
-            return Ok(());
+            return Ok(None);
         };
         let Some(invoker) = ctx.tool_invoker.clone() else {
-            return Ok(());
+            return Ok(None);
         };
         let rt = tokio::runtime::Runtime::new().map_err(|e| RuntimeError::ToolExecutionFailed {
             tool_name: "runtime".into(),
             step_id,
             reason: e.to_string(),
         })?;
+        let mut lines = Vec::new();
         for def in tools {
             let input = json!({ "message": run_input });
             if let Some(tx) = ctx.stream_tx.as_ref() {
@@ -572,19 +636,25 @@ impl AgentRuntime {
                     args_keys,
                 });
             }
-            if let Err(err) = rt.block_on(runtime.execute_tool(
-                &def.name,
-                input,
-                invoker.clone(),
-                ctx.legacy,
-                ctx.sprint5,
-                &ctx.run_id,
-                Some(step_id),
+            match rt.block_on(self.execute_tool_call_async(
+                crate::providers::ToolCallRequest {
+                    id: format!("legacy_{step_id}"),
+                    name: def.name.clone(),
+                    arguments: serde_json::to_string(&input).unwrap_or_default(),
+                },
+                tools,
+                step_id,
+                ctx,
             )) {
-                return Err(map_tool_error(def.name.clone(), step_id, err));
+                Ok(output) => lines.push(format!("{}: {}", def.name, output)),
+                Err(err) => return Err(err),
             }
         }
-        Ok(())
+        if lines.is_empty() {
+            Ok(None)
+        } else {
+            Ok(Some(lines.join("\n")))
+        }
     }
 
     /// Reads prior stub context, writes current input, returns prior value for output annotation.
@@ -595,9 +665,9 @@ impl AgentRuntime {
         state: &StateSnapshot,
         run_input: &str,
         ctx: &mut ExecutionContext<'_, '_>,
-    ) -> Result<Option<String>, RuntimeError> {
+    ) -> Result<(Option<String>, Option<String>), RuntimeError> {
         let Some(config) = agent.memory_config.as_ref() else {
-            return Ok(None);
+            return Ok((None, None));
         };
         let value = run_input.as_bytes();
         let prior = match config.memory_type {
@@ -690,6 +760,54 @@ impl AgentRuntime {
                 prior
             }
             MemoryType::Vector => {
+                if config.retrieval.is_some() {
+                    let ns = require_namespace(config, step_id)?;
+                    let top_k = config
+                        .retrieval
+                        .as_ref()
+                        .and_then(|r| r.top_k)
+                        .unwrap_or(5) as usize;
+                    let query = ContextAssembler::query_for_retrieval(run_input, run_input);
+                    let hits = ctx
+                        .memory
+                        .search_vector(
+                            config,
+                            &query,
+                            top_k,
+                            &agent.name,
+                            ctx.legacy,
+                            ctx.sprint5,
+                            &ctx.run_id,
+                            Some(step_id),
+                        )
+                        .map_err(|e| map_memory_error(step_id, e))?;
+                    let total_bytes: usize = hits.iter().map(|h| h.len()).sum();
+                    ctx.sprint5.emit(TraceEventKind::MemoryRetrieved {
+                        run_id: ctx.run_id.clone(),
+                        step_id: step_id.to_string(),
+                        agent_name: agent.name.clone(),
+                        chunk_count: hits.len(),
+                        total_bytes,
+                    });
+                    let rag_block = if hits.is_empty() {
+                        None
+                    } else {
+                        Some(
+                            hits.iter()
+                                .enumerate()
+                                .map(|(i, h)| {
+                                    format!(
+                                        "[{}] {}",
+                                        i + 1,
+                                        String::from_utf8_lossy(h)
+                                    )
+                                })
+                                .collect::<Vec<_>>()
+                                .join("\n"),
+                        )
+                    };
+                    return Ok((None, rag_block));
+                }
                 let ns = require_namespace(config, step_id)?;
                 let prior = ctx
                     .memory
@@ -718,7 +836,57 @@ impl AgentRuntime {
                 prior
             }
         };
-        Ok(bytes_to_note(prior))
+        Ok((bytes_to_note(prior), None))
+    }
+
+    pub(crate) async fn execute_tool_call_async(
+        &self,
+        call: crate::providers::ToolCallRequest,
+        tool_defs: &[crate::rcs::types::ToolDefinition],
+        step_id: Uuid,
+        ctx: &mut ExecutionContext<'_, '_>,
+    ) -> Result<String, RuntimeError> {
+        let Some(def) = tool_defs.iter().find(|d| d.name == call.name) else {
+            return Err(RuntimeError::ToolExecutionFailed {
+                tool_name: call.name.clone(),
+                step_id,
+                reason: "tool not configured on agent".into(),
+            });
+        };
+        let Some(runtime) = ctx.tool_runtime else {
+            return Err(RuntimeError::ToolExecutionFailed {
+                tool_name: call.name.clone(),
+                step_id,
+                reason: "tool runtime not configured".into(),
+            });
+        };
+        let Some(invoker) = ctx.tool_invoker.clone() else {
+            return Err(RuntimeError::ToolExecutionFailed {
+                tool_name: call.name.clone(),
+                step_id,
+                reason: "tool invoker not configured".into(),
+            });
+        };
+        let input: serde_json::Value =
+            serde_json::from_str(&call.arguments).unwrap_or_else(|_| {
+                serde_json::json!({ "raw": call.arguments })
+            });
+        runtime
+            .execute_tool(
+                &def.name,
+                input,
+                invoker,
+                ctx.legacy,
+                ctx.sprint5,
+                &ctx.run_id,
+                Some(step_id),
+            )
+            .await
+            .map_err(|e| RuntimeError::ToolExecutionFailed {
+                tool_name: call.name,
+                step_id,
+                reason: e.to_string(),
+            })
     }
 }
 
@@ -818,6 +986,8 @@ mod tests {
             instructions: "i".into(),
             tools: None,
             memory_config: None,
+            context: None,
+            tool_execution: None,
         }
     }
 
