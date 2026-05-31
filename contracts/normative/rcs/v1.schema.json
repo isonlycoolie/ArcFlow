@@ -240,6 +240,33 @@
         "memory_config": {
           "$ref": "#/$defs/MemoryConfig",
           "description": "Optional memory configuration. Sprint 4."
+        },
+        "context": {
+          "type": "object",
+          "description": "Context assembly policy (Phase 2-Pro / RCS v0.6).",
+          "properties": {
+            "include_prior_steps": {
+              "type": "string",
+              "enum": ["all", "last", "none"],
+              "default": "all"
+            },
+            "include_run_input": { "type": "boolean", "default": true },
+            "max_prior_step_chars": { "type": "integer", "default": 4096 }
+          },
+          "additionalProperties": false
+        },
+        "tool_execution": {
+          "type": "object",
+          "description": "Tool loop configuration (Phase 2-Pro / RCS v0.6).",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["legacy_eager", "llm_select"],
+              "default": "llm_select"
+            },
+            "max_iterations": { "type": "integer", "default": 5, "minimum": 1, "maximum": 20 }
+          },
+          "additionalProperties": false
         }
       },
       "required": ["id", "name", "role", "instructions"],

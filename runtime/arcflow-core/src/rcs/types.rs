@@ -252,6 +252,76 @@ pub struct MemoryConfig {
     pub chunking: Option<MemoryChunkingConfig>,
 }
 
+/// Which prior step outputs to include in agent context (Phase 2-Pro / RCS v0.6).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum PriorStepsMode {
+    #[default]
+    All,
+    Last,
+    None,
+}
+
+fn default_include_run_input() -> bool {
+    true
+}
+
+fn default_max_prior_step_chars() -> usize {
+    4096
+}
+
+/// Prompt context assembly policy on an agent (Phase 2-Pro / RCS v0.6).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ContextPolicy {
+    #[serde(default)]
+    pub include_prior_steps: PriorStepsMode,
+    #[serde(default = "default_include_run_input")]
+    pub include_run_input: bool,
+    #[serde(default = "default_max_prior_step_chars")]
+    pub max_prior_step_chars: usize,
+}
+
+impl Default for ContextPolicy {
+    fn default() -> Self {
+        Self {
+            include_prior_steps: PriorStepsMode::All,
+            include_run_input: true,
+            max_prior_step_chars: 4096,
+        }
+    }
+}
+
+/// How tools are invoked during agent execution (Phase 2-Pro / RCS v0.6).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum ToolExecutionMode {
+    LegacyEager,
+    #[default]
+    LlmSelect,
+}
+
+fn default_max_tool_iterations() -> u32 {
+    5
+}
+
+/// Tool loop bounds for LLM function calling (Phase 2-Pro / RCS v0.6).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ToolExecutionConfig {
+    #[serde(default)]
+    pub mode: ToolExecutionMode,
+    #[serde(default = "default_max_tool_iterations")]
+    pub max_iterations: u32,
+}
+
+impl Default for ToolExecutionConfig {
+    fn default() -> Self {
+        Self {
+            mode: ToolExecutionMode::LlmSelect,
+            max_iterations: 5,
+        }
+    }
+}
+
 /// External tool specification embedded in agent definitions.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ToolDefinition {
@@ -291,6 +361,12 @@ pub struct AgentDefinition {
     pub tools: Option<Vec<ToolDefinition>>,
     /// Memory configuration for this agent.
     pub memory_config: Option<MemoryConfig>,
+    /// Context assembly policy (Phase 2-Pro / RCS v0.6).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub context: Option<ContextPolicy>,
+    /// Tool execution mode and loop limits (Phase 2-Pro / RCS v0.6).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tool_execution: Option<ToolExecutionConfig>,
 }
 
 /// Human-in-the-loop gate on a step (Phase 1.4).
@@ -605,6 +681,8 @@ mod tests {
             instructions: "Find sources".to_string(),
             tools: None,
             memory_config: None,
+            context: None,
+            tool_execution: None,
         });
     }
 
