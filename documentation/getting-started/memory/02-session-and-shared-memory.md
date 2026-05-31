@@ -93,3 +93,18 @@ Run either script with `python shared_memory_demo.py`. Stub output is placeholde
 | Shared demo uses same `namespace` on both agents | `"handoff"` on extractor and writer |
 
 Inspect trace metadata after a run if you want to confirm memory events:
+
+```python
+kinds = {e.get("event_kind") for e in result.trace_events}
+print(sorted(kinds))
+```
+
+You may see `MemoryWrite` or `MemoryRead` depending on runtime version and stub behavior. Absence of those events on stub-only runs is not a failure; the config wiring is what this lesson validates.
+
+## Next
+
+[03 Vector memory setup](03-vector-memory-setup.md) connects `MemoryType.VECTOR` to Qdrant through `ARCFLOW_QDRANT_URL` and namespace alignment.
+
+## Source
+
+`sdk-python/arcflow/memory.py`; [Memory types](../../guides/memory-and-rag/memory-types.md) (session and shared sections); [Context and prior steps](../writing-agents/04-context-and-prior-steps.md).
