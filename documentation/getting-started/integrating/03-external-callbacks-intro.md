@@ -93,3 +93,20 @@ See `examples/external/playwright_stub_callback.py` for a CLI stub and `examples
 ## Verify
 
 | Check | Expected |
+|-------|----------|
+| Run with binding reaches `Interrupted` | Yes, after bound step completes |
+| `report_outcome` with valid HMAC | Run resumes toward `Completed` |
+| Trace after callback | `ExternalBindingCompleted` metadata event |
+| Invalid signature | Rejected before outcome parsing |
+
+Poll `GET /v1/runs/{run_id}` while waiting. When status is `Interrupted`, inspect the interrupt payload for binding context before posting the outcome.
+
+## Next
+
+[04 HITL approval intro](04-hitl-approval-intro.md) covers human approval gates, another `Interrupted` pattern that uses `POST /v1/runs/{run_id}/approve/{approval_key}` instead of external callbacks.
+
+Deep dives: [Webhook security](../../guides/external-integrations/webhook-security.md), [Recovery and resume](../../guides/reliability/recovery-and-resume.md), [Track E: HITL and external](../../tutorials/track-e-hitl-and-external.md).
+
+## Source
+
+`sdk-python/arcflow/external.py`, `server/arcflow-server/src/handlers/external.rs`, `examples/external/`; [External callbacks](../../guides/external-integrations/external-callbacks.md); capabilities reference §9, §25.
