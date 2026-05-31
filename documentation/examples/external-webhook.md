@@ -93,3 +93,31 @@ Script stdout prints JSON response from the server on success:
 On signing or auth failure, stderr shows `[ArcFlow] callback failed: ...` and exit code 1.
 
 ## Trace events you should see
+
+| Event kind | When |
+|------------|------|
+| `WorkflowStarted` | Run begins |
+| External step activation | Step waits for callback (metadata in run record) |
+| `StepCompleted` | After valid outcome ingested |
+| `WorkflowCompleted` or next branch | Depends on workflow routing |
+
+Failed HMAC or invalid payload does not emit completion; check server logs and [webhook security](../guides/external-integrations/webhook-security.md).
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| Callback failed: 401 | Wrong signing secret or clock skew | Align binding secret with server config |
+| 404 on run or binding | Mismatched `binding_id` | Use id declared in workflow publish payload |
+| Run unchanged after POST | Outcome status not accepted | Use allowed status values: `success`, `failed`, `needs_input` |
+| Calling from browser | SEC-1 violation risk | Never embed server keys in static frontend; use backend relay |
+
+## Related
+
+| Resource | Link |
+|----------|------|
+| Online application bot | [`examples/static/online-application-chatbot/README.md`](../../examples/static/online-application-chatbot/README.md) |
+| HITL example | [hitl-approval-flow.md](hitl-approval-flow.md) |
+| Tutorial track | [Track E](../tutorials/track-e-hitl-and-external.md) |
+
+**Source:** [`examples/external/playwright_stub_callback.py`](../../examples/external/playwright_stub_callback.py), [`examples/static/online-application-chatbot/`](../../examples/static/online-application-chatbot/); capabilities reference §25, §28 Track E; [external callbacks](../guides/external-integrations/external-callbacks.md), [webhook security](../guides/external-integrations/webhook-security.md).
