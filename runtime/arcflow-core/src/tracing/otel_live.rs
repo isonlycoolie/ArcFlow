@@ -146,3 +146,59 @@ pub fn record_llm_tokens(
         completion_tokens as u64,
     );
 }
+
+/// Opens an `arcflow.tool.execute` span under the active step span.
+pub fn tool_span(run_id: &str, step_id: &str, tool_name: &str) -> SpanGuard {
+    if !otel_config::otel_enabled() {
+        return SpanGuard::none();
+    }
+    try_init_live_tracing();
+    SpanGuard {
+        _inner: Some(
+            tracing::info_span!(
+                "arcflow.tool.execute",
+                run_id = run_id,
+                step_id = step_id,
+                tool_name = tool_name,
+                duration_ms = tracing::field::Empty,
+                status = tracing::field::Empty,
+            )
+            .entered(),
+        ),
+    }
+}
+
+/// Records tool duration and status on the active tool span.
+pub fn record_tool_result(duration_ms: u64, status: &str) {
+    if !otel_config::otel_enabled() {
+        return;
+    }
+    let span = tracing::Span::current();
+    span.record("duration_ms", duration_ms);
+    span.record("status", status);
+}
+
+/// Opens an `arcflow.memory` span for a memory operation.
+pub fn memory_span(
+    run_id: &str,
+    step_id: Option<&str>,
+    memory_type: &str,
+    operation: &str,
+) -> SpanGuard {
+    if !otel_config::otel_enabled() {
+        return SpanGuard::none();
+    }
+    try_init_live_tracing();
+    SpanGuard {
+        _inner: Some(
+            tracing::info_span!(
+                "arcflow.memory",
+                run_id = run_id,
+                step_id = step_id.unwrap_or(""),
+                memory_type = memory_type,
+                operation = operation,
+            )
+            .entered(),
+        ),
+    }
+}
