@@ -93,3 +93,10 @@ If any answer is yes, redesign the field or gate it behind localhost debug with 
 
 ## Related pages
 
+- [Architecture overview](architecture-overview.md) for Relay and trace poll flow
+- [Maturity and known gaps](maturity-and-known-gaps.md) for FP-4 (OTel)
+- [security/sec-1-compliance.md](../security/sec-1-compliance.md) for auth and webhook hardening
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §11.1 (SEC-1 rules), §11.2 (Trace access surfaces), Appendix D (Trace events).
