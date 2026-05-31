@@ -18,6 +18,8 @@ pub struct AppState {
     pub default_upstream_runtime_key: Option<String>,
     pub static_runtime_keys: StaticKeyMap,
     pub webhook_secret: Option<String>,
+    /// Shared pool when `ARCFLOW_POSTGRESQL_URL` is set (Phase A).
+    pub pg_pool: Option<PgPool>,
     pub runs: Option<Arc<RunStore>>,
     pub registry: Option<Arc<WorkflowRegistryStore>>,
     pub sites: Option<Arc<SiteStore>>,
@@ -30,8 +32,16 @@ pub struct AppState {
 impl AppState {
     pub async fn from_env(api_key: String) -> Self {
         let webhook_secret = std::env::var("ARCFLOW_WEBHOOK_SECRET").ok();
-        let (runs, registry, sites, traces) = match std::env::var("ARCFLOW_POSTGRESQL_URL") {
-            Ok(url) => match PgPool::connect(&url).await {
+        let max_pg = std::env::var("ARCFLOW_PG_MAX_CONNECTIONS")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(10);
+        let (pg_pool, runs, registry, sites, traces) = match std::env::var("ARCFLOW_POSTGRESQL_URL") {
+            Ok(url) => match sqlx::postgres::PgPoolOptions::new()
+                .max_connections(max_pg)
+                .connect(&url)
+                .await
+            {
                 Ok(pool) => {
                     arcflow_core::tracing::set_trace_event_persist_hook(Arc::new({
                         let pool = pool.clone();
@@ -50,7 +60,9 @@ impl AppState {
                             }
                         }
                     }));
+                    arcflow_core::recovery::install_shared_pool(pool.clone());
                     (
+                        Some(pool.clone()),
                         Some(Arc::new(RunStore::new(pool.clone()))),
                         Some(Arc::new(WorkflowRegistryStore::new(pool.clone()))),
                         Some(Arc::new(SiteStore::new(pool.clone()))),
@@ -59,10 +71,10 @@ impl AppState {
                 }
                 Err(e) => {
                     tracing::warn!(error = %e, "postgres unavailable; /v1/runs disabled");
-                    (None, None, None, None)
+                    (None, None, None, None, None)
                 }
             },
-            Err(_) => (None, None, None, None),
+            Err(_) => (None, None, None, None, None),
         };
         Self {
             api_key,
@@ -70,6 +82,7 @@ impl AppState {
             default_upstream_runtime_key: std::env::var("ARCFLOW_DEFAULT_UPSTREAM_RUNTIME_KEY").ok(),
             static_runtime_keys: load_static_keys_from_env(),
             webhook_secret,
+            pg_pool,
             runs,
             registry,
             sites,
