@@ -93,3 +93,16 @@ Checklist for new events, debug endpoints, or dashboard widgets:
 1. Does any field embed user or model text?
 2. Does any field embed tool arguments or retrieval chunks?
 3. Can this event reach the browser via Relay trace poll?
+4. Do logs duplicate trace with richer content?
+
+If any answer is yes, redesign the field or gate behind localhost debug with `ARCFLOW_DEBUG=true`.
+
+## Related pages
+
+- [Trace event reference](trace-event-reference.md) per-event SEC-1 classification
+- [OpenTelemetry](opentelemetry.md) for FP-4 span attribute rules
+- [Webhook security](../external-integrations/webhook-security.md) for callback body logging
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §11.1, Appendix D; Sprint 5 security rules, Appendix K K-16; `runtime/arcflow-core/src/tracing/events.rs`.
