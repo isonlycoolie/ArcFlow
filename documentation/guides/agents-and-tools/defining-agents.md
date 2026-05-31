@@ -93,3 +93,98 @@ Memory details: [Memory types](../memory-and-rag/memory-types.md). Context: [Con
 ```
 
 Runtime validates tool call arguments against `input_schema`. Violations emit `ToolInputValidationFailed` and map to `ToolExecutionFailed` on terminal failure.
+
+## ProviderConfig
+
+Never embed API keys in agent JSON. Use `api_key_env` to name an environment variable:
+
+```json
+{
+  "provider_id": "openai",
+  "model": "gpt-4o-mini",
+  "api_key_env": "OPENAI_API_KEY",
+  "params": {
+    "temperature": 0.2,
+    "max_tokens": 2048
+  }
+}
+```
+
+Supported providers: [Provider configuration](provider-configuration.md).
+
+## Python SDK
+
+```python
+from arcflow import Agent
+
+researcher = Agent(
+    id="00000000-0000-4000-8000-000000000020",
+    name="researcher",
+    role="Research analyst",
+    instructions="Use search_kb for facts. Cite sources.",
+    provider="openai/gpt-4o-mini",
+    api_key_env="OPENAI_API_KEY",
+)
+
+workflow.step(researcher, order=1)
+```
+
+See [Python quickstart](../../getting-started/quickstart-python.md) for provider wiring with real keys.
+
+## TypeScript SDK
+
+```typescript
+import { Agent } from "@arcflow/sdk";
+
+const researcher = new Agent({
+  id: "00000000-0000-4000-8000-000000000020",
+  name: "researcher",
+  role: "Research analyst",
+  instructions: "Use search_kb for facts. Cite sources.",
+  provider: {
+    providerId: "openai",
+    model: "gpt-4o-mini",
+    apiKeyEnv: "OPENAI_API_KEY",
+  },
+});
+```
+
+See [TypeScript quickstart](../../getting-started/quickstart-typescript.md).
+
+## Server run envelope
+
+Agents travel in the `agents` array on `POST /v1/runs`:
+
+```json
+{
+  "workflow": { "name": "demo", "execution_mode": "linear", "steps": [] },
+  "agents": [
+    {
+      "id": "00000000-0000-4000-8000-000000000020",
+      "name": "researcher",
+      "role": "Research analyst",
+      "instructions": "Answer concisely."
+    }
+  ],
+  "input": "Summarize Q3 metrics.",
+  "exec_config": { "recovery_enabled": false }
+}
+```
+
+Registry publish may bundle agents with the workflow definition; see [Workflow registry](../workflows/workflow-registry.md).
+
+## Error codes relevant to agents
+
+| ErrorCode | Typical cause |
+|-----------|---------------|
+| `ProviderError` | LLM API failure |
+| `ToolExecutionFailed` | Tool handler error |
+| `ToolInputValidationFailed` | Schema violation (trace event) |
+| `EmbeddingError` | Vector embed failure |
+| `RerankError` | Rerank provider failure |
+| `MemoryError` | Backend unavailable |
+
+Full list in capabilities reference Appendix E.
+
+## Related pages
+
