@@ -4,6 +4,7 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use std::time::Instant;
 
+use serde_json::{Map, Value};
 use uuid::Uuid;
 
 use crate::agent::AgentRuntime;
@@ -148,6 +149,8 @@ pub fn run_graph_loop(
         let mut state = StateEngine::new();
         let mut memory = MemoryCoordinator::new(run_id);
         let mut step_outputs = Vec::new();
+        let mut graph_state_map: Map<String, Value> =
+            exec_config.initial_state.clone().unwrap_or_default();
         let mut loop_ctx = RunLoop {
             run_id,
             workflow_id: workflow.id,
@@ -155,6 +158,7 @@ pub fn run_graph_loop(
             step_outputs: &mut step_outputs,
             run_input,
             test_config: exec_config.test.clone(),
+            graph_state: graph_state_json(&graph_state_map),
         };
 
         while let Some(current) = pending.pop() {
@@ -218,6 +222,20 @@ pub fn run_graph_loop(
                 exec_config.debug.clone(),
             )?;
 
+            if let Some(node) = graph.nodes.iter().find(|n| n.id == current) {
+                if let Some(keys) = &node.outputs {
+                    if let Some(out) = loop_ctx.step_outputs.last() {
+                        for key in keys {
+                            graph_state_map.insert(
+                                key.clone(),
+                                Value::String(out.content.clone()),
+                            );
+                        }
+                    }
+                }
+            }
+            loop_ctx.graph_state = graph_state_json(&graph_state_map);
+
             graph_step_index += 1;
             join_gate.mark_completed(&current);
 
@@ -272,4 +290,12 @@ pub fn run_graph_loop(
             reason: "trace store lock unavailable".into(),
         }))
     })
+}
+
+fn graph_state_json(map: &Map<String, Value>) -> Option<String> {
+    if map.is_empty() {
+        None
+    } else {
+        serde_json::to_string(map).ok()
+    }
 }

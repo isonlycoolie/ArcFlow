@@ -30,6 +30,8 @@ pub struct ExecutionConfig {
     pub stream: Option<StreamConfig>,
     /// Local debug session with breakpoints (Phase 2.4).
     pub debug: Option<Arc<DebugSession>>,
+    /// Initial graph run state JSON (Phase 2-Pro).
+    pub initial_state: Option<serde_json::Map<String, serde_json::Value>>,
 }
 
 impl ExecutionConfig {
