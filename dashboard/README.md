@@ -2,7 +2,9 @@
 
 This folder holds **design and technical specifications** for the ArcFlow operator dashboard. It does not contain dashboard application code.
 
-Implementation lives in the private [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard) repository (submodule in the [meta-repo template](../deploy/meta-repo-template/)). Use these specs as the handoff for that build.
+**Implementation and spec copy:** [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard) (private) — Vite UI, `spec/`, and dashboard CI. Submodule in the [meta-repo template](../deploy/meta-repo-template/).
+
+Keep OSS `dashboard/spec/` in sync when changing admin API bindings; mirror updates to the private repo.
 
 ## Audience
 
