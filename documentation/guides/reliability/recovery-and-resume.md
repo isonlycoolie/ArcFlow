@@ -93,3 +93,98 @@ Safe today:
 
 - Graph forward execution with checkpoints written
 - Linear recovery
+- Re-run graph workflows from entry after failure (new run)
+
+Not production-complete:
+
+- Resume API continuing exact graph node after crash mid-parallel branch
+
+Graph authoring: [Graph workflows](../workflows/graph-workflows.md).
+
+## HITL and recovery
+
+Human-in-the-loop **requires** `recovery_enabled`. Interrupt state lives in Postgres (`arcflow_human_approvals`, run snapshot columns, migration `20240531000004`).
+
+Flow:
+
+```text
+Running → HITL step → Interrupted
+POST approve(approved=true) → Running → Completed
+POST approve(approved=false) → Failed (HumanRejected)
+Timeout → Failed (HumanTimeout)
+```
+
+Poll interrupt payload:
+
+```json
+GET /v1/runs/{run_id}
+
+{
+  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "status": "Interrupted",
+  "interrupt": {
+    "approval_key": "manager_signoff",
+    "step_id": "00000000-0000-4000-8000-000000000030",
+    "metadata": { "summary_bytes": 256 }
+  }
+}
+```
+
+Approve:
+
+```json
+POST /v1/runs/{run_id}/approve/manager_signoff
+
+{ "approved": true, "data": { "notes": "Looks good" } }
+```
+
+Response:
+
+```json
+{ "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7", "status": "Running" }
+```
+
+## Idempotency
+
+`Idempotency-Key` header on `POST /v1/runs` deduplicates identical submissions within the server window (Postgres-backed). Distinct from recovery resume but prevents duplicate runs from client retries.
+
+## Migrations and operations
+
+```bash
+# Before deploy
+arcflow migrate up
+
+# Smoke
+curl -s http://localhost:8080/health
+curl -s http://localhost:8080/ready
+```
+
+Pending migrations cause `/ready` to fail. See [Install and build](../../getting-started/install-and-build.md) and [Server API quickstart](../../getting-started/quickstart-server-api.md).
+
+## Run state machine
+
+```text
+Pending → Running → Completed
+                 └→ Failed → (recovery?) → WorkflowRecoveryStarted → Running
+                 └→ Interrupted (HITL) → approve → Running
+                 └→ Cancelled
+```
+
+`ExecutionStatus` values: `Pending`, `Running`, `Completed`, `Failed`, `Retrying`, `Cancelled`, `Interrupted`.
+
+## Trace persistence
+
+When configured, SEC-1 events also land in `arcflow_trace_events` (migration `20240531000005`). CLI: `arcflow trace <run_id>`. Server: `GET /v1/runs/{id}/trace`.
+
+## Testing recovery
+
+Use test mode for step outputs plus recovery enabled:
+
+```json
+{
+  "exec_config": {
+    "recovery_enabled": true,
+    "test": {
+      "steps": {
+        "s1": { "output": "done" },
+        "s2": { "output": "done" }
