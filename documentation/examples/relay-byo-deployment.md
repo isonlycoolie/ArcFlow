@@ -93,3 +93,28 @@ Pass criteria:
 |-------|----------|
 | `/health` | 200 |
 | POST run from allowed origin | 201 with `run_id` |
+| POST from disallowed origin | Rejected at Relay |
+| Upstream receives run | Visible in server logs or `GET /v1/runs` with server key |
+
+## Trace events you should see
+
+Retrieve via Relay trace route or server admin tools. Expect standard workflow lifecycle events on published workflow runs (`WorkflowStarted`, `StepCompleted`, `WorkflowCompleted`, optional `MemoryRetrieved` for RAG sites).
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| Relay cannot reach upstream | Wrong `ARCFLOW_UPSTREAM_URL` from container | Use host gateway or shared Docker network |
+| 401 from upstream | `upstream_runtime_key` mismatch | Match `ARCFLOW_SERVER_API_KEY` on server |
+| 403 Origin | Browser origin not in JSON | Add exact origin string to `allowed_origins` |
+| Inline workflow rejected | `allow_inline: false` | Publish workflow on server; use `runPublished` |
+
+## Related
+
+| Resource | Link |
+|----------|------|
+| Static chat widget | [static-chat-widget.md](static-chat-widget.md) |
+| Static examples index | [`examples/static/README.md`](../../examples/static/README.md) |
+| Tutorial track | [Track F](../tutorials/track-f-static-product.md) |
+
+**Source:** [`examples/relay/byo-docker/README.md`](../../examples/relay/byo-docker/README.md), [`examples/relay/byo-docker/compose.yml`](../../examples/relay/byo-docker/compose.yml); capabilities reference §25, §28 Track F; `docker/docker-compose.server.yml`.
