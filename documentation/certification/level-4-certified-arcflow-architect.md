@@ -93,3 +93,60 @@ Explain in prose:
 | Join semantics | What `wait_for` guarantees |
 | `max_iterations` | Loop guard purpose |
 | FP-1.01 | Why not to rely on graph resume in production yet |
+| Retry vs fallback | When to use each at enterprise scale |
+| SDK vs server | Latency, persistence, and compliance tradeoffs |
+
+### Deferred feature recommendation template
+
+Pick one deferred feature from [maturity and known gaps](../concepts/maturity-and-known-gaps.md):
+
+| Field | Your answer |
+|-------|-------------|
+| Feature ID | e.g. FP-2 |
+| User impact | What customers cannot do today |
+| Workaround | Supported alternative |
+| Tradeoff accepted | Cost of workaround |
+| Revisit condition | When to adopt native feature |
+
+Example: FP-2 server SSE deferred, workaround SDK streaming or poll, accept higher latency for browser backends until native SSE ships.
+
+### Production RAG pipeline section
+
+Document ingestion for at least two document types (PDF export, HTML, or markdown):
+
+| Stage | Design choice |
+|-------|---------------|
+| Source | Dashboard upload vs batch job |
+| Chunking | Size, overlap, heading awareness |
+| Embedding | Model selection and rotation |
+| Namespace | Per tenant and per product |
+| Evaluation | Recall spot checks without storing raw queries in logs |
+| Reindex | Zero-downtime strategy |
+
+### Pass criteria checklist
+
+| Check | Pass |
+|-------|------|
+| Diagram matches narrative | yes |
+| Every external integration has surface choice | yes |
+| SEC-1 audit procedure reproducible | yes |
+| Multi-tenant isolation explicit | yes |
+| Graph semantics section accurate | yes |
+| FP workaround technically sound | yes |
+| RAG pipeline operable | yes |
+| Peer review | another engineer agrees |
+
+## Self-assessment checklist
+
+| Question | Answer must be yes |
+|----------|-------------------|
+| Can you explain why traces are metadata-only in storage design? | |
+| Can you propose an RCS change without breaking Relay clients? | |
+| Can you defend SDK embed vs server for a regulated workload? | |
+| Can you audit a live deployment in under two hours? | |
+
+## Program completion
+
+Level 4 is the current top tier. Maintain certification by re-running SEC-1 audits after major upgrades and revisiting deferred feature recommendations each release.
+
+**Source:** Full capabilities reference, all sprint implementation plans; ARCFLOW-DOCS-ORGANIZATION-PLAN Level 4 brief; [maturity and known gaps](../concepts/maturity-and-known-gaps.md); `runtime/arcflow-core/`, `contracts/normative/`.
