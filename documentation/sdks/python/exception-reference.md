@@ -93,3 +93,98 @@ Subclass of `WorkflowExecutionError`. All retry attempts exhausted.
 Review retry policy on `workflow.retry()` and upstream provider errors.
 
 ### WorkflowTimeoutError
+
+Subclass of `WorkflowExecutionError`. Workflow or step timeout enforced.
+
+| Attribute | Type |
+|-----------|------|
+| `timeout_type` | `str` |
+| `configured_seconds` | `float` |
+| `elapsed_seconds` | `float` |
+
+Increase `timeout()` / `step_timeout()` or reduce work per step.
+
+### ToolExecutionError
+
+Tool callable raised or native tool layer failed.
+
+| Attribute | Type |
+|-----------|------|
+| `tool_name` | `str \| None` |
+| `run_id` | `str \| None` |
+| `failed_step` | `str \| None` |
+
+### MemoryOperationError
+
+Memory read or write failed at runtime. Verify backend URL, migrations, and namespace.
+
+### ProviderExecutionError
+
+LLM provider call failed.
+
+| Attribute | Type |
+|-----------|------|
+| `provider_id` | `str \| None` |
+| `run_id` | `str \| None` |
+| `failed_step` | `str \| None` |
+
+Verify API key env vars and model name.
+
+### InfrastructureUnavailableError
+
+Optional backend unreachable or URL unset.
+
+| Attribute | Type |
+|-----------|------|
+| `backend` | `str \| None` |
+| `suggestion` | `str \| None` |
+
+Common case: Postgres or Qdrant not running. Start Docker stack and export env vars from [installation](installation.md).
+
+## Observability errors
+
+### TraceNotFoundError
+
+No trace for requested run.
+
+| Cause | Fix |
+|-------|-----|
+| `trace()` before `run()` | Call `run()` first |
+| Run evicted from in-process store | Re-run or use CLI with persisted trace |
+
+### TraceStorageWarning
+
+Trace store dropped events at capacity. Not always fatal; check `TraceResult.warnings`.
+
+| Attribute | Type |
+|-----------|------|
+| `events_dropped` | `int` |
+| `run_id` | `str \| None` |
+
+Reduce trace volume or increase store limits in runtime config.
+
+## HITL errors
+
+### WorkflowInterruptedError
+
+Workflow paused waiting for human approval. Expected control flow for HITL, not necessarily a bug.
+
+| Attribute | Type |
+|-----------|------|
+| `run_id` | `str` |
+| `approval_key` | `str` |
+| `expires_at` | `str \| None` |
+
+Resume with `workflow.resume_with_approval(run_id, approval_key, approved=True)`.
+
+### HumanRejectedError
+
+Human rejected the approval request.
+
+| Attribute | Type |
+|-----------|------|
+| `approval_key` | `str \| None` |
+
+## External callback errors
+
+`report_outcome()` raises standard Python exceptions outside the ArcFlow hierarchy:
