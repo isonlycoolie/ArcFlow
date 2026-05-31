@@ -93,3 +93,37 @@ Run:
 
 ```bash
 python attach_tools.py
+```
+
+## Verify
+
+| Check | Expected |
+|-------|----------|
+| Script completes | No configuration error |
+| Duplicate tool names | Second tool with same `name` on one agent raises `WorkflowConfigurationError` |
+
+Duplicate name check:
+
+```python
+from arcflow import Agent, Tool
+from arcflow.exceptions import WorkflowConfigurationError
+
+def stub_execute(_: dict) -> str:
+    return "ok"
+
+t1 = Tool("dup", "first", {"type": "object"}, stub_execute)
+t2 = Tool("dup", "second", {"type": "object"}, stub_execute)
+
+try:
+    Agent(name="a", role="A", instructions="Run.", tools=(t1, t2))
+except WorkflowConfigurationError as err:
+    print(err)
+```
+
+## Next
+
+[03 Tool loop and max iterations](03-tool-loop-and-max-iterations.md) bounds how many tool rounds an agent may take in one step.
+
+## Source
+
+`sdk-python/arcflow/agent.py` (`tools`, `_validate_tools`); `sdk-python/tests/integration/test_sprint4_tools_memory.py`.
