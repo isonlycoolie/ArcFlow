@@ -93,3 +93,12 @@ Track C troubleshooting: if answers ignore ingested facts, confirm namespace mat
 
 ## Next
 
+| Goal | Document |
+|------|----------|
+| Full tutorial checklist | [Track C: RAG and vector memory](../../tutorials/track-c-rag.md) |
+| Weight and rerank tuning | [Hybrid retrieval and reranking](../../guides/memory-and-rag/hybrid-retrieval-and-reranking.md) |
+| Operator ingest via admin API | [Knowledge ingestion](../../guides/memory-and-rag/knowledge-ingestion.md) |
+
+## Source
+
+[`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py); `examples/rag/memory_guide_qa.py` (restructure branch); [Hybrid retrieval and reranking](../../guides/memory-and-rag/hybrid-retrieval-and-reranking.md); `sdk-python/arcflow/memory.py` (`MemoryRetrievalConfig`).
