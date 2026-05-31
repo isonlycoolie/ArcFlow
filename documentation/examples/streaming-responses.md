@@ -93,3 +93,26 @@ Typical post-run trace kinds:
 |------------|------|
 | `WorkflowStarted` | Run begins |
 | `StepStarted` | Step begins (mirrors stream `step_start`) |
+| `StepCompleted` | Step ends (mirrors stream `step_complete`) |
+| `WorkflowCompleted` | Success |
+
+Stream iterators may surface token deltas before `StepCompleted` appears in trace export.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `Expected at least one stream event` | Provider or binding without stream support | Confirm stub path; rebuild SDK |
+| TypeScript import error | SDK not built | Run `npm run build` in `sdk-typescript/` |
+| Empty token events on stub | Normal for some stub versions | Step events still validate streaming plumbing |
+| Expecting HTTP SSE from server | FP-2 not implemented | Use SDK streaming or poll run status |
+
+## Related
+
+| Resource | Link |
+|----------|------|
+| SDK streaming guide | [sdk-streaming](../guides/streaming/sdk-streaming.md) |
+| Browser streaming note | [streaming in the browser](../guides/streaming/streaming-in-the-browser.md) |
+| FP-2 gap | [maturity and known gaps](../concepts/maturity-and-known-gaps.md) |
+
+**Source:** [`examples/streaming/chat_stream.py`](../../examples/streaming/chat_stream.py), [`examples/streaming/chat_stream.ts`](../../examples/streaming/chat_stream.ts); capabilities reference §25; [SDK streaming](../guides/streaming/sdk-streaming.md).
