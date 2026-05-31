@@ -93,3 +93,17 @@ TypeScript matches Python for core execution paths documented in [parity matrix]
 | No `reportOutcome()` client | POST to server external callback with fetch + HMAC |
 | Graph recovery resume incomplete | Same FP-1.01 limitation as Python |
 | Server SSE deferred (FP-2) | Use `runStream()` in-process or poll GET run |
+
+## Related pages
+
+| Page | Content |
+|------|---------|
+| [Installation](installation.md) | npm and local build |
+| [API reference](api-reference.md) | Exported symbols |
+| [Exception reference](exception-reference.md) | Error classes and `mapNativeError` |
+| [TypeScript quickstart](../../getting-started/quickstart-typescript.md) | First run |
+| [Parity matrix](../parity-matrix.md) | Cross-surface comparison |
+
+## Source
+
+`sdk-typescript/index.ts`, `sdk-typescript/README.md`, `sdk-typescript/arcflow/workflow.ts`; capabilities reference §17, §17.1, §17.2.
