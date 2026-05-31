@@ -2,6 +2,7 @@
 [workspace]
 members = [
     "runtime/arcflow-core",
+    "runtime/arcflow-wasm",
     "sdk-python",
     "sdk-typescript",
     "cli/arcflow-cli",
