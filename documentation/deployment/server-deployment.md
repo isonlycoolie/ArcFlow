@@ -93,3 +93,34 @@ When built with `debug-endpoints` feature and `ARCFLOW_DEBUG=true`, `/v1/debug/r
 
 Set `ARCFLOW_WEBHOOK_SECRET` before enabling external binding workflows. Without it, external callback handlers reject requests. See [Webhook HMAC](../security/webhook-hmac.md).
 
+## Verification after deploy
+
+```bash
+curl -sf http://localhost:8080/health
+curl -sf http://localhost:8080/ready
+
+curl -sf -X POST http://localhost:8080/v1/runs \
+  -H "Authorization: Bearer $ARCFLOW_SERVER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"workflow":{"id":"00000000-0000-4000-8000-000000000001","name":"smoke","execution_mode":"linear","steps":[]},"agents":[],"input":"hi","exec_config":{"recovery_enabled":false}}'
+```
+
+Adjust workflow JSON to match a valid minimal definition in your environment.
+
+Load test reference: `bash scripts/load-test-runs.sh`.
+
+## Backup
+
+Back up Postgres (runs, recovery, registry, sites, trace events). Qdrant volumes hold vector data; back up `arcflow_qdrant_data` or use Qdrant snapshot APIs for RAG-heavy deployments.
+
+## Related pages
+
+- [Health and readiness](health-and-readiness.md)
+- [Migrations runbook](migrations-runbook.md)
+- [Environment variables reference](environment-variables-reference.md)
+- [API key management](../security/api-key-management.md)
+- [Production checklist](production-checklist.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §12, §23; `server/arcflow-server/src/main.rs`, `state.rs`, `handlers/runs.rs`; [contracts/guides/deployment/self-hosted.md](../../contracts/guides/deployment/self-hosted.md).
