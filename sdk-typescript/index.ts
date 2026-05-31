@@ -24,4 +24,9 @@ export {
   type TestExecConfigOptions,
 } from "./arcflow/testing/vitest.js";
 export { Workflow, type RunOptions, type WorkflowConfig } from "./arcflow/workflow.js";
+export {
+  externalBinding,
+  type ExternalBinding,
+  type ExternalOutcomeReport,
+} from "./arcflow/external.js";
 export { ChunkHit, VectorStore } from "./arcflow/memory.js";

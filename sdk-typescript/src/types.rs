@@ -73,6 +73,7 @@ pub fn build_workflow(
         retry_policy: None,
         execution_mode: arcflow_core::rcs::types::ExecutionMode::Linear,
         graph: None,
+        external_bindings: None,
     };
     Ok((workflow, agent_map))
 }
