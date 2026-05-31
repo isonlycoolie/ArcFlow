@@ -93,3 +93,72 @@ Pair with `ExternalBindingConfig` on publish and `report_outcome()` from Python.
 |---------|---------|
 | [byo-docker](../../examples/relay/byo-docker/) | Self-hosted Relay with Docker Compose |
 
+Browser env: `VITE_ARCFLOW_RELAY_URL`, `VITE_ARCFLOW_SITE_TOKEN`. Relay validates Origin and rate-limits per site.
+
+## LangChain interop
+
+| Script | Pattern |
+|--------|---------|
+| [migration_demo.py](../../examples/langchain/migration_demo.py) | `from_langchain_tool`, `langgraph_to_arcflow` |
+
+Requires Python optional `[langchain]` extra. No TypeScript equivalent in repo.
+
+## Vertical samples
+
+Domain-specific agent workflows (Python). Useful as copy sources, not separate product surfaces:
+
+| Directory | Focus |
+|-----------|-------|
+| `education/` | Course Q&A |
+| `healthcare/` | Protocol Q&A |
+| `personal/` | Blog content pipeline |
+| `support/` | Ticket RAG bot |
+| `trading/` | Research + RAG trade flow |
+
+Each is a single-script sample without a dedicated README. Run from repo root with SDK built and provider keys set.
+
+## VS Code extension examples
+
+| Path | Content |
+|------|---------|
+| [extensions/vscode-arcflow/examples/](../../extensions/vscode-arcflow/examples/) | Workflow preview JSON for extension dev |
+
+Separate from top-level `examples/`; targets extension authors.
+
+## How to run (general)
+
+1. Build the SDK for your language ([Python install](../sdks/python/installation.md) or [TypeScript install](../sdks/typescript/installation.md))
+2. Export provider and backend env vars the sample needs
+3. Run the script from repository root, e.g. `python examples/rag/document_qa.py`
+
+Static examples use `npm install` and `npm run dev` inside the example directory.
+
+## Gaps in example coverage
+
+| Topic | Status |
+|-------|--------|
+| TypeScript graph sample in `examples/graph/` | Python only today |
+| TypeScript RAG sample | Python only; TS has `VectorStore` but no dedicated example README |
+| Server-only curl tutorials | See Track B in capabilities §28, not duplicated here |
+| Per-example README | Only static and relay categories have README files today |
+
+Contributors adding examples should include a README with prerequisites, env vars, and a verify command per capabilities reference §25.
+
+## Branch note (pending merges)
+
+Documentation and lessons may reference names from branches not yet on `main`:
+
+| Current branch path | After `feat/examples-catalog-restructure` |
+|---------------------|---------------------------------------------|
+| `examples/rag/document_qa.py` | `examples/rag/memory_guide_qa.py` (ingest + query in one script) |
+| `examples/personal/blog_pipeline.py` | `examples/personal/weekly_blog_pipeline.py` |
+| `examples/external/playwright_stub_callback.py` | `examples/external/portal_outcome_callback.py` |
+| `examples/langchain/migration_demo.py` | `examples/langchain/langchain_adapter_demo.py` |
+
+Lessons under [getting-started/rag/](../getting-started/rag/README.md) call out both names where relevant. After merge, update this table and remove dual references.
+
+SDK PascalCase facades (`CommonTools`, `FromLangChain`, `ExternalOutcome`) are documented in [getting-started/tools/](../getting-started/tools/README.md) with legacy import notes until `feat/sdk-pascalcase-facades` merges.
+
+## Source
+
+`examples/` tree, [examples/static/README.md](../../examples/static/README.md), [examples/static/chat-rag/README.md](../../examples/static/chat-rag/README.md), [examples/static/online-application-chatbot/README.md](../../examples/static/online-application-chatbot/README.md), [examples/relay/byo-docker/README.md](../../examples/relay/byo-docker/README.md); capabilities reference §25, §28.
