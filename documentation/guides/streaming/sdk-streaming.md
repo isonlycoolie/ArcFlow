@@ -93,3 +93,38 @@ See `examples/streaming/chat_stream.ts`.
 
 ## Trace events during streaming
 
+After the run, inspect metadata-only trace events:
+
+```json
+[
+  { "kind": "StreamChunkReceived", "run_id": "r1", "step_id": "s1", "chunk_bytes": 64 },
+  { "kind": "TokenEmitted", "run_id": "r1", "step_id": "s1", "completion_token_delta": 4, "prompt_token_delta": 0 },
+  { "kind": "StreamChunkReceived", "run_id": "r1", "step_id": "s1", "chunk_bytes": 32 },
+  { "kind": "TokenEmitted", "run_id": "r1", "step_id": "s1", "completion_token_delta": 2, "prompt_token_delta": 0 }
+]
+```
+
+Use these events for dashboards and latency analysis, not for reconstructing full completions from trace storage alone.
+
+## Blocking run vs stream
+
+| API | When to use |
+|-----|-------------|
+| `workflow.run()` | Batch jobs, tests, simple scripts |
+| `workflow.run_stream()` / `runStream` | Chat UIs, progressive rendering in Node or Python services |
+
+Both paths share the same engine and SEC-1 trace rules.
+
+## FP-2: server SSE deferred
+
+Remote clients cannot open an SSE channel to `arcflow-server` today. HTTP integrations should poll `GET /v1/runs/{id}` or `GET /v1/runs/{id}/trace`. Browser apps use Relay trace polling; see [streaming in the browser](streaming-in-the-browser.md).
+
+## Related pages
+
+- [Streaming in the browser](streaming-in-the-browser.md) for Relay polling pattern
+- [Execution traces](../observability/execution-traces.md) for reading traces after a stream completes
+- [Maturity and known gaps](../../concepts/maturity-and-known-gaps.md) for FP-2 status
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §10.1, §10.2; `examples/streaming/`, `runtime/arcflow-core/src/tracing/events.rs` (`StreamChunkReceived`, `TokenEmitted`).
