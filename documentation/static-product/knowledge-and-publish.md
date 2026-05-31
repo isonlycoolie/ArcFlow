@@ -93,3 +93,38 @@ Static SDK semver ranges (`^1.0.0`) are preferred over alias strings in browser 
 ## End-to-end operator sequence
 
 ```text
+1. POST /v1/admin/sites           → site_id, token, kb_namespace
+2. POST .../knowledge/ingest      → FAQ / docs in Qdrant
+3. POST .../workflows/chat/publish → chat@1.0.0
+4. Frontend runPublished          → resolve ^1.0.0 → run
+5. Trace MemoryRetrieved          → chunk_count, total_bytes (SEC-1)
+```
+
+## Smoke scripts
+
+Repository reference implementations:
+
+| Script | Purpose |
+|--------|---------|
+| `scripts/static-provision.sh` | Create site, ingest sample, publish |
+| `scripts/static-smoke.sh` | End-to-end run via Relay |
+
+Use in CI after deploy to catch registry or Qdrant misconfiguration early.
+
+## Infrastructure requirements
+
+| Service | Required for |
+|---------|--------------|
+| Postgres | Sites, registry, runs |
+| Qdrant | Vector retrieval in chat |
+| Embedding provider env | Ingest and query embeddings |
+
+Stub embedding works for local smoke only, not production RAG quality.
+
+## Related pages
+
+- [site-lifecycle.md](site-lifecycle.md)
+- [browser-sdk-api.md](browser-sdk-api.md)
+- [guides/workflows/workflow-registry.md](../guides/workflows/workflow-registry.md)
+
+**Source:** capabilities reference §13.2, §13.3, §15.1; Appendix B; `scripts/static-provision.sh`, `scripts/static-smoke.sh`.
