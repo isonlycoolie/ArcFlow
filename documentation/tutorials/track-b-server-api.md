@@ -93,3 +93,97 @@ curl -s -X POST http://localhost:8080/v1/runs \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer dev-secret" \
   -d @run-payload.json
+```
+
+Copy `run_id` from **201** response. Optional: add `Idempotency-Key: <uuid>` header for deduplication.
+
+## Step 4: Poll until terminal status
+
+```bash
+RUN_ID="paste-uuid-here"
+curl -s "http://localhost:8080/v1/runs/${RUN_ID}" \
+  -H "Authorization: Bearer dev-secret"
+```
+
+Poll until `status` is `Completed`, `Failed`, `Cancelled`, or `Interrupted`. Stub runs typically finish in seconds.
+
+Bash loop:
+
+```bash
+until STATUS=$(curl -s "http://localhost:8080/v1/runs/${RUN_ID}" \
+  -H "Authorization: Bearer dev-secret" | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])") \
+  && [[ "$STATUS" == "Completed" || "$STATUS" == "Failed" ]]; do
+  sleep 1
+done
+echo "terminal status: $STATUS"
+```
+
+Track B pass criteria: `Completed` with non-empty `result.output`.
+
+## Step 5: Retrieve trace
+
+```bash
+curl -s "http://localhost:8080/v1/runs/${RUN_ID}/trace" \
+  -H "Authorization: Bearer dev-secret"
+```
+
+Verify event kinds include `WorkflowStarted`, `StepCompleted`, and `WorkflowCompleted`. Payloads are SEC-1 metadata only.
+
+Optional CLI:
+
+```bash
+cargo run -p arcflow-cli -- trace ${RUN_ID} --format json --verbose
+```
+
+## Step 6: Verification checklist
+
+| Check | Expected |
+|-------|----------|
+| `/ready` | HTTP 200 |
+| Create run | HTTP 201 with `run_id` |
+| Final status | `Completed` |
+| Trace export | Lifecycle kinds present |
+| Auth without key | HTTP 401 on `/v1/runs` |
+
+## Expected output
+
+Create response shape:
+
+```json
+{
+  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "trace_id": "trace-7c9e6679",
+  "status": "Running"
+}
+```
+
+Completed run includes `result.output` string. HTTP uses PascalCase; Python SDK embedded runs use lowercase `completed` for the same state.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| 503 on POST `/v1/runs` | Postgres down or migrations pending | Check `docker compose logs arcflow-migrate` and `/ready` |
+| 401 Unauthorized | Missing or wrong API key | Use `dev-secret` from compose file |
+| Stuck in `Running` | Server error or hung provider | Inspect server logs; stub should finish quickly |
+| Empty trace | Wrong run id | Copy id from create response exactly |
+
+## What you learned
+
+Track B maps the embedded SDK loop to durable server execution: auth tiers, run persistence, polling contract, and trace HTTP export. Platform engineers use this surface for backends, cron, and services that should not embed the SDK.
+
+## Next tracks
+
+| Track | Focus |
+|-------|-------|
+| C | RAG and Qdrant |
+| G | Migrations, `/ready`, operator CLI |
+| E | HITL and external callbacks on server |
+
+Stop the stack when finished:
+
+```bash
+docker compose -f docker/docker-compose.server.yml down
+```
+
+**Source:** capabilities reference §28 Track B, §12, Appendix B; [Server API quickstart](../getting-started/quickstart-server-api.md); `docker/docker-compose.server.yml`, `server/arcflow-server/README.md`.
