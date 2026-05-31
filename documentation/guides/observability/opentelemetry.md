@@ -93,3 +93,39 @@ Expect `arcflow.workflow` spans within a few seconds of run completion.
 See [docker/observability-otel.md](../../../docker/observability-otel.md) for full compose notes.
 
 ## FP-4 maturity expectations
+
+| Stable enough today | Still stabilizing under FP-4 |
+|---------------------|------------------------------|
+| Native traces and HTTP trace API | Metric label sets |
+| CLI TUI trace view | Dual live + post-run export tuning |
+| SEC-1 metadata in span translation | Production SLO guidance for collector failures |
+
+Export failures are best-effort and never fail workflow execution (`tracing/error.rs`). Monitor collector health separately.
+
+## Verification commands
+
+| Command | Expect |
+|---------|--------|
+| `cargo test -p arcflow-core --features otel otel` | Span, SEC-1, metrics smoke tests pass |
+| `cargo build -p arcflow-core --no-default-features` | Pass without OTel deps |
+| `cargo build -p arcflow-server` | Pass with OTel enabled |
+
+## When not to use OTel yet
+
+Skip FP-4 in production if:
+
+- You cannot cap metric cardinality.
+- Compliance has not reviewed span attributes.
+- You only need run-level debugging (native trace is sufficient).
+
+Revisit when FP-4 exits alpha in [maturity and known gaps](../../concepts/maturity-and-known-gaps.md).
+
+## Related pages
+
+- [Execution traces](execution-traces.md) for native trace access
+- [SEC-1 rules](sec-1-rules.md) for attribute policy
+- [Maturity and known gaps](../../concepts/maturity-and-known-gaps.md) for FP-4 status
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §11.3; Sprint 5 and Sprint 6 implementation plans, ADR-009; `docker/observability-otel.md`, `runtime/arcflow-core/src/tracing/otel_config.rs`.
