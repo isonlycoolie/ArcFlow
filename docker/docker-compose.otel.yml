@@ -1,0 +1,30 @@
+# OpenTelemetry stack for local ArcFlow verification.
+#
+# Usage:
+#   docker compose -f docker/docker-compose.server.yml -f docker/docker-compose.otel.yml up
+#
+# Jaeger UI: http://localhost:16686
+# OTLP HTTP: http://localhost:4318
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+
+  arcflow-server:
+    environment:
+      ARCFLOW_OTEL_ENABLED: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_SERVICE_NAME: arcflow-server
