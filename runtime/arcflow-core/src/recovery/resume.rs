@@ -61,6 +61,9 @@ pub fn resume_workflow(
         }));
     }
 
+    #[cfg(feature = "otel")]
+    crate::tracing::otel_metrics::record_recovery_resume();
+
     let precompleted: Vec<ExecutionStepOutput> = recovery
         .completed_steps
         .iter()
