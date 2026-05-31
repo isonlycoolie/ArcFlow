@@ -93,3 +93,30 @@ Pass criteria are structural: graph events and join ordering, not exact LLM text
 
 | Event kind | When |
 |------------|------|
+| `WorkflowStarted` | Graph run begins |
+| `GraphNodeStarted` | Each node starts |
+| `GraphNodeCompleted` | Each node finishes |
+| `StepStarted` / `StepCompleted` | Per underlying step |
+| `WorkflowCompleted` | Success |
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| Synthesize runs early | Join misconfigured | Use `.join_node("synthesize", ["search_web", "search_docs"])` |
+| Loop never exits | Condition always matches | Add terminating edge with `to=None` |
+| Missing graph events | `graph=True` omitted | Set on Workflow constructor |
+| Exceeded iterations error | Guard too low | Increase `max_iterations` or fix routing |
+
+## What you learned
+
+Track D covers scheduler semantics: entry nodes, conditional edges, parallel fan-out, join preconditions, and iteration guards. These patterns underpin support routers and multi-branch automation in production.
+
+## Next tracks
+
+| Track | Focus |
+|-------|-------|
+| E | HITL and external callbacks |
+| Level 2 cert | Graph plus RAG plus HITL combined workflow |
+
+**Source:** capabilities reference §28 Track D; [`examples/graph/parallel_search.py`](../../examples/graph/parallel_search.py), [`examples/graph/reflection_loop.py`](../../examples/graph/reflection_loop.py); [graph routing example](../examples/graph-routing.md); [graph workflows](../guides/workflows/graph-workflows.md).
