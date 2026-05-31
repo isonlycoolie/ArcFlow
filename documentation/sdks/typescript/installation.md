@@ -93,3 +93,15 @@ Use in unit tests to avoid live LLM calls. See `sdk-typescript/tests/` for patte
 
 ## Troubleshooting
 
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `Cannot find module '../index.native.js'` | Build not run | `npm run build` in `sdk-typescript/` |
+| Wrong architecture binary | Platform mismatch | Rebuild native module locally |
+| Provider errors at runtime | Missing API key | Export provider env var |
+| `mapNativeError` returns generic `ArcFlowError` | Unrecognized native message | Check raw message; file issue if mapping gap |
+
+For combined Python and TypeScript install guidance, see [install and build](../../getting-started/install-and-build.md).
+
+## Source
+
+`sdk-typescript/README.md`, `sdk-typescript/package.json`, `documentation/getting-started/install-and-build.md`; capabilities reference §17.
