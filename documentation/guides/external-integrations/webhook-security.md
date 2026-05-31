@@ -93,3 +93,45 @@ If `ARCFLOW_WEBHOOK_SECRET` is unset, external callback routes return **503** wi
 ## Secret rotation and dual-verify window
 
 Production rotations should use a short overlap window:
+
+1. Generate `SECRET_NEW`.
+2. Configure integrators to sign with `SECRET_NEW` while the server accepts both `SECRET_OLD` and `SECRET_NEW` (operational pattern: deploy integrator first, then update server secret, then retire old secret).
+3. The open-source server currently loads a single `ARCFLOW_WEBHOOK_SECRET`. During rotation, run dual verification in your ingress layer or temporarily configure the old secret at integrators until the server secret is swapped, then update integrators in the same maintenance window.
+
+Document the rotation timestamp and retire the old secret within 24 hours.
+
+## What never to log
+
+| Do not log | Why |
+|------------|-----|
+| Raw POST body | May contain PII or payment fields in `fields` |
+| Full `X-ArcFlow-Signature` | Secret-derived; aids offline guessing with leaks |
+| `ARCFLOW_WEBHOOK_SECRET` or API keys | Credential exposure |
+
+Safe structured log fields: `run_id`, `binding_id`, `status` from parsed JSON after verification, HTTP status, duration_ms, idempotency key hash.
+
+## Failure responses
+
+| HTTP | Meaning |
+|------|---------|
+| 401 | Missing or invalid signature |
+| 404 | Unknown run or binding id |
+| 409 | Run not awaiting external callback |
+| 422 | JSON or schema validation failure |
+| 503 | Webhook secret or Postgres unavailable |
+
+Failed verification must not parse or persist outcome fields.
+
+## Network reachability
+
+Async callbacks require the integrator to reach `arcflow-server` over HTTPS in production. Browser-only workers should post from a backend worker, not from untrusted client JavaScript holding webhook secrets.
+
+## Related pages
+
+- [External callbacks](external-callbacks.md) for binding configuration and ExternalOutcome.report
+- [SEC-1 rules](../observability/sec-1-rules.md) for trace and log policy
+- [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md) for compliance overview
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §9.2, §9.3, Appendix K K-07; `runtime/arcflow-core/src/external/webhook.rs`, `server/arcflow-server/src/handlers/external.rs`.
