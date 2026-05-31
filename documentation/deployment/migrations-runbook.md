@@ -93,3 +93,46 @@ Start server only after validate succeeds.
 Rolling upgrade without dual-write: migrations must be backward compatible with the previous server version, or deploy in a stop-the-world window. ArcFlow additive migrations follow expand-only patterns where possible.
 
 ## Partial failure recovery
+
+| Symptom | Likely cause | Action |
+|---------|--------------|--------|
+| `/ready` → `migrations_pending` | Migrate not run | Run `arcflow migrate up` |
+| `/ready` → `postgres_unavailable` | Network or credentials | Fix URL, security groups, TLS |
+| `/ready` → `migration_check_failed` | Corrupt `_sqlx_migrations` | Restore from backup; do not hand-edit unless guided by platform team |
+| Migrate job exit non-zero | SQL error mid-migration | Restore snapshot; fix root cause; retry on clone first |
+
+Never delete migration files from a deployed environment.
+
+## Rollback
+
+ArcFlow does not ship automated `migrate down` for production. Rollback procedure:
+
+1. Restore Postgres from pre-migrate snapshot.
+2. Deploy previous server image tag that matches restored schema.
+3. Verify `/ready` and smoke `POST /v1/runs`.
+
+Forward-fix is preferred when rollback snapshot is stale (data loss).
+
+## Schema version tracking
+
+SQLx records applied revisions in `_sqlx_migrations`. Operators can inspect:
+
+```sql
+SELECT version, description, installed_on FROM _sqlx_migrations ORDER BY version;
+```
+
+Expected latest version matches the highest `2024053100000N` file in the release tag.
+
+## Relay dependency
+
+Relay reads site tables from migration 000007. Deploy server migrations before enabling Relay on a fresh cluster.
+
+## Related pages
+
+- [Health and readiness](health-and-readiness.md)
+- [Recovery and resume](../guides/reliability/recovery-and-resume.md)
+- [Server deployment](server-deployment.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §23.2, §23.3, Appendix G; `server/arcflow-server/migrations/`, `arcflow_core::migrate`.
