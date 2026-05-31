@@ -46,6 +46,10 @@ impl SiteStore {
         format!("st_live_{}", &Uuid::new_v4().simple().to_string())
     }
 
+    pub fn origin_allowed(site: &SiteRecord, origin: &str) -> bool {
+        maintenance::origin_allowed(site, origin)
+    }
+
     pub async fn create(
         &self,
         display_name: &str,
