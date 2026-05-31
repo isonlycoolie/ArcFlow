@@ -1,7 +1,7 @@
 {
   "name": "@arcflow/static",
-  "version": "0.1.0",
-  "description": "Static-site SDK for self-hosted ArcFlow servers",
+  "version": "0.2.0",
+  "description": "Browser RCS serializer and HTTP client for ArcFlow server",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
