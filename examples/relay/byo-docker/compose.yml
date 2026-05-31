@@ -1,0 +1,10 @@
+services:
+  arcflow-relay:
+    build:
+      context: ../../..
+      dockerfile: examples/relay/byo-docker/Dockerfile
+    ports:
+      - "8090:8090"
+    environment:
+      ARCFLOW_UPSTREAM_URL: ${ARCFLOW_UPSTREAM_URL:-http://host.docker.internal:8080}
+      ARCFLOW_RELAY_SITES_JSON: ${ARCFLOW_RELAY_SITES_JSON:-[]}
