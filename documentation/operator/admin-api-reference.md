@@ -188,3 +188,20 @@ Dashboard UI (FP-3.01 deferred) maps 401 to key configuration screens. Until the
 
 - `scripts/static-provision-site.sh`
 - `scripts/static-ingest-knowledge.sh`
+- `scripts/static-publish-chat.sh`
+
+## Future routes (not R1)
+
+- `GET /v1/admin/sites` list endpoint
+- Registry browser with semver range picker
+
+## Related pages
+
+- [Sites management](sites-management.md)
+- [Token rotation](token-rotation.md)
+- [Dashboard spec](dashboard-spec.md)
+- [API enforcement](../../dashboard/spec/04-api-enforcement.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §13; [dashboard/spec/03-admin-api-contract.md](../../dashboard/spec/03-admin-api-contract.md), [04-api-enforcement.md](../../dashboard/spec/04-api-enforcement.md).
