@@ -93,3 +93,23 @@ Response includes a new `site_token`. Update all frontend deployments. Old token
 ## 6. Decommission
 
 Archive site by revoking token, removing origins, and unpublishing workflows as needed. Postgres rows remain for audit unless operational policy deletes them.
+
+## Checklist
+
+| Step | Done when |
+|------|-----------|
+| Site created | `site_id` and `relay_url` recorded |
+| Token stored securely | Not in repo |
+| Origins match deploy URLs | Relay 403 tests pass |
+| Knowledge ingested | RAG answers cite KB (see knowledge guide) |
+| Chat workflow published | `runPublished("chat", "^1.0.0", ...)` succeeds |
+| Smoke script green | `scripts/static-smoke.sh` or manual curl |
+
+## Related pages
+
+- [knowledge-and-publish.md](knowledge-and-publish.md)
+- [relay/origin-and-rate-limiting.md](../relay/origin-and-rate-limiting.md)
+- [static-product/security-model.md](security-model.md)
+- Dashboard spec [03-admin-api-contract.md](../../dashboard/spec/03-admin-api-contract.md)
+
+**Source:** capabilities reference §13.1; `server/arcflow-server/src/handlers/admin/sites.rs`; dashboard spec §03.
