@@ -93,3 +93,95 @@ POST /v1/admin/sites/{site_id}/workflows/chat/publish
 ```
 
 Published agents should reference the site namespace:
+
+```json
+{
+  "memory_config": {
+    "memory_type": "vector",
+    "scope": "workflow",
+    "namespace": "site-acme-kb-uuid",
+    "embedding": "openai/text-embedding-3-small",
+    "retrieval": { "mode": "hybrid", "top_k": 5 }
+  }
+}
+```
+
+Browser: `runPublished("chat", "^1.0.0", userMessage)` via Relay. See [Workflow registry](../workflows/workflow-registry.md) and [Server API quickstart](../../getting-started/quickstart-server-api.md).
+
+## Developer ingest (examples)
+
+Example directories:
+
+| Path | Pattern |
+|------|---------|
+| `examples/rag/` | SDK vector store ingest |
+| `examples/static/chat-rag/` | Admin + Relay + static SDK end-to-end |
+| `examples/online-application-chatbot/` | Full static product |
+
+Typical SDK pattern (conceptual):
+
+```python
+from arcflow.memory import VectorStore
+
+store = VectorStore(
+    namespace="product-docs",
+    embedding="openai/text-embedding-3-small",
+    chunk_size=512,
+    chunk_overlap=64,
+)
+
+store.ingest_text(key="getting-started", text=open("docs/intro.md").read())
+```
+
+Exact API names follow `sdk-python` examples; align namespace with agent `memory_config.namespace`.
+
+## Prerequisites
+
+| Component | Variable / service |
+|-----------|------------------|
+| Qdrant | `ARCFLOW_QDRANT_URL` |
+| Embeddings | `ARCFLOW_EMBEDDING_PROVIDER`, provider API key |
+| Server (admin path) | `ARCFLOW_POSTGRESQL_URL`, `ARCFLOW_ADMIN_API_KEY` |
+| Hybrid search | `ARCFLOW_QDRANT_HYBRID=true` optional |
+
+Production: do not use stub embedding provider. See [Hybrid retrieval and reranking](hybrid-retrieval-and-reranking.md).
+
+## Verify ingest
+
+1. Run a workflow with vector agent pointing at the namespace
+2. Query with text that appears only in ingested docs
+3. Trace shows `MemoryRetrieved` with `chunk_count > 0`:
+
+```json
+{
+  "kind": "MemoryRetrieved",
+  "run_id": "r1",
+  "agent_name": "support",
+  "chunk_count": 3,
+  "total_bytes": 2400
+}
+```
+
+4. Answer should reflect ingested facts (manual review; traces do not contain chunk text per SEC-1)
+
+## Operational scripts
+
+Reference CI smoke implementations:
+
+- `scripts/static-provision.sh`
+- `scripts/static-smoke.sh`
+
+## Updating and deleting content
+
+Re-ingest with the same `key` to replace logical documents per admin API semantics. Monitor `MemoryEvicted` traces if TTL or capacity policies apply on persistent stores (vector collections follow Qdrant collection management).
+
+## Related pages
+
+- [Vector RAG pipeline](vector-rag-pipeline.md)
+- [Memory types](memory-types.md)
+- [Surfaces and when to use them](../../concepts/surfaces-and-when-to-use-them.md)
+- [Architecture overview](../../concepts/architecture-overview.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §6.2, §13.2; Appendix B (admin ingest route); Appendix A (MemoryChunkingConfig).
