@@ -10,4 +10,5 @@ export { HitlConfig, HumanRejectedError, WorkflowInterruptedError } from "./arcf
 export { type StreamEvent, type StreamRunResult } from "./arcflow/stream.js";
 export { buildTestExecConfig, enableStubMode, type TestExecConfigOptions, } from "./arcflow/testing/vitest.js";
 export { Workflow, type RunOptions, type WorkflowConfig } from "./arcflow/workflow.js";
+export { ChunkHit, VectorStore } from "./arcflow/memory.js";
 //# sourceMappingURL=index.d.ts.map
