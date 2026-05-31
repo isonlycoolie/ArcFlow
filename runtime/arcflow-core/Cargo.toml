@@ -62,3 +62,8 @@ path = "src/lib.rs"
 [[bench]]
 name = "trace_overhead"
 harness = false
+
+[[test]]
+name = "otel_spans"
+path = "tests/otel_spans.rs"
+required-features = ["otel"]
