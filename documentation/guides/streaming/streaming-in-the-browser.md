@@ -93,3 +93,36 @@ Do not expect SEC-1 trace exports to replay exact token strings.
 ## Recommended poll parameters
 
 | Parameter | Suggested value | Notes |
+|-----------|-----------------|-------|
+| Interval | 300 to 500 ms | Balance UX vs load |
+| Max duration | 60 to 120 s | Align with workflow timeout |
+| Backoff on 429 | exponential | If rate limits appear |
+| Stop condition | `WorkflowCompleted`, `WorkflowFailed`, or run status terminal | Avoid infinite loops |
+
+Also poll run status (`GET .../runs/{run_id}`) when trace persistence lags behind completion.
+
+## Static SDK run flow
+
+Typical sequence from `packages/arcflow-static`:
+
+1. `client.run(input)` creates the run and may poll until complete for simple chat.
+2. For streaming UI, split create and poll: capture `runId`, start trace poll loop, fetch final `RunResult` when status completes.
+3. Handle `Interrupted` for HITL or external bindings without treating it as failure.
+
+Site tokens and Origin allowlists are required on Relay. Never embed `ARCFLOW_SERVER_API_KEY` in frontend bundles.
+
+## Security reminders
+
+- Trace poll responses are SEC-1 metadata; safe to inspect in browser devtools relative to prompt content, but still protect run IDs from unauthorized users.
+- Scoped runtime keys limit which workflows a site may start.
+- See [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md).
+
+## Related pages
+
+- [SDK streaming](sdk-streaming.md) for in-process `run_stream` / `runStream`
+- [Architecture overview](../../concepts/architecture-overview.md) for Relay diagram
+- [Maturity and known gaps](../../concepts/maturity-and-known-gaps.md) for FP-2
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §10.3, §10.4; `packages/arcflow-static/src/client.ts`, `documentation/concepts/architecture-overview.md`.
