@@ -93,3 +93,36 @@ Define scoped keys on the server:
     "workflows": ["chat"],
     "publish": false
   }
+}
+```
+
+Set `"upstream_runtime_key": "relay-site-key-abc"` in site JSON. Never put the master server key in Relay env if a scoped key suffices.
+
+## TLS and networking
+
+Typical layout:
+
+```text
+Internet → CDN/WAF → Relay (TLS termination)
+                         → private network → arcflow-server
+```
+
+Relay does not terminate LLM traffic; it only proxies JSON run APIs.
+
+## Smoke test
+
+After deploy, run repository scripts if available:
+
+```bash
+./scripts/static-smoke.sh
+```
+
+Or manual curl from [origin-and-rate-limiting.md](origin-and-rate-limiting.md).
+
+## Related pages
+
+- [relay/overview.md](overview.md)
+- [relay/request-path.md](request-path.md)
+- [examples/relay-byo-deployment.md](../examples/relay-byo-deployment.md) (when published)
+
+**Source:** capabilities reference §14.3, Appendix H; `examples/relay/byo-docker/README.md`, `examples/relay/byo-docker/compose.yml`.
