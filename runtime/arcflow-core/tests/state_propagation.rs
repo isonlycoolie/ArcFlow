@@ -37,6 +37,7 @@ fn first_step_sees_empty_prior_state() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
+            external_bindings: None,
     };
     let mut m = HashMap::new();
     m.insert(a, ag(a, "alpha"));
@@ -75,6 +76,7 @@ fn second_step_sees_first_step_in_snapshot() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
+            external_bindings: None,
     };
     let mut m = HashMap::new();
     m.insert(a1, ag(a1, "first"));

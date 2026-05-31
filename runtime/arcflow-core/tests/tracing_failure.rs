@@ -35,6 +35,7 @@ fn failed_step_emits_step_failed_then_workflow_failed() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
+            external_bindings: None,
     };
     let mut agents = HashMap::new();
     agents.insert(

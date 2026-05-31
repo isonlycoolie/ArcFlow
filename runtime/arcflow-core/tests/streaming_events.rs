@@ -91,6 +91,7 @@ fn single_step_workflow(agent_id: Uuid, step_id: Uuid) -> (WorkflowDefinition, H
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
+            external_bindings: None,
     };
     (workflow, agents)
 }

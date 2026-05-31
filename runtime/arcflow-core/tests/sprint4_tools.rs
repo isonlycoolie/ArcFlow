@@ -62,6 +62,7 @@ fn workflow_runs_agent_with_tool() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
+            external_bindings: None,
     };
     let mut runtime = ToolRuntime::new();
     runtime
@@ -121,6 +122,7 @@ fn workflow_with_session_memory_records_trace_events() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
+            external_bindings: None,
     };
     let record = WorkflowEngine::new()
         .execute_with_tools(&wf, &agents, "remember", None, None, None, 0, 0.0)
