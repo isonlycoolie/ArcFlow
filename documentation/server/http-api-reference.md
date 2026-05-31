@@ -93,3 +93,98 @@ curl -s -X POST http://localhost:8080/v1/runs \
 {
   "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
   "trace_id": "trace-7c9e6679",
+  "status": "Running"
+}
+```
+
+Errors: **400** validation, **401** auth, **403** scoped key workflow denied, **503** Postgres unavailable.
+
+### GET /v1/runs/{run_id}
+
+Poll status, result, error, interrupt.
+
+```bash
+curl -s "http://localhost:8080/v1/runs/7c9e6679-7425-40de-944b-e07fc1f90ae7" \
+  -H "Authorization: Bearer dev-secret"
+```
+
+**200** completed:
+
+```json
+{
+  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "status": "Completed",
+  "result": { "output": "Final answer text", "step_outputs": {} },
+  "error": null,
+  "interrupt": null
+}
+```
+
+**200** interrupted (HITL):
+
+```json
+{
+  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "status": "Interrupted",
+  "result": null,
+  "error": null,
+  "interrupt": {
+    "approval_key": "manager_signoff",
+    "step_id": "00000000-0000-4000-8000-000000000030",
+    "metadata": { "summary_bytes": 256 }
+  }
+}
+```
+
+### GET /v1/runs/{run_id}/trace
+
+SEC-1 metadata-only `ExecutionTrace` JSON.
+
+```bash
+curl -s "http://localhost:8080/v1/runs/7c9e6679-7425-40de-944b-e07fc1f90ae7/trace" \
+  -H "Authorization: Bearer dev-secret"
+```
+
+### POST /v1/runs/{run_id}/approve/{approval_key}
+
+Resume or reject HITL interrupt.
+
+```bash
+curl -s -X POST "http://localhost:8080/v1/runs/RUN_ID/approve/manager_signoff" \
+  -H "Authorization: Bearer dev-secret" \
+  -H "Content-Type: application/json" \
+  -d '{"approved": true, "data": {}}'
+```
+
+**200** on approve:
+
+```json
+{ "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7", "status": "Running" }
+```
+
+Reject with `"approved": false` yields terminal `Failed` (HumanRejected).
+
+### POST /v1/runs/{run_id}/external/{binding_id}
+
+External system callback. Body: `ExternalOutcomeReport` JSON. Verify `X-ArcFlow-Signature` when `ARCFLOW_WEBHOOK_SECRET` is set.
+
+```bash
+curl -s -X POST "http://localhost:8080/v1/runs/RUN_ID/external/binding-uuid" \
+  -H "Authorization: Bearer dev-secret" \
+  -H "Content-Type: application/json" \
+  -H "X-ArcFlow-Signature: sha256=..." \
+  -d '{"status":"completed","output":{"ticket_id":"T-99"}}'
+```
+
+## Workflow registry (runtime API key)
+
+### PUT /v1/workflows/{name}/versions/{version}
+
+Publish a versioned workflow definition.
+
+```bash
+curl -s -X PUT "http://localhost:8080/v1/workflows/chat/versions/1.0.0" \
+  -H "Authorization: Bearer dev-secret" \
+  -H "Content-Type: application/json" \
+  -d '{"definition":{"id":"00000000-0000-4000-8000-000000000099","name":"chat","execution_mode":"linear","steps":[]},"agents":[]}'
+```
