@@ -1,4 +1,6 @@
--- Migration 006: versioned workflow registry (Phase 3.3).
+-- Versioned workflow registry.
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE IF NOT EXISTS arcflow_workflows (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -1,4 +1,4 @@
--- Migration 007: site registry for ArcFlow Relay (R1).
+-- Site registry for ArcFlow Relay.
 
 CREATE TABLE IF NOT EXISTS arcflow_sites (
     id                  TEXT PRIMARY KEY,

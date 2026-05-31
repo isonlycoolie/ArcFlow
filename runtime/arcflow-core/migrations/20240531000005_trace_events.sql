@@ -1,4 +1,4 @@
--- Migration 005: persisted trace events for server GET /v1/runs/{id}/trace.
+-- Persisted trace events for GET /v1/runs/{id}/trace.
 
 CREATE TABLE IF NOT EXISTS arcflow_trace_events (
     run_id      TEXT NOT NULL,

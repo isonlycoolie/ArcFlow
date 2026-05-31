@@ -1,4 +1,4 @@
--- Migration 004: human approvals and run payload snapshots (Phase 1.4 HITL).
+-- Human approvals and run payload snapshots (HITL).
 
 CREATE TABLE IF NOT EXISTS arcflow_human_approvals (
     run_id          TEXT NOT NULL,
