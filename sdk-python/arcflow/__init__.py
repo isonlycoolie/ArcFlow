@@ -33,6 +33,8 @@ from arcflow.trace import (
 from arcflow.hitl import HitlConfig, HumanRejectedError, WorkflowInterruptedError
 from arcflow.stream import StreamEvent, StreamRunResult
 from arcflow.workflow import Workflow
+from arcflow.external import ExternalBindingConfig, report_outcome
+from arcflow.schedule import ScheduleManifest
 
 __all__ = [
     "Agent",
@@ -75,4 +77,7 @@ __all__ = [
     "WorkflowResult",
     "RetryExhaustedError",
     "WorkflowTimeoutError",
+    "ExternalBindingConfig",
+    "report_outcome",
+    "ScheduleManifest",
 ]

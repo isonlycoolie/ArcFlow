@@ -7,7 +7,7 @@ name = "arcflow"
 version = "0.3.0"
 description = "AI workflow orchestration runtime — structured, observable, reusable."
 requires-python = ">=3.9"
-dependencies = []
+dependencies = ["PyYAML>=6.0"]
 
 [project.optional-dependencies]
 dev = [
