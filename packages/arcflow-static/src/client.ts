@@ -7,13 +7,15 @@ import type { ExternalOutcomeReport } from "./external.js";
 import { parseCreateRun, parseRunStatus, type RunResult } from "./result.js";
 import type { Workflow } from "./workflow.js";
 
-export type ClientMode = "direct" | "bff";
+export type ClientMode = "direct" | "relay" | "bff";
 
 export interface ArcFlowClientOptions {
   baseUrl: string;
   apiKey: string;
   mode?: ClientMode;
-  /** Prefer X-ArcFlow-Api-Key; set false to use Authorization Bearer only. */
+  /** Site id when baseUrl is relay host root (optional if baseUrl includes /v1/sites/{id}). */
+  siteId?: string;
+  /** Prefer X-ArcFlow-Api-Key; relay mode defaults to Bearer. */
   useArcFlowHeader?: boolean;
 }
 
@@ -23,6 +25,7 @@ export class ArcFlowClient {
   private readonly baseUrl: string;
   private readonly apiKey: string;
   private readonly useArcFlowHeader: boolean;
+  private readonly siteId: string | undefined;
   readonly mode: ClientMode;
 
   constructor(opts: ArcFlowClientOptions) {
@@ -35,8 +38,11 @@ export class ArcFlowClient {
     }
     this.baseUrl = base;
     this.apiKey = opts.apiKey.trim();
-    this.mode = opts.mode ?? "bff";
-    this.useArcFlowHeader = opts.useArcFlowHeader ?? true;
+    const mode = opts.mode ?? "relay";
+    this.mode = mode === "bff" ? "relay" : mode;
+    this.siteId = opts.siteId ?? parseSiteIdFromBase(base);
+    this.useArcFlowHeader =
+      opts.useArcFlowHeader ?? (this.mode === "direct");
   }
 
   private headers(extra?: Record<string, string>): Record<string, string> {
@@ -52,13 +58,20 @@ export class ArcFlowClient {
     return h;
   }
 
+  private runsBasePath(): string {
+    if (this.mode === "relay" && this.siteId) {
+      return `/v1/sites/${encodeURIComponent(this.siteId)}/runs`;
+    }
+    return "/v1/runs";
+  }
+
   async runWorkflow(
     workflow: Workflow,
     input: string,
     options: { initialState?: Record<string, unknown> } = {},
   ): Promise<RunResult> {
     const payload = workflow.buildRunPayload(input, options.initialState);
-    const created = await this.request<Record<string, unknown>>("POST", "/v1/runs", payload);
+    const created = await this.request<Record<string, unknown>>("POST", this.runsBasePath(), payload);
     const { runId, status } = parseCreateRun(created);
     if (status.toLowerCase() === "completed" || status.toLowerCase() === "failed") {
       return this.getRun(runId);
@@ -77,8 +90,33 @@ export class ArcFlowClient {
     return this.pollUntilComplete(runId);
   }
 
+  async runPublished(
+    name: string,
+    version: string,
+    input: string,
+    options: { initialState?: Record<string, unknown> } = {},
+  ): Promise<RunResult> {
+    const payload: Record<string, unknown> = {
+      workflow_ref: { name, version },
+      input,
+    };
+    if (options.initialState) {
+      payload.exec_config = { initial_state: options.initialState };
+    }
+    const created = await this.request<Record<string, unknown>>("POST", this.runsBasePath(), payload);
+    const { runId, status } = parseCreateRun(created);
+    if (status.toLowerCase() === "completed" || status.toLowerCase() === "failed") {
+      return this.getRun(runId);
+    }
+    return this.pollUntilComplete(runId);
+  }
+
   async getRun(runId: string): Promise<RunResult> {
-    const body = await this.request<Record<string, unknown>>("GET", `/v1/runs/${runId}`);
+    const path =
+      this.mode === "relay" && this.siteId
+        ? `/v1/sites/${encodeURIComponent(this.siteId)}/runs/${encodeURIComponent(runId)}`
+        : `/v1/runs/${runId}`;
+    const body = await this.request<Record<string, unknown>>("GET", path);
     const parsed = parseRunStatus(body);
     if (parsed.status.toLowerCase() === "failed" && parsed.error) {
       throw new StaticExecutionError(parsed.error.message, runId, parsed.error.stepId);
@@ -160,6 +198,11 @@ export class ArcFlowClient {
     }
     return (await res.json()) as T;
   }
+}
+
+function parseSiteIdFromBase(baseUrl: string): string | undefined {
+  const match = baseUrl.match(/\/v1\/sites\/([^/]+)$/);
+  return match?.[1];
 }
 
 function looksLikeSemverRange(version: string): boolean {
