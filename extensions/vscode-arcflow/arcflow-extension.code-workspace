@@ -1,0 +1,20 @@
+{
+  "folders": [
+    {
+      "name": "ArcFlow Extension",
+      "path": "."
+    },
+    {
+      "name": "Sample workflows",
+      "path": "examples"
+    }
+  ],
+  "settings": {
+    "arcflow.serverUrl": "http://127.0.0.1:8080",
+    "arcflow.autoOpenGraph": true,
+    "arcflow.autoOpenTrace": true
+  },
+  "extensions": {
+    "recommendations": []
+  }
+}
