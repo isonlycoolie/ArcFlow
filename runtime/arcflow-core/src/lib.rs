@@ -60,6 +60,9 @@ pub mod recovery;
 /// Human-in-the-loop pause and resume (Phase 1.4).
 pub mod human;
 
+/// External orchestration — bindings, callbacks, recovery (Phase 2-Pro v2).
+pub mod external;
+
 /// Local-only step-through debugging (Phase 2.4).
 pub mod debug;
 
