@@ -93,3 +93,98 @@ Save the payload as `run-payload.json` in your working directory:
   "exec_config": {
     "recovery_enabled": true,
     "workflow_timeout_secs": 300
+  }
+}
+```
+
+Submit the run:
+
+```bash
+curl -s -X POST http://localhost:8080/v1/runs \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer dev-secret" \
+  -d @run-payload.json
+```
+
+On Windows PowerShell:
+
+```powershell
+curl.exe -s -X POST http://localhost:8080/v1/runs `
+  -H "Content-Type: application/json" `
+  -H "Authorization: Bearer dev-secret" `
+  -d "@run-payload.json"
+```
+
+Example **201** response:
+
+```json
+{
+  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "trace_id": "trace-7c9e6679",
+  "status": "Running"
+}
+```
+
+Copy `run_id` for polling. Optional: send `Idempotency-Key: <uuid>` on create to deduplicate identical submissions.
+
+## Poll run status
+
+Replace `RUN_ID` with the value from the create response:
+
+```bash
+curl -s http://localhost:8080/v1/runs/RUN_ID \
+  -H "Authorization: Bearer dev-secret"
+```
+
+Repeat until `status` is terminal (`Completed`, `Failed`, `Cancelled`, or `Interrupted`). Sample workflows typically finish in seconds.
+
+Example **200** when complete:
+
+```json
+{
+  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "status": "Completed",
+  "result": {
+    "output": "Final answer text",
+    "step_outputs": {}
+  },
+  "error": null,
+  "interrupt": null
+}
+```
+
+Poll loop (bash):
+
+```bash
+RUN_ID="paste-uuid-here"
+until STATUS=$(curl -s "http://localhost:8080/v1/runs/${RUN_ID}" \
+  -H "Authorization: Bearer dev-secret" | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])") \
+  && [[ "$STATUS" == "Completed" || "$STATUS" == "Failed" ]]; do
+  sleep 1
+done
+echo "terminal status: $STATUS"
+```
+
+Poll loop (PowerShell):
+
+```powershell
+$runId = "paste-uuid-here"
+do {
+  Start-Sleep -Seconds 1
+  $body = curl.exe -s "http://localhost:8080/v1/runs/$runId" -H "Authorization: Bearer dev-secret"
+  $status = ($body | ConvertFrom-Json).status
+} until ($status -in @("Completed", "Failed"))
+Write-Host "terminal status: $status"
+```
+
+HTTP API status strings use PascalCase. The embedded Python SDK exposes lowercase `completed` on `WorkflowResult`; both refer to the same terminal state.
+
+## Retrieve the trace
+
+```bash
+curl -s "http://localhost:8080/v1/runs/RUN_ID/trace" \
+  -H "Authorization: Bearer dev-secret"
+```
+
+The response is an `ExecutionTrace` JSON document with metadata-only events (SEC-1). Expect lifecycle kinds such as `WorkflowStarted`, `StepCompleted`, and `WorkflowCompleted`.
+
