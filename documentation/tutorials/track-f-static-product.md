@@ -93,3 +93,22 @@ Operators fetch trace via Relay or server:
 
 ## Troubleshooting
 
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| CORS error | Origin not listed | Update site allowed origins |
+| 401 on Relay | Invalid site token | Re-copy token from provision output |
+| Empty answers | Knowledge not ingested | Re-run ingest script |
+| Inline Agent in bundle | Wrong dev path | Use publish flow; avoid shipping `main-dev-direct.ts` |
+
+## What you learned
+
+Track F splits responsibilities: operators own knowledge and publish records; frontend developers ship env vars and UI; Relay enforces browser trust boundaries.
+
+## Next tracks
+
+| Track | Focus |
+|-------|-------|
+| G | Migrations, readiness, CLI trace export |
+| Level 3 cert | Full stack deployment project |
+
+**Source:** capabilities reference §28 Track F; [`examples/static/chat-rag/`](../../examples/static/chat-rag/), [`examples/static/README.md`](../../examples/static/README.md); [static-chat-widget](../examples/static-chat-widget.md), [relay-byo-deployment](../examples/relay-byo-deployment.md).
