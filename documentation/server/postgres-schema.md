@@ -93,3 +93,68 @@ Persisted trace for `GET /v1/runs/{id}/trace`.
 | `run_id`, `seq` | TEXT, BIGINT | Composite PK, ordered |
 | `event_json` | JSONB | SEC-1 metadata event |
 | `created_at` | TIMESTAMPTZ | Insert time |
+
+## arcflow_workflows and arcflow_workflow_aliases
+
+Registry semver storage.
+
+**arcflow_workflows**
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | Row id |
+| `name`, `version` | TEXT | UNIQUE pair |
+| `schema_hash` | TEXT | Definition hash |
+| `definition_json` | JSONB | Full workflow |
+| `published_by` | TEXT | Optional publisher |
+| `published_at` | TIMESTAMPTZ | Publish time |
+| `deprecated` | BOOLEAN | Soft deprecation |
+
+**arcflow_workflow_aliases**
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `name`, `alias` | TEXT | Composite PK |
+| `version` | TEXT | Target version |
+
+Requires `pgcrypto` extension (migration 000006).
+
+## arcflow_sites, arcflow_site_tokens, arcflow_site_usage_daily
+
+Static product operator model.
+
+**arcflow_sites**
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | TEXT PK | Site id |
+| `display_name` | TEXT | Operator label |
+| `allowed_origins` | TEXT[] | Relay Origin allowlist |
+| `rate_limit_rpm` | INTEGER | Default 60 |
+| `allow_inline` | BOOLEAN | Browser inline workflow override |
+| `default_workflow_name` | TEXT | e.g. `chat` |
+| `kb_namespace` | TEXT | Qdrant namespace |
+| `upstream_runtime_key` | TEXT | Scoped server key id |
+| `chat_instructions` | TEXT | Publish template hint |
+
+**arcflow_site_tokens**
+
+Hashed tokens per site; `revoked_at` for rotation.
+
+**arcflow_site_usage_daily**
+
+Daily run counters per site for operator metrics.
+
+## Operational notes
+
+- Relay does **not** connect to Postgres; it reads site config from env JSON or future sync.
+- Qdrant collections for vector memory are **not** in these migrations; configure `ARCFLOW_QDRANT_URL` separately.
+- Backup `arcflow_runs` and `arcflow_trace_events` together for audit replay.
+
+## Related pages
+
+- [cli/migrate.md](../cli/migrate.md)
+- [server/overview.md](overview.md)
+- [static-product/site-lifecycle.md](../static-product/site-lifecycle.md)
+
+**Source:** capabilities reference Appendix G, §12.2; `runtime/arcflow-core/migrations/`; K-04.
