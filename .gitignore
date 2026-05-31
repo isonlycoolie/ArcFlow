@@ -23,6 +23,10 @@ ArcFlow_Improvement_Plans/phase2-months-4-6/*
 !ArcFlow_Improvement_Plans/phase2-months-4-6/hybrid-rag-guide.md
 ArcFlow_Improvement_Plans/phase2-pro/*
 !ArcFlow_Improvement_Plans/phase2-pro/*.md
+!ArcFlow_Improvement_Plans/phase2-pro/playbooks/
+!ArcFlow_Improvement_Plans/phase2-pro/playbooks/**
+!ArcFlow_Improvement_Plans/phase2-pro/reference-agents/
+!ArcFlow_Improvement_Plans/phase2-pro/reference-agents/**
 !ArcFlow_Improvement_Plans/current-capabilities-vs-gaps.md
 ArcFlow_Improvement_Plans/phase3-long-term/*
 !ArcFlow_Improvement_Plans/phase3-long-term/otel-observability-guide.md
