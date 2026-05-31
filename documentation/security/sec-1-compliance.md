@@ -93,3 +93,30 @@ Manual review: no substring matches for user-provided essay content, API keys, o
 | Platform | Keep `ARCFLOW_DEBUG=false` in production |
 | Operator | Do not log ingest body to analytics |
 | Integrator | Do not attach raw payloads to custom trace exporters |
+
+## Dashboard and BFF alignment
+
+Private dashboard repo must pass SEC-1 CI (checklist S3 in `dashboard/spec/09-exit-criteria.md`):
+
+- No hardcoded API keys
+- No logging of `site_token` or admin key
+- Dependency scanning in CI
+
+## Before approving new observability features
+
+1. Does any new field embed user or model text?
+2. Does any field embed tool arguments or retrieval chunks?
+3. Can this event reach the browser via Relay trace poll?
+4. Do logs duplicate trace with richer content?
+
+If any answer is yes, reject or gate behind localhost debug.
+
+## Related pages
+
+- [Trace events normative](../contracts/trace-events-normative.md)
+- [Webhook HMAC](webhook-hmac.md) (external payloads separate from traces)
+- [Self-hosted security](self-hosted-security.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §11.1; Appendix G (000005); K-16; [contracts/normative/observability/trace-events-v1.md](../../contracts/normative/observability/trace-events-v1.md).
