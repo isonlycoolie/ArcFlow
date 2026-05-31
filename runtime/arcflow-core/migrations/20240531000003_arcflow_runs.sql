@@ -1,4 +1,4 @@
--- Migration 003: arcflow_runs table for HTTP server run tracking.
+-- arcflow_runs table for HTTP server run tracking.
 
 CREATE TABLE IF NOT EXISTS arcflow_runs (
     run_id           TEXT PRIMARY KEY,

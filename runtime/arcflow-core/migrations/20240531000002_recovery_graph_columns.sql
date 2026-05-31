@@ -1,5 +1,4 @@
--- Migration 002: graph checkpoint columns on arcflow_recovery_state.
--- Idempotent for CI and local Docker Postgres.
+-- Graph checkpoint columns on arcflow_recovery_state.
 
 ALTER TABLE arcflow_recovery_state
     ADD COLUMN IF NOT EXISTS execution_mode TEXT NOT NULL DEFAULT 'linear';
