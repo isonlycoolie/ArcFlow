@@ -101,6 +101,8 @@ where
                     backoff_ms,
                     trigger_error_code: error_code,
                 });
+                #[cfg(feature = "otel")]
+                crate::tracing::otel_metrics::record_retry_attempt(step_id);
                 tokio::time::sleep(tokio::time::Duration::from_millis(backoff_ms)).await;
             }
         }
