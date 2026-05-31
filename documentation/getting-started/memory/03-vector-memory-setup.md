@@ -93,3 +93,39 @@ python vector_memory_setup.py
 Ingest sample text into the same namespace before expecting grounded answers:
 
 ```python
+from arcflow.memory import VectorStore
+
+SAMPLE_DOC = """ArcFlow vector memory supports hybrid dense and sparse retrieval.
+Chunk documents before ingest for better recall on long texts."""
+
+store = VectorStore()
+chunk_count = store.ingest("doc_qa", "memory-guide", SAMPLE_DOC)
+print(f"ingested {chunk_count} chunks")
+```
+
+Run ingest once, then run the workflow query again.
+
+## Verify
+
+| Check | Expected |
+|-------|----------|
+| `MemoryConfig` without `namespace` | `MemoryConfigurationError` |
+| Workflow run with stub embedding | `status == "completed"`, non-empty `result.output` |
+| After ingest with matching namespace | `MemoryRetrieved` in `result.trace_events` when Qdrant is up |
+
+Trace check:
+
+```python
+kinds = {e.get("event_kind") for e in result.trace_events}
+assert "MemoryRetrieved" in kinds, f"missing MemoryRetrieved; got {kinds}"
+```
+
+SEC-1: trace payloads include chunk counts and byte totals, not chunk text.
+
+## Next
+
+Continue to the [RAG track](../rag/README.md) for ingest patterns, agent wiring, and hybrid retrieval tuning.
+
+## Source
+
+[`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py); `examples/rag/memory_guide_qa.py` (examples restructure branch); `sdk-python/arcflow/memory.py`; [Track C: RAG and vector memory](../../tutorials/track-c-rag.md).
