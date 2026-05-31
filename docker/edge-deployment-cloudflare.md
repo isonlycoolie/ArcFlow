@@ -1,6 +1,6 @@
 # Edge deployment on Cloudflare Workers
 
-ArcFlow’s edge runtime is an alpha WASM build for low-latency stub workflows at the CDN edge. It is not a drop-in replacement for the self-hosted server — the server runs the full engine with Postgres recovery, vector memory, and real LLM providers.
+ArcFlow’s edge runtime is an alpha WASM build for low-latency stub workflows at the CDN edge. It is not a drop-in replacement for the self-hosted server, the server runs the full engine with Postgres recovery, vector memory, and real LLM providers.
 
 ## Why edge exists
 
@@ -23,7 +23,7 @@ cd adapters/cloudflare
 npx wrangler deploy
 ```
 
-Configure secrets with `wrangler secret put` — never bake API keys into the wasm artifact.
+Configure secrets with `wrangler secret put`, never bake API keys into the wasm artifact.
 
 ## Limitations matrix
 

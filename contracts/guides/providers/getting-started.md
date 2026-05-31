@@ -1,4 +1,4 @@
-# Providers — Getting Started
+# Providers, Getting Started
 
 ArcFlow supports OpenAI, Anthropic, and Gemini via `workflow.run(input, provider=...)`.
 

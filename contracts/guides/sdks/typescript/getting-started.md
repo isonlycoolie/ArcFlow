@@ -1,4 +1,4 @@
-# TypeScript SDK — Getting Started
+# TypeScript SDK, Getting Started
 
 Install (local development):
 

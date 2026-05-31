@@ -1,6 +1,6 @@
 # Online Application Chatbot (Production)
 
-Multi-turn application intake on a static site — e.g. business license, permit, or onboarding forms. Workflow shape, steps, and external callbacks are **published from the dashboard**; the static frontend only drives conversation turns via Relay.
+Multi-turn application intake on a static site, e.g. business license, permit, or onboarding forms. Workflow shape, steps, and external callbacks are **published from the dashboard**; the static frontend only drives conversation turns via Relay.
 
 ## Who does what
 
@@ -43,12 +43,12 @@ VITE_ARCFLOW_SITE_TOKEN=st_live_xxxxxxxx
 | File | Purpose |
 |------|---------|
 | `arcflow.schedule.yaml` | Schedule manifest (validate only) |
-| `sample_run.json` | Legacy payload shape reference — dashboard owns workflow definition in production |
+| `sample_run.json` | Legacy payload shape reference, dashboard owns workflow definition in production |
 | `test_e2e.py` | Structure and optional live callback tests |
 
 ## External callback (production)
 
-When a step triggers an external binding (e.g. Playwright form fill), your **backend** receives the webhook and calls ArcFlow server with the server key — never from the static bundle:
+When a step triggers an external binding (e.g. Playwright form fill), your **backend** receives the webhook and calls ArcFlow server with the server key, never from the static bundle:
 
 ```bash
 python examples/external/playwright_stub_callback.py --run-id <run_id>
@@ -70,4 +70,4 @@ pytest examples/static/online-application-chatbot/test_e2e.py -q -k live
 ## Related
 
 - [Static examples index](../README.md)
-- [RAG upload guide](../../ArcFlow_Improvement_Plans/arcflow-static-product-vision/10-rag-document-upload-guide.md) — if this bot also uses knowledge base docs
+- [RAG upload guide](../../ArcFlow_Improvement_Plans/arcflow-static-product-vision/10-rag-document-upload-guide.md), if this bot also uses knowledge base docs

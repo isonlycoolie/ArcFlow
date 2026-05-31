@@ -1,6 +1,6 @@
 # Swapping Providers
 
-The same workflow definition works with any supported provider — pass the provider only at `run()` time (ADR-010).
+The same workflow definition works with any supported provider, pass the provider only at `run()` time (ADR-010).
 
 ## Python
 
@@ -27,7 +27,7 @@ await wf.run("topic", { provider: new Gemini({ model: "gemini-1.5-pro" }) });
 
 ## Trace equivalence
 
-Successful runs produce the same `step_count` and structurally equivalent traces (provider-specific token counts may differ). CI validates this with mock HTTP servers — no live API keys required.
+Successful runs produce the same `step_count` and structurally equivalent traces (provider-specific token counts may differ). CI validates this with mock HTTP servers, no live API keys required.
 
 ## Stub fallback
 

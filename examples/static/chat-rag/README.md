@@ -1,6 +1,6 @@
 # Landing-Page Support Chat (Production)
 
-Production static-site chatbot for a marketing or support landing page. Visitors ask questions; answers come from knowledge you uploaded in the **ArcFlow Dashboard** — not from code in this repo.
+Production static-site chatbot for a marketing or support landing page. Visitors ask questions; answers come from knowledge you uploaded in the **ArcFlow Dashboard**, not from code in this repo.
 
 ## Who does what
 
@@ -13,12 +13,12 @@ The frontend file [`src/main.ts`](src/main.ts) is intentionally minimal (~30 lin
 
 ## Dashboard setup (before frontend work)
 
-1. **Create site** — Sites → Create; copy relay URL and site token once
-2. **Upload knowledge** — Knowledge tab → add your FAQs and docs  
+1. **Create site**, Sites → Create; copy relay URL and site token once
+2. **Upload knowledge**, Knowledge tab → add your FAQs and docs  
    See [RAG document upload guide](../../ArcFlow_Improvement_Plans/arcflow-static-product-vision/10-rag-document-upload-guide.md) for how to structure uploads for good chunking
-3. **Configure chat** — Chat tab → instructions (e.g. “You are Acme Corp support…”) → **Save & publish**
+3. **Configure chat**, Chat tab → instructions (e.g. “You are Acme Corp support…”) → **Save & publish**
 
-After publish, the published workflow name is `chat` (default). The frontend calls that by name — no workflow definition in browser code.
+After publish, the published workflow name is `chat` (default). The frontend calls that by name, no workflow definition in browser code.
 
 ## Frontend env (production)
 
@@ -37,7 +37,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173 — chat hits Relay with your site token.
+Open http://localhost:5173, chat hits Relay with your site token.
 
 ## Frontend code (all you ship)
 
@@ -78,11 +78,11 @@ curl -X POST "http://localhost:8080/v1/admin/sites/{site_id}/workflows/chat/publ
   -d '{"instructions": "Answer using the knowledge base. Be concise."}'
 ```
 
-[`kb.txt`](kb.txt) is sample content for dashboard upload testing — **do not** embed or ingest it from frontend code.
+[`kb.txt`](kb.txt) is sample content for dashboard upload testing, **do not** embed or ingest it from frontend code.
 
 ## Advanced: direct mode (internal only)
 
-[`src/main-dev-direct.ts`](src/main-dev-direct.ts) defines inline `Agent` + `MemoryConfig` for local engine debugging with CORS. Not for production — keys and workflow shape belong in dashboard/Relay, not the static bundle.
+[`src/main-dev-direct.ts`](src/main-dev-direct.ts) defines inline `Agent` + `MemoryConfig` for local engine debugging with CORS. Not for production, keys and workflow shape belong in dashboard/Relay, not the static bundle.
 
 ## Tests
 

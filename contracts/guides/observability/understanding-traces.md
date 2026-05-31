@@ -1,6 +1,6 @@
 # Understanding ArcFlow traces
 
-ArcFlow records **metadata-only** execution traces for every workflow run. Traces help you answer: which steps ran, how long they took, whether tools or memory were used, and where a run failed — without exposing user payloads.
+ArcFlow records **metadata-only** execution traces for every workflow run. Traces help you answer: which steps ran, how long they took, whether tools or memory were used, and where a run failed, without exposing user payloads.
 
 ## Python: `workflow.trace()`
 

@@ -23,9 +23,9 @@
   </strong>
 </p>
 
-**ArcFlow** is a Rust workflow runtime for AI agent pipelines. It combines a deterministic execution engine, versioned RCS contracts, and SDKs for Python, TypeScript, and the browser. Define ordered or graph workflows, run them locally or on a self-hosted server, and ship production chat experiences through ArcFlow Relay — without embedding agents or API keys in static frontends.
+**ArcFlow** is a Rust workflow runtime for AI agent pipelines. It combines a deterministic execution engine, versioned RCS contracts, and SDKs for Python, TypeScript, and the browser. Define ordered or graph workflows, run them locally or on a self-hosted server, and ship production chat experiences through ArcFlow Relay, without embedding agents or API keys in static frontends.
 
-ArcFlow is written in Rust for reliability under load. Recovery, vector memory, observability, and provider boundaries are first-class — not bolted on after the fact.
+ArcFlow is written in Rust for reliability under load. Recovery, vector memory, observability, and provider boundaries are first-class, not bolted on after the fact.
 
 ## Getting Started
 
@@ -67,9 +67,9 @@ TypeScript and remote-server usage: [sdk-python/README.md](sdk-python/README.md)
 
 | Mode | Best for | Docs |
 |------|----------|------|
-| **Self-hosted server** | Full engine — graph workflows, Postgres recovery, vector memory, real LLM providers | [server/arcflow-server/README.md](server/arcflow-server/README.md) |
-| **ArcFlow Relay** | Static sites (Vite, Next.js export, CDN) — dashboard publishes workflows; browser calls relay only | [examples/static/README.md](examples/static/README.md) |
-| **Edge WASM (alpha)** | Stub linear workflows on Cloudflare Workers — low latency, no central round-trip | [docker/edge-deployment-cloudflare.md](docker/edge-deployment-cloudflare.md) |
+| **Self-hosted server** | Full engine, graph workflows, Postgres recovery, vector memory, real LLM providers | [server/arcflow-server/README.md](server/arcflow-server/README.md) |
+| **ArcFlow Relay** | Static sites (Vite, Next.js export, CDN), dashboard publishes workflows; browser calls relay only | [examples/static/README.md](examples/static/README.md) |
+| **Edge WASM (alpha)** | Stub linear workflows on Cloudflare Workers, low latency, no central round-trip | [docker/edge-deployment-cloudflare.md](docker/edge-deployment-cloudflare.md) |
 
 ## SDKs & Tools
 
@@ -79,7 +79,7 @@ TypeScript and remote-server usage: [sdk-python/README.md](sdk-python/README.md)
 | [sdk-typescript](sdk-typescript/README.md) | Promise-native TypeScript SDK |
 | [packages/arcflow-static](packages/arcflow-static) | Browser client for relay mode (`runPublished`) |
 | [extensions/vscode-arcflow](extensions/vscode-arcflow/README.md) | Workflow graph, trace timeline, local step-through debug |
-| [cli/arcflow-cli](cli/arcflow-cli) | `arcflow` CLI — validate, run, trace, and TUI |
+| [cli/arcflow-cli](cli/arcflow-cli) | `arcflow` CLI, validate, run, trace, and TUI |
 
 ## Examples
 
@@ -91,13 +91,13 @@ TypeScript and remote-server usage: [sdk-python/README.md](sdk-python/README.md)
 
 ## Features
 
-- **Linear and graph workflows** — RCS-defined agents, steps, and execution modes
-- **Postgres-backed recovery** — resume runs after failure or restart
-- **Workflow registry** — semver `workflow_ref` resolution on the server
-- **Vector memory** — Qdrant-backed RAG for knowledge-grounded agents
-- **OpenTelemetry-native tracing** — opt-in OTLP export for spans and metrics ([observability guide](docker/observability-otel.md))
-- **Human-in-the-loop** — approval gates with persistent state
-- **Provider boundary** — OpenAI-compatible LLM integration with structured tool loops
+- **Linear and graph workflows**, RCS-defined agents, steps, and execution modes
+- **Postgres-backed recovery**, resume runs after failure or restart
+- **Workflow registry**, semver `workflow_ref` resolution on the server
+- **Vector memory**, Qdrant-backed RAG for knowledge-grounded agents
+- **OpenTelemetry-native tracing**, opt-in OTLP export for spans and metrics ([observability guide](docker/observability-otel.md))
+- **Human-in-the-loop**, approval gates with persistent state
+- **Provider boundary**, OpenAI-compatible LLM integration with structured tool loops
 
 ## Contracts & API
 

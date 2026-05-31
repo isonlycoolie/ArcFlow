@@ -1,6 +1,6 @@
 # OpenTelemetry observability for ArcFlow
 
-ArcFlow exports workflow, step, LLM, tool, and memory spans to any OTLP collector when you opt in. The in-process trace store and CLI TUI stay unchanged — OTel is additive for platform teams running Grafana, Jaeger, or Prometheus alongside other services.
+ArcFlow exports workflow, step, LLM, tool, and memory spans to any OTLP collector when you opt in. The in-process trace store and CLI TUI stay unchanged, OTel is additive for platform teams running Grafana, Jaeger, or Prometheus alongside other services.
 
 ## Enable export
 
@@ -8,7 +8,7 @@ Set the master switch and a collector endpoint. Legacy `ARCFLOW_OTLP_ENDPOINT` s
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `ARCFLOW_OTEL_ENABLED` | `false` | Master switch — no outbound telemetry when unset |
+| `ARCFLOW_OTEL_ENABLED` | `false` | Master switch, no outbound telemetry when unset |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | — | Collector URL, e.g. `http://localhost:4318` |
 | `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf` | `grpc` or `http/protobuf` |
 | `OTEL_SERVICE_NAME` | `arcflow-runtime` | Resource attribute |
