@@ -21,11 +21,27 @@ services:
       - "8080:8080"
     environment:
       ARCFLOW_SERVER_API_KEY: dev-secret
+      ARCFLOW_ADMIN_API_KEY: dev-admin
+      ARCFLOW_DEFAULT_UPSTREAM_RUNTIME_KEY: dev-secret
       ARCFLOW_POSTGRESQL_URL: postgres://arcflow:arcflow@postgres:5432/arcflow
       ARCFLOW_PORT: "8080"
+      ARCFLOW_STATIC_RUNTIME_KEYS: '{"dev-secret":{"publish":true,"workflows":["chat"]}}'
     depends_on:
       postgres:
         condition: service_healthy
+
+  arcflow-relay:
+    build:
+      context: ..
+      dockerfile: server/arcflow-relay/Dockerfile
+    ports:
+      - "8090:8090"
+    environment:
+      ARCFLOW_UPSTREAM_URL: http://arcflow-server:8080
+      ARCFLOW_POSTGRESQL_URL: postgres://arcflow:arcflow@postgres:5432/arcflow
+      ARCFLOW_RELAY_PORT: "8090"
+    depends_on:
+      - arcflow-server
 
   static-demo:
     image: nginx:alpine
