@@ -93,3 +93,30 @@ Stub output may not always emit the exact condition token `billing` or `technica
 
 ## Verify
 
+| Check | Expected |
+|-------|----------|
+| `result.status` | `"completed"` on happy path |
+| Trace events | At least one `GraphNodeStarted` |
+| Mixed API rejected | `Workflow(graph=True).step(agent)` raises `WorkflowConfigurationError` |
+| Linear API rejected | `Workflow().node("a", agent)` raises `WorkflowConfigurationError` |
+
+Mixed API check:
+
+```python
+from arcflow import Agent, Workflow
+from arcflow.exceptions import WorkflowConfigurationError
+
+agent = Agent(name="a", role="a", instructions="Run.")
+try:
+    Workflow("g", graph=True).node("a", agent).step(agent)
+except WorkflowConfigurationError as err:
+    print(err)
+```
+
+## Next
+
+[04 Testing with stub responses](04-testing-with-stub-responses.md) shows how to pin step outputs for CI without live model calls.
+
+## Source
+
+`sdk-python/arcflow/workflow.py` (`node`, `add_edge`, `join_node`, `set_entry`); `sdk-python/tests/unit/test_graph_workflow.py`; [Graph workflows](../../guides/workflows/graph-workflows.md); [FP-1.01 maturity note](../../concepts/maturity-and-known-gaps.md).
