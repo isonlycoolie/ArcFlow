@@ -188,3 +188,52 @@ Provide `workflow` **or** `workflow_ref`, not both.
 ### RunResult
 
 | Field | Type | Notes |
+|-------|------|-------|
+| `output` | string | Final text |
+| `status` | ExecutionStatus | Terminal or in-flight |
+| `trace` | TraceEvent[] | SEC-1 metadata events |
+| `error` | object | Error code + message |
+
+### ExecutionStatus
+
+`Pending`, `Running`, `Completed`, `Failed`, `Retrying`, `Cancelled`, `Interrupted`.
+
+### ErrorCode
+
+See [Error codes](error-codes.md).
+
+## Example minimal linear workflow
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "name": "demo",
+  "execution_mode": "linear",
+  "steps": [
+    {
+      "id": "00000000-0000-4000-8000-000000000010",
+      "agent_id": "00000000-0000-4000-8000-000000000020",
+      "order": 0
+    }
+  ]
+}
+```
+
+## Normative file index
+
+| Path | Content |
+|------|---------|
+| [contracts/normative/rcs/v1.schema.json](../../contracts/normative/rcs/v1.schema.json) | JSON Schema |
+| [contracts/normative/runtime/recovery-schema-v1.sql](../../contracts/normative/runtime/recovery-schema-v1.sql) | Recovery DDL (partial) |
+| [contracts/normative/providers/api-v1.md](../../contracts/normative/providers/api-v1.md) | Provider API |
+| [contracts/normative/README.md](../../contracts/normative/README.md) | Index |
+
+## Related pages
+
+- [Error codes](error-codes.md)
+- [Trace events normative](trace-events-normative.md)
+- [Graph workflows](../guides/workflows/graph-workflows.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) Appendix A, §22; K-10; [contracts/normative/rcs/v1.schema.json](../../contracts/normative/rcs/v1.schema.json).
