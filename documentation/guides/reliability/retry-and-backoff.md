@@ -188,3 +188,23 @@ HTTP callbacks use separate recovery on bindings:
         "on_failure": "retry_with_backoff"
       }
     }
+  ]
+}
+```
+
+Traces: `ExternalRecoveryTriggered`. Distinct from step retry but same backoff concepts.
+
+## Run status during retry
+
+`ExecutionStatus` may show `Retrying` between attempts, then return to `Running`. Poll `GET /v1/runs/{id}` on server integrations.
+
+## Related pages
+
+- [Step fallbacks](../workflows/step-fallbacks.md)
+- [Timeouts](timeouts.md)
+- [Recovery and resume](recovery-and-resume.md)
+- [Server API quickstart](../../getting-started/quickstart-server-api.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §7.1; Appendix C (exec_config.retry); Appendix D (RetryAttempted, RetryExhausted).
