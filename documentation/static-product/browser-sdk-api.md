@@ -93,3 +93,52 @@ const final = await client.pollUntilComplete(runId, 500, 60);
 await client.publishWorkflow(workflow, "1.0.0");
 await client.resolveWorkflow("chat", "^1.0.0");
 ```
+
+Registry calls require direct server URL with server API key (operator/backend scripts, not browser).
+
+## Client modes
+
+| mode | Use | Security |
+|------|-----|----------|
+| `relay` | Production | Site token + Origin via Relay |
+| `direct` | Local dev only | **Never** ship server API key in production bundles |
+| `bff` | Your backend holds keys | Static SDK treats as relay to your BFF URL |
+
+## StepForm
+
+Structured multi-turn input for workflows reading `initial_state.conversation_turns`:
+
+```typescript
+import { StepForm } from "@arcflow/static";
+
+const form = new StepForm()
+  .addTurn("user", "I need a refund")
+  .addTurn("assistant", "I can help with that.");
+
+await client.runPublished("chat", "^1.0.0", "Follow up", {
+  initialState: form.toInitialState(),
+});
+```
+
+## Errors
+
+| Class | When |
+|-------|------|
+| `StaticConfigurationError` | Invalid client options |
+| `StaticExecutionError` | Run failed or HTTP error |
+| `WorkflowInterruptedError` | HITL pause; includes `runId`, `approvalKey` |
+
+## Streaming note (FP-2)
+
+There is no SSE client in the static SDK for server events. For token-progress UI, poll trace via Relay and read `TokenEmitted` metadata. See [guides/streaming/streaming-in-the-browser.md](../guides/streaming/streaming-in-the-browser.md).
+
+## Exports
+
+`Agent`, `Workflow`, `Tool`, `MemoryConfig`, `HitlConfig`, `buildExecConfig`, `parseRunStatus`, graph helpers, and error types are re-exported from `packages/arcflow-static/src/index.ts`.
+
+## Related pages
+
+- [static-product/security-model.md](security-model.md)
+- [relay/request-path.md](../relay/request-path.md)
+
+**Source:** capabilities reference §15.1, §15.2, §15.3; `packages/arcflow-static/src/client.ts`, `packages/arcflow-static/src/index.ts`.
