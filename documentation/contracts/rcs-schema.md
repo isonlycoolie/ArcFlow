@@ -93,3 +93,98 @@ Graph trace kinds in RCS envelope: `GraphNodeStarted`, `GraphNodeCompleted`, `Gr
 
 ### MemoryConfig
 
+| Field | Type | Notes |
+|-------|------|-------|
+| `memory_type` | enum | e.g. vector, session |
+| `scope` | enum | run vs persistent |
+| `namespace` | string | Required for persistent/vector |
+| `ttl_seconds` | integer | Optional TTL |
+| `embedding` | object | Embedding model config |
+| `retrieval` | MemoryRetrievalConfig | Search mode |
+| `chunking` | MemoryChunkingConfig | Ingest chunking |
+
+### MemoryRetrievalConfig
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `mode` | string | dense, sparse, hybrid |
+| `top_k` | integer | Result count |
+| `dense_weight` | float | Hybrid weight |
+| `sparse_weight` | float | Hybrid weight |
+| `rerank` | object | Optional rerank provider |
+
+### MemoryChunkingConfig
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `chunk_size` | integer | Characters or tokens per policy |
+| `chunk_overlap` | integer | Overlap between chunks |
+
+### ContextPolicy
+
+| Field | Type | Default | Notes |
+|-------|------|---------|-------|
+| `include_prior_steps` | bool | | Prior step outputs in context |
+| `include_run_input` | bool | | Original user input |
+| `max_prior_step_chars` | integer | 4096 | Truncation limit |
+
+### ToolExecutionConfig
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `mode` | `"llm_select"` \| `"legacy_eager"` | Tool loop strategy |
+| `max_iterations` | integer | Tool loop cap |
+
+## Control plane types
+
+### HitlConfig
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `approval_key` | string | Approve route key |
+| `timeout_seconds` | integer | Interrupt timeout |
+
+### ExternalBinding
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `id` | string | Binding id for external POST |
+| `kind` | string | Binding type |
+| `attach_to_step_id` | UUID | Step attachment |
+| `mode` | string | async/monitor semantics |
+| `recovery` | object | Recovery policy on external failure |
+
+### ProviderConfig
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `provider_id` | string | e.g. openai |
+| `model` | string | Model id |
+| `api_key_env` | string | Env var name for key |
+| `params` | object | Temperature, max_tokens |
+
+### ToolDefinition
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `name` | string | Tool name in traces |
+| `input_schema` | JSON Schema | Arguments schema |
+| `permissions` | string[] | Optional capability flags |
+
+## Run envelope
+
+### RunRequest (server POST /v1/runs)
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `workflow` | WorkflowDefinition | Inline definition |
+| `workflow_ref` | object | `{ name, version }` semver range |
+| `agents` | AgentDefinition[] | Agent catalog |
+| `input` | string | User/run input |
+| `exec_config` | ExecConfig | Recovery, timeouts |
+
+Provide `workflow` **or** `workflow_ref`, not both.
+
+### RunResult
+
+| Field | Type | Notes |
