@@ -283,3 +283,66 @@ curl -s "http://localhost:8080/v1/admin/sites/site_abc123" \
 
 Update origins, rate limits, defaults.
 
+```bash
+curl -s -X PATCH "http://localhost:8080/v1/admin/sites/site_abc123" \
+  -H "Authorization: Bearer dev-admin" \
+  -H "Content-Type: application/json" \
+  -d '{"allowed_origins":["https://app.acme.com"],"rate_limit_rpm":120}'
+```
+
+### POST /v1/admin/sites/{site_id}/tokens/rotate
+
+Invalidate prior token; returns new token once.
+
+```bash
+curl -s -X POST "http://localhost:8080/v1/admin/sites/site_abc123/tokens/rotate" \
+  -H "Authorization: Bearer dev-admin"
+```
+
+### POST /v1/admin/sites/{site_id}/knowledge/ingest
+
+```bash
+curl -s -X POST "http://localhost:8080/v1/admin/sites/site_abc123/knowledge/ingest" \
+  -H "Authorization: Bearer dev-admin" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Our refund policy allows returns within 30 days.","key":"faq-refunds"}'
+```
+
+### POST /v1/admin/sites/{site_id}/workflows/chat/publish
+
+Publish chat workflow to registry for the site.
+
+```bash
+curl -s -X POST "http://localhost:8080/v1/admin/sites/site_abc123/workflows/chat/publish" \
+  -H "Authorization: Bearer dev-admin" \
+  -H "Content-Type: application/json" \
+  -d '{"instructions":"Answer only from ingested knowledge. Say when unsure.","version":"1.0.1"}'
+```
+
+Full admin contract: [dashboard/spec/03-admin-api-contract.md](../../dashboard/spec/03-admin-api-contract.md).
+
+## Debug (localhost, ARCFLOW_DEBUG)
+
+Feature-gated. Not for production.
+
+- `POST /v1/debug/runs/start`
+- `GET /v1/debug/runs/{id}/state`
+- `POST /v1/debug/runs/{id}/continue`
+
+## Common HTTP codes
+
+| Code | Typical cause |
+|------|---------------|
+| 401 | Missing or wrong API key |
+| 403 | Scoped key, origin (Relay), or inline workflow denied |
+| 429 | Relay rate limit |
+| 503 | Postgres unavailable |
+
+## Related pages
+
+- [authentication.md](authentication.md)
+- [run-state-machine.md](run-state-machine.md)
+- [idempotency.md](idempotency.md)
+- [relay/request-path.md](../relay/request-path.md) for browser proxy routes
+
+**Source:** capabilities reference Appendix B, §12; `server/arcflow-server/src/lib.rs`; K-01, K-10.
