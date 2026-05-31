@@ -473,3 +473,21 @@ Nested in multiple events:
 
 ```json
 [
+  { "kind": "WorkflowStarted", "run_id": "r1", "workflow_name": "demo", "step_count": 2 },
+  { "kind": "StepStarted", "run_id": "r1", "step_id": "s1", "step_index": 0, "agent_name": "a1", "agent_role": "Analyst" },
+  { "kind": "ProviderRequestSent", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "max_tokens": 1024, "prompt_size_bytes": 512 },
+  { "kind": "ProviderResponseReceived", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "tokens": { "input": 120, "output": 45, "total": 165 }, "latency_ms": 890 },
+  { "kind": "StepCompleted", "run_id": "r1", "step_id": "s1", "step_index": 0, "duration_ms": 920, "tokens": { "input": 120, "output": 45, "total": 165 }, "output_size_bytes": 180 },
+  { "kind": "WorkflowCompleted", "run_id": "r1", "duration_ms": 950, "total_tokens": { "input": 120, "output": 45, "total": 165 } }
+]
+```
+
+## Related pages
+
+- [Execution traces](execution-traces.md) for SDK and HTTP access patterns
+- [SEC-1 rules](sec-1-rules.md) for audit checklist
+- [SDK streaming](../streaming/sdk-streaming.md) for stream event UX vs trace storage
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) Appendix D; Sprint 5 TraceEventKind enum; Appendix K K-02, K-13, K-20; `runtime/arcflow-core/src/tracing/events.rs`.
