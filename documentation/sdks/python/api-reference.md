@@ -188,3 +188,93 @@ Metadata only: `tool_name`, `status`, `duration_seconds`, `input_schema_hash`, `
 
 `error_code`, `message`.
 
+## Streaming
+
+### StreamEvent
+
+Fields: `type`, `text`, `step_id`, `node_id`, `duration_ms`, `tool_name`, `args_keys`, `code`, `message`.
+
+`from_dict(raw)` parses native events. `to_exception()` when `type == "error"`.
+
+### StreamRunResult
+
+`output`, `run_id`, `step_count` after stream completes.
+
+## HITL
+
+### HitlConfig
+
+`HitlConfig(approval_key, timeout_seconds=3600, interrupt=True)`
+
+Attach via `workflow.step(agent, hitl=HitlConfig("manager_approve"))`.
+
+### HumanRejectedError
+
+Raised on rejection. Attribute: `approval_key`.
+
+### WorkflowInterruptedError
+
+Raised when run pauses for approval. Attributes: `run_id`, `approval_key`, `expires_at`.
+
+## External bindings
+
+### ExternalBindingConfig
+
+`ExternalBindingConfig(binding_id, *, kind="browser_automation", attach_to_step_id, mode="async_callback", outcome_schema=None, recovery=None)`
+
+Builds publish payload metadata for external async callbacks.
+
+### report_outcome
+
+```python
+report_outcome(
+    run_id,
+    binding_id,
+    outcome,  # dict with status: success | failed | needs_input
+    *,
+    base_url="http://localhost:8080",
+    api_key=None,
+    webhook_secret=None,
+    idempotency_key=None,
+) -> dict
+```
+
+POSTs an external outcome report to `POST /v1/runs/{run_id}/external/{binding_id}` with HMAC signature. Requires `ARCFLOW_SERVER_API_KEY` and `ARCFLOW_WEBHOOK_SECRET` when args omitted.
+
+There is no Python type named `ExternalOutcome`. The server RCS type is `ExternalOutcomeReport`; Python accepts a plain `dict` for `outcome`.
+
+## ScheduleManifest
+
+`ScheduleManifest.load(path)` reads `arcflow.schedule.yaml`. `validate()` checks structure (id, cron, workflow.name).
+
+## LangChain adapter (`arcflow.langchain`)
+
+Not exported from top-level `__all__`. Requires optional `[langchain]` extra.
+
+| Symbol | Actual name in codebase | Purpose |
+|--------|-------------------------|---------|
+| (requested `FromLangChain`) | `from_langchain_tool` | Wrap a LangChain tool as `arcflow.Tool` |
+| (requested `LangChainToArcflow`) | `langgraph_to_arcflow` | Convert LangGraph to `Workflow` |
+| | `langgraph_to_rcs_json` | Convert LangGraph to RCS JSON string |
+| | `to_arcflow_step` | Map LangGraph node to ArcFlow step helper |
+
+`CommonTools` does not exist in this repository.
+
+Example:
+
+```python
+from arcflow.langchain import from_langchain_tool, langgraph_to_arcflow
+
+tool = from_langchain_tool(langchain_tool)
+wf = langgraph_to_arcflow(state_graph, workflow_name="migrated")
+```
+
+See `examples/langchain/migration_demo.py`.
+
+## Base exception
+
+`ArcFlowError` is the root of all SDK exceptions documented in [exception reference](exception-reference.md).
+
+## Source
+
+`sdk-python/arcflow/__init__.py`, `sdk-python/arcflow/workflow.py`, `sdk-python/arcflow/agent.py`, `sdk-python/arcflow/tool.py`, `sdk-python/arcflow/memory.py`, `sdk-python/arcflow/provider.py`, `sdk-python/arcflow/trace.py`, `sdk-python/arcflow/stream.py`, `sdk-python/arcflow/hitl.py`, `sdk-python/arcflow/external.py`, `sdk-python/arcflow/context.py`, `sdk-python/arcflow/schedule.py`, `sdk-python/arcflow/langchain.py`, `sdk-python/arcflow_langchain/`; capabilities reference §16.
