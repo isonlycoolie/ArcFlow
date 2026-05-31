@@ -93,3 +93,49 @@ Every event shares correlation fields where applicable:
 | `StreamChunkReceived` | Stream chunk (size only in trace) | run_id, step_id, chunk_bytes | Safe |
 | `TokenEmitted` | Token delta accounting | run_id, step_id, completion_token_delta, prompt_token_delta | Safe |
 
+SDK streaming may expose text to the local process during `run_stream()`; persisted traces remain count-based.
+
+## D.8 External bindings
+
+| Kind | Trigger | Fields | SEC-1 |
+|------|---------|--------|-------|
+| `ExternalBindingStarted` | External wait begins | run_id, binding_id, step_id, mode | Safe |
+| `ExternalBindingCompleted` | External success | run_id, binding_id, step_id, duration_ms | Safe |
+| `ExternalBindingFailed` | External failure | run_id, binding_id, step_id, error_code, status | Safe |
+| `ExternalRecoveryTriggered` | External recovery action | run_id, binding_id, action, attempt_number | Safe |
+
+## Example trace excerpt
+
+```json
+[
+  { "kind": "WorkflowStarted", "run_id": "r1", "workflow_name": "demo", "step_count": 2 },
+  { "kind": "StepStarted", "run_id": "r1", "step_id": "s1", "step_index": 0, "agent_name": "a1", "agent_role": "Analyst" },
+  { "kind": "ProviderRequestSent", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "max_tokens": 1024, "prompt_size_bytes": 512 },
+  { "kind": "ProviderResponseReceived", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "tokens": { "input": 120, "output": 45, "total": 165 }, "latency_ms": 890 },
+  { "kind": "StepCompleted", "run_id": "r1", "step_id": "s1", "step_index": 0, "duration_ms": 920, "tokens": { "input": 120, "output": 45, "total": 165 }, "output_size_bytes": 180 },
+  { "kind": "WorkflowCompleted", "run_id": "r1", "duration_ms": 950, "total_tokens": { "input": 120, "output": 45, "total": 165 } }
+]
+```
+
+## Persistence
+
+When Postgres persistence is enabled, events are stored in `arcflow_trace_events` (migration 000005). Payloads must remain SEC-1 compliant at rest.
+
+## Adding new event kinds
+
+Before merging new `TraceEventKind` variants:
+
+1. Update [contracts/normative/observability/trace-events-v1.md](../../contracts/normative/observability/trace-events-v1.md).
+2. Update `events.rs` and this page.
+3. Pass SEC-1 review: no forbidden field categories.
+4. Consider Relay browser exposure path.
+
+## Related pages
+
+- [SEC-1 compliance](../security/sec-1-compliance.md)
+- [Execution traces](../guides/observability/execution-traces.md)
+- [RCS schema](rcs-schema.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) Appendix D; K-02, K-20; [contracts/normative/observability/trace-events-v1.md](../../contracts/normative/observability/trace-events-v1.md); `runtime/arcflow-core/src/tracing/events.rs`.
