@@ -188,3 +188,18 @@ For streaming in Node, see `runStream()` on `Workflow`. See [SDK streaming](../g
 |-------|----------|
 | Import succeeds | `import ok` |
 | Default run (no API key) | `stepCount === 2`, non-empty `output` |
+| `workflow.trace()` after run | Summary prints without exception |
+
+## Next
+
+| Topic | Link |
+|-------|------|
+| Python twin | [Python quickstart](quickstart-python.md) |
+| Track A with verification steps | [Track A: First workflow](../tutorials/track-a-first-workflow.md) |
+| Provider guide | [Provider configuration](../guides/agents-and-tools/provider-configuration.md) |
+| Browser static client | [Static site chatbot](paths/static-site-chatbot.md) |
+| VS Code extension | [VS Code overview](../vscode/overview.md) |
+
+## Source
+
+`sdk-typescript/README.md`, `sdk-typescript/arcflow/workflow.ts`, `sdk-typescript/index.d.ts`; capabilities reference §17, §17.2, Appendix I.
