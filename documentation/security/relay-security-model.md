@@ -93,3 +93,22 @@ await runPublished("chat", "^1.0.0", message, {
 
 ## SEC-1 and browser trace poll
 
+Relay exposes `GET .../trace` to the browser. Trace events are SEC-1 metadata only. See [SEC-1 compliance](sec-1-compliance.md).
+
+## Token rotation and race conditions
+
+After `POST .../tokens/rotate`, old tokens fail immediately at Relay. Plan deploys to avoid user-visible auth errors during rotation. See [Token rotation](../operator/token-rotation.md).
+
+## CSRF on operator BFF
+
+Dashboard BFF mutating routes should use SameSite cookies and CSRF tokens. Admin key never reaches the browser.
+
+## Related pages
+
+- [Relay deployment](../deployment/relay-deployment.md)
+- [API key management](api-key-management.md)
+- [Streaming in the browser](../guides/streaming/streaming-in-the-browser.md)
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §14.2, §15.3; K-08; [dashboard/spec/05-security-model.md](../../dashboard/spec/05-security-model.md).
