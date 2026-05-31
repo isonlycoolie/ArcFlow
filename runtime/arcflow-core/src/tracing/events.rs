@@ -222,4 +222,33 @@ pub enum TraceEventKind {
         chunk_count: usize,
         total_bytes: usize,
     },
+    /// External binding started (RCS v0.7, SEC-1 — metadata only).
+    ExternalBindingStarted {
+        run_id: String,
+        binding_id: String,
+        step_id: String,
+        mode: String,
+    },
+    /// External binding completed successfully (RCS v0.7).
+    ExternalBindingCompleted {
+        run_id: String,
+        binding_id: String,
+        step_id: String,
+        duration_ms: u64,
+    },
+    /// External binding failed (RCS v0.7).
+    ExternalBindingFailed {
+        run_id: String,
+        binding_id: String,
+        step_id: String,
+        error_code: String,
+        status: String,
+    },
+    /// Recovery action triggered after external outcome (RCS v0.7).
+    ExternalRecoveryTriggered {
+        run_id: String,
+        binding_id: String,
+        action: String,
+        attempt_number: u32,
+    },
 }
