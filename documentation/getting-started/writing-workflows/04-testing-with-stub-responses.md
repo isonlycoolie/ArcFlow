@@ -1,6 +1,5 @@
 # 04 Testing with stub responses
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -127,7 +126,3 @@ See `sdk-python/tests/test_workflow_test.py` for full fixture examples.
 ## Next
 
 [05 Retry and timeouts basics](05-retry-and-timeouts-basics.md) configures runtime retry and timeout limits that pair with test mode for failure drills.
-
-## Source
-
-`sdk-python/arcflow/workflow.py` (`test`); `sdk-python/arcflow/testing/case_helpers.py`; `sdk-python/tests/test_workflow_test.py`, `sdk-python/tests/test_workflow_test_fail_times.py`; [Validation and testing](../../guides/workflows/validation-and-testing.md).

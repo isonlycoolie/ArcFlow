@@ -1,6 +1,5 @@
 # Static site chatbot
 
-**Audience:** `[frontend]` `[operator]`
 
 ## Before you start
 
@@ -165,7 +164,7 @@ const result = await client.runPublished("chat", "^1.0.0", userMessage, {
 });
 ```
 
-See [`examples/static/chat-rag/src/main.ts`](../../../examples/static/chat-rag/src/main.ts) for full UI wiring.
+See [Static chat widget example](../../examples/static-chat-widget.md) for full UI wiring.
 
 ## Step 6: Verify network and trace behavior
 
@@ -246,7 +245,7 @@ Re-add the origin and confirm chat works again.
 
 ## Advanced: direct mode (internal dev only)
 
-[`examples/static/chat-rag/src/main-dev-direct.ts`](../../../examples/static/chat-rag/src/main-dev-direct.ts) defines inline `Agent` and `MemoryConfig` for local engine debugging with CORS. Do not ship this to production. Keys and workflow shape belong in dashboard/Relay, not the static bundle.
+The [Static chat widget example](../../examples/static-chat-widget.md) documents a dev-only direct-runtime path. Do not ship that pattern to production. Keys and workflow shape belong in dashboard/Relay, not the static bundle.
 
 ## Verify (summary)
 
@@ -270,7 +269,3 @@ Re-add the origin and confirm chat works again.
 | Security model | [Static product security model](../../static-product/security-model.md) |
 | BYO Relay deployment | [Relay BYO deployment](../../examples/relay-byo-deployment.md) |
 | Integrating server features | [Integrating track](../integrating/README.md) |
-
-## Source
-
-`examples/static/chat-rag/`, `examples/static/README.md`, `scripts/static-provision-site.sh`, `scripts/static-ingest-knowledge.sh`, `scripts/static-publish-chat.sh`; capabilities reference §15, §28 Track F; [Track F: Static product](../../tutorials/track-f-static-product.md).

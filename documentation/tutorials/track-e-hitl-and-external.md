@@ -1,6 +1,5 @@
 # Track E: HITL and external integrations
 
-**Audience:** `[developer]` `[compliance]`
 
 Track E combines human approval interrupts with external webhook callbacks on the server. You drive a run from `Running` through `Interrupted` to `Completed`, and post structured external outcomes with verified auth.
 
@@ -57,7 +56,7 @@ Pass criteria: transition `Interrupted` then `Completed` with accounting step ex
 
 ### Step 4: Run or create workflow with external binding
 
-Use a published workflow with external step (see [`online-application-chatbot`](../../examples/static/online-application-chatbot/README.md) for shape) or SDK workflow declaring binding id `gov_portal_submit`.
+Use a published workflow with external step (see [`online-application-chatbot`](../examples/static-chat-widget.md) for shape) or SDK workflow declaring binding id `gov_portal_submit`.
 
 Obtain `run_id` when external step activates.
 
@@ -119,5 +118,3 @@ Track E covers operator-facing controls: pausing automation for human decisions 
 | F | Static product embedding |
 | G | Operator migrations and CLI |
 | Level 2 cert | Combined support workflow project |
-
-**Source:** capabilities reference §28 Track E; [hitl-approval-flow](../examples/hitl-approval-flow.md), [external-webhook](../examples/external-webhook.md); [approve-and-reject](../guides/human-in-the-loop/approve-and-reject.md), [webhook security](../guides/external-integrations/webhook-security.md).

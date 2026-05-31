@@ -1,6 +1,5 @@
 # Python quickstart
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -88,7 +87,7 @@ for event in result.trace_events:
     print(event.get("event_kind"), event.get("sequence"))
 ```
 
-Trace payloads follow SEC-1 rules: no raw prompts, tool values, or credentials. See [SEC-1 rules](../guides/observability/sec-1-rules.md) and `contracts/normative/observability/trace-events-v1.md` for event shapes.
+Trace payloads follow SEC-1 rules: no raw prompts, tool values, or credentials. See [SEC-1 rules](../guides/observability/sec-1-rules.md) and [Trace events (normative)](../contracts/trace-events-normative.md) for event shapes.
 
 ## Structured trace via `workflow.trace()`
 
@@ -179,7 +178,3 @@ Messages use the format `[ArcFlow] <what happened>. <what to do>.`
 | Execution traces | [Execution traces](../guides/observability/execution-traces.md) |
 | TypeScript twin | [TypeScript quickstart](quickstart-typescript.md) |
 | Server HTTP detail | [Server API quickstart](quickstart-server-api.md) |
-
-## Source
-
-`sdk-python/README.md`, `sdk-python/arcflow/workflow.py`, `sdk-python/arcflow/result.py`; capabilities reference §16, §16.2.

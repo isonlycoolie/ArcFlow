@@ -1,6 +1,5 @@
 # Python SDK exception reference
 
-**Audience:** `[developer]`
 
 ArcFlow Python exceptions inherit from `ArcFlowError`. Messages follow the format `[ArcFlow] <what happened>. <what to do>.` when raised by SDK validation layers. Native runtime errors are mapped into the same hierarchy before they reach your code.
 
@@ -213,7 +212,3 @@ Human rejected the approval request.
 | `WorkflowTimeoutError` | Run | Increase timeout |
 | `WorkflowInterruptedError` | Run (HITL) | Approve or reject |
 | `HumanRejectedError` | Run (HITL) | Handle rejection path |
-
-## Source
-
-`sdk-python/arcflow/exceptions.py`, `sdk-python/arcflow/hitl.py`, `sdk-python/README.md` (Errors section); capabilities reference §16.

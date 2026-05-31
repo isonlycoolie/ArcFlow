@@ -1,4 +1,3 @@
-**Audience:** `[developer]`
 
 # Edge WASM (alpha)
 
@@ -113,5 +112,3 @@ Includes `execute_workflow_json_round_trip` in `lib.rs` tests.
 | FP-1.01 | Graph recovery partial on server; WASM has no graph |
 
 Maturity: [maturity-and-known-gaps.md](../concepts/maturity-and-known-gaps.md).
-
-**Source:** capabilities reference §20; `runtime/arcflow-wasm/src/lib.rs`, `runtime/arcflow-wasm/Cargo.toml`; Appendix I (WASM column).

@@ -1,6 +1,5 @@
 # TypeScript SDK exception reference
 
-**Audience:** `[developer]`
 
 TypeScript errors inherit from `ArcFlowError`. Native Rust failures arrive as thrown Error objects with structured message prefixes; `mapNativeError()` converts them into typed subclasses when patterns match.
 
@@ -129,7 +128,3 @@ Same discipline as Python:
 | `HumanRejectedError` | Handle rejection branch |
 
 Messages use the `[ArcFlow]` prefix when raised from validation layers, matching Python convention.
-
-## Source
-
-`sdk-typescript/arcflow/exceptions.ts`, `sdk-typescript/arcflow/hitl.ts`, `sdk-typescript/index.ts`; Python parity from `sdk-python/arcflow/exceptions.py`; capabilities reference §17, Appendix I.

@@ -1,6 +1,5 @@
 # 01 RAG concepts in ArcFlow
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -31,7 +30,7 @@ Chunking can be set on the agent via `MemoryChunkingConfig`. Align chunk size an
 
 For local development, `embedding="stub/8"` (or `stub/384`) avoids API keys. Set `ARCFLOW_QDRANT_URL=http://localhost:6333` when you want real persistence and `MemoryRetrieved` trace events.
 
-The canonical query-side sample on the current branch is [`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py). The restructure branch combines ingest and query in `examples/rag/memory_guide_qa.py`.
+The canonical query-side sample on the current branch is [RAG chatbot walkthrough](../../examples/rag-chatbot.md). The restructure branch combines ingest and query in `examples/rag/memory_guide_qa.py`.
 
 ## Example
 
@@ -75,7 +74,3 @@ After you complete [02 Ingest documents](02-ingest-documents.md), re-run a query
 ## Next
 
 [02 Ingest documents](02-ingest-documents.md) covers `VectorStore.ingest` with a runnable ingest script.
-
-## Source
-
-[`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py); `examples/rag/memory_guide_qa.py` (restructure branch); [Knowledge ingestion](../../guides/memory-and-rag/knowledge-ingestion.md); [Vector RAG pipeline](../../guides/memory-and-rag/vector-rag-pipeline.md).

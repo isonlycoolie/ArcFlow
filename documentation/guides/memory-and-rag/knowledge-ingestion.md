@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[operator]`
 
 # Knowledge ingestion
 
@@ -181,7 +180,3 @@ Re-ingest with the same `key` to replace logical documents per admin API semanti
 - [Memory types](memory-types.md)
 - [Surfaces and when to use them](../../concepts/surfaces-and-when-to-use-them.md)
 - [Architecture overview](../../concepts/architecture-overview.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §6.2, §13.2; Appendix B (admin ingest route); Appendix A (MemoryChunkingConfig).

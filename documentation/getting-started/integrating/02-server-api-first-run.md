@@ -1,6 +1,5 @@
 # 02 Server API first run
 
-**Audience:** `[platform]`
 
 ## Before you start
 
@@ -139,7 +138,3 @@ Optional: send `Idempotency-Key: <uuid>` on create to deduplicate identical subm
 [03 External callbacks intro](03-external-callbacks-intro.md) covers runs that pause at `Interrupted` until an external system posts an outcome.
 
 For the full server quickstart with SDK client and bash poll loop, see [Server API quickstart](../quickstart-server-api.md).
-
-## Source
-
-`docker/docker-compose.server.yml`, `server/arcflow-server/README.md`, `scripts/load-test-runs.sh`; capabilities reference §12, Appendix B.

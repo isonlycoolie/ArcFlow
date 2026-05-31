@@ -1,6 +1,5 @@
 # When something fails
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -105,5 +104,3 @@ You have finished the fundamentals track. Continue with:
 | Full exception list | [Python SDK exception reference](../../sdks/python/exception-reference.md) |
 
 Return to the [Fundamentals track overview](README.md) if you want the lesson index.
-
-**Source:** `sdk-python/arcflow/exceptions.py`, `sdk-python/arcflow/agent.py`, `sdk-python/arcflow/workflow.py`, `documentation/sdks/python/exception-reference.md`; capabilities reference §16.2.

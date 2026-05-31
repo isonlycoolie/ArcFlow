@@ -1,6 +1,5 @@
 # Track G: Operations
 
-**Audience:** `[operator]`
 
 Track G focuses on running ArcFlow in production-like local conditions: schema migrations, readiness probes, trace export, and idempotent re-migration. No application workflow authoring required.
 
@@ -128,5 +127,3 @@ Stop stack when done:
 ```bash
 docker compose -f docker/docker-compose.server.yml down
 ```
-
-**Source:** capabilities reference §28 Track G; `docker/docker-compose.server.yml`, `server/arcflow-server/README.md`; [execution traces](../guides/observability/execution-traces.md), [SEC-1 rules](../guides/observability/sec-1-rules.md).

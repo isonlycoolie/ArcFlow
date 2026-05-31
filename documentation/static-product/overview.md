@@ -1,4 +1,3 @@
-**Audience:** `[frontend]` `[operator]`
 
 # Static product overview
 
@@ -84,5 +83,3 @@ Static product (Relay + admin + static SDK) is **production** per maturity matri
 | [security-model.md](security-model.md) | Browser exposure rules |
 | [relay/overview.md](../relay/overview.md) | Proxy behavior |
 | [server/http-api-reference.md](../server/http-api-reference.md) | Admin routes |
-
-**Source:** capabilities reference §2, §13, §14, §15; `packages/arcflow-static/`; `dashboard/spec/01-product-vision.md`.

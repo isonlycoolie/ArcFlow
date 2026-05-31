@@ -1,10 +1,9 @@
 # 04 Hybrid retrieval intro
 
-**Audience:** `[developer]`
 
 ## Before you start
 
-Complete [03 Retrieval and agent wiring](03-retrieval-and-agent-wiring.md) so you have seen `MemoryRetrieved` on a populated namespace. Read [`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py) hybrid settings before tuning weights.
+Complete [03 Retrieval and agent wiring](03-retrieval-and-agent-wiring.md) so you have seen `MemoryRetrieved` on a populated namespace. Read [RAG chatbot walkthrough](../../examples/rag-chatbot.md) hybrid settings before tuning weights.
 
 ## Concept
 
@@ -44,7 +43,7 @@ Stub embedding (`stub/8`) still runs hybrid config through the workflow for loca
 
 ## Example
 
-From [`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py):
+From [RAG chatbot walkthrough](../../examples/rag-chatbot.md):
 
 ```python
 from arcflow import MemoryChunkingConfig, MemoryConfig, MemoryRetrievalConfig, MemoryScope, MemoryType
@@ -98,7 +97,3 @@ Track C troubleshooting: if answers ignore ingested facts, confirm namespace mat
 | Full tutorial checklist | [Track C: RAG and vector memory](../../tutorials/track-c-rag.md) |
 | Weight and rerank tuning | [Hybrid retrieval and reranking](../../guides/memory-and-rag/hybrid-retrieval-and-reranking.md) |
 | Operator ingest via admin API | [Knowledge ingestion](../../guides/memory-and-rag/knowledge-ingestion.md) |
-
-## Source
-
-[`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py); `examples/rag/memory_guide_qa.py` (restructure branch); [Hybrid retrieval and reranking](../../guides/memory-and-rag/hybrid-retrieval-and-reranking.md); `sdk-python/arcflow/memory.py` (`MemoryRetrievalConfig`).

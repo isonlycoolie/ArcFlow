@@ -1,4 +1,3 @@
-**Audience:** `[operator]`
 
 # Site lifecycle
 
@@ -110,6 +109,4 @@ Archive site by revoking token, removing origins, and unpublishing workflows as 
 - [knowledge-and-publish.md](knowledge-and-publish.md)
 - [relay/origin-and-rate-limiting.md](../relay/origin-and-rate-limiting.md)
 - [static-product/security-model.md](security-model.md)
-- Dashboard spec [03-admin-api-contract.md](../../dashboard/spec/03-admin-api-contract.md)
-
-**Source:** capabilities reference §13.1; `server/arcflow-server/src/handlers/admin/sites.rs`; dashboard spec §03.
+- Dashboard spec [03-admin-api-contract.md](../operator/admin-api-reference.md)

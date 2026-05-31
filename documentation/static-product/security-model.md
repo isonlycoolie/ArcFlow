@@ -1,4 +1,3 @@
-**Audience:** `[frontend]` `[compliance]`
 
 # Static product security model
 
@@ -85,6 +84,4 @@ Do not expose SSE endpoints to browsers until FP-2 ships. Current polling model 
 
 - [static-product/overview.md](overview.md)
 - [server/authentication.md](../server/authentication.md)
-- Dashboard spec [05-security-model.md](../../dashboard/spec/05-security-model.md)
-
-**Source:** capabilities reference §12.3, §15.3; `server/arcflow-server/src/middleware/static_limits.rs`; dashboard spec §05; K-08.
+- Dashboard spec [05-security-model.md](../static-product/security-model.md)

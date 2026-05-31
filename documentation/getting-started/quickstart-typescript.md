@@ -1,6 +1,5 @@
 # TypeScript quickstart
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -199,7 +198,3 @@ For streaming in Node, see `runStream()` on `Workflow`. See [SDK streaming](../g
 | Provider guide | [Provider configuration](../guides/agents-and-tools/provider-configuration.md) |
 | Browser static client | [Static site chatbot](paths/static-site-chatbot.md) |
 | VS Code extension | [VS Code overview](../vscode/overview.md) |
-
-## Source
-
-`sdk-typescript/README.md`, `sdk-typescript/arcflow/workflow.ts`, `sdk-typescript/index.d.ts`; capabilities reference §17, §17.2, Appendix I.

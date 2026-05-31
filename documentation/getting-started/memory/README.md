@@ -1,6 +1,5 @@
 # Memory track
 
-**Audience:** `[developer]`
 
 This track teaches how ArcFlow agents attach memory backends through `MemoryConfig`. You start with the four memory types and scope rules, then practice session and shared memory without external services, and finish with vector memory setup for Qdrant-backed RAG.
 
@@ -20,7 +19,7 @@ Lessons 01 and 02 run with the stub provider and no Docker. Lesson 03 adds Qdran
 
 ## How these lessons are structured
 
-Every page follows the same sections: **Audience**, **Before you start**, **Concept**, **Example**, **Verify**, **Next**, and **Source**. Run each example as a standalone script unless the page says otherwise.
+Every page follows the same sections: **Before you start**, **Concept**, **Example**, **Verify**, and **Next**. Run each example as a standalone script unless the page says otherwise.
 
 ## After this track
 
@@ -29,5 +28,3 @@ Every page follows the same sections: **Audience**, **Before you start**, **Conc
 | Ingest documents and wire RAG agents | [RAG track](../rag/README.md) |
 | Guided verification with trace events | [Track C: RAG and vector memory](../../tutorials/track-c-rag.md) |
 | Full memory reference | [Memory types](../../guides/memory-and-rag/memory-types.md) |
-
-**Source:** `sdk-python/arcflow/memory.py`, `examples/rag/document_qa.py`; on the examples restructure branch the same pattern appears as `examples/rag/memory_guide_qa.py`.

@@ -1,4 +1,3 @@
-**Audience:** `[platform]` `[operator]`
 
 # Workflow registry
 
@@ -162,7 +161,7 @@ Registry data lives in `arcflow_workflows` and `arcflow_workflow_aliases`. Apply
 
 ## Validation before publish
 
-Validate workflow JSON against [contracts/normative/rcs/v1.schema.json](../../../contracts/normative/rcs/v1.schema.json) in CI. Engine runs `validate_workflow` and `validate_graph` before execution. CLI `arcflow validate` is a stub (**FP-5.04**); see [Validation and testing](validation-and-testing.md).
+Validate workflow JSON against [RCS schema](../../contracts/rcs-schema.md) in CI. Engine runs `validate_workflow` and `validate_graph` before execution. CLI `arcflow validate` is a stub (**FP-5.04**); see [Validation and testing](validation-and-testing.md).
 
 ## Idempotency on runs
 
@@ -174,7 +173,3 @@ Registry resolves workflow at run creation time. Re-posting the same run body wi
 - [The RCS contract](../../concepts/the-rcs-contract.md)
 - [Server API quickstart](../../getting-started/quickstart-server-api.md)
 - [Surfaces and when to use them](../../concepts/surfaces-and-when-to-use-them.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §4.4, §13.2; Appendix B (registry routes); Appendix G (migrations 000006).

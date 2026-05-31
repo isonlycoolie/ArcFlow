@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[platform]`
 
 # Timeouts
 
@@ -165,7 +164,3 @@ TypeScript equivalent on `workflow.run()` options object. See [Python quickstart
 - [Recovery and resume](recovery-and-resume.md)
 - [Linear workflows](../workflows/linear-workflows.md)
 - [The RCS contract](../../concepts/the-rcs-contract.md) (HitlConfig)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §7.2, §8; Appendix C (workflow_timeout_secs, step_timeout_secs); Appendix D (TimeoutEnforced); Appendix E (Timeout, HumanTimeout).

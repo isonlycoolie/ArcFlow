@@ -1,4 +1,3 @@
-**Audience:** `[compliance]`
 
 # SEC-1 compliance
 
@@ -6,7 +5,7 @@ SEC-1 is ArcFlow's mandatory trace data policy. Traces and persisted trace event
 
 Product context: [SEC-1 and data safety](../concepts/sec-1-and-data-safety.md). Implementation guide: [SEC-1 rules](../guides/observability/sec-1-rules.md).
 
-Normative contract: [contracts/normative/observability/trace-events-v1.md](../../contracts/normative/observability/trace-events-v1.md).
+Normative contract: [Trace events (normative)](../contracts/trace-events-normative.md).
 
 ## The SEC-1 rule
 
@@ -96,7 +95,7 @@ Manual review: no substring matches for user-provided essay content, API keys, o
 
 ## Dashboard and BFF alignment
 
-Private dashboard repo must pass SEC-1 CI (checklist S3 in `dashboard/spec/09-exit-criteria.md`):
+Private dashboard repo must pass SEC-1 CI (exit criteria in [Dashboard spec](dashboard-spec.md)):
 
 - No hardcoded API keys
 - No logging of `site_token` or admin key
@@ -116,7 +115,3 @@ If any answer is yes, reject or gate behind localhost debug.
 - [Trace events normative](../contracts/trace-events-normative.md)
 - [Webhook HMAC](webhook-hmac.md) (external payloads separate from traces)
 - [Self-hosted security](self-hosted-security.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §11.1; Appendix G (000005); K-16; [contracts/normative/observability/trace-events-v1.md](../../contracts/normative/observability/trace-events-v1.md).

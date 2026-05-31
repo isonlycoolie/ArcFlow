@@ -1,4 +1,3 @@
-**Audience:** `[operator]` `[platform]`
 
 # BYO Relay deployment
 
@@ -53,7 +52,6 @@ Each array element maps to a site record:
 | `upstream_runtime_key` | Yes | Key sent to server (must match scoped key or master) |
 | `token` | Yes | Plain site token Relay accepts from browsers |
 
-Parser: `server/arcflow-relay/src/state/sites_json.rs`.
 
 ## Environment variables
 
@@ -72,7 +70,7 @@ Server-side companion vars:
 | `ARCFLOW_SERVER_API_KEY` | Master key if upstream uses it |
 | `ARCFLOW_RELAY_PUBLIC_URL` | Public Relay base for admin responses |
 
-Full list: capabilities reference Appendix H.
+Full list: [Environment variables reference](../deployment/environment-variables-reference.md).
 
 ## Admin-provisioned vs BYO
 
@@ -124,5 +122,3 @@ Or manual curl from [origin-and-rate-limiting.md](origin-and-rate-limiting.md).
 - [relay/overview.md](overview.md)
 - [relay/request-path.md](request-path.md)
 - [examples/relay-byo-deployment.md](../examples/relay-byo-deployment.md) (when published)
-
-**Source:** capabilities reference §14.3, Appendix H; `examples/relay/byo-docker/README.md`, `examples/relay/byo-docker/compose.yml`.

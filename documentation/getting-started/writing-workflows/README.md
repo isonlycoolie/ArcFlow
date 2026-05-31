@@ -1,6 +1,5 @@
 # Writing workflows
 
-**Audience:** `[developer]`
 
 This track teaches how to build ArcFlow workflows beyond a single agent step: linear pipelines, controlled handoffs between steps, graph routing, deterministic testing, and basic retry and timeout configuration. Each lesson is runnable with the built-in stub provider unless noted otherwise.
 
@@ -26,7 +25,7 @@ python -c "from arcflow import Agent, Workflow; print('ready')"
 
 ## How these lessons are structured
 
-Every page follows the same sections: **Audience**, **Before you start**, **Concept**, **Example**, **Verify**, **Next**, and **Source**. Run each example as a standalone script. No API keys are required until you connect a live provider in [Python quickstart](../quickstart-python.md).
+Every page follows the same sections: **Before you start**, **Concept**, **Example**, **Verify**, and **Next**. Run each example as a standalone script. No API keys are required until you connect a live provider in [Python quickstart](../quickstart-python.md).
 
 ## After this track
 
@@ -36,5 +35,3 @@ Every page follows the same sections: **Audience**, **Before you start**, **Conc
 | Full graph patterns | [Track D: Graph workflows](../../tutorials/track-d-graph-workflows.md) |
 | Recovery and resume | [Recovery and resume](../../guides/reliability/recovery-and-resume.md) |
 | Tool-calling agents | [Tools track](../tools/) |
-
-**Source:** `sdk-python/arcflow/workflow.py`, `sdk-python/README.md`, [Execution model](../../concepts/execution-model.md).

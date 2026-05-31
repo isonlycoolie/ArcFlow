@@ -1,6 +1,5 @@
 # 01 Embedded SDK vs server
 
-**Audience:** `[developer]` `[platform]`
 
 ## Before you start
 
@@ -69,7 +68,3 @@ If the server path returns **503** on create, Postgres is unreachable or migrati
 ## Next
 
 [02 Server API first run](02-server-api-first-run.md) starts the Docker stack and walks through curl against `POST /v1/runs` without the SDK.
-
-## Source
-
-ADR-001 (Rust core, thin bindings); `documentation/server/overview.md`, `sdk-python/arcflow/workflow.py`; capabilities reference §12, §16.

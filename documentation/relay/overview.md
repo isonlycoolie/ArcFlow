@@ -1,4 +1,3 @@
-**Audience:** `[frontend]` `[operator]`
 
 # ArcFlow Relay overview
 
@@ -62,5 +61,3 @@ BYO guide: [byo-relay-deployment.md](byo-relay-deployment.md).
 - [origin-and-rate-limiting.md](origin-and-rate-limiting.md)
 - [static-product/overview.md](../static-product/overview.md)
 - [static-product/security-model.md](../static-product/security-model.md)
-
-**Source:** capabilities reference §14; `server/arcflow-relay/src/lib.rs`; `examples/relay/byo-docker/README.md`.

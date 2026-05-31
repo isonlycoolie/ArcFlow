@@ -1,6 +1,5 @@
 # Python SDK API reference
 
-**Audience:** `[developer]`
 
 This page documents every symbol in `arcflow.__all__`, plus extension modules searched for LangChain and external outcome helpers. Signatures reflect `sdk-python/arcflow/` as of the current tree.
 
@@ -274,7 +273,3 @@ See `examples/langchain/migration_demo.py`.
 ## Base exception
 
 `ArcFlowError` is the root of all SDK exceptions documented in [exception reference](exception-reference.md).
-
-## Source
-
-`sdk-python/arcflow/__init__.py`, `sdk-python/arcflow/workflow.py`, `sdk-python/arcflow/agent.py`, `sdk-python/arcflow/tool.py`, `sdk-python/arcflow/memory.py`, `sdk-python/arcflow/provider.py`, `sdk-python/arcflow/trace.py`, `sdk-python/arcflow/stream.py`, `sdk-python/arcflow/hitl.py`, `sdk-python/arcflow/external.py`, `sdk-python/arcflow/context.py`, `sdk-python/arcflow/schedule.py`, `sdk-python/arcflow/langchain.py`, `sdk-python/arcflow_langchain/`; capabilities reference §16.

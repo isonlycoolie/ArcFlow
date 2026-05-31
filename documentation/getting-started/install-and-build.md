@@ -1,6 +1,5 @@
 # Install and build
 
-**Audience:** `[developer]`
 
 ArcFlow ships two in-process SDKs (Python and TypeScript) that bind to the same Rust engine (`arcflow-core`). Both packages aim for zero runtime dependencies beyond what the native extension needs. Python builds the extension with maturin from source in this repository. TypeScript can be installed from npm with a prebuilt native binary, or built locally with `cargo` and `npm`.
 
@@ -145,5 +144,3 @@ Embedded SDK runs do not require Postgres unless you enable recovery or registry
 | TypeScript with optional OpenAI | [TypeScript quickstart](quickstart-typescript.md) |
 | HTTP integration | [Server API quickstart](quickstart-server-api.md) |
 | Public website chat widget | [Static site chatbot](paths/static-site-chatbot.md) |
-
-**Source:** `sdk-python/README.md`, `sdk-python/pyproject.toml`, `sdk-typescript/README.md`, `sdk-typescript/package.json`; capabilities reference §16, §17.

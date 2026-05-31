@@ -1,6 +1,5 @@
 # Track F: Static product
 
-**Audience:** `[frontend]` `[operator]`
 
 Track F provisions a static-site chat product: admin setup, knowledge ingest, workflow publish, Relay-backed browser client, and origin enforcement.
 
@@ -16,7 +15,7 @@ Create an admin site, ingest knowledge, publish a workflow, embed the static SDK
 | Node.js | 18+ for Vite example |
 | Operator scripts or dashboard | Site, ingest, publish |
 | Primary examples | [static-chat-widget](../examples/static-chat-widget.md), [relay-byo-deployment](../examples/relay-byo-deployment.md) |
-| App | [`examples/static/chat-rag/`](../../examples/static/chat-rag/) |
+| App | [Static chat widget walkthrough](../examples/static-chat-widget.md) |
 | Track B | Helpful for understanding server admin APIs |
 
 Frontend developers do not define agents in browser code in production. Dashboard or admin API owns workflow shape.
@@ -110,5 +109,3 @@ Track F splits responsibilities: operators own knowledge and publish records; fr
 |-------|-------|
 | G | Migrations, readiness, CLI trace export |
 | Level 3 cert | Full stack deployment project |
-
-**Source:** capabilities reference §28 Track F; [`examples/static/chat-rag/`](../../examples/static/chat-rag/), [`examples/static/README.md`](../../examples/static/README.md); [static-chat-widget](../examples/static-chat-widget.md), [relay-byo-deployment](../examples/relay-byo-deployment.md).

@@ -1,4 +1,3 @@
-**Audience:** `[developer]`
 
 # Linear workflows
 
@@ -165,7 +164,3 @@ When `exec_config.recovery_enabled` is true, linear progress persists to Postgre
 - [Graph workflows](graph-workflows.md) for conditional routing and joins
 - [The RCS contract](../../concepts/the-rcs-contract.md) for type definitions
 - [Python quickstart](../../getting-started/quickstart-python.md) and [TypeScript quickstart](../../getting-started/quickstart-typescript.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §4.1, §4.2; Appendix A (WorkflowDefinition, StepDefinition).

@@ -1,6 +1,5 @@
 # 03 Roles and multi-agent pipelines
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -81,7 +80,3 @@ You should see lifecycle events such as `WorkflowStarted`, `StepCompleted`, and 
 ## Next
 
 [04 Context and prior steps](04-context-and-prior-steps.md) introduces `ContextPolicy` so you control how much of the run input and prior step output each agent receives.
-
-## Source
-
-`sdk-python/tests/integration/test_first_five_minutes.py`; [First workflow in five minutes](../first-workflow-in-five-minutes.md); [Execution model](../../concepts/execution-model.md) (linear execution).

@@ -1,4 +1,3 @@
-**Audience:** `[frontend]`
 
 # Relay request path
 
@@ -74,7 +73,6 @@ Payload uses `workflow_ref` so agent definitions stay on the server registry, no
 3. **Origin check** against `allowed_origins` (see [origin-and-rate-limiting.md](origin-and-rate-limiting.md)).
 4. **Rate limit** token bucket per site (`429` when exceeded).
 
-Implementation: `server/arcflow-relay/src/middleware/site_auth.rs`.
 
 ## Step 3: Upstream proxy
 
@@ -84,7 +82,6 @@ Relay forwards to `ARCFLOW_UPSTREAM_URL` (default `http://arcflow-server:8080`):
 - Auth header replaced with site's `upstream_runtime_key` (must exist in `ARCFLOW_STATIC_RUNTIME_KEYS` or match master key policy)
 - `Idempotency-Key` forwarded if present
 
-Implementation: `server/arcflow-relay/src/handlers/proxy.rs`.
 
 ## Step 4: Poll status
 
@@ -116,5 +113,3 @@ When a run returns `Interrupted`, the static SDK throws `WorkflowInterruptedErro
 
 - [relay/overview.md](overview.md)
 - [static-product/browser-sdk-api.md](../static-product/browser-sdk-api.md)
-
-**Source:** capabilities reference §14.1, §2; `server/arcflow-relay/src/handlers/proxy.rs`, `server/arcflow-relay/src/middleware/site_auth.rs`; Appendix B (Relay routes).

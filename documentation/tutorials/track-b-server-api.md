@@ -1,6 +1,5 @@
 # Track B: Server API
 
-**Audience:** `[platform]`
 
 Track B introduces the HTTP execution surface: Docker Compose, migrations, `POST /v1/runs`, status polling, and trace export. You complete the same linear stub pipeline as Track A, but through `arcflow-server` and Postgres persistence.
 
@@ -185,5 +184,3 @@ Stop the stack when finished:
 ```bash
 docker compose -f docker/docker-compose.server.yml down
 ```
-
-**Source:** capabilities reference §28 Track B, §12, Appendix B; [Server API quickstart](../getting-started/quickstart-server-api.md); `docker/docker-compose.server.yml`, `server/arcflow-server/README.md`.

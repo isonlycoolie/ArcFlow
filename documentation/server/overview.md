@@ -1,4 +1,3 @@
-**Audience:** `[platform]`
 
 # arcflow-server overview
 
@@ -58,7 +57,7 @@ Full auth detail: [authentication.md](authentication.md).
 
 ## Contract drift (K-10)
 
-Normative [server-api-v1.md](../../contracts/normative/runtime/server-api-v1.md) lists only `/health`, `/ready`, and deprecated `POST /v1/workflows/run`. The implemented router in `server/arcflow-server/src/lib.rs` matches capabilities reference **Appendix B**. When integrating, prefer this documentation and Appendix B over server-api-v1 until normative docs are promoted.
+Normative [server-api-v1.md](../server/http-api-reference.md) lists only `/health`, `/ready`, and deprecated `POST /v1/workflows/run`. The implemented router matches [HTTP API reference](../server/http-api-reference.md). When integrating, prefer this [HTTP API reference](../server/http-api-reference.md).
 
 ## Quick verification
 
@@ -89,5 +88,3 @@ curl -s -X POST http://localhost:8080/v1/runs \
 | Idempotent create | [idempotency.md](idempotency.md) |
 | Schema | [postgres-schema.md](postgres-schema.md) |
 | Known gaps | [maturity-and-known-gaps.md](../concepts/maturity-and-known-gaps.md) |
-
-**Source:** capabilities reference §12; `server/arcflow-server/src/lib.rs`, `server/arcflow-server/README.md`; Appendix B, K-10.

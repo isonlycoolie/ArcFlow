@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[platform]`
 
 # Hybrid retrieval and reranking
 
@@ -154,7 +153,3 @@ Site knowledge ingests into site `kb_namespace`. Published chat agents should us
 - [Provider configuration](../agents-and-tools/provider-configuration.md)
 - [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md)
 - [Validation and testing](../workflows/validation-and-testing.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §6.2, §6.4; Appendix A (MemoryRetrievalConfig); Appendix H (`ARCFLOW_QDRANT_HYBRID`, `COHERE_API_KEY`).

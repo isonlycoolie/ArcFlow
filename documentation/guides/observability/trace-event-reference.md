@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[compliance]`
 
 # Trace event reference
 
@@ -6,9 +5,9 @@ Complete reference for engine `TraceEventKind` variants emitted by `arcflow-core
 
 **SEC-1:** All listed events are metadata-only in storage and HTTP export. No prompt text, tool payloads, or chunk content.
 
-Source of truth: `runtime/arcflow-core/src/tracing/events.rs`. Normative names: [contracts/normative/observability/trace-events-v1.md](../../../contracts/normative/observability/trace-events-v1.md).
+See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
-**Total engine kinds:** 37 in `events.rs` (capabilities Appendix D also lists RCS graph kinds that may appear in extended exports).
+**Total engine kinds:** 37 (see [Trace events (normative)](../../contracts/trace-events-normative.md) for graph export kinds).
 
 ## Workflow lifecycle
 
@@ -487,7 +486,3 @@ Nested in multiple events:
 - [Execution traces](execution-traces.md) for SDK and HTTP access patterns
 - [SEC-1 rules](sec-1-rules.md) for audit checklist
 - [SDK streaming](../streaming/sdk-streaming.md) for stream event UX vs trace storage
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) Appendix D; Sprint 5 TraceEventKind enum; Appendix K K-02, K-13, K-20; `runtime/arcflow-core/src/tracing/events.rs`.

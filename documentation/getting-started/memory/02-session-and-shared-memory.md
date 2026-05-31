@@ -1,6 +1,5 @@
 # 02 Session and shared memory
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -104,7 +103,3 @@ You may see `MemoryWrite` or `MemoryRead` depending on runtime version and stub 
 ## Next
 
 [03 Vector memory setup](03-vector-memory-setup.md) connects `MemoryType.VECTOR` to Qdrant through `ARCFLOW_QDRANT_URL` and namespace alignment.
-
-## Source
-
-`sdk-python/arcflow/memory.py`; [Memory types](../../guides/memory-and-rag/memory-types.md) (session and shared sections); [Context and prior steps](../writing-agents/04-context-and-prior-steps.md).

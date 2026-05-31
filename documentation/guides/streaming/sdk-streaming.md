@@ -1,4 +1,3 @@
-**Audience:** `[developer]`
 
 # SDK streaming
 
@@ -124,7 +123,3 @@ Remote clients cannot open an SSE channel to `arcflow-server` today. HTTP integr
 - [Streaming in the browser](streaming-in-the-browser.md) for Relay polling pattern
 - [Execution traces](../observability/execution-traces.md) for reading traces after a stream completes
 - [Maturity and known gaps](../../concepts/maturity-and-known-gaps.md) for FP-2 status
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §10.1, §10.2; `examples/streaming/`, `runtime/arcflow-core/src/tracing/events.rs` (`StreamChunkReceived`, `TokenEmitted`).

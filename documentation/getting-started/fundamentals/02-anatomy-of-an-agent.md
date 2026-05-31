@@ -1,6 +1,5 @@
 # Anatomy of an agent
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -90,5 +89,3 @@ You should see `[ArcFlow] Agent name must be a non-empty string` in the output. 
 ## Next lesson
 
 [Anatomy of a workflow](03-anatomy-of-a-workflow.md): chaining agents with `Workflow()`, `step()`, and `run()`, and reading `WorkflowResult`.
-
-**Source:** `sdk-python/arcflow/agent.py`, `sdk-python/tests/unit/test_agent.py`; capabilities reference §16.2.

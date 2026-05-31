@@ -1,8 +1,7 @@
-**Audience:** `[operator]`
 
 # Admin API reference
 
-Complete reference for ArcFlow admin routes under `/v1/admin/*`. These routes implement the static product operator workflows defined in OSS `dashboard/spec/03-admin-api-contract.md`.
+Complete reference for ArcFlow admin routes under `/v1/admin/*`. These routes implement the static product operator workflows defined in the [Admin API reference](admin-api-reference.md).
 
 **Authentication:** all routes require:
 
@@ -14,7 +13,7 @@ Scoped runtime keys are rejected on admin routes (**403**). Admin routes return 
 
 Base URL: your server origin (e.g. `https://api.example.com` or `http://localhost:8080`).
 
-Normative HTTP index (partially stale): [contracts/normative/runtime/server-api-v1.md](../../contracts/normative/runtime/server-api-v1.md). Authoritative admin shapes: `dashboard/spec/03-admin-api-contract.md`.
+Normative HTTP index (partially stale): [HTTP API reference](../server/http-api-reference.md). Authoritative admin shapes: [Admin API reference](admin-api-reference.md).
 
 ## POST /v1/admin/sites
 
@@ -200,8 +199,4 @@ Dashboard UI (FP-3.01 deferred) maps 401 to key configuration screens. Until the
 - [Sites management](sites-management.md)
 - [Token rotation](token-rotation.md)
 - [Dashboard spec](dashboard-spec.md)
-- [API enforcement](../../dashboard/spec/04-api-enforcement.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §13; [dashboard/spec/03-admin-api-contract.md](../../dashboard/spec/03-admin-api-contract.md), [04-api-enforcement.md](../../dashboard/spec/04-api-enforcement.md).
+- [API key management](../security/api-key-management.md)

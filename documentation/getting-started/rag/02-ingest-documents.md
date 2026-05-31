@@ -1,6 +1,5 @@
 # 02 Ingest documents
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -110,7 +109,3 @@ Re-ingesting with the same `key` replaces that document's chunks rather than dup
 ## Next
 
 [03 Retrieval and agent wiring](03-retrieval-and-agent-wiring.md) connects ingested namespaces to agents and verifies `MemoryRetrieved` on query runs.
-
-## Source
-
-`sdk-python/arcflow/memory.py` (`VectorStore.ingest`, `VectorStore.search`); [`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py); `examples/rag/memory_guide_qa.py` (restructure branch); [`examples/support/ticket_rag_bot.py`](../../../examples/support/ticket_rag_bot.py).

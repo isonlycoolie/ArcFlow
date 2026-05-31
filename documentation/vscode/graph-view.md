@@ -1,4 +1,3 @@
-**Audience:** `[developer]`
 
 # Graph view (VS Code)
 
@@ -82,5 +81,3 @@ Graph **execution** is production-ready. **Resume from checkpoint after failure*
 
 - [vscode/overview.md](overview.md)
 - [trace-timeline.md](trace-timeline.md)
-
-**Source:** capabilities reference §19, §4.3; `extensions/vscode-arcflow/package.json` (command `arcflow.visualizeGraph`).

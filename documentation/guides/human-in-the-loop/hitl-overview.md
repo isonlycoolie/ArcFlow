@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[compliance]`
 
 # Human-in-the-loop overview
 
@@ -80,7 +79,3 @@ RCS JSON uses a `hitl` object on the step definition with `approval_key` and `ti
 - [Approve and reject](approve-and-reject.md) for the HTTP approval API
 - [Recovery and resume](../reliability/recovery-and-resume.md) for Postgres persistence
 - [Execution model](../../concepts/execution-model.md) for the full run state machine
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §8, Appendix E, Appendix F; `runtime/arcflow-core/src/human/`, `server/arcflow-server/src/handlers/approve.rs`, `examples/hitl/`.

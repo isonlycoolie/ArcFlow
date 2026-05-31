@@ -1,4 +1,3 @@
-**Audience:** `[developer]`
 
 # Graph workflows
 
@@ -172,7 +171,3 @@ Working samples live under `examples/graph/`. Verify trace order matches the bra
 - [Step fallbacks](step-fallbacks.md) for per-node resilience
 - [The RCS contract](../../concepts/the-rcs-contract.md) (GraphDefinition, GraphNode, GraphEdge, JoinNode)
 - [Validation and testing](validation-and-testing.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §4.3, §4.6; Appendix A (GraphDefinition); FP-1.01 graph recovery note.

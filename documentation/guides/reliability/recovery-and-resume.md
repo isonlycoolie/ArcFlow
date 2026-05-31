@@ -1,4 +1,3 @@
-**Audience:** `[platform]` `[developer]`
 
 # Recovery and resume
 
@@ -202,7 +201,3 @@ Simulate failure between steps in integration tests by aborting process mid-run,
 - [Timeouts](timeouts.md)
 - [Validation and testing](../workflows/validation-and-testing.md)
 - [Architecture overview](../../concepts/architecture-overview.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §7.3, §7.4; Appendix F (Recovery); Appendix G (migrations 000001-000005); FP-1.01 graph recovery partial.

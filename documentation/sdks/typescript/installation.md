@@ -1,6 +1,5 @@
 # TypeScript SDK installation
 
-**Audience:** `[developer]`
 
 The TypeScript SDK publishes to npm as `arcflow`. The package bundles a prebuilt native N-API module and compiles TypeScript to plain JavaScript with zero production npm dependencies.
 
@@ -101,7 +100,3 @@ Use in unit tests to avoid live LLM calls. See `sdk-typescript/tests/` for patte
 | `mapNativeError` returns generic `ArcFlowError` | Unrecognized native message | Check raw message; file issue if mapping gap |
 
 For combined Python and TypeScript install guidance, see [install and build](../../getting-started/install-and-build.md).
-
-## Source
-
-`sdk-typescript/README.md`, `sdk-typescript/package.json`, `documentation/getting-started/install-and-build.md`; capabilities reference §17.

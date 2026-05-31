@@ -1,6 +1,5 @@
 # 02 Instructions that work
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -72,7 +71,3 @@ Try removing all text from `instructions` and confirm construction raises `Workf
 ## Next
 
 [03 Roles and multi-agent pipelines](03-roles-and-multi-agent-pipelines.md) adds a second agent and shows how ordered steps form a pipeline.
-
-## Source
-
-`sdk-python/arcflow/agent.py`; [Defining agents](../../guides/agents-and-tools/defining-agents.md) (instructions field); capabilities reference §5.1.

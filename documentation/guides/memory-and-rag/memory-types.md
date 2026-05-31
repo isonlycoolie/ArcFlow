@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[platform]`
 
 # Memory types
 
@@ -159,7 +158,3 @@ Production vector setups need `ARCFLOW_QDRANT_URL` and non-stub `ARCFLOW_EMBEDDI
 - [Knowledge ingestion](knowledge-ingestion.md)
 - [Provider configuration](../agents-and-tools/provider-configuration.md)
 - [Install and build](../../getting-started/install-and-build.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §6.1, §6.3; Appendix A (MemoryConfig).

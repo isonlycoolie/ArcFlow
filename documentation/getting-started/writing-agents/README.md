@@ -1,6 +1,5 @@
 # Writing agents
 
-**Audience:** `[developer]`
 
 This track teaches how to define agents in Python and chain them into multi-step workflows. Each lesson is short, runnable with the built-in stub provider, and builds on the [fundamentals](../fundamentals/) series.
 
@@ -19,7 +18,7 @@ Complete [Install and build](../install-and-build.md) so `from arcflow import Ag
 
 ## How these lessons are structured
 
-Every page follows the same sections: **Audience**, **Before you start**, **Concept**, **Example**, **Verify**, **Next**, and **Source**. Run each example as a standalone script. No API keys are required until you move on to [Python quickstart](../quickstart-python.md).
+Every page follows the same sections: **Before you start**, **Concept**, **Example**, **Verify**, and **Next**. Run each example as a standalone script. No API keys are required until you move on to [Python quickstart](../quickstart-python.md).
 
 ## After this track
 
@@ -28,5 +27,3 @@ Every page follows the same sections: **Audience**, **Before you start**, **Conc
 | Verify trace events and status checks | [Track A: First workflow](../../tutorials/track-a-first-workflow.md) |
 | Full agent fields (tools, memory, provider) | [Defining agents](../../guides/agents-and-tools/defining-agents.md) |
 | Deep dive on context assembly | [Context policies](../../guides/agents-and-tools/context-policies.md) |
-
-**Source:** `sdk-python/arcflow/agent.py`, `sdk-python/README.md`, [Defining agents](../../guides/agents-and-tools/defining-agents.md).

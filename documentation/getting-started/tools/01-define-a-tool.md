@@ -1,6 +1,5 @@
 # 01 Define a tool
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -113,7 +112,3 @@ except ToolConfigurationError as err:
 ## Next
 
 [02 Attach tools to agents](02-attach-tools-to-agents.md) covers multiple tools, duplicate name validation, and workflow wiring.
-
-## Source
-
-`sdk-python/arcflow/tool.py`; `sdk-python/tests/integration/test_sprint4_tools_memory.py` (`test_tool_configuration_rejects_invalid_schema`, `test_workflow_with_tool_echoes_message`).

@@ -1,6 +1,5 @@
 # Tools
 
-**Audience:** `[developer]`
 
 This track teaches how to declare tools, attach them to agents, bound the tool execution loop, and use the bundled common tools package. Examples use the stub provider unless noted.
 
@@ -25,7 +24,7 @@ python -c "from arcflow import Agent, Tool, Workflow; print('ready')"
 
 ## How these lessons are structured
 
-Every page follows the same sections: **Audience**, **Before you start**, **Concept**, **Example**, **Verify**, **Next**, and **Source**. Run each example as a standalone script.
+Every page follows the same sections: **Before you start**, **Concept**, **Example**, **Verify**, and **Next**. Run each example as a standalone script.
 
 ## After this track
 
@@ -34,5 +33,3 @@ Every page follows the same sections: **Audience**, **Before you start**, **Conc
 | Full tool loop semantics | [Tool execution loop](../../guides/agents-and-tools/tool-execution-loop.md) |
 | LangChain tool conversion | `arcflow.langchain.from_langchain_tool` |
 | Agent fields reference | [Defining agents](../../guides/agents-and-tools/defining-agents.md) |
-
-**Source:** `sdk-python/arcflow/tool.py`, `sdk-python/arcflow/agent.py`, `sdk-python/tests/integration/test_sprint4_tools_memory.py`.

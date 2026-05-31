@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[platform]`
 
 # External callbacks
 
@@ -162,7 +161,3 @@ When status is `failed` or `needs_input`, `recovery` controls the next action:
 - [Webhook security](webhook-security.md) for HMAC verification and logging rules
 - [HITL overview](../human-in-the-loop/hitl-overview.md) when `on_fatal` is `hitl_escalate`
 - [Recovery and resume](../reliability/recovery-and-resume.md) for Postgres requirements
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §9.1, §9.2; `sdk-python/arcflow/external.py`, `server/arcflow-server/src/handlers/external.rs`, `runtime/arcflow-core/src/external/`, `examples/external/`.

@@ -1,4 +1,3 @@
-**Audience:** `[platform]`
 
 # OpenTelemetry integration
 
@@ -125,7 +124,3 @@ Revisit when FP-4 exits alpha in [maturity and known gaps](../../concepts/maturi
 - [Execution traces](execution-traces.md) for native trace access
 - [SEC-1 rules](sec-1-rules.md) for attribute policy
 - [Maturity and known gaps](../../concepts/maturity-and-known-gaps.md) for FP-4 status
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §11.3; Sprint 5 and Sprint 6 implementation plans, ADR-009; `docker/observability-otel.md`, `runtime/arcflow-core/src/tracing/otel_config.rs`.

@@ -1,6 +1,5 @@
 # 03 Vector memory setup
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -40,7 +39,7 @@ Pick one namespace per knowledge base or tutorial (e.g. `doc_qa`, `track_c_kb`, 
 
 ## Example
 
-This mirrors [`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py) on the current branch. On the examples restructure branch the full ingest-plus-query flow is in `examples/rag/memory_guide_qa.py`.
+This mirrors [RAG chatbot walkthrough](../../examples/rag-chatbot.md) on the current branch. On the examples restructure branch the full ingest-plus-query flow is in `examples/rag/memory_guide_qa.py`.
 
 Save as `vector_memory_setup.py`:
 
@@ -125,7 +124,3 @@ SEC-1: trace payloads include chunk counts and byte totals, not chunk text.
 ## Next
 
 Continue to the [RAG track](../rag/README.md) for ingest patterns, agent wiring, and hybrid retrieval tuning.
-
-## Source
-
-[`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py); `examples/rag/memory_guide_qa.py` (examples restructure branch); `sdk-python/arcflow/memory.py`; [Track C: RAG and vector memory](../../tutorials/track-c-rag.md).

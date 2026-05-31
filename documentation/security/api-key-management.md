@@ -1,4 +1,3 @@
-**Audience:** `[platform]` `[compliance]`
 
 # API key management
 
@@ -51,7 +50,7 @@ Relay calls upstream with the scoped key associated with a site (`upstream_runti
 | Knowledge ingest | No | Yes | No | No |
 | Relay create run | No | No | No | Yes + Origin |
 
-Enforcement matrix: [dashboard/spec/04-api-enforcement.md](../../dashboard/spec/04-api-enforcement.md).
+Enforcement matrix: [API key management](../security/api-key-management.md).
 
 ## Storage rules
 
@@ -89,7 +88,3 @@ Classification from [Environment variables reference](../deployment/environment-
 - [Token rotation](../operator/token-rotation.md)
 - [Relay security model](relay-security-model.md)
 - [Self-hosted security](self-hosted-security.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §12.1; `server/arcflow-server/src/middleware/admin_auth.rs`, `principal.rs`; ADR-017 themes in Sprint 8 plan.

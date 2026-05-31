@@ -1,4 +1,3 @@
-**Audience:** `[platform]` `[developer]`
 
 # Run state machine
 
@@ -117,5 +116,3 @@ curl -s "http://localhost:8080/v1/runs/RUN_ID/trace" \
 - [guides/human-in-the-loop/hitl-overview.md](../guides/human-in-the-loop/hitl-overview.md)
 - [guides/reliability/recovery-and-resume.md](../guides/reliability/recovery-and-resume.md)
 - [postgres-schema.md](postgres-schema.md)
-
-**Source:** capabilities reference Appendix F; `arcflow_core::rcs::types::ExecutionStatus`; `server/arcflow-server/src/handlers/runs.rs`, `server/arcflow-server/src/handlers/approve.rs`.

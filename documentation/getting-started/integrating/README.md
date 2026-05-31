@@ -1,6 +1,5 @@
 # Integrating ArcFlow
 
-**Audience:** `[developer]` `[platform]`
 
 ## What this track is
 
@@ -42,5 +41,3 @@ For server lessons (2 through 4), you need Docker with Compose v2 and ports 8080
 | Guided server tutorial | [Track B: Server API](../../tutorials/track-b-server-api.md) |
 | HITL and external tutorial | [Track E: HITL and external](../../tutorials/track-e-hitl-and-external.md) |
 | Static site product | [Static site chatbot](../paths/static-site-chatbot.md) |
-
-**Source:** `documentation/getting-started/paths/`, `documentation/guides/`, `server/arcflow-server/README.md`; capabilities reference §12, §28 Tracks B and E.

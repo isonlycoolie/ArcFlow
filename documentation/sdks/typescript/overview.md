@@ -1,6 +1,5 @@
 # TypeScript SDK overview
 
-**Audience:** `[developer]`
 
 The ArcFlow TypeScript SDK exposes the same Rust runtime as Python through an N-API native module. APIs are Promise-based and follow Node.js naming (camelCase fields on results, `async/await` for runs).
 
@@ -103,7 +102,3 @@ TypeScript matches Python for core execution paths documented in [parity matrix]
 | [Exception reference](exception-reference.md) | Error classes and `mapNativeError` |
 | [TypeScript quickstart](../../getting-started/quickstart-typescript.md) | First run |
 | [Parity matrix](../parity-matrix.md) | Cross-surface comparison |
-
-## Source
-
-`sdk-typescript/index.ts`, `sdk-typescript/README.md`, `sdk-typescript/arcflow/workflow.ts`; capabilities reference §17, §17.1, §17.2.

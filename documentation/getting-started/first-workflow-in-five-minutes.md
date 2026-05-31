@@ -1,6 +1,5 @@
 # First workflow in five minutes
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -75,7 +74,3 @@ You declared two agents and registered them as ordered steps on a `Workflow`. Ca
 | TypeScript twin | [TypeScript quickstart](quickstart-typescript.md) |
 | HTTP instead of embedded SDK | [Server API quickstart](quickstart-server-api.md) |
 | Integration choices | [Integrating track](integrating/README.md) |
-
-## Source
-
-`sdk-python/README.md`, `sdk-python/tests/integration/test_first_five_minutes.py`; capabilities reference §16.2, §28 Track A.

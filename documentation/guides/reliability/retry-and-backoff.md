@@ -1,4 +1,3 @@
-**Audience:** `[developer]`
 
 # Retry and backoff
 
@@ -204,7 +203,3 @@ Traces: `ExternalRecoveryTriggered`. Distinct from step retry but same backoff c
 - [Timeouts](timeouts.md)
 - [Recovery and resume](recovery-and-resume.md)
 - [Server API quickstart](../../getting-started/quickstart-server-api.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §7.1; Appendix C (exec_config.retry); Appendix D (RetryAttempted, RetryExhausted).

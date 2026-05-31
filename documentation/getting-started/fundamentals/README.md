@@ -1,6 +1,5 @@
 # Fundamentals track
 
-**Audience:** `[developer]`
 
 ## What this track is
 
@@ -39,5 +38,3 @@ If that prints `ready`, open [lesson 1](01-how-arcflow-thinks.md).
 | Fastest end-to-end run | [First workflow in five minutes](../first-workflow-in-five-minutes.md) |
 | OpenAI and trace reading | [Python quickstart](../quickstart-python.md) |
 | Guided verification with trace events | [Track A: First workflow](../../tutorials/track-a-first-workflow.md) |
-
-**Source:** `sdk-python/README.md`, `documentation/getting-started/install-and-build.md`; capabilities reference §16, §28 Track A.

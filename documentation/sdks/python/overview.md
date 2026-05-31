@@ -1,6 +1,5 @@
 # Python SDK overview
 
-**Audience:** `[developer]`
 
 The ArcFlow Python SDK lets you declare multi-agent workflows in Python and execute them in the Rust runtime (`arcflow-core`). Python owns structure: agents, steps, tools, memory config, graph topology, and run options. The native extension owns execution: LLM calls, tool validation, memory I/O, tracing, recovery, and streaming.
 
@@ -109,7 +108,3 @@ Known runtime gaps that affect both SDKs:
 | [Exception reference](exception-reference.md) | Error hierarchy and remediation |
 | [Python quickstart](../../getting-started/quickstart-python.md) | First run with traces |
 | [Parity matrix](../parity-matrix.md) | Python vs TypeScript vs server |
-
-## Source
-
-`sdk-python/arcflow/__init__.py`, `sdk-python/README.md`, `sdk-python/arcflow/workflow.py`; capabilities reference §16, §16.1, §16.2.

@@ -1,6 +1,5 @@
 # Server API quickstart
 
-**Audience:** `[platform]`
 
 ## Before you start
 
@@ -203,7 +202,7 @@ cargo run -p arcflow-cli -- trace RUN_ID --format json --verbose
 | `/v1/admin/*` | Bearer `ARCFLOW_ADMIN_API_KEY` |
 | `/v1/debug/*` | Localhost and `ARCFLOW_DEBUG=true` |
 
-Full route index is in capabilities reference Appendix B and [HTTP API reference](../server/http-api-reference.md).
+Full route index is in [HTTP API reference](../server/http-api-reference.md) and [HTTP API reference](../server/http-api-reference.md).
 
 ## SDK client pointing at the server
 
@@ -255,7 +254,3 @@ Add `-v` only if you intend to wipe the Postgres volume.
 | Production compose | `docker/docker-compose.prod.yml`, `contracts/guides/deployment/self-hosted.md` |
 | Full HTTP reference | [Server overview](../server/overview.md) |
 | Static browser product | [Static site chatbot](paths/static-site-chatbot.md) |
-
-## Source
-
-capabilities reference §12, Appendix B; `docker/docker-compose.server.yml`, `server/arcflow-server/README.md`, `scripts/load-test-runs.sh`.

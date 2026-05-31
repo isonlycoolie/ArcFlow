@@ -1,4 +1,3 @@
-**Audience:** `[frontend]`
 
 # Browser SDK API (`@arcflow/static`)
 
@@ -140,5 +139,3 @@ There is no SSE client in the static SDK for server events. For token-progress U
 
 - [static-product/security-model.md](security-model.md)
 - [relay/request-path.md](../relay/request-path.md)
-
-**Source:** capabilities reference §15.1, §15.2, §15.3; `packages/arcflow-static/src/client.ts`, `packages/arcflow-static/src/index.ts`.

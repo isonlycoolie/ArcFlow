@@ -1,4 +1,3 @@
-**Audience:** `[platform]` `[compliance]`
 
 # Server authentication
 
@@ -107,5 +106,3 @@ For external webhooks, `ARCFLOW_WEBHOOK_SECRET` supports dual-verify during rota
 - [http-api-reference.md](http-api-reference.md) for per-route auth column
 - [static-product/security-model.md](../static-product/security-model.md) for browser exposure rules
 - [relay/origin-and-rate-limiting.md](../relay/origin-and-rate-limiting.md) for Origin enforcement
-
-**Source:** capabilities reference §12.1; `server/arcflow-server/src/middleware/auth.rs`, `server/arcflow-server/src/middleware/admin_auth.rs`; Appendix H; dashboard spec [04-api-enforcement.md](../../dashboard/spec/04-api-enforcement.md).

@@ -1,6 +1,5 @@
 # Python SDK installation
 
-**Audience:** `[developer]`
 
 The Python SDK ships as a native extension built with maturin against `arcflow-core`. There is no published PyPI wheel in this repository workflow; you build from source in the monorepo or from a release artifact your team provides.
 
@@ -112,7 +111,3 @@ Credentials are never passed through workflow JSON. The runtime reads them at ex
 | `InfrastructureUnavailableError` on recovery | Postgres URL unset | Export `ARCFLOW_POSTGRESQL_URL`, run migrations |
 
 For shared install guidance across Python and TypeScript, see [install and build](../../getting-started/install-and-build.md).
-
-## Source
-
-`sdk-python/README.md`, `sdk-python/pyproject.toml`, `documentation/getting-started/install-and-build.md`; capabilities reference §16.

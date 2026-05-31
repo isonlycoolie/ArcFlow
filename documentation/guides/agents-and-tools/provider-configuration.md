@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[platform]`
 
 # Provider configuration
 
@@ -124,7 +123,7 @@ Example:
 | `EmbeddingError` | 502 | Embedding call failed |
 | `RerankError` | 502 | Cohere rerank failed |
 
-Appendix E lists all RCS error codes.
+See [Error codes](../../contracts/error-codes.md) for the full list.
 
 ## Server deployment
 
@@ -164,7 +163,3 @@ provider: {
 - [Hybrid retrieval and reranking](../memory-and-rag/hybrid-retrieval-and-reranking.md) (Cohere rerank)
 - [Retry and backoff](../reliability/retry-and-backoff.md) (ProviderRateLimited)
 - [Python quickstart](../../getting-started/quickstart-python.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §5.3; Appendix A (ProviderConfig); Appendix E (ProviderError, EmbeddingError, RerankError); Appendix H (env vars).

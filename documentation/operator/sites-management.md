@@ -1,4 +1,3 @@
-**Audience:** `[operator]`
 
 # Sites management
 
@@ -146,7 +145,7 @@ Watch Relay logs for 429 rate limit responses.
 4. Patch origins to match deployed frontend URL.
 5. Smoke test from production origin.
 
-Matches `dashboard/spec/02-information-architecture.md` default operator flow.
+Matches the default operator flow in [Sites management](sites-management.md).
 
 ## Related pages
 
@@ -154,7 +153,3 @@ Matches `dashboard/spec/02-information-architecture.md` default operator flow.
 - [Token rotation](token-rotation.md)
 - [Relay deployment](../deployment/relay-deployment.md)
 - [Knowledge ingestion guide](../guides/memory-and-rag/knowledge-ingestion.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §13.1; [dashboard/spec/02-information-architecture.md](../../dashboard/spec/02-information-architecture.md), [03-admin-api-contract.md](../../dashboard/spec/03-admin-api-contract.md).

@@ -1,6 +1,5 @@
 # Default runtime vs live LLM
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -111,5 +110,3 @@ Live output varies by model and temperature. Default-runtime output for the same
 ## Next lesson
 
 [When something fails](05-when-something-fails.md): `WorkflowConfigurationError` vs `WorkflowExecutionError`, and how to read ArcFlow error messages.
-
-**Source:** `sdk-python/arcflow/provider.py`, `sdk-python/README.md`, [Python quickstart](../quickstart-python.md); capabilities reference §16, §16.2.

@@ -1,6 +1,5 @@
 # Track C: RAG and vector memory
 
-**Audience:** `[developer]`
 
 Track C walks through document ingestion, vector memory configuration, and query runs that emit `MemoryRetrieved` trace events. You use Qdrant plus embedding configuration (stub or real provider).
 
@@ -16,7 +15,7 @@ Ingest documents, query via a vector-memory agent, and verify retrieval in execu
 | Python SDK | Built |
 | Qdrant | `ARCFLOW_QDRANT_URL` (e.g. dev stack on port 6333) |
 | Primary example | [RAG chatbot example](../examples/rag-chatbot.md) |
-| Script | [`examples/rag/document_qa.py`](../../examples/rag/document_qa.py) |
+| Script | [RAG chatbot walkthrough](../examples/rag-chatbot.md) |
 | Guides | [Vector RAG pipeline](../guides/memory-and-rag/vector-rag-pipeline.md), [knowledge ingestion](../guides/memory-and-rag/knowledge-ingestion.md) |
 
 Stub-only path works without Qdrant but will not emit `MemoryRetrieved` until documents exist in the store.
@@ -31,7 +30,7 @@ export ARCFLOW_QDRANT_URL=http://localhost:6333
 
 ## Step 2: Configure memory on an agent
 
-Use the sample from [`document_qa.py`](../../examples/rag/document_qa.py):
+Use the sample from [`document_qa.py`](../examples/rag-chatbot.md):
 
 ```python
 memory = MemoryConfig(
@@ -124,5 +123,3 @@ Track C connects agent memory configuration to operational ingest and trace-veri
 | D | Graph routing |
 | F | Static product with dashboard-ingested knowledge |
 | Level 2 cert | RAG plus graph plus HITL combined project |
-
-**Source:** capabilities reference §28 Track C; [`examples/rag/document_qa.py`](../../examples/rag/document_qa.py); [RAG chatbot example](../examples/rag-chatbot.md); [vector RAG pipeline](../guides/memory-and-rag/vector-rag-pipeline.md).

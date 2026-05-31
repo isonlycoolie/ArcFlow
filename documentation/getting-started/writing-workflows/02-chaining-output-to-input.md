@@ -1,6 +1,5 @@
 # 02 Chaining output to input
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -103,7 +102,3 @@ except WorkflowConfigurationError:
 ## Next
 
 [03 Graph workflows intro](03-graph-workflows-intro.md) covers conditional routing when linear order is not enough.
-
-## Source
-
-`sdk-python/arcflow/context.py` (`ContextPolicy`, `PriorStepsMode`); [Context policies](../../guides/agents-and-tools/context-policies.md); [04 Context and prior steps](../writing-agents/04-context-and-prior-steps.md).

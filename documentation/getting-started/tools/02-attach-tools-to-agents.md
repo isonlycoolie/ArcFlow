@@ -1,6 +1,5 @@
 # 02 Attach tools to agents
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -123,7 +122,3 @@ except WorkflowConfigurationError as err:
 ## Next
 
 [03 Tool loop and max iterations](03-tool-loop-and-max-iterations.md) bounds how many tool rounds an agent may take in one step.
-
-## Source
-
-`sdk-python/arcflow/agent.py` (`tools`, `_validate_tools`); `sdk-python/tests/integration/test_sprint4_tools_memory.py`.

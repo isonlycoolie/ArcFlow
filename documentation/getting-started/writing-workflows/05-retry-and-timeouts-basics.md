@@ -1,6 +1,5 @@
 # 05 Retry and timeouts basics
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -112,7 +111,3 @@ except WorkflowConfigurationError as err:
 | Tool-calling agents | [Tools track](../tools/) |
 | Full retry and backoff reference | [Retry and backoff](../../guides/reliability/retry-and-backoff.md) |
 | Live provider fault tolerance tests | `sdk-python/tests/integration/test_fault_tolerance.py` |
-
-## Source
-
-`sdk-python/arcflow/workflow.py` (`retry`, `timeout`, `step_timeout`); `sdk-python/arcflow/retry.py`; `sdk-python/tests/test_workflow_test_retry.py`; `sdk-python/tests/integration/test_fault_tolerance.py`; [Retry and backoff](../../guides/reliability/retry-and-backoff.md).

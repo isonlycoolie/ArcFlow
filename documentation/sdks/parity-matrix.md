@@ -1,8 +1,7 @@
 # SDK and surface parity matrix
 
-**Audience:** `[developer]` `[platform]` `[frontend]` `[operator]`
 
-This matrix compares ArcFlow capabilities across runtime surfaces. Values come from capabilities reference Appendix I, verified 2026-05-31 against `arcflow-core`, `arcflow-server`, and SDK exports.
+This matrix compares ArcFlow capabilities across runtime surfaces. Values come from [SDK parity matrix](../sdks/parity-matrix.md), verified 2026-05-31 against `arcflow-core`, `arcflow-server`, and SDK exports.
 
 Use it when answering "can I do X in TypeScript?" or "does Relay support graph workflows?"
 
@@ -127,7 +126,3 @@ Server honors idempotency on mutating routes. Relay forwards the header to upstr
 | [Python overview](python/overview.md) | Python SDK capabilities |
 | [TypeScript overview](typescript/overview.md) | TypeScript SDK capabilities |
 | [Maturity and known gaps](../concepts/maturity-and-known-gaps.md) | FP-1.01, FP-2, FP-3.01 |
-
-## Source
-
-`docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md` Appendix I; `sdk-python/arcflow/__init__.py`, `sdk-typescript/index.ts`; capabilities reference §16, §17, §26, §27.

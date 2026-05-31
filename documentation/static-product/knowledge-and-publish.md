@@ -1,4 +1,3 @@
-**Audience:** `[operator]`
 
 # Knowledge and publish
 
@@ -126,5 +125,3 @@ Stub embedding works for local smoke only, not production RAG quality.
 - [site-lifecycle.md](site-lifecycle.md)
 - [browser-sdk-api.md](browser-sdk-api.md)
 - [guides/workflows/workflow-registry.md](../guides/workflows/workflow-registry.md)
-
-**Source:** capabilities reference §13.2, §13.3, §15.1; Appendix B; `scripts/static-provision.sh`, `scripts/static-smoke.sh`.

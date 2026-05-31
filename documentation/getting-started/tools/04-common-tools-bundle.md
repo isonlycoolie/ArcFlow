@@ -1,6 +1,5 @@
 # 04 Common tools bundle
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -118,7 +117,3 @@ Expected: `['web_search', 'http_fetch', 'read_document']`.
 | Full tool loop reference | [Tool execution loop](../../guides/agents-and-tools/tool-execution-loop.md) |
 | Provider-backed tool selection | [Python quickstart](../quickstart-python.md) |
 | LangChain tool import | `arcflow.langchain.from_langchain_tool` |
-
-## Source
-
-`sdk-python/arcflow/tools/common.py` and `sdk-python/arcflow/tools/__init__.py` on `feat/sdk-pascalcase-facades`; `sdk-python/arcflow_tools/__init__.py` on `main`; facade migration table in `sdk-python/README.md` on the facade branch.

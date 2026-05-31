@@ -1,4 +1,3 @@
-**Audience:** `[operator]` `[frontend]`
 
 # Origin and rate limiting
 
@@ -115,5 +114,3 @@ Rate limits protect upstream LLM cost and server capacity. They do not replace W
 - [static-product/site-lifecycle.md](../static-product/site-lifecycle.md)
 - [static-product/security-model.md](../static-product/security-model.md)
 - [byo-relay-deployment.md](byo-relay-deployment.md)
-
-**Source:** capabilities reference §14.2; `server/arcflow-relay/src/middleware/site_auth.rs`, `server/arcflow-relay/src/state/mod.rs`; K-08; dashboard spec [05-security-model.md](../../dashboard/spec/05-security-model.md).

@@ -1,6 +1,5 @@
 # 01 Memory types overview
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -71,7 +70,7 @@ print(session.memory_type, session.scope, session.namespace)
 print(vector.memory_type, vector.embedding)
 ```
 
-Attach memory to an agent (vector config matches [`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py) on the current branch):
+Attach memory to an agent (vector config matches [RAG chatbot walkthrough](../../examples/rag-chatbot.md) on the current branch):
 
 ```python
 from arcflow import Agent, MemoryConfig, MemoryScope, MemoryType
@@ -102,7 +101,3 @@ On the examples restructure branch the same wiring appears in `examples/rag/memo
 ## Next
 
 [02 Session and shared memory](02-session-and-shared-memory.md) covers in-run backends that do not need Qdrant or Postgres.
-
-## Source
-
-`sdk-python/arcflow/memory.py` (`MemoryType`, `MemoryScope`, `MemoryConfig`); [Memory types](../../guides/memory-and-rag/memory-types.md); [`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py).

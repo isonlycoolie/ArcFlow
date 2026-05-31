@@ -1,4 +1,3 @@
-**Audience:** `[operator]` `[platform]`
 
 # Dashboard specification
 
@@ -8,26 +7,26 @@ The ArcFlow operator dashboard is specified in OSS and implemented in a **privat
 
 | Repository | Visibility | Contents |
 |------------|------------|----------|
-| [ArcFlow](https://github.com/isonlycoolie/ArcFlow) (OSS) | Public | `dashboard/spec/*`, `deploy/arcflow-dashboard-v0/` starter |
+| [ArcFlow](https://github.com/isonlycoolie/ArcFlow) (OSS) | Public | Operator specs on this site, `deploy/arcflow-dashboard-v0/` starter |
 | [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) | Private | Operator UI, dashboard CI, operator `.env` |
 
 Dashboard implementation MUST NOT change admin API semantics without updating OSS spec first.
 
 ## OSS specification documents
 
-Authoritative spec folder: `dashboard/spec/`.
+Published operator docs on this site:
 
 | Document | Content |
 |----------|---------|
-| [01-product-vision.md](../../dashboard/spec/01-product-vision.md) | Personas, tiers, non-goals |
-| [02-information-architecture.md](../../dashboard/spec/02-information-architecture.md) | Navigation and screen map |
-| [03-admin-api-contract.md](../../dashboard/spec/03-admin-api-contract.md) | Admin REST routes (matches §13) |
-| [04-api-enforcement.md](../../dashboard/spec/04-api-enforcement.md) | Auth headers, 403 matrix |
-| [05-security-model.md](../../dashboard/spec/05-security-model.md) | Tokens, origins, SEC-1 |
-| [06-features-tier1.md](../../dashboard/spec/06-features-tier1.md) | R1 feature scope |
-| [07-features-tier2.md](../../dashboard/spec/07-features-tier2.md) | Future tier features |
-| [08-ui-states-and-errors.md](../../dashboard/spec/08-ui-states-and-errors.md) | UI states and error mapping |
-| [09-exit-criteria.md](../../dashboard/spec/09-exit-criteria.md) | Definition of done (private CI) |
+| [Dashboard spec](dashboard-spec.md) | Personas, tiers, non-goals |
+| [Dashboard spec](dashboard-spec.md) | Navigation and screen map |
+| [03-admin-api-contract.md](../operator/admin-api-reference.md) | Admin REST routes (matches §13) |
+| [API key management](../security/api-key-management.md) | Auth headers, 403 matrix |
+| [05-security-model.md](../static-product/security-model.md) | Tokens, origins, SEC-1 |
+| [Dashboard spec](dashboard-spec.md) | R1 feature scope |
+| [Dashboard spec](dashboard-spec.md) | Future tier features |
+| [Dashboard spec](dashboard-spec.md) | UI states and error mapping |
+| [Dashboard spec](dashboard-spec.md) | Definition of done (private CI) |
 
 Documentation mirror: [Admin API reference](admin-api-reference.md), [Sites management](sites-management.md).
 
@@ -46,10 +45,10 @@ Non-goals for v1: ArcFlow Cloud billing, visual workflow editor, end-user OAuth 
 
 1. Clone [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git).
 2. Sync from OSS starter: `deploy/arcflow-dashboard-v0/`.
-3. Point API contract at `dashboard/spec/03-admin-api-contract.md` (submodule path in meta-repo).
+3. Use the [Admin API reference](admin-api-reference.md) (submodule path in meta-repo).
 4. Dev: `npm run dev` on port **5174**; requires `arcflow-server` with matching `ARCFLOW_ADMIN_API_KEY`.
 
-Admin key must stay in BFF env, not Vite client bundle. See [04-api-enforcement.md](../../dashboard/spec/04-api-enforcement.md).
+Admin key must stay in BFF env, not Vite client bundle. See [API key management](../security/api-key-management.md).
 
 ## Meta-repo consumption
 
@@ -70,10 +69,10 @@ Guide: [contracts/guides/deployment/meta-repo.md](../../contracts/guides/deploym
 
 | Item | Status |
 |------|--------|
-| OSS `dashboard/spec/` handoff | Complete |
+| OSS operator specification on this site | Complete |
 | OSS static scripts (`scripts/static-*.sh`) | Done |
 | Meta-repo template | Done |
-| Dashboard UI in private repo | **Deferred** until E/S/D checklists in [09-exit-criteria.md](../../dashboard/spec/09-exit-criteria.md) pass |
+| Dashboard UI in private repo | **Deferred** until E/S/D checklists in [Dashboard spec](dashboard-spec.md) pass |
 
 Do not document dashboard UI features as shipped in OSS releases.
 
@@ -88,22 +87,18 @@ Without the dashboard UI:
 | Custom BFF + internal UI | Enterprise operator portal |
 | `deploy/arcflow-dashboard-v0/` | Starting point for private repo |
 
-Admin routes are stable; bind new tools to `03-admin-api-contract.md`.
+Admin routes are stable; bind new tools to the [Admin API reference](admin-api-reference.md).
 
 ## Normative contracts
 
 Dashboard and server integrations should cross-check:
 
-- [contracts/normative/runtime/server-api-v1.md](../../contracts/normative/runtime/server-api-v1.md) (note: partially stale, K-10)
-- [contracts/normative/rcs/v1.schema.json](../../contracts/normative/rcs/v1.schema.json)
-- [contracts/normative/observability/trace-events-v1.md](../../contracts/normative/observability/trace-events-v1.md)
+- [HTTP API reference](../server/http-api-reference.md) (note: partially stale, K-10)
+- [RCS schema](../contracts/rcs-schema.md)
+- [Trace events (normative)](../contracts/trace-events-normative.md)
 
 ## Related pages
 
 - [Sites management](sites-management.md)
 - [Deployment overview](../deployment/overview.md)
 - [SEC-1 compliance](../security/sec-1-compliance.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §21; `dashboard/spec/` index; FP-3.01 / §27 known gaps.

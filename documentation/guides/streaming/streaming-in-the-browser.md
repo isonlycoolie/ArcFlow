@@ -1,4 +1,3 @@
-**Audience:** `[frontend]`
 
 # Streaming in the browser
 
@@ -122,7 +121,3 @@ Site tokens and Origin allowlists are required on Relay. Never embed `ARCFLOW_SE
 - [SDK streaming](sdk-streaming.md) for in-process `run_stream` / `runStream`
 - [Architecture overview](../../concepts/architecture-overview.md) for Relay diagram
 - [Maturity and known gaps](../../concepts/maturity-and-known-gaps.md) for FP-2
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §10.3, §10.4; `packages/arcflow-static/src/client.ts`, `documentation/concepts/architecture-overview.md`.

@@ -1,6 +1,5 @@
 # Track H: IDE and CLI
 
-**Audience:** `[developer]`
 
 Track H introduces developer tooling: VS Code workflow preview, local CLI execution, and comparison between CLI trace output and SDK results.
 
@@ -15,7 +14,7 @@ Open a graph workflow in VS Code, view the graph, run a workflow locally via CLI
 | [Track A](track-a-first-workflow.md) | SDK workflow basics |
 | Rust toolchain | `cargo run -p arcflow-cli` |
 | VS Code | With ArcFlow extension from `extensions/vscode-arcflow/` |
-| Graph sample | [`examples/graph/reflection_loop.py`](../../examples/graph/reflection_loop.py) or extension preview JSON |
+| Graph sample | [Graph routing walkthrough](../examples/graph-routing.md) or extension preview JSON |
 | Track D | Helpful for graph semantics |
 
 ## Step 1: Open graph workflow in VS Code
@@ -24,8 +23,8 @@ Install or launch the ArcFlow extension from `extensions/vscode-arcflow/`. Open 
 
 | Path | Purpose |
 |------|---------|
-| [`extensions/vscode-arcflow/examples/react-preview.arcflow.json`](../../extensions/vscode-arcflow/examples/react-preview.arcflow.json) | Extension graph preview sample |
-| [`examples/graph/reflection_loop.py`](../../examples/graph/reflection_loop.py) | Python graph source to compare |
+| [`extensions/vscode-arcflow/examples/react-preview.arcflow.json`](../vscode/overview.md) | Extension graph preview sample |
+| [Graph routing walkthrough](../examples/graph-routing.md) | Python graph source to compare |
 
 Use the extension graph panel to inspect nodes and edges. Confirm entry node and conditional edges match the Python DSL in reflection loop.
 
@@ -128,5 +127,3 @@ Track H connects authoring (IDE graph), execution (CLI), and observability (trac
 | Server promotion | [Track B](track-b-server-api.md) |
 | Certification Level 1 | [level-1-workflow-developer](../certification/level-1-workflow-developer.md) |
 | Extension docs | `extensions/vscode-arcflow/README.md` |
-
-**Source:** capabilities reference §28 Track H; `extensions/vscode-arcflow/`, `arcflow-cli`; [`examples/graph/reflection_loop.py`](../../examples/graph/reflection_loop.py); [Track A](track-a-first-workflow.md), [Track D](track-d-graph-workflows.md).

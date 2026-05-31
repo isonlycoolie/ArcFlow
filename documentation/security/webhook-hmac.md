@@ -1,4 +1,3 @@
-**Audience:** `[platform]` `[compliance]`
 
 # Webhook HMAC
 
@@ -135,7 +134,3 @@ Integrators must reach `arcflow-server` over HTTPS in production. Do not embed w
 - [External callbacks](../guides/external-integrations/external-callbacks.md)
 - [SEC-1 compliance](sec-1-compliance.md)
 - [Self-hosted security](self-hosted-security.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §9.3; K-07, K-17; `runtime/arcflow-core/src/external/webhook.rs`.

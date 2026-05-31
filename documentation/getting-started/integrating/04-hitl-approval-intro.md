@@ -1,6 +1,5 @@
 # 04 HITL approval intro
 
-**Audience:** `[developer]` `[operator]`
 
 ## Before you start
 
@@ -115,7 +114,3 @@ Trace exports remain SEC-1 metadata only. You see step lifecycle events, not app
 | Static browser client | [Static site chatbot](../paths/static-site-chatbot.md) |
 
 When external binding recovery sets `on_fatal: hitl_escalate`, failed external work can route into the same HITL approve flow. See [External callbacks](../../guides/external-integrations/external-callbacks.md).
-
-## Source
-
-`runtime/arcflow-core/src/human/`, `server/arcflow-server/src/handlers/approve.rs`, `examples/hitl/`; [HITL overview](../../guides/human-in-the-loop/hitl-overview.md); capabilities reference §8, Appendix E.

@@ -1,4 +1,3 @@
-**Audience:** `[platform]` `[compliance]`
 
 # Webhook security for external callbacks
 
@@ -131,7 +130,3 @@ Async callbacks require the integrator to reach `arcflow-server` over HTTPS in p
 - [External callbacks](external-callbacks.md) for binding configuration and ExternalOutcome.report
 - [SEC-1 rules](../observability/sec-1-rules.md) for trace and log policy
 - [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md) for compliance overview
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §9.2, §9.3, Appendix K K-07; `runtime/arcflow-core/src/external/webhook.rs`, `server/arcflow-server/src/handlers/external.rs`.

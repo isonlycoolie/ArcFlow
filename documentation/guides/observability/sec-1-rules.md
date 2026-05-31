@@ -1,4 +1,3 @@
-**Audience:** `[compliance]` `[developer]`
 
 # SEC-1 rules (implementation guide)
 
@@ -72,7 +71,7 @@ Document separately which API fields your compliance team treats as sensitive.
 5. **Logs**: Confirm application logs do not duplicate traces with richer content.
 6. **OTel (if FP-4 enabled)**: Inspect span attributes in Jaeger for prompt or completion keys.
 
-Normative contract: [contracts/normative/observability/trace-events-v1.md](../../../contracts/normative/observability/trace-events-v1.md).
+Normative contract: [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ## Safe trace excerpt
 
@@ -102,7 +101,3 @@ If any answer is yes, redesign the field or gate behind localhost debug with `AR
 - [Trace event reference](trace-event-reference.md) per-event SEC-1 classification
 - [OpenTelemetry](opentelemetry.md) for FP-4 span attribute rules
 - [Webhook security](../external-integrations/webhook-security.md) for callback body logging
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §11.1, Appendix D; Sprint 5 security rules, Appendix K K-16; `runtime/arcflow-core/src/tracing/events.rs`.

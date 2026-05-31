@@ -1,4 +1,3 @@
-**Audience:** `[developer]` `[operator]`
 
 # Approve and reject HITL runs
 
@@ -118,7 +117,3 @@ After approval and resume, expect further `StepStarted` / `StepCompleted` events
 - [Configuring interrupts](configuring-interrupts.md) for `approval_key` and timeout setup
 - [HITL overview](hitl-overview.md) for the state machine
 - [SEC-1 rules](../observability/sec-1-rules.md) for trace field policy
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §8.2, §8.3; `server/arcflow-server/src/handlers/approve.rs`, `examples/hitl/approve_cli.sh`.

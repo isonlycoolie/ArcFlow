@@ -1,4 +1,3 @@
-**Audience:** `[frontend]` `[compliance]`
 
 # Relay security model
 
@@ -29,7 +28,7 @@ Operator browser (untrusted)
         → Admin API (ARCFLOW_ADMIN_API_KEY)
 ```
 
-Spec source: [dashboard/spec/05-security-model.md](../../dashboard/spec/05-security-model.md).
+See [Static product security model](../static-product/security-model.md).
 
 ## Site token scope
 
@@ -108,7 +107,3 @@ Dashboard BFF mutating routes should use SameSite cookies and CSRF tokens. Admin
 - [Relay deployment](../deployment/relay-deployment.md)
 - [API key management](api-key-management.md)
 - [Streaming in the browser](../guides/streaming/streaming-in-the-browser.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §14.2, §15.3; K-08; [dashboard/spec/05-security-model.md](../../dashboard/spec/05-security-model.md).

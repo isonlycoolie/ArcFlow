@@ -1,6 +1,5 @@
 # Track D: Graph workflows
 
-**Audience:** `[developer]`
 
 Track D builds conditional-branch graph workflows with routing and join nodes. You verify correct branch execution order through graph trace events, not only final output text.
 
@@ -16,7 +15,7 @@ Build a conditional-branch graph workflow with routing and a join node. Verify c
 | Python SDK | Built |
 | Provider | Stub default |
 | Primary examples | [Graph routing example](../examples/graph-routing.md) |
-| Scripts | [`parallel_search.py`](../../examples/graph/parallel_search.py), [`reflection_loop.py`](../../examples/graph/reflection_loop.py) |
+| Scripts | [`parallel_search.py`](../examples/graph-routing.md), [`reflection_loop.py`](../examples/graph-routing.md) |
 | Guide | [Graph workflows](../guides/workflows/graph-workflows.md) |
 
 Postgres optional for embedded SDK; required for server recovery paths. Graph resume from checkpoint is partial (FP-1.01).
@@ -118,5 +117,3 @@ Track D covers scheduler semantics: entry nodes, conditional edges, parallel fan
 |-------|-------|
 | E | HITL and external callbacks |
 | Level 2 cert | Graph plus RAG plus HITL combined workflow |
-
-**Source:** capabilities reference §28 Track D; [`examples/graph/parallel_search.py`](../../examples/graph/parallel_search.py), [`examples/graph/reflection_loop.py`](../../examples/graph/reflection_loop.py); [graph routing example](../examples/graph-routing.md); [graph workflows](../guides/workflows/graph-workflows.md).

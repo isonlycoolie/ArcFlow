@@ -1,4 +1,3 @@
-**Audience:** `[developer]`
 
 # Trace timeline (VS Code)
 
@@ -81,12 +80,10 @@ arcflow trace RUN_ID --server http://localhost:8080 --tui
 
 Full event catalog: [guides/observability/trace-event-reference.md](../guides/observability/trace-event-reference.md).
 
-Normative contract: `contracts/normative/observability/trace-events-v1.md`.
+Normative contract: [Trace events (normative)](../contracts/trace-events-normative.md).
 
 ## Related pages
 
 - [cli/trace.md](../cli/trace.md)
 - [guides/observability/execution-traces.md](../guides/observability/execution-traces.md)
 - [vscode/overview.md](overview.md)
-
-**Source:** capabilities reference §19, §11.2, Appendix D; `extensions/vscode-arcflow/package.json` (command `arcflow.viewTraceTimeline`).

@@ -1,6 +1,5 @@
 # RAG track
 
-**Audience:** `[developer]`
 
 This track walks from RAG concepts in ArcFlow through document ingest, agent wiring, and a first look at hybrid retrieval. You use `VectorStore.ingest`, attach `MemoryConfig` to agents, and verify retrieval through workflow traces.
 
@@ -21,12 +20,12 @@ Primary example scripts:
 
 | Branch | Script |
 |--------|--------|
-| Current branch | [`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py) |
+| Current branch | [RAG chatbot walkthrough](../../examples/rag-chatbot.md) |
 | Examples restructure branch | `examples/rag/memory_guide_qa.py` (ingest plus query in one file) |
 
 ## How these lessons are structured
 
-Every page follows the same sections: **Audience**, **Before you start**, **Concept**, **Example**, **Verify**, **Next**, and **Source**.
+Every page follows the same sections: **Before you start**, **Concept**, **Example**, **Verify**, and **Next**.
 
 ## After this track
 
@@ -35,5 +34,3 @@ Every page follows the same sections: **Audience**, **Before you start**, **Conc
 | Tutorial with verification checklist | [Track C: RAG and vector memory](../../tutorials/track-c-rag.md) |
 | RAG chatbot walkthrough | [RAG chatbot example](../../examples/rag-chatbot.md) |
 | Hybrid tuning deep dive | [Hybrid retrieval and reranking](../../guides/memory-and-rag/hybrid-retrieval-and-reranking.md) |
-
-**Source:** [`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py), `examples/rag/memory_guide_qa.py` (restructure branch); [Vector RAG pipeline](../../guides/memory-and-rag/vector-rag-pipeline.md).

@@ -1,6 +1,5 @@
 # 03 Tool loop and max iterations
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -101,7 +100,3 @@ for bad in (0, 21):
 ## Next
 
 [04 Common tools bundle](04-common-tools-bundle.md) introduces prebuilt web and document tools you can attach instead of writing your own.
-
-## Source
-
-`sdk-python/arcflow/context.py` (`ToolExecutionConfig`); [Tool execution loop](../../guides/agents-and-tools/tool-execution-loop.md); `sdk-python/tests/integration/test_memory_workflow.py` (tool timeout behavior).

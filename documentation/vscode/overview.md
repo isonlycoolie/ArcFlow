@@ -1,4 +1,3 @@
-**Audience:** `[developer]`
 
 # VS Code extension overview
 
@@ -75,5 +74,3 @@ Uses `@vscode/test-electron` per `package.json` scripts.
 - [graph-view.md](graph-view.md)
 - [trace-timeline.md](trace-timeline.md)
 - [cli/trace.md](../cli/trace.md)
-
-**Source:** capabilities reference §19; `extensions/vscode-arcflow/package.json`, `extensions/vscode-arcflow/README.md`.

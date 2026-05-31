@@ -1,10 +1,9 @@
-**Audience:** `[platform]` `[developer]`
 
 # HTTP API reference
 
-Authoritative route list for `arcflow-server` as registered in `server/arcflow-server/src/lib.rs` (2026-05-31). Matches capabilities reference **Appendix B**.
+Authoritative route list for `arcflow-server`. Matches [HTTP API reference](../server/http-api-reference.md).
 
-**K-10 drift:** [contracts/normative/runtime/server-api-v1.md](../../contracts/normative/runtime/server-api-v1.md) still documents only legacy routes. Do not use it as the integration source until promoted from draft. This page and Appendix B reflect implemented behavior.
+This page reflects the implemented HTTP API.
 
 **FP-2:** `GET /v1/runs/{run_id}/events` (SSE) is **deferred**. Not listed below.
 
@@ -319,7 +318,7 @@ curl -s -X POST "http://localhost:8080/v1/admin/sites/site_abc123/workflows/chat
   -d '{"instructions":"Answer only from ingested knowledge. Say when unsure.","version":"1.0.1"}'
 ```
 
-Full admin contract: [dashboard/spec/03-admin-api-contract.md](../../dashboard/spec/03-admin-api-contract.md).
+Full admin contract: [Admin API reference](../operator/admin-api-reference.md).
 
 ## Debug (localhost, ARCFLOW_DEBUG)
 
@@ -344,5 +343,3 @@ Feature-gated. Not for production.
 - [run-state-machine.md](run-state-machine.md)
 - [idempotency.md](idempotency.md)
 - [relay/request-path.md](../relay/request-path.md) for browser proxy routes
-
-**Source:** capabilities reference Appendix B, §12; `server/arcflow-server/src/lib.rs`; K-01, K-10.

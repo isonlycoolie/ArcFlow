@@ -1,10 +1,9 @@
-**Audience:** `[developer]` `[platform]`
 
 # Validation and testing
 
 ArcFlow validates workflow definitions before execution and supports deterministic test mode for CI without live LLM calls. Validation catches schema errors, broken graph references, and missing agent ids early. Test mode simulates step outputs and controlled failures so you can verify retry, fallback, and trace shape cheaply.
 
-Normative schema: [contracts/normative/rcs/v1.schema.json](../../../contracts/normative/rcs/v1.schema.json). Rust types: `runtime/arcflow-core/src/rcs/types.rs`. Conceptual overview: [The RCS contract](../../concepts/the-rcs-contract.md).
+Normative schema: [RCS schema](../../contracts/rcs-schema.md). Conceptual overview: [The RCS contract](../../concepts/the-rcs-contract.md).
 
 ## Engine validation
 
@@ -164,7 +163,3 @@ Simulate interrupt mid-run, then resume per [Recovery and resume](../reliability
 - [Graph workflows](graph-workflows.md)
 - [Maturity and known gaps](../../concepts/maturity-and-known-gaps.md) (FP-5.04, FP-1.01)
 - [Install and build](../../getting-started/install-and-build.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §4.5, Appendix C (test mode); FP-5.04 CLI validate stub; §27 known gaps.

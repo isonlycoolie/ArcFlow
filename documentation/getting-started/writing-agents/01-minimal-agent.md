@@ -1,6 +1,5 @@
 # 01 Minimal agent
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -65,7 +64,3 @@ If construction fails with `WorkflowConfigurationError`, one of the three requir
 ## Next
 
 [02 Instructions that work](02-instructions-that-work.md) covers how to write `instructions` that produce useful behavior when you switch from stub to a real provider.
-
-## Source
-
-`sdk-python/arcflow/agent.py` (`Agent.__init__`, `_require_non_empty`); `sdk-python/tests/integration/test_first_five_minutes.py`; [Defining agents](../../guides/agents-and-tools/defining-agents.md).

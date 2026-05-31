@@ -1,6 +1,5 @@
 # 03 Retrieval and agent wiring
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -19,7 +18,7 @@ Wiring checklist:
 
 Trace event `MemoryRetrieved` confirms retrieval ran. Payload fields include `chunk_count` and `total_bytes`, not chunk text (SEC-1).
 
-[`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py) on the current branch shows steps 2 through 4; ingest is left as a comment. The restructure branch `memory_guide_qa.py` runs ingest and query in one `main()`.
+[RAG chatbot walkthrough](../../examples/rag-chatbot.md) on the current branch shows steps 2 through 4; ingest is left as a comment. The restructure branch `memory_guide_qa.py` runs ingest and query in one `main()`.
 
 ## Example
 
@@ -101,7 +100,3 @@ With a live LLM provider, answers should reference ingested facts. With stub pro
 ## Next
 
 [04 Hybrid retrieval intro](04-hybrid-retrieval-intro.md) explains dense versus hybrid mode and environment flags.
-
-## Source
-
-[`examples/rag/document_qa.py`](../../../examples/rag/document_qa.py); `examples/rag/memory_guide_qa.py` (restructure branch); [Track C: RAG and vector memory](../../tutorials/track-c-rag.md); [RAG chatbot example](../../examples/rag-chatbot.md).

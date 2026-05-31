@@ -1,4 +1,3 @@
-**Audience:** `[platform]`
 
 # Idempotency on run creation
 
@@ -79,5 +78,3 @@ External callback ingress supports `X-Idempotency-Key` on `POST /v1/runs/{run_id
 
 - [http-api-reference.md](http-api-reference.md) for create-run contract
 - [run-state-machine.md](run-state-machine.md) for polling after create
-
-**Source:** capabilities reference Appendix B, Appendix I; `server/arcflow-server/src/handlers/runs.rs`, `server/arcflow-server/src/store/runs.rs`; migration `20240531000003_arcflow_runs.sql`.

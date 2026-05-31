@@ -1,6 +1,5 @@
 # 03 External callbacks intro
 
-**Audience:** `[developer]` `[platform]`
 
 ## Before you start
 
@@ -106,7 +105,3 @@ Poll `GET /v1/runs/{run_id}` while waiting. When status is `Interrupted`, inspec
 [04 HITL approval intro](04-hitl-approval-intro.md) covers human approval gates, another `Interrupted` pattern that uses `POST /v1/runs/{run_id}/approve/{approval_key}` instead of external callbacks.
 
 Deep dives: [Webhook security](../../guides/external-integrations/webhook-security.md), [Recovery and resume](../../guides/reliability/recovery-and-resume.md), [Track E: HITL and external](../../tutorials/track-e-hitl-and-external.md).
-
-## Source
-
-`sdk-python/arcflow/external.py`, `server/arcflow-server/src/handlers/external.rs`, `examples/external/`; [External callbacks](../../guides/external-integrations/external-callbacks.md); capabilities reference §9, §25.

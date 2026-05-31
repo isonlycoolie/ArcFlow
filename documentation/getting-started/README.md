@@ -1,6 +1,5 @@
 # Getting started curriculum
 
-**Audience:** `[developer]` `[operator]` `[frontend]`
 
 ArcFlow workflows are written as simple declarations: you define agents, chain them into a workflow, and call `run()`. The Rust runtime handles scheduling, tools, memory, traces, and recovery. This curriculum teaches that model step by step: one concept per lesson, each with a copy-paste script you run locally on your machine.
 
@@ -59,7 +58,3 @@ Layers you add later: more steps, `Tool(...)`, `MemoryConfig(...)`, `provider=Op
 | API signatures | [Python SDK reference](../sdks/python/api-reference.md) |
 | Guided tracks A–H | [Tutorials](../tutorials/track-a-first-workflow.md) |
 | Architecture | [Concepts](../concepts/what-is-arcflow.md) |
-
-## Source
-
-Capabilities reference §16, §28; `sdk-python/arcflow/agent.py`, `sdk-python/arcflow/workflow.py`.

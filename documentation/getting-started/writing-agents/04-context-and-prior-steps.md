@@ -1,6 +1,5 @@
 # 04 Context and prior steps
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -115,7 +114,3 @@ Trace metadata records sizes, not prompt content. After a run, `ProviderRequestS
 | Trace verification walkthrough | [Track A: First workflow](../../tutorials/track-a-first-workflow.md) |
 | Tools and memory on agents | [Defining agents](../../guides/agents-and-tools/defining-agents.md) |
 | OpenAI or other live providers | [Python quickstart](../quickstart-python.md) |
-
-## Source
-
-`sdk-python/arcflow/context.py` (`ContextPolicy`, `PriorStepsMode`); [Context policies](../../guides/agents-and-tools/context-policies.md); [Execution model](../../concepts/execution-model.md); capabilities reference Appendix A (ContextPolicy).

@@ -1,6 +1,5 @@
 # How ArcFlow thinks
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -75,5 +74,3 @@ Optional: import succeeds without touching the network. That is expected. The de
 ## Next lesson
 
 [Anatomy of an agent](02-anatomy-of-an-agent.md): what `name`, `role`, and `instructions` mean, and how `Agent()` validates them.
-
-**Source:** `sdk-python/arcflow/agent.py`, `sdk-python/arcflow/workflow.py`, `runtime/arcflow-core/src/workflow/`; [The RCS contract](../../concepts/the-rcs-contract.md); capabilities reference §4, §16.2.

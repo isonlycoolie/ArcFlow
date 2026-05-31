@@ -1,6 +1,6 @@
 # ArcFlow documentation
 
-This folder is the tracked user-facing documentation site for ArcFlow. Normative wire formats and JSON schemas remain in [contracts/normative](../contracts/normative/README.md). ADRs and the internal docs pipeline live in the gitignored `docs/` tree.
+This folder is the tracked user-facing documentation site for ArcFlow. Normative wire formats and JSON schemas are published under [contracts/](contracts/rcs-schema.md) on this site. ADRs and the internal docs pipeline live in the gitignored `docs/` tree.
 
 ## Start here
 
@@ -50,4 +50,11 @@ All surfaces call the same Rust engine (`arcflow-core`). Behavior is consistent;
 
 ## Writing and validation
 
-Pages follow the arcflow-documentation skill: report tone, concrete examples, audience tags, and a Source footer citing capabilities reference sections and code paths. Deferred features (FP-1.01 through FP-5.04) are labeled explicitly in [maturity and known gaps](concepts/maturity-and-known-gaps.md).
+Pages follow the arcflow-documentation skill: report tone, concrete runnable examples, and cross-links to related guides. Label deferred features (FP-1.01 through FP-5.04) explicitly in [maturity and known gaps](concepts/maturity-and-known-gaps.md).
+
+**Linking rules for published pages:**
+
+- All markdown links must stay inside `documentation/` so they resolve on `/docs/*`.
+- Do not link to paths outside this tree (repository example scripts, internal spec folders, or source files).
+- Do not cite internal capability appendices, ADRs, or sprint IDs in reader prose — link to the matching guide or contract page instead.
+- Do not add author metadata (Audience tags or Source footers).

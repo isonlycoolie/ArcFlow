@@ -1,4 +1,3 @@
-**Audience:** `[platform]`
 
 # Postgres schema
 
@@ -156,5 +155,3 @@ Daily run counters per site for operator metrics.
 - [cli/migrate.md](../cli/migrate.md)
 - [server/overview.md](overview.md)
 - [static-product/site-lifecycle.md](../static-product/site-lifecycle.md)
-
-**Source:** capabilities reference Appendix G, §12.2; `runtime/arcflow-core/migrations/`; K-04.

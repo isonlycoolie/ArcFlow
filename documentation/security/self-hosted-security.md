@@ -1,4 +1,3 @@
-**Audience:** `[platform]` `[compliance]`
 
 # Self-hosted security
 
@@ -108,7 +107,3 @@ Operators may ingest PII into site knowledge namespaces. Your organization owns 
 - [API key management](api-key-management.md)
 - [Relay security model](relay-security-model.md)
 - [Production checklist](../deployment/production-checklist.md)
-
-## Source
-
-Derived from Sprint 7 and 8 security rules; [contracts/guides/deployment/self-hosted.md](../../contracts/guides/deployment/self-hosted.md); [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §12, §23.

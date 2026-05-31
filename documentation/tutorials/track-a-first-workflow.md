@@ -1,6 +1,5 @@
 # Track A: First workflow
 
-**Audience:** `[developer]`
 
 Track A is the first structured tutorial in the ArcFlow learning path. You build a linear two-agent pipeline, run it with the stub provider (no API keys), and verify completion status plus trace lifecycle events. The same workflow can be written in Python or TypeScript; pick one language for this track.
 
@@ -223,5 +222,3 @@ Track A establishes the core loop: define agents, register ordered steps, call `
 | H | CLI and VS Code | After A; local tooling |
 
 Continue with [Python quickstart](../getting-started/quickstart-python.md) or [TypeScript quickstart](../getting-started/quickstart-typescript.md) when you want a real LLM provider.
-
-**Source:** capabilities reference §28 Track A, §16.2; `sdk-python/tests/integration/test_first_five_minutes.py`, `sdk-python/tests/integration/test_workflow_trace.py`; `contracts/normative/observability/trace-events-v1.md`.

@@ -1,6 +1,5 @@
 # 01 Linear pipelines
 
-**Audience:** `[developer]`
 
 ## Before you start
 
@@ -95,7 +94,3 @@ You should see three step lifecycles before `WorkflowCompleted`. Prompt text nev
 ## Next
 
 [02 Chaining output to input](02-chaining-output-to-input.md) explains how each step receives text from earlier steps and how to control that with `ContextPolicy`.
-
-## Source
-
-`sdk-python/arcflow/workflow.py` (`step`, `run`); `sdk-python/tests/integration/test_first_five_minutes.py`; [Execution model](../../concepts/execution-model.md) (linear execution).

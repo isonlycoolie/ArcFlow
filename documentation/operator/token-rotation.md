@@ -1,4 +1,3 @@
-**Audience:** `[operator]` `[compliance]`
 
 # Token rotation
 
@@ -101,7 +100,3 @@ Dashboard dev (private repo): update local `.env` on port 5174 only for developm
 - [API key management](../security/api-key-management.md)
 - [Admin API reference](admin-api-reference.md)
 - [Relay security model](../security/relay-security-model.md)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §13.1; [dashboard/spec/05-security-model.md](../../dashboard/spec/05-security-model.md), [09-exit-criteria.md](../../dashboard/spec/09-exit-criteria.md) (E5).

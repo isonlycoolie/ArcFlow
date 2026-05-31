@@ -1,4 +1,3 @@
-**Audience:** `[developer]`
 
 # Configuring HITL interrupts
 
@@ -124,7 +123,3 @@ Graph steps reference the same `hitl` block on the underlying `StepDefinition`. 
 - [HITL overview](hitl-overview.md) for the interrupt model and error codes
 - [Approve and reject](approve-and-reject.md) for POST bodies and outcomes
 - [Quickstart server API](../../getting-started/quickstart-server-api.md) for Docker stack setup
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §8.1, §8.2; `sdk-python/arcflow/hitl.py`, `server/arcflow-server/src/dto/runs.rs`, `examples/hitl/`.

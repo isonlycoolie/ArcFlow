@@ -1,6 +1,5 @@
 # TypeScript SDK API reference
 
-**Audience:** `[developer]`
 
 Exports are defined in `sdk-typescript/index.ts`. This page lists every public symbol and notes parity gaps against the Python SDK.
 
@@ -241,7 +240,3 @@ Searched symbols from Python ecosystem:
 | `Tool` class | Not exported |
 | `ScheduleManifest` | Not exported |
 | `ContextPolicy`, `ToolExecutionConfig` | Not exported |
-
-## Source
-
-`sdk-typescript/index.ts`, `sdk-typescript/index.d.ts`, `sdk-typescript/arcflow/workflow.ts`, `sdk-typescript/arcflow/agent.ts`, `sdk-typescript/arcflow/provider.ts`, `sdk-typescript/arcflow/memory.ts`, `sdk-typescript/arcflow/external.ts`, `sdk-typescript/arcflow/stream.ts`, `sdk-typescript/arcflow/hitl.ts`, `sdk-typescript/arcflow/trace.ts`; capabilities reference §17, Appendix I.

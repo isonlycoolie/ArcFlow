@@ -1,4 +1,3 @@
-**Audience:** `[developer]`
 
 # Vector RAG pipeline
 
@@ -172,7 +171,3 @@ Examples: `examples/rag/`, `examples/static/chat-rag/`, `examples/online-applica
 - [Knowledge ingestion](knowledge-ingestion.md)
 - [Defining agents](../agents-and-tools/defining-agents.md)
 - [Workflow registry](../workflows/workflow-registry.md) (publish RAG chat)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §6.2, §6.4; Appendix A (MemoryRetrievalConfig, MemoryChunkingConfig).

@@ -1,4 +1,3 @@
-**Audience:** `[developer]`
 
 # Tool execution loop
 
@@ -150,7 +149,3 @@ For integration tests with real tool validation, use minimal schemas and stub ha
 - [Provider configuration](provider-configuration.md)
 - [Validation and testing](../workflows/validation-and-testing.md)
 - [Vector RAG pipeline](../memory-and-rag/vector-rag-pipeline.md) (retrieval as memory, not custom tools)
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §5.2; Appendix A (ToolExecutionConfig); Appendix D (tool trace events); K-14 default LlmSelect.

@@ -1,6 +1,5 @@
 # Getting started paths
 
-**Audience:** `[developer]` `[frontend]` `[platform]`
 
 ## What this section is
 
@@ -43,5 +42,3 @@ Install the SDK or confirm Docker depending on your path:
 | Server tutorial with checklist | [Track B: Server API](../../tutorials/track-b-server-api.md) |
 | Static product tutorial | [Track F: Static product](../../tutorials/track-f-static-product.md) |
 | Certification ladder | [Certification overview](../../certification/overview.md) |
-
-**Source:** `documentation/getting-started/`, `sdk-python/README.md`, `sdk-typescript/README.md`, `examples/static/`; capabilities reference §16, §17, §28.

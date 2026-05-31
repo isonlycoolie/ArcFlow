@@ -1,10 +1,9 @@
-**Audience:** `[developer]` `[operator]` `[platform]` `[frontend]` `[compliance]`
 
 # ArcFlow documentation
 
 ArcFlow is a self-hosted AI workflow runtime written in Rust. One engine (`arcflow-core`) powers Python and TypeScript SDKs, the HTTP server, Relay, the static browser SDK, CLI, VS Code extension, and an alpha WASM build. Workflows are defined as RCS v1 JSON: agents, steps, optional graph routing, tools, vector memory, human-in-the-loop gates, and external callbacks.
 
-This site explains what the system does, which surface to use, and how to run workflows safely in production. Normative wire formats stay in [contracts/normative](../../contracts/normative/README.md). This tree is the tracked, user-facing narrative.
+This site explains what the system does, which surface to use, and how to run workflows safely in production. Normative wire formats are in [The RCS contract](../concepts/the-rcs-contract.md) and [Trace events (normative)](../contracts/trace-events-normative.md).
 
 ## Four entry paths
 
@@ -68,7 +67,3 @@ For a full comparison and Postgres notes, see [Surfaces and when to use them](..
 | [deployment/](../deployment/overview.md) | Docker, production, migrations |
 | [security/](../security/sec-1-compliance.md) | Auth, webhooks, self-hosted hardening |
 | [tutorials/](../tutorials/track-a-first-workflow.md) | Tracks A through H |
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §1 (What ArcFlow is), §3 (Runtime surfaces), §26 (Maturity matrix), §27 (Known gaps).

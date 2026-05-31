@@ -1,4 +1,3 @@
-**Audience:** `[developer]`
 
 # Execution traces
 
@@ -142,7 +141,3 @@ When trace persistence is enabled, rows land in `arcflow_trace_events`. Operator
 - [Trace event reference](trace-event-reference.md) for every `TraceEventKind`
 - [SEC-1 rules](sec-1-rules.md) for allowed and forbidden fields
 - [Track A first workflow](../../tutorials/track-a-first-workflow.md) for hands-on trace verification
-
-## Source
-
-Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §11.2; `sdk-python/arcflow/trace.py`, `sdk-python/arcflow/workflow.py`, Sprint 5 observability plan, `contracts/normative/observability/trace-events-v1.md`.
