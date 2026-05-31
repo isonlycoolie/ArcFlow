@@ -93,3 +93,10 @@ If Postgres is unavailable, `POST /v1/runs` returns **503**. Health checks: `GET
 | Question | Page |
 |----------|------|
 | Which binary or package do I run? | [Surfaces and when to use them](surfaces-and-when-to-use-them.md) |
+| Linear vs graph execution | [Execution model](execution-model.md) |
+| Trace field rules | [SEC-1 and data safety](sec-1-and-data-safety.md) |
+| Production vs deferred | [Maturity and known gaps](maturity-and-known-gaps.md) |
+
+## Source
+
+Derived from [ARCFLOW-FULL-CAPABILITIES-REFERENCE.md](../../docs/_draft/ARCFLOW-FULL-CAPABILITIES-REFERENCE.md) §2 (Architecture), including static product and backend integration sequence diagrams.
