@@ -283,3 +283,98 @@ Source of truth: `runtime/arcflow-core/src/tracing/events.rs`. Normative names: 
 
 ### MemoryRead
 
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `agent_name` | string | Agent name | Safe |
+| `memory_type` | string | Backend type | Safe |
+| `key` | string | Memory key | Caution |
+| `hit` | bool | Cache hit | Safe |
+| `duration_ms` | u64 | Operation time | Safe |
+
+**Emitter:** memory coordinator.
+
+### MemoryRetrieved
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `agent_name` | string | Agent name | Safe |
+| `chunk_count` | usize | Number of chunks | Safe |
+| `total_bytes` | usize | Aggregate chunk bytes | Safe |
+
+**Emitter:** vector retrieval (RAG).
+
+### MemoryDegraded
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `memory_type` | string | Backend type | Safe |
+| `backend` | string | Backend id | Safe |
+| `reason` | string | Degradation reason | Safe |
+
+**Emitter:** memory coordinator.
+
+### MemoryEvicted
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `memory_type` | string | Backend type | Safe |
+| `key` | string | Evicted key | Caution |
+| `eviction_reason` | string | Reason enum / slug | Safe |
+
+**Emitter:** memory eviction policy.
+
+## Reliability
+
+### RetryAttempted
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `attempt_number` | u32 | Current attempt | Safe |
+| `max_attempts` | u32 | Configured cap | Safe |
+| `backoff_ms` | u64 | Wait before retry | Safe |
+| `trigger_error_code` | string | Code that triggered retry | Safe |
+
+**Emitter:** retry policy.
+
+### RetryExhausted
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `total_attempts` | u32 | Attempts made | Safe |
+| `last_error_code` | string | Final error code | Safe |
+
+**Emitter:** retry policy.
+
+### TimeoutEnforced
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `step_id` | string | Step UUID | Safe |
+| `timeout_type` | string | `workflow` or `step` | Safe |
+| `configured_ms` | u64 | Limit | Safe |
+| `elapsed_ms` | u64 | Observed elapsed | Safe |
+
+**Emitter:** timeout enforcer.
+
+### TraceStorageWarning
+
+| Field | Type | Meaning | SEC-1 |
+|-------|------|---------|-------|
+| `run_id` | string | Execution UUID | Safe |
+| `events_dropped` | u32 | Dropped event count | Safe |
+| `capacity_limit` | u32 | Store capacity | Safe |
+
+**Emitter:** trace ring buffer.
+
+## Streaming
