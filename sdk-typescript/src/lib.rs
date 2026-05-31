@@ -3,9 +3,12 @@
 mod errors;
 mod execution_config;
 mod graph;
+mod memory;
 mod stream;
 mod types;
 mod workflow;
+
+pub use memory::JsVectorStore;
 
 pub use stream::{start_workflow_stream, JsWorkflowStreamIterator};
 pub use workflow::{

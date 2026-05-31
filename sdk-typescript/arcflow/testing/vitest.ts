@@ -36,9 +36,9 @@ export interface WorkflowTestCase {
 
 /** Maps spec aliases to stub_responses entries. */
 export function normalizeTestCase(
-  case: WorkflowTestCase,
+  testCase: WorkflowTestCase,
 ): WorkflowTestCase & { stub_responses?: Record<string, unknown> } {
-  const normalized = { ...case };
+  const normalized = { ...testCase };
   const mockStep = normalized.mock_step_failure;
   const mockFailCount = normalized.mock_fail_count;
   if (mockStep !== undefined) {

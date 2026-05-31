@@ -15,6 +15,7 @@ import { traceFromJson, type TraceResult } from "./trace.js";
 import { buildExecConfigJson, type RetryOptions } from "./types/fault.js";
 import { HitlConfig } from "./hitl.js";
 import type { StreamEvent, StreamRunResult } from "./stream.js";
+import { attemptsFromStub, normalizeTestCase } from "./testing/vitest.js";
 
 type NativeBinding = {
   executeWorkflow: (
@@ -116,6 +117,7 @@ export interface WorkflowConfig {
 
 export interface RunOptions {
   provider?: Provider;
+  initialState?: Record<string, unknown>;
 }
 
 interface GraphNodeRecord {
@@ -315,12 +317,13 @@ export class Workflow {
     return this;
   }
 
-  private execConfigJson(): string | undefined {
+  private execConfigJson(initialState?: Record<string, unknown>): string | undefined {
     return buildExecConfigJson({
       retry: this.retryOptions,
       workflowTimeoutSeconds: this.workflowTimeoutSeconds,
       stepTimeoutSeconds: this.stepTimeoutSeconds,
       recoveryEnabled: this.recoveryEnabled,
+      initialState,
     });
   }
 
@@ -577,7 +580,7 @@ export class Workflow {
         steps,
         trimmed,
         provider,
-        this.execConfigJson(),
+        this.execConfigJson(options.initialState),
         this.graphJson(),
       );
       this.lastRunId = result.runId;
@@ -675,7 +678,6 @@ export class Workflow {
   > {
     const { agents, steps } = this.agentsAndSteps();
     const native = loadNative();
-    const { normalizeTestCase, attemptsFromStub } = await import("./testing/vitest.js");
     const results: Array<{
       name: string;
       passed: boolean;

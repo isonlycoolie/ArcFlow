@@ -23,6 +23,7 @@ export interface ExecConfigPayload {
   recovery_enabled?: boolean;
   stream?: { enabled: boolean };
   test?: { stub_responses: Record<string, unknown> };
+  initial_state?: Record<string, unknown>;
 }
 
 export function buildExecConfigJson(options: {
@@ -32,6 +33,7 @@ export function buildExecConfigJson(options: {
   recoveryEnabled?: boolean;
   stream?: boolean;
   test?: { stub_responses: Record<string, unknown> };
+  initialState?: Record<string, unknown>;
 }): string | undefined {
   const payload: ExecConfigPayload = {};
   if (options.retry) {
@@ -82,6 +84,9 @@ export function buildExecConfigJson(options: {
   }
   if (options.test) {
     payload.test = options.test;
+  }
+  if (options.initialState) {
+    payload.initial_state = options.initialState;
   }
   if (Object.keys(payload).length === 0) {
     return undefined;

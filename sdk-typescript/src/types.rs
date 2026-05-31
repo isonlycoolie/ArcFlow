@@ -45,6 +45,8 @@ pub fn build_workflow(
                 instructions: agent.instructions.clone(),
                 tools: None,
                 memory_config: None,
+                context: None,
+                tool_execution: None,
             },
         );
     }
