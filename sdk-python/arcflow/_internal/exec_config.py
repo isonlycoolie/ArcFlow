@@ -42,6 +42,7 @@ def build_exec_config_json(
     recovery_enabled: bool,
     test: dict[str, Any] | None = None,
     stream: bool = False,
+    initial_state: dict[str, Any] | None = None,
 ) -> str | None:
     payload: dict[str, Any] = {}
     if retry is not None:
@@ -60,6 +61,8 @@ def build_exec_config_json(
         payload["test"] = test
     if stream:
         payload["stream"] = {"enabled": True}
+    if initial_state:
+        payload["initial_state"] = initial_state
     if not payload:
         return None
     return json.dumps(payload)

@@ -1,6 +1,7 @@
 """ArcFlow Python SDK — workflow orchestration via the Rust runtime."""
 
 from arcflow.agent import Agent
+from arcflow.context import ContextPolicy, PriorStepsMode, ToolExecutionConfig
 from arcflow.exceptions import (
     ArcFlowError,
     InfrastructureUnavailableError,
@@ -35,6 +36,9 @@ from arcflow.workflow import Workflow
 
 __all__ = [
     "Agent",
+    "ContextPolicy",
+    "PriorStepsMode",
+    "ToolExecutionConfig",
     "ArcFlowError",
     "InfrastructureUnavailableError",
     "MemoryConfig",

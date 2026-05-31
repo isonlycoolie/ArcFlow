@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from uuid import UUID, uuid4
 
+from arcflow.context import ContextPolicy, ToolExecutionConfig
 from arcflow.exceptions import WorkflowConfigurationError
 from arcflow.memory import MemoryConfig
 from arcflow.tool import Tool
@@ -30,6 +31,8 @@ class Agent:
         model: str = "default",
         tools: tuple[Tool, ...] = (),
         memory: MemoryConfig | None = None,
+        context: ContextPolicy | None = None,
+        tool_execution: ToolExecutionConfig | None = None,
     ) -> None:
         self.name = _require_non_empty("name", name)
         self.role = _require_non_empty("role", role)
@@ -37,6 +40,8 @@ class Agent:
         self.model = model.strip() or "default"
         self.tools = tuple(tools)
         self.memory = memory
+        self.context = context
+        self.tool_execution = tool_execution
         self._validate_tools()
         self.agent_id: UUID = uuid4()
 
@@ -55,10 +60,23 @@ class Agent:
 
     def binding_tuple(
         self,
-    ) -> tuple[str, str, str, str, list[tuple[str, str, str, float]], str | None]:
+    ) -> tuple[
+        str,
+        str,
+        str,
+        str,
+        list[tuple[str, str, str, float]],
+        str | None,
+        str | None,
+        str | None,
+    ]:
         """Serializes agent fields for the native binding layer."""
         tool_rows = [t.binding_spec() for t in self.tools]
         memory_json = self.memory.binding_json() if self.memory else None
+        context_json = self.context.binding_json() if self.context else None
+        tool_exec_json = (
+            self.tool_execution.binding_json() if self.tool_execution else None
+        )
         return (
             str(self.agent_id),
             self.name,
@@ -66,4 +84,6 @@ class Agent:
             self.instructions,
             tool_rows,
             memory_json,
+            context_json,
+            tool_exec_json,
         )
