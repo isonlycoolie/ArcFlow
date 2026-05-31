@@ -93,3 +93,36 @@ Inspect `MemoryRetrieved` payloads for chunk counts and scores without chunk tex
 ## Verification checklist
 
 | Check | Expected |
+|-------|----------|
+| Ingest | Namespace populated |
+| `result.status` | `completed` |
+| `MemoryRetrieved` | Present on query run |
+| `WorkflowCompleted` | Present |
+| Answers | Reference ingested facts when using real provider |
+
+## Expected output
+
+Non-empty answer string referencing hybrid retrieval concepts when the store is populated. Verification prints `track C trace checks passed`.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| No `MemoryRetrieved` | No ingest or wrong namespace | Re-ingest into `track_c_kb` |
+| Qdrant connection refused | Service not running | Start Qdrant; verify URL |
+| Generic stub answer | Stub path without store | Expected until ingest completes |
+| Poor recall | Chunk settings | Tune `chunk_size` and `overlap` per guide |
+
+## What you learned
+
+Track C connects agent memory configuration to operational ingest and trace-verified retrieval. Platform RAG features in static product and server admin APIs build on the same vector primitives.
+
+## Next tracks
+
+| Track | Focus |
+|-------|-------|
+| D | Graph routing |
+| F | Static product with dashboard-ingested knowledge |
+| Level 2 cert | RAG plus graph plus HITL combined project |
+
+**Source:** capabilities reference §28 Track C; [`examples/rag/document_qa.py`](../../examples/rag/document_qa.py); [RAG chatbot example](../examples/rag-chatbot.md); [vector RAG pipeline](../guides/memory-and-rag/vector-rag-pipeline.md).
