@@ -1,0 +1,40 @@
+[package]
+name = "arcflow-relay"
+version.workspace = true
+edition.workspace = true
+description = "ArcFlow Relay — browser edge proxy for static sites"
+
+[lib]
+name = "arcflow_relay"
+path = "src/lib.rs"
+
+[[bin]]
+name = "arcflow-relay"
+path = "src/main.rs"
+
+[dependencies]
+arcflow-server = { path = "../arcflow-server" }
+axum = { version = "0.7", features = ["json"] }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["limit", "cors"] }
+sqlx = { version = "0.8", default-features = false, features = [
+    "runtime-tokio",
+    "postgres",
+    "json",
+    "chrono",
+] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+chrono = { workspace = true }
+subtle = "2"
+
+[dev-dependencies]
+axum = { version = "0.7", features = ["json"] }
+tower = { version = "0.5", features = ["util"] }
+http-body-util = "0.1"
+hyper = "1"
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
