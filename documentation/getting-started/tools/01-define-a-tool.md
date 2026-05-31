@@ -93,3 +93,27 @@ Stub runs may not always invoke the tool the way a live model would, but the wor
 | Invalid schema type | `Tool(..., input_schema="bad", ...)` raises `ToolConfigurationError` |
 | Empty name | `Tool(name="", ...)` raises `ToolConfigurationError` |
 
+Invalid schema check:
+
+```python
+from arcflow import Tool
+from arcflow.exceptions import ToolConfigurationError
+
+try:
+    Tool(
+        name="t",
+        description="d",
+        input_schema="not-a-dict",
+        execute=lambda _: "x",
+    )
+except ToolConfigurationError as err:
+    print(err)
+```
+
+## Next
+
+[02 Attach tools to agents](02-attach-tools-to-agents.md) covers multiple tools, duplicate name validation, and workflow wiring.
+
+## Source
+
+`sdk-python/arcflow/tool.py`; `sdk-python/tests/integration/test_sprint4_tools_memory.py` (`test_tool_configuration_rejects_invalid_schema`, `test_workflow_with_tool_echoes_message`).
