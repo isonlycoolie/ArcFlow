@@ -378,3 +378,98 @@ Machine-readable JSON Schema for the Runtime Contract Specification (RCS) v0.1. 
       },
       "required": ["from"],
       "additionalProperties": false
+    },
+    "JoinNode": {
+      "type": "object",
+      "description": "Fan-in join waiting for parallel branches. Phase 1.1.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Join node id (must exist in nodes)."
+        },
+        "wait_for": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Branch node ids that must complete before join proceeds."
+        }
+      },
+      "required": ["id", "wait_for"],
+      "additionalProperties": false
+    },
+    "GraphDefinition": {
+      "type": "object",
+      "description": "Graph execution topology for graph-mode workflows. Phase 1.1.",
+      "properties": {
+        "entry_node": {
+          "type": "string",
+          "description": "First node to execute."
+        },
+        "max_iterations": {
+          "type": "integer",
+          "default": 100,
+          "minimum": 1,
+          "maximum": 10000,
+          "description": "Maximum cycle iterations before GraphIterationLimitReached."
+        },
+        "nodes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/GraphNode" },
+          "minItems": 1
+        },
+        "edges": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/GraphEdge" }
+        },
+        "join_nodes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/JoinNode" }
+        }
+      },
+      "required": ["entry_node", "nodes", "edges"],
+      "additionalProperties": false
+    },
+    "ExternalBindingKind": {
+      "type": "string",
+      "enum": ["browser_automation", "schedule_trigger", "custom"],
+      "description": "Kind of developer-owned external system. RCS v0.7."
+    },
+    "ExternalBindingMode": {
+      "type": "string",
+      "enum": ["sync_tool", "async_callback"],
+      "description": "Invocation mode for external binding. RCS v0.7."
+    },
+    "ExternalNeedsInputAction": {
+      "type": "string",
+      "enum": ["agent_reask", "fail_run"],
+      "default": "agent_reask"
+    },
+    "ExternalFatalAction": {
+      "type": "string",
+      "enum": ["hitl_escalate", "fail_run"],
+      "default": "fail_run"
+    },
+    "ExternalRecoveryPolicy": {
+      "type": "object",
+      "properties": {
+        "max_retries": { "type": "integer", "minimum": 0, "default": 0 },
+        "on_needs_input": { "$ref": "#/$defs/ExternalNeedsInputAction" },
+        "on_fatal": { "$ref": "#/$defs/ExternalFatalAction" }
+      },
+      "additionalProperties": false
+    },
+    "ExternalBinding": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "$ref": "#/$defs/ExternalBindingKind" },
+        "attach_to_step_id": { "$ref": "#/$defs/Uuid" },
+        "mode": { "$ref": "#/$defs/ExternalBindingMode" },
+        "outcome_schema": { "type": "object" },
+        "recovery": { "$ref": "#/$defs/ExternalRecoveryPolicy" }
+      },
+      "required": ["id", "kind", "attach_to_step_id", "mode", "outcome_schema"],
+      "additionalProperties": false
+    },
+    "ExternalOutcomeStatus": {
+      "type": "string",
