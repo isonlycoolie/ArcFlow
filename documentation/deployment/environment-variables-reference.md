@@ -98,7 +98,7 @@ These are build-time Vite variables, documented for operator handoff:
 | `VITE_ARCFLOW_SITE_ID` | Site id from admin create |
 | `VITE_ARCFLOW_SITE_TOKEN` | One-time site token |
 
-Dashboard dev (private repo): `ARCFLOW_ADMIN_URL`, admin key in BFF only.
+Custom admin BFF: `ARCFLOW_ADMIN_URL`, admin key on the server only (never in the browser).
 
 ## Critical production triple
 
@@ -111,7 +111,7 @@ Minimum for a working server deployment:
 ## Security checklist for operators
 
 - Store secrets in a secret manager or orchestrator secrets, not in git.
-- Rotate keys on schedule or on personnel change. See [Token rotation](../operator/token-rotation.md).
+- Rotate keys on schedule or on personnel change. See [API key management](../security/api-key-management.md).
 - Restrict `.env` file permissions (`chmod 600`).
 - Never log environment dumps in production support bundles.
 

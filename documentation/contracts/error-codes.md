@@ -1,7 +1,7 @@
 
 # Error codes
 
-Complete reference for RCS `ErrorCode` variants (16 total, K-03). Defined in `runtime/arcflow-core/src/rcs/types.rs`.
+Complete reference for RCS `ErrorCode` variants (16 total, K-03). Normative definitions align with [RCS schema](rcs-schema.md) and [RCS v1 JSON Schema](rcs-v1-schema.md).
 
 Errors surface in workflow results, trace events (`WorkflowFailed`, `StepFailed`), and HTTP API responses on the server.
 

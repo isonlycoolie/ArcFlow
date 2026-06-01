@@ -1,7 +1,7 @@
 
 # arcflow migrate up
 
-Apply embedded PostgreSQL schema migrations shipped in `runtime/arcflow-core/migrations/`. Required before `arcflow-server` can serve `POST /v1/runs` on a fresh database.
+Apply embedded PostgreSQL schema migrations shipped with the CLI. Required before `arcflow-server` can serve `POST /v1/runs` on a fresh database.
 
 ## Usage
 

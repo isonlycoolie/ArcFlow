@@ -1,7 +1,7 @@
 
 # Edge WASM (alpha)
 
-`runtime/arcflow-wasm/` builds a WebAssembly module for edge hosts (Cloudflare Workers, experimental CDN workers). Status: **alpha**. Not recommended for production workloads.
+The **arcflow-wasm** crate builds a WebAssembly module for edge hosts (Cloudflare Workers, experimental CDN workers). Status: **alpha**. Not recommended for production workloads.
 
 ## What works today
 
@@ -22,16 +22,15 @@ Full `arcflow-core` linkage is deferred until native dependencies are wasm-gated
 After build:
 
 ```text
-runtime/arcflow-wasm/pkg/
+pkg/
   arcflow_wasm.js
   arcflow_wasm_bg.wasm
   arcflow_wasm.d.ts
 ```
 
-Build from repo (requires `wasm-pack`):
+Build from the `arcflow-wasm` crate directory in your clone (requires `wasm-pack`):
 
 ```bash
-cd runtime/arcflow-wasm
 wasm-pack build --target web
 ```
 
@@ -58,7 +57,7 @@ const workflowJson = JSON.stringify({
 const resultJson = executeWorkflow(workflowJson, JSON.stringify("hello"));
 ```
 
-Rust host entry: `execute_workflow_json` in `runtime/arcflow-wasm/src/lib.rs`.
+Rust host entry: `execute_workflow_json` in the wasm crate.
 
 Errors return JSON strings with `code` and `message` (e.g. `unsupported_mode`, `empty_workflow`).
 

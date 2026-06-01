@@ -23,7 +23,7 @@ Algorithm:
 3. Encode digest as lowercase hex.
 4. Send header `X-ArcFlow-Signature: sha256=<hex>`.
 
-Server verification lives in `runtime/arcflow-core/src/external/webhook.rs` via `verify_webhook_signature`. The header may be raw hex or the `sha256=` prefix form.
+The server verifies signatures with `verify_webhook_signature`. The header may be raw hex or the `sha256=` prefix form.
 
 ### Python (integrator signing)
 

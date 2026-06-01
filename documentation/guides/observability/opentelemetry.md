@@ -48,7 +48,7 @@ arcflow.workflow (run_id, workflow_name)
 
 Post-run OTLP export from `ExecutionTrace` remains as a fallback when live span export is unavailable. Both paths can be active when OTel is enabled.
 
-Implementation: `runtime/arcflow-core/src/tracing/otel.rs`, `otel_metrics.rs`, ADR-009.
+OTel hooks live in the core tracing module (see ADR-009). Metrics export is partial (FP-4).
 
 ## Metrics (FP-4 alpha)
 

@@ -34,7 +34,7 @@ If a field could appear in a browser network tab via Relay, treat it as forbidde
 
 ## Runtime enforcement
 
-Engine emission is implemented in `runtime/arcflow-core/src/tracing/events.rs`. Event variants only carry metadata fields. For example:
+The engine emits SEC-1 events from the tracing layer. Event variants only carry metadata fields. For example:
 
 - `ProviderRequestSent` records `prompt_size_bytes`, not prompt text.
 - `ToolCallStarted` records `input_schema_hash`, not arguments.

@@ -128,7 +128,7 @@ Separate from top-level `examples/`; targets extension authors.
 
 1. Build the SDK for your language ([Python install](../sdks/python/installation.md) or [TypeScript install](../sdks/typescript/installation.md))
 2. Export provider and backend env vars the sample needs
-3. Run the script from repository root, e.g. `python examples/rag/document_qa.py`
+3. Follow the matching walkthrough page in this section for exact commands and script names in your clone
 
 Static examples use `npm install` and `npm run dev` inside the example directory.
 
@@ -143,17 +143,4 @@ Static examples use `npm install` and `npm run dev` inside the example directory
 
 Contributors adding examples should include a README with prerequisites, env vars, and a verify command per [Example catalog](../examples/catalog.md).
 
-## Branch note (pending merges)
-
-Documentation and lessons may reference names from branches not yet on `main`:
-
-| Current branch path | After `feat/examples-catalog-restructure` |
-|---------------------|---------------------------------------------|
-| `examples/rag/document_qa.py` | `examples/rag/memory_guide_qa.py` (ingest + query in one script) |
-| `examples/personal/blog_pipeline.py` | `examples/personal/weekly_blog_pipeline.py` |
-| `examples/external/playwright_stub_callback.py` | `examples/external/portal_outcome_callback.py` |
-| `examples/langchain/migration_demo.py` | `examples/langchain/langchain_adapter_demo.py` |
-
-Lessons under [getting-started/rag/](../getting-started/rag/README.md) call out both names where relevant. After merge, update this table and remove dual references.
-
-SDK PascalCase facades (`CommonTools`, `FromLangChain`, `ExternalOutcome`) are documented in [getting-started/tools/](../getting-started/tools/README.md) with legacy import notes until `feat/sdk-pascalcase-facades` merges.
+Walkthrough pages under [examples/](../examples/) are the supported way to run samples from this site. Clone the ArcFlow repository for the matching Python scripts and env files referenced in each walkthrough.

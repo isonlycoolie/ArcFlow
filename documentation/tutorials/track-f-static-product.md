@@ -13,12 +13,12 @@ Create an admin site, ingest knowledge, publish a workflow, embed the static SDK
 |------|----------|
 | Server + Relay | `docker compose -f docker/docker-compose.server.yml up -d` |
 | Node.js | 18+ for Vite example |
-| Operator scripts or dashboard | Site, ingest, publish |
+| Admin API or provision scripts | Site, ingest, publish |
 | Primary examples | [static-chat-widget](../examples/static-chat-widget.md), [relay-byo-deployment](../examples/relay-byo-deployment.md) |
 | App | [Static chat widget walkthrough](../examples/static-chat-widget.md) |
 | Track B | Helpful for understanding server admin APIs |
 
-Frontend developers do not define agents in browser code in production. Dashboard or admin API owns workflow shape.
+Frontend developers do not define agents in browser code in production. The admin API owns workflow shape.
 
 ## Step 1: Provision site and ingest knowledge
 
@@ -26,20 +26,18 @@ Frontend developers do not define agents in browser code in production. Dashboar
 docker compose -f docker/docker-compose.server.yml up -d
 bash scripts/static-provision-site.sh
 export SITE_ID=...  # from output
-export TEXT_FILE=examples/static/chat-rag/kb.txt
+export TEXT_FILE=path/to/kb.txt
 bash scripts/static-ingest-knowledge.sh
 bash scripts/static-publish-chat.sh
 ```
 
-Record relay URL, site token, and allowed origins from site configuration.
-
-Alternative: ArcFlow Dashboard Sites, Knowledge, and Chat tabs when available in your deployment.
+Record relay URL, site token, and allowed origins from site configuration. API details: [Static product overview](../static-product/overview.md) and [HTTP API reference](../server/http-api-reference.md).
 
 ## Step 2: Configure frontend env
 
+Follow [Static chat widget walkthrough](../examples/static-chat-widget.md) for Vite env vars (`VITE_ARCFLOW_RELAY_URL`, `VITE_ARCFLOW_SITE_TOKEN`), then:
+
 ```bash
-cd examples/static/chat-rag
-# set VITE_ARCFLOW_RELAY_URL and VITE_ARCFLOW_SITE_TOKEN
 npm install
 npm run dev
 ```

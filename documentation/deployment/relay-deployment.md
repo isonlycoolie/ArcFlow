@@ -33,7 +33,7 @@ Admin routes (`/v1/admin/*`) are never exposed through Relay.
 | `ARCFLOW_POSTGRESQL_URL` | Recommended | Load sites from Postgres (admin-created sites) |
 | `ARCFLOW_RELAY_SITES_JSON` | BYO alternative | Inline site config for Docker-only Relay |
 
-When both Postgres and JSON are configured, Postgres-backed sites from admin API are authoritative for dynamic provisioning. BYO pattern: `examples/relay/byo-docker/`.
+When both Postgres and JSON are configured, Postgres-backed sites from admin API are authoritative for dynamic provisioning. BYO pattern: [Relay BYO deployment](../examples/relay-byo-deployment.md).
 
 Optional admin response helper on server:
 
@@ -68,7 +68,7 @@ curl -sf http://localhost:8090/health || curl -sf http://localhost:8090/
 3. Frontend env: `VITE_ARCFLOW_RELAY_URL`, `VITE_ARCFLOW_SITE_ID`, `VITE_ARCFLOW_SITE_TOKEN`.
 4. Static SDK calls Relay with `mode: "relay"`.
 
-See [Sites management](../operator/sites-management.md).
+See [Static product overview](../static-product/overview.md).
 
 ## Middleware behavior
 

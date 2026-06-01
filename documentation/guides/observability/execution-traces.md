@@ -134,7 +134,7 @@ Full field catalog: [trace event reference](trace-event-reference.md).
 
 ## Postgres
 
-When trace persistence is enabled, rows land in `arcflow_trace_events`. Operators may SQL-query by `run_id` for dashboards until FP-3.01 dashboard UI exits private repo CI.
+When trace persistence is enabled, rows land in `arcflow_trace_events`. Platform teams may SQL-query by `run_id` for runbooks until a dashboard UI ships (FP-3.01).
 
 ## Related pages
 

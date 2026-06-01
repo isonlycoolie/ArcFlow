@@ -94,7 +94,7 @@ When fallback activates:
 ]
 ```
 
-If the fallback step also fails and has no further fallback, the workflow terminal state is `Failed` with the last `error_code` (for example `StepExecutionFailed` or `ProviderError` per [[Error codes](../contracts/error-codes.md)](../../contracts/error-codes.md)).
+If the fallback step also fails and has no further fallback, the workflow terminal state is `Failed` with the last `error_code` (for example `StepExecutionFailed` or `ProviderError` per [Error codes](../../contracts/error-codes.md)).
 
 ## Combining with retry
 

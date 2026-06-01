@@ -48,7 +48,7 @@ Actionable readiness checklist before accepting production traffic. Aligns with 
 |---|-------|--------------|
 | P20 | Sites have HTTPS `allowed_origins` | Relay rejects wrong Origin |
 | P21 | `allow_inline: false` on production sites | No browser workflow override |
-| P22 | Site tokens rotated on schedule | Procedure in [Token rotation](../operator/token-rotation.md) |
+| P22 | Site tokens rotated on schedule | Procedure in [API key management](../security/api-key-management.md) |
 | P23 | Real embedding provider configured | Not `stub` for knowledge ingest |
 | P24 | Chat workflow published to registry | `POST .../workflows/chat/publish` success |
 
@@ -83,7 +83,7 @@ bash scripts/static-smoke.sh     # static product end-to-end
 
 | ID | Item |
 |----|------|
-| FP-3.01 | Operator dashboard UI (private ArcFlow-Dashboard repo) |
+| FP-3.01 | Operator dashboard UI (not shipped in OSS; use admin API and CLI) |
 | FP-2 | Server SSE `/v1/runs/{id}/events` |
 | FP-4 | Stable OTel metrics |
 | FP-5.04 | Full `arcflow validate` against schema |

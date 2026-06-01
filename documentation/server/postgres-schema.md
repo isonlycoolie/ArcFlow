@@ -1,7 +1,7 @@
 
 # Postgres schema
 
-ArcFlow stores server-side state in PostgreSQL. Migrations live in `runtime/arcflow-core/migrations/` and apply via `arcflow migrate up` or the `arcflow-migrate` init container before server start.
+ArcFlow stores server-side state in PostgreSQL. Migrations ship with `arcflow-core` and apply via `arcflow migrate up` or the `arcflow-migrate` init container before server start.
 
 Verify readiness after migrate:
 
