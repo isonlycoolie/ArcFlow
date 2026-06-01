@@ -109,4 +109,4 @@ Archive site by revoking token, removing origins, and unpublishing workflows as 
 - [knowledge-and-publish.md](knowledge-and-publish.md)
 - [relay/origin-and-rate-limiting.md](../relay/origin-and-rate-limiting.md)
 - [static-product/security-model.md](security-model.md)
-- Dashboard spec [03-admin-api-contract.md](../operator/admin-api-reference.md)
+- [HTTP API reference](../server/http-api-reference.md) (admin routes under `/v1/admin/*`)

@@ -16,7 +16,7 @@ Traces and persisted trace events **must not** include:
 | RAG content | Retrieved chunk text, raw embedding inputs |
 | PII | Personal data unless your deployment policy explicitly allows it and you have controls |
 
-This aligns with normative guidance in [contracts/guides/observability/](../../contracts/guides/observability/) and [trace-events-v1.md](../contracts/trace-events-normative.md). Engine implementation: `runtime/arcflow-core/src/tracing/events.rs`.
+This aligns with normative guidance in [Understanding traces](../contracts/guides/observability/understanding-traces.md) and [Trace events (normative)](../contracts/trace-events-normative.md).
 
 ### Why the boundary exists
 
@@ -75,9 +75,9 @@ Browser bundles must not contain provider keys. Production static sites use Rela
 
 Opt-in metrics via `ARCFLOW_OTEL_ENABLED` and `ARCFLOW_OTLP_ENDPOINT` are **alpha (FP-4)**. Core operation does not require OTel. When enabling FP-4 in future, apply the same metadata-only discipline to exported metric labels and span attributes.
 
-## Operator dashboards
+## Platform operations without a bundled UI
 
-Operator UI is specified in OSS [Dashboard spec](dashboard-spec.md) but implemented in the private ArcFlow-Dashboard repository. Dashboard v1 UI is deferred (FP-3.01). Until exit criteria pass in private repo CI, operators use admin API, CLI trace, and SQL against `arcflow_trace_events`.
+Site lifecycle, knowledge ingest, and workflow publish are available through the server admin API (`/v1/admin/*`). Use the [HTTP API reference](../server/http-api-reference.md), [Static product overview](../static-product/overview.md), and CLI trace against `arcflow_trace_events` for day-two operations.
 
 ## Review checklist
 

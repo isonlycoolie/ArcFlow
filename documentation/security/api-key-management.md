@@ -66,7 +66,7 @@ Enforcement matrix: [API key management](../security/api-key-management.md).
 
 | Key | Procedure |
 |-----|-----------|
-| Site token | [Token rotation](../operator/token-rotation.md) |
+| Site token | `POST /v1/admin/sites/{site_id}/tokens/rotate` (see [HTTP API reference](../server/http-api-reference.md)) |
 | Server key | Rolling server deploy + update Relay upstream |
 | Admin key | Update BFF secrets + rolling server deploy |
 
@@ -85,6 +85,5 @@ Classification from [Environment variables reference](../deployment/environment-
 
 ## Related pages
 
-- [Token rotation](../operator/token-rotation.md)
 - [Relay security model](relay-security-model.md)
 - [Self-hosted security](self-hosted-security.md)

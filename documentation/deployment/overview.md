@@ -12,7 +12,7 @@ Each scenario maps to a Compose file or bare-metal process layout. The server is
 | Local development | Developer | `docker/docker-compose.dev.yml` | Postgres, Qdrant |
 | Server API + admin | Platform | `docker/docker-compose.server.yml` | Postgres, migrate job, server |
 | Production static product | Operator, platform | `docker/docker-compose.prod.yml` | Postgres, Qdrant, migrate, server, relay |
-| BYO Relay only | Frontend team | `examples/relay/byo-docker/` | Relay + upstream server URL |
+| BYO Relay only | Frontend team | [Relay BYO deployment](../examples/relay-byo-deployment.md) | Relay + upstream server URL |
 
 ### Local development
 
@@ -24,7 +24,7 @@ Developers run Postgres and Qdrant via `docker-compose.dev.yml`, then build the 
 
 ### Static product (Relay + published workflows)
 
-`docker-compose.prod.yml` adds Qdrant and production-oriented volume mounts. Operators create sites via admin API, ingest knowledge, publish chat workflows, and embed Relay URL plus site token in a static frontend. See [Relay deployment](relay-deployment.md) and [Sites management](../operator/sites-management.md).
+`docker-compose.prod.yml` adds Qdrant and production-oriented volume mounts. Platform teams create sites via the server admin API, ingest knowledge, publish chat workflows, and embed Relay URL plus site token in a static frontend. See [Relay deployment](relay-deployment.md) and [Static product overview](../static-product/overview.md).
 
 ## Startup sequence (server)
 
@@ -47,17 +47,13 @@ Relay starts after the upstream server is listening. Relay reads site configurat
 | `docker/docker-compose.prod.yml` | Production-like stack with named volumes |
 | `docker/docker-compose.otel.yml` | Optional OTel collector overlay (FP-4 alpha) |
 
-Contract guides: [contracts/guides/deployment/self-hosted.md](../../contracts/guides/deployment/self-hosted.md), [meta-repo.md](../../contracts/guides/deployment/meta-repo.md).
+Contract guides: [Self-hosted deployment](../contracts/guides/deployment/self-hosted.md), [Meta-repo layout](../contracts/guides/deployment/meta-repo.md).
 
-Normative HTTP contract (stale in places): [HTTP API reference](../server/http-api-reference.md). Prefer [HTTP API reference](../server/http-api-reference.md) or [Admin API reference](../operator/admin-api-reference.md) for current routes.
-
-## Operator dashboard (deferred)
-
-The operator UI lives in the private [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) repository. OSS holds the specification in this documentation and a starter scaffold at `deploy/arcflow-dashboard-v0/`. **FP-3.01** (dashboard v1 UI) is deferred until exit criteria in [Dashboard spec](../operator/dashboard-spec.md) pass in private repo CI. Until then, use admin API directly, OSS shell scripts (`scripts/static-*.sh`), or the v0 starter. See [Dashboard spec](../operator/dashboard-spec.md).
+For HTTP integration, use the [HTTP API reference](../server/http-api-reference.md). Admin routes under `/v1/admin/*` are documented in the server reference and [Static product overview](../static-product/overview.md).
 
 ## Meta-repo layout
 
-Private platform repos submodule OSS ArcFlow and ArcFlow-Dashboard. Template: `deploy/meta-repo-template/`. Convention ports: server 8080, relay 8090, dashboard dev 5174.
+Private platform repos can submodule OSS ArcFlow alongside your application repo. Template: `deploy/meta-repo-template/`. Convention ports: server 8080, relay 8090.
 
 ## Related pages
 

@@ -63,12 +63,12 @@ const result = await client.runPublished("chat", "^1.0.0", "What is your refund 
 console.log(result.output);
 ```
 
-Example app: `examples/static/chat-rag/`.
+Walkthrough: [Static chat widget example](../examples/static-chat-widget.md).
 
 ## What static product does not do
 
 - **Server SSE (FP-2):** no `GET /v1/runs/{id}/events` on server; use trace polling for streaming UX.
-- **Operator dashboard UI (FP-3.01):** OSS spec exists; UI in private ArcFlow-Dashboard repo.
+- **Bundled operator UI (FP-3.01):** use the admin API and [HTTP API reference](../server/http-api-reference.md) until a dashboard ships.
 - **Inline workflow from browser** when `allow_inline: false` (recommended production default).
 
 ## Maturity

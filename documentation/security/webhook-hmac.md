@@ -5,7 +5,7 @@ Security reference for ArcFlow external callback verification. External integrat
 
 Tutorial: [Webhook security guide](../guides/external-integrations/webhook-security.md).
 
-Implementation: `runtime/arcflow-core/src/external/webhook.rs`, `server/arcflow-server/src/handlers/external.rs`.
+Verification runs in the core external module and the server external handler. See [Webhook security](../guides/external-integrations/webhook-security.md).
 
 ## Required configuration
 

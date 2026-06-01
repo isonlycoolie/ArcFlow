@@ -93,7 +93,7 @@ await client.publishWorkflow(workflow, "1.0.0");
 await client.resolveWorkflow("chat", "^1.0.0");
 ```
 
-Registry calls require direct server URL with server API key (operator/backend scripts, not browser).
+Registry calls require direct server URL with server API key (backend scripts, not browser).
 
 ## Client modes
 

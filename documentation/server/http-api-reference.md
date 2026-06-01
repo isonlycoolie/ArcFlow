@@ -318,7 +318,7 @@ curl -s -X POST "http://localhost:8080/v1/admin/sites/site_abc123/workflows/chat
   -d '{"instructions":"Answer only from ingested knowledge. Say when unsure.","version":"1.0.1"}'
 ```
 
-Full admin contract: [Admin API reference](../operator/admin-api-reference.md).
+Admin routes are listed in this reference under `/v1/admin/*`. See also [Static product overview](../static-product/overview.md).
 
 ## Debug (localhost, ARCFLOW_DEBUG)
 

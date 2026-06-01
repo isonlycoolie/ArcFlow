@@ -42,6 +42,18 @@ contracts/sprint*-acceptance-evidence.md
 *.swo
 .DS_Store
 
+# Local / generated (never commit)
+extensions/vscode-arcflow/.vscode-test/
+runtime/arcflow-wasm/pkg/
+scripts/check_relay_range.sh
+scripts/otel_commit.sh
+scripts/relay_commit.sh
+scripts/rewrite_commit_messages.py
+scripts/rewrite_commits.py
+scripts/vscode_commit.sh
+scripts/wasm_commit.sh
+sdk-typescript/ARCFLOW-DOCS-ORGANIZATION-PLAN.md
+
 # Future SDK / tooling artifacts (stubs may add these later)
 __pycache__/
 *.pyc

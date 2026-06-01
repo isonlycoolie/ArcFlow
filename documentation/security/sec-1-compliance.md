@@ -34,7 +34,7 @@ Run **result** payloads on `GET /v1/runs/{id}` may include final output text und
 
 ## Runtime enforcement
 
-Engine emission is implemented in `runtime/arcflow-core/src/tracing/events.rs`. Examples:
+The engine emits SEC-1 events from the tracing layer. Examples:
 
 | Event | SEC-1 safe fields | Forbidden |
 |-------|-------------------|-----------|
@@ -92,14 +92,6 @@ Manual review: no substring matches for user-provided essay content, API keys, o
 | Platform | Keep `ARCFLOW_DEBUG=false` in production |
 | Operator | Do not log ingest body to analytics |
 | Integrator | Do not attach raw payloads to custom trace exporters |
-
-## Dashboard and BFF alignment
-
-Private dashboard repo must pass SEC-1 CI (exit criteria in [Dashboard spec](dashboard-spec.md)):
-
-- No hardcoded API keys
-- No logging of `site_token` or admin key
-- Dependency scanning in CI
 
 ## Before approving new observability features
 

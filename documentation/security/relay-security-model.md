@@ -96,11 +96,11 @@ Relay exposes `GET .../trace` to the browser. Trace events are SEC-1 metadata on
 
 ## Token rotation and race conditions
 
-After `POST .../tokens/rotate`, old tokens fail immediately at Relay. Plan deploys to avoid user-visible auth errors during rotation. See [Token rotation](../operator/token-rotation.md).
+After `POST /v1/admin/sites/{site_id}/tokens/rotate`, old tokens fail immediately at Relay. Plan deploys to avoid user-visible auth errors during rotation. See [API key management](api-key-management.md).
 
-## CSRF on operator BFF
+## CSRF on admin BFF
 
-Dashboard BFF mutating routes should use SameSite cookies and CSRF tokens. Admin key never reaches the browser.
+If you build a custom admin UI behind a BFF, mutating routes should use SameSite cookies and CSRF tokens. The admin API key never reaches the browser.
 
 ## Related pages
 

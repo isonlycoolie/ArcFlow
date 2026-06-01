@@ -29,7 +29,6 @@ This folder is the tracked user-facing documentation site for ArcFlow. Normative
 | [vscode/](vscode/overview.md) | IDE extension |
 | [wasm/](wasm/edge-alpha.md) | Edge WASM (alpha) |
 | [deployment/](deployment/overview.md) | Docker, production, migrations |
-| [operator/](operator/admin-api-reference.md) | Admin API and dashboard spec |
 | [security/](security/sec-1-compliance.md) | Auth, webhooks, self-hosted hardening |
 | [contracts/](contracts/rcs-schema.md) | Narrative contract guides |
 | [examples/](examples/catalog.md) | Example catalog and walkthroughs |
