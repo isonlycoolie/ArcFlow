@@ -188,3 +188,98 @@
 **Emitted by:** `AgentRuntime`  
 **Emitted when:** Token counts are known for a step.  
 **Count per run:** Once per step (may coalesce with response).
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id | string | Identifiers |
+| tokens | TokenUsage | prompt / completion / total |
+
+**NEVER contains:** Token strings.
+
+---
+
+## Tool events
+
+### TraceEventKind::ToolCallStarted
+
+**Emitted by:** `ToolRuntime`  
+**Emitted when:** Tool dispatch begins (after schema validation).  
+**Count per run:** Once per tool invocation.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id | string | Identifiers |
+| tool_name | string | Registered tool name |
+| input_schema_hash | string | SHA-256 of input schema |
+
+**NEVER contains:** Tool argument values.
+
+---
+
+### TraceEventKind::ToolCallCompleted
+
+**Emitted by:** `ToolRuntime`  
+**Emitted when:** Tool returns success.  
+**Count per run:** Once per successful tool call.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id, tool_name | string | Identifiers |
+| duration_ms | u64 | Wall time |
+| output_size_bytes | usize | Output size |
+
+---
+
+### TraceEventKind::ToolCallFailed
+
+**Emitted by:** `ToolRuntime`  
+**Emitted when:** Tool execution or timeout fails.  
+**Count per run:** Once per failed invocation.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id, tool_name | string | Identifiers |
+| duration_ms | u64 | Elapsed |
+| failure_reason | string | `execution_error` \| `timeout` \| â€¦ |
+| error_code | string | Sanitized code |
+
+---
+
+### TraceEventKind::ToolInputValidationFailed
+
+**Emitted by:** `ToolRuntime`  
+**Emitted when:** JSON Schema validation fails before execute.  
+**Count per run:** Once per failed validation.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id, tool_name | string | Identifiers |
+| violation_description | string | JSON paths / constraints only |
+
+**NEVER contains:** Actual input JSON values.
+
+---
+
+## Memory events
+
+### TraceEventKind::MemoryWrite
+
+**Emitted by:** Memory coordinator (all four backends)  
+**Emitted when:** Write completes.  
+**Count per run:** Once per write operation.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id, agent_name | string | Context |
+| memory_type | string | `session` \| `shared` \| `persistent` \| `vector` |
+| key | string | Namespaced logical key |
+| duration_ms | u64 | Operation latency |
+
+**NEVER contains:** Written value bytes.
+
+---
+
+### TraceEventKind::MemoryRead
+
+**Emitted by:** Memory coordinator  
+**Emitted when:** Read completes.  
