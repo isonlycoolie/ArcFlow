@@ -188,3 +188,98 @@ Machine-readable JSON Schema for the Runtime Contract Specification (RCS) v0.1. 
           "description": "Tool name used for dispatch. Sprint 4."
         },
         "input_schema": {
+          "description": "JSON Schema describing tool inputs. Sprint 4.",
+          "type": "object"
+        },
+        "permissions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Permission strings required to invoke the tool. Sprint 4."
+        }
+      },
+      "required": ["name", "input_schema"],
+      "additionalProperties": false
+    },
+    "ProviderConfig": {
+      "type": "object",
+      "description": "LLM provider settings for a run. Sprint 6.",
+      "properties": {
+        "provider_id": { "$ref": "#/$defs/ProviderId" },
+        "model": {
+          "type": "string",
+          "description": "Model id passed to the provider API. Sprint 6."
+        },
+        "api_key_env": {
+          "type": "string",
+          "description": "Environment variable holding the API key. Sprint 6."
+        },
+        "params": {
+          "description": "Optional provider-specific parameters. Sprint 6.",
+          "type": "object"
+        }
+      },
+      "required": ["provider_id", "model", "api_key_env"],
+      "additionalProperties": false
+    },
+    "AgentDefinition": {
+      "type": "object",
+      "description": "Agent role and capabilities referenced by workflow steps. Sprint 2â€“6.",
+      "properties": {
+        "id": { "$ref": "#/$defs/Uuid" },
+        "name": {
+          "type": "string",
+          "description": "Human-readable agent name. Sprint 2â€“3 SDK binding."
+        },
+        "role": {
+          "type": "string",
+          "description": "Role label used in prompts. Sprint 2â€“3."
+        },
+        "instructions": {
+          "type": "string",
+          "description": "System or task instructions. Sprint 2â€“3, Sprint 6 provider calls."
+        },
+        "tools": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ToolDefinition" },
+          "description": "Tools available to the agent. Sprint 4."
+        },
+        "memory_config": {
+          "$ref": "#/$defs/MemoryConfig",
+          "description": "Optional memory configuration. Sprint 4."
+        },
+        "context": {
+          "type": "object",
+          "description": "Context assembly policy (Phase 2-Pro / RCS v0.6).",
+          "properties": {
+            "include_prior_steps": {
+              "type": "string",
+              "enum": ["all", "last", "none"],
+              "default": "all"
+            },
+            "include_run_input": { "type": "boolean", "default": true },
+            "max_prior_step_chars": { "type": "integer", "default": 4096 }
+          },
+          "additionalProperties": false
+        },
+        "tool_execution": {
+          "type": "object",
+          "description": "Tool loop configuration (Phase 2-Pro / RCS v0.6).",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["legacy_eager", "llm_select"],
+              "default": "llm_select"
+            },
+            "max_iterations": { "type": "integer", "default": 5, "minimum": 1, "maximum": 20 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["id", "name", "role", "instructions"],
+      "additionalProperties": false
+    },
+    "StepDefinition": {
+      "type": "object",
+      "description": "Ordered step within a workflow. Sprint 2 execution.",
+      "properties": {
+        "id": { "$ref": "#/$defs/Uuid" },
