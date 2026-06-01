@@ -18,7 +18,7 @@ Wiring checklist:
 
 Trace event `MemoryRetrieved` confirms retrieval ran. Payload fields include `chunk_count` and `total_bytes`, not chunk text (SEC-1).
 
-[RAG chatbot walkthrough](../../examples/rag-chatbot.md) on the current branch shows steps 2 through 4; ingest is left as a comment. The restructure branch `memory_guide_qa.py` runs ingest and query in one `main()`.
+[RAG chatbot example](../../examples/rag-chatbot.md) shows retrieval and agent wiring. Complete ingest steps in [Ingest documents](02-ingest-documents.md) first if your namespace is empty.
 
 ## Example
 
@@ -77,7 +77,7 @@ export ARCFLOW_QDRANT_URL=http://localhost:6333
 python retrieval_wiring.py
 ```
 
-Compare with the split layout in `document_qa.py` (query only) versus `memory_guide_qa.py` (ingest file then query on restructure branch).
+If ingest and query live in separate scripts, run ingest first so the namespace is populated before the workflow run.
 
 ## Verify
 

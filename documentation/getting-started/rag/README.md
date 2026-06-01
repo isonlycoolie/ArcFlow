@@ -16,12 +16,7 @@ This track walks from RAG concepts in ArcFlow through document ingest, agent wir
 
 Complete the [Memory track](../memory/README.md), especially [03 Vector memory setup](../memory/03-vector-memory-setup.md). You need the Python SDK built ([Install and build](../install-and-build.md)) and Qdrant reachable at `ARCFLOW_QDRANT_URL` for the full ingest-and-query path. Stub embedding (`stub/8` or `stub/384`) is enough for local dev without a paid embedding API.
 
-Primary example scripts:
-
-| Branch | Script |
-|--------|--------|
-| Current branch | [RAG chatbot walkthrough](../../examples/rag-chatbot.md) |
-| Examples restructure branch | `examples/rag/memory_guide_qa.py` (ingest plus query in one file) |
+Primary walkthrough: [RAG chatbot example](../../examples/rag-chatbot.md).
 
 ## How these lessons are structured
 

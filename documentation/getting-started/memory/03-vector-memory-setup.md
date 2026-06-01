@@ -39,7 +39,7 @@ Pick one namespace per knowledge base or tutorial (e.g. `doc_qa`, `track_c_kb`, 
 
 ## Example
 
-This mirrors [RAG chatbot walkthrough](../../examples/rag-chatbot.md) on the current branch. On the examples restructure branch the full ingest-plus-query flow is in `examples/rag/memory_guide_qa.py`.
+This mirrors the [RAG chatbot example](../../examples/rag-chatbot.md) ingest and query flow.
 
 Save as `vector_memory_setup.py`:
 

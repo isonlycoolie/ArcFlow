@@ -30,7 +30,7 @@ Chunking can be set on the agent via `MemoryChunkingConfig`. Align chunk size an
 
 For local development, `embedding="stub/8"` (or `stub/384`) avoids API keys. Set `ARCFLOW_QDRANT_URL=http://localhost:6333` when you want real persistence and `MemoryRetrieved` trace events.
 
-The canonical query-side sample on the current branch is [RAG chatbot walkthrough](../../examples/rag-chatbot.md). The restructure branch combines ingest and query in `examples/rag/memory_guide_qa.py`.
+The canonical walkthrough is [RAG chatbot example](../../examples/rag-chatbot.md), which covers ingest, retrieval, and agent wiring end to end.
 
 ## Example
 

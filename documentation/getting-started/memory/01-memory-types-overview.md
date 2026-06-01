@@ -70,7 +70,7 @@ print(session.memory_type, session.scope, session.namespace)
 print(vector.memory_type, vector.embedding)
 ```
 
-Attach memory to an agent (vector config matches [RAG chatbot walkthrough](../../examples/rag-chatbot.md) on the current branch):
+Attach memory to an agent (vector config matches the [RAG chatbot example](../../examples/rag-chatbot.md)):
 
 ```python
 from arcflow import Agent, MemoryConfig, MemoryScope, MemoryType
@@ -88,7 +88,7 @@ agent = Agent(
 )
 ```
 
-On the examples restructure branch the same wiring appears in `examples/rag/memory_guide_qa.py` with namespace `platform-docs-memory-guide`.
+The [RAG chatbot example](../../examples/rag-chatbot.md) uses the same wiring with a documented namespace for ingest and query.
 
 ## Verify
 

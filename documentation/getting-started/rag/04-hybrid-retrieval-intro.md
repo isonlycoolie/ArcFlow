@@ -3,7 +3,7 @@
 
 ## Before you start
 
-Complete [03 Retrieval and agent wiring](03-retrieval-and-agent-wiring.md) so you have seen `MemoryRetrieved` on a populated namespace. Read [RAG chatbot walkthrough](../../examples/rag-chatbot.md) hybrid settings before tuning weights.
+Complete [03 Retrieval and agent wiring](03-retrieval-and-agent-wiring.md) so you have seen `MemoryRetrieved` on a populated namespace. Read [RAG chatbot example](../../examples/rag-chatbot.md) hybrid settings before tuning weights.
 
 ## Concept
 
@@ -43,7 +43,7 @@ Stub embedding (`stub/8`) still runs hybrid config through the workflow for loca
 
 ## Example
 
-From [RAG chatbot walkthrough](../../examples/rag-chatbot.md):
+From [RAG chatbot example](../../examples/rag-chatbot.md):
 
 ```python
 from arcflow import MemoryChunkingConfig, MemoryConfig, MemoryRetrievalConfig, MemoryScope, MemoryType
@@ -69,7 +69,8 @@ Environment for a local hybrid run:
 ```bash
 export ARCFLOW_QDRANT_URL=http://localhost:6333
 export ARCFLOW_QDRANT_HYBRID=true
-python examples/rag/document_qa.py
+# Run your ingest + query script (see RAG chatbot example walkthrough)
+python your_rag_demo.py
 ```
 
 Dense baseline for comparison:
@@ -78,7 +79,7 @@ Dense baseline for comparison:
 retrieval=MemoryRetrievalConfig(mode="dense", top_k=6)
 ```
 
-Run the same question against both configs on an ingested namespace and compare latency plus `MemoryRetrieved` metadata. Start near 0.65 / 0.35 weights if 0.7 / 0.3 recall is weak on keyword-heavy queries (as in restructure branch `memory_guide_qa.py`).
+Run the same question against both configs on an ingested namespace and compare latency plus `MemoryRetrieved` metadata. Start near 0.65 / 0.35 weights if 0.7 / 0.3 recall is weak on keyword-heavy queries.
 
 ## Verify
 

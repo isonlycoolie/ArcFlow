@@ -32,8 +32,8 @@ The return value is the number of chunks written. Empty namespace raises `Memory
 
 Ingest is separate from `Workflow.run()`. Typical patterns:
 
-1. **Setup script**: ingest in `main()` before creating the workflow (see `examples/support/ticket_rag_bot.py`).
-2. **One-shot demo**: read a file, ingest, then run the query in the same process (see `memory_guide_qa.py` on the restructure branch).
+1. **Setup script**: ingest in `main()` before creating the workflow (see [RAG chatbot example](../../examples/rag-chatbot.md)).
+2. **One-shot demo**: read a file, ingest, then run the query in the same process in one script.
 
 Chunking defaults come from the runtime when ingest is called without per-call overrides. Set `MemoryChunkingConfig` on the agent so retrieval expects the same segment sizes you used conceptually at ingest time.
 
@@ -74,14 +74,14 @@ export ARCFLOW_QDRANT_URL=http://localhost:6333
 python ingest_demo.py
 ```
 
-File-based ingest (pattern from restructure branch `memory_guide_qa.py`):
+File-based ingest:
 
 ```python
 from pathlib import Path
 from arcflow.memory import VectorStore
 
 NAMESPACE = "platform-docs-memory-guide"
-doc = Path("examples/rag/data/memory_guide.md").read_text(encoding="utf-8")
+doc = Path("path/to/your-guide.md").read_text(encoding="utf-8")
 store = VectorStore()
 print(store.ingest(NAMESPACE, "memory_guide", doc))
 ```
