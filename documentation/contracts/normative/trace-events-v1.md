@@ -93,3 +93,98 @@
 
 ## Step lifecycle
 
+### TraceEventKind::StepStarted
+
+**Emitted by:** `WorkflowEngine`  
+**Emitted when:** Immediately before `AgentRuntime` for a step.  
+**Count per run:** Once per executed step.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id | string | Identifiers |
+| step_index | usize | 0-based order |
+| agent_name | string | Agent display name |
+
+**NEVER contains:** Step input content, instructions body.
+
+---
+
+### TraceEventKind::StepCompleted
+
+**Emitted by:** `WorkflowEngine`  
+**Emitted when:** Step returns success.  
+**Count per run:** Once per successful step.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id | string | Identifiers |
+| duration_ms | u64 | Step wall time |
+| tokens | TokenUsage | Step token accounting |
+
+---
+
+### TraceEventKind::StepFailed
+
+**Emitted by:** `WorkflowEngine`  
+**Emitted when:** Step returns error.  
+**Count per run:** Once per failed step (run may continue partial).
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id | string | Identifiers |
+| duration_ms | u64 | Elapsed |
+| error_code | string | Sanitized code |
+
+---
+
+### TraceEventKind::StateCommitted
+
+**Emitted by:** `StateEngine`  
+**Emitted when:** Step output committed to run state.  
+**Count per run:** Once per committed step.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id | string | Identifiers |
+| output_size_bytes | usize | Size of committed output |
+
+**NEVER contains:** Output content.
+
+---
+
+## Agent invocation
+
+### TraceEventKind::AgentInvoked
+
+**Emitted by:** `AgentRuntime`  
+**Emitted when:** Agent processing starts for a step.  
+**Count per run:** Once per step invocation.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id | string | Identifiers |
+| agent_name, agent_role | string | Identity |
+| model_id | string | Model identifier string |
+
+---
+
+### TraceEventKind::AgentResponseReceived
+
+**Emitted by:** `AgentRuntime`  
+**Emitted when:** Agent produces output (stub or provider).  
+**Count per run:** Once per step.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id | string | Identifiers |
+| response_size_bytes | usize | Output size only |
+
+**NEVER contains:** Response text.
+
+---
+
+### TraceEventKind::TokensConsumed
+
+**Emitted by:** `AgentRuntime`  
+**Emitted when:** Token counts are known for a step.  
+**Count per run:** Once per step (may coalesce with response).
