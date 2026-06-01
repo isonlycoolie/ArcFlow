@@ -6,7 +6,7 @@ Complete reference for ArcFlow admin routes under `/v1/admin/*`. These routes im
 **Authentication:** all routes require:
 
 ```http
-Authorization: Bearer <ARCFLOW_ADMIN_API_KEY>
+X-ArcFlow-Admin-Key: <ARCFLOW_ADMIN_API_KEY>
 ```
 
 Scoped runtime keys are rejected on admin routes (**403**). Admin routes return **401** when the key is missing or invalid.

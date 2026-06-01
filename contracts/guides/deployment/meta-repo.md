@@ -1,6 +1,6 @@
 # ArcFlow meta-repo (private)
 
-The open-source [ArcFlow](https://github.com/isonlycoolie/ArcFlow) tree stays public. The operator dashboard and pinned releases live in a **private meta-repo** that submodules both projects.
+The open-source [ArcFlow](https://github.com/isonlycoolie/ArcFlow) tree stays public. The operator webapp and pinned releases live in a **private meta-repo** that submodules both projects.
 
 ## Layout
 
@@ -8,7 +8,7 @@ The open-source [ArcFlow](https://github.com/isonlycoolie/ArcFlow) tree stays pu
 ArcFlow-Platform/          # private meta-repo (your name may differ)
   .gitmodules
   arcflow/                 # submodule → ArcFlow OSS
-  dashboard/               # submodule → ArcFlow-Dashboard
+  webapp/                  # submodule → ArcFlow-WebApp
   README.md
   docker-compose.yml       # optional: wires compose from arcflow/docker/
 ```
@@ -26,12 +26,7 @@ cd ArcFlow-Platform
 |---------|------|
 | arcflow-server | 8080 |
 | arcflow-relay | 8090 |
-| dashboard dev (Vite) | 5174 |
+| webapp dev (Next.js) | 5174 |
+| operator-api | 8091 |
 
-## Bootstrap template
-
-Copy [deploy/meta-repo-template/](../../../deploy/meta-repo-template/) into your private repo and set submodule URLs.
-
-## Dashboard
-
-See the `dashboard/` submodule README. It calls admin APIs on `arcflow-server`; it does not embed workflow secrets in the browser build for production.
+See the `webapp/` submodule README. It calls admin APIs on `arcflow-server` via BFF; it does not embed workflow secrets in the browser build for production.

@@ -51,13 +51,13 @@ Contract guides: [contracts/guides/deployment/self-hosted.md](../../contracts/gu
 
 Normative HTTP contract (stale in places): [HTTP API reference](../server/http-api-reference.md). Prefer [HTTP API reference](../server/http-api-reference.md) or [Admin API reference](../operator/admin-api-reference.md) for current routes.
 
-## Operator dashboard (deferred)
+## Operator dashboard
 
-The operator UI lives in the private [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) repository. OSS holds the specification in this documentation and a starter scaffold at `deploy/arcflow-dashboard-v0/`. **FP-3.01** (dashboard v1 UI) is deferred until exit criteria in [Dashboard spec](../operator/dashboard-spec.md) pass in private repo CI. Until then, use admin API directly, OSS shell scripts (`scripts/static-*.sh`), or the v0 starter. See [Dashboard spec](../operator/dashboard-spec.md).
+The operator UI lives in the private [ArcFlow-WebApp](https://github.com/isonlycoolie/ArcFlow-WebApp.git) repository (`webapp/` submodule). Tier 1 flows (sites, knowledge, chat publish, keys) are implemented. Tier 2 usage charts and server-side site list remain future work. See [Dashboard spec](../operator/dashboard-spec.md).
 
 ## Meta-repo layout
 
-Private platform repos submodule OSS ArcFlow and ArcFlow-Dashboard. Template: `deploy/meta-repo-template/`. Convention ports: server 8080, relay 8090, dashboard dev 5174.
+Private platform repos submodule OSS ArcFlow and ArcFlow-WebApp. Template: `deploy/meta-repo-template/`. Convention ports: server 8080, relay 8090, webapp dev 5174, operator-api 8091.
 
 ## Related pages
 

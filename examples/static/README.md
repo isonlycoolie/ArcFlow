@@ -37,7 +37,7 @@ All of that lives in the **ArcFlow Dashboard** (Knowledge tab, Chat tab, Publish
 
 ## Operator setup (dashboard or scripts)
 
-Use the private **ArcFlow-Dashboard** (meta-repo `dashboard/` submodule) or OSS scripts:
+Use the **ArcFlow WebApp** operator dashboard (meta-repo `webapp/` submodule) or OSS scripts:
 
 ```bash
 docker compose -f docker/docker-compose.server.yml up -d
@@ -48,7 +48,7 @@ bash scripts/static-ingest-knowledge.sh
 bash scripts/static-publish-chat.sh
 ```
 
-Dashboard starter: [deploy/arcflow-dashboard-v0/](../../deploy/arcflow-dashboard-v0/). Meta-repo layout: [contracts/guides/deployment/meta-repo.md](../../contracts/guides/deployment/meta-repo.md).
+Dashboard: clone ArcFlow-WebApp (`webapp/`). Meta-repo layout: [contracts/guides/deployment/meta-repo.md](../../contracts/guides/deployment/meta-repo.md).
 
 ## Advanced: direct mode (internal dev only)
 

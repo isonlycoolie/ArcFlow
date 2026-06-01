@@ -1,14 +1,14 @@
 
 # Dashboard specification
 
-The ArcFlow operator dashboard is specified in OSS and implemented in a **private repository**. The UI is **deferred under FP-3.01** until exit criteria pass in [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) CI. Operators today use the admin API, OSS shell scripts, or the v0 starter scaffold.
+The ArcFlow operator dashboard is implemented in the **ArcFlow-WebApp** private repository (`webapp/` submodule). OSS spec archive: `webapp/docs/operator/` in that repo. Operators may also use admin API shell scripts.
 
 ## Repository split
 
 | Repository | Visibility | Contents |
 |------------|------------|----------|
-| [ArcFlow](https://github.com/isonlycoolie/ArcFlow) (OSS) | Public | Operator specs on this site, `deploy/arcflow-dashboard-v0/` starter |
-| [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) | Private | Operator UI, dashboard CI, operator `.env` |
+| [ArcFlow](https://github.com/isonlycoolie/ArcFlow) (OSS) | Public | Operator docs on this site, deploy templates |
+| [ArcFlow-WebApp](https://github.com/isonlycoolie/ArcFlow-WebApp.git) | Private | Operator UI (Next.js), operator-api, dashboard CI |
 
 Dashboard implementation MUST NOT change admin API semantics without updating OSS spec first.
 
@@ -43,10 +43,10 @@ Non-goals for v1: ArcFlow Cloud billing, visual workflow editor, end-user OAuth 
 
 ## Private repo bootstrap
 
-1. Clone [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git).
-2. Sync from OSS starter: `deploy/arcflow-dashboard-v0/`.
-3. Use the [Admin API reference](admin-api-reference.md) (submodule path in meta-repo).
-4. Dev: `npm run dev` on port **5174**; requires `arcflow-server` with matching `ARCFLOW_ADMIN_API_KEY`.
+1. Clone [ArcFlow-WebApp](https://github.com/isonlycoolie/ArcFlow-WebApp.git).
+2. Spec archive: `webapp/docs/operator/` in that repo.
+3. Use the [Admin API reference](admin-api-reference.md).
+4. Dev: `npm run dev` on port **5174**; start `operator-api` on **8091**; requires `arcflow-server` with matching `ARCFLOW_ADMIN_API_KEY`.
 
 Admin key must stay in BFF env, not Vite client bundle. See [API key management](../security/api-key-management.md).
 
@@ -57,11 +57,11 @@ Private platform repos submodule both projects. Template: `deploy/meta-repo-temp
 ```text
 ArcFlow-Platform/
   arcflow/      → OSS submodule
-  dashboard/    → ArcFlow-Dashboard submodule
+  webapp/       → ArcFlow-WebApp submodule
   docker-compose.yml
 ```
 
-Convention ports: server 8080, relay 8090, dashboard dev 5174.
+Convention ports: server 8080, relay 8090, webapp dev 5174, operator-api 8091.
 
 Guide: [contracts/guides/deployment/meta-repo.md](../../contracts/guides/deployment/meta-repo.md).
 
@@ -72,9 +72,9 @@ Guide: [contracts/guides/deployment/meta-repo.md](../../contracts/guides/deploym
 | OSS operator specification on this site | Complete |
 | OSS static scripts (`scripts/static-*.sh`) | Done |
 | Meta-repo template | Done |
-| Dashboard UI in private repo | **Deferred** until E/S/D checklists in [Dashboard spec](dashboard-spec.md) pass |
+| Dashboard UI in ArcFlow-WebApp | **Shipped** (Tier 1); Tier 2 usage/list API pending |
 
-Do not document dashboard UI features as shipped in OSS releases.
+Do not document Tier 2 dashboard features (usage charts, server site list) as shipped.
 
 ## Building operator tooling today
 
@@ -85,7 +85,7 @@ Without the dashboard UI:
 | [Admin API reference](admin-api-reference.md) + curl | Automation, CI |
 | `scripts/static-provision-site.sh` etc. | Parity testing |
 | Custom BFF + internal UI | Enterprise operator portal |
-| `deploy/arcflow-dashboard-v0/` | Starting point for private repo |
+| ArcFlow-WebApp clone | Full operator dashboard + auth |
 
 Admin routes are stable; bind new tools to the [Admin API reference](admin-api-reference.md).
 
