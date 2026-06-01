@@ -18,7 +18,7 @@ Verified baseline: 2026-05-31 against `arcflow-core`, `arcflow-server`, and migr
 | Server SSE streaming | **Deferred** | FP-2: `GET /v1/runs/{id}/events` not implemented |
 | OpenTelemetry metrics | **Alpha** | FP-4: opt-in export stabilizing |
 | CLI `arcflow validate` | **Stub** | FP-5.04: use JSON Schema in CI until shipped |
-| Operator dashboard UI | **Deferred** | FP-3.01: private ArcFlow-Dashboard repo; OSS spec complete |
+| Operator dashboard UI | **Deferred** | FP-3.01: use admin API and shell scripts until a UI ships |
 | Edge WASM | **Alpha** | Linear stub only; not for production |
 
 ### Production areas in brief
@@ -39,9 +39,9 @@ Verified baseline: 2026-05-31 against `arcflow-core`, `arcflow-server`, and migr
 |----|-----|--------|-------------------|
 | **FP-1.01** | Graph recovery resume from checkpoint | **Partial** | Schema and `persist_graph_checkpoint` exist; resume dispatch incomplete. Plan: `feat/fp-1-graph-recovery`. Do not rely on mid-graph resume in production. Linear recovery works. |
 | **FP-2** | Server SSE `/v1/runs/{id}/events` | **Deferred** | Poll `GET /v1/runs/{id}` or trace. SDK `run_stream()` works in-process. Browser polls Relay trace for `TokenEmitted`. Plan: `feat/fp-2-server-streaming`. |
-| **FP-3.01** | Operator dashboard UI | **Deferred** | OSS [Dashboard spec](dashboard-spec.md) and admin API are source of truth. UI lives in private [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git). Use admin API, `scripts/static-*.sh`, or v0 starter until [Dashboard spec](dashboard-spec.md) passes in private CI. |
+| **FP-3.01** | Operator dashboard UI | **Deferred** | Use admin API (`/v1/admin/*`), `scripts/static-*.sh`, or the v0 starter in `deploy/arcflow-dashboard-v0/`. See [Static product overview](../static-product/overview.md) and [HTTP API reference](../server/http-api-reference.md). |
 | **FP-4** | Stable OTel metrics export | **Alpha** | Core runtime does not need OTel. Enable only with review of label cardinality and SEC-1. Plan: `feat/fp-4-observability`. |
-| **FP-5.04** | Full `arcflow validate` schema check | **Stub** | CLI command exists but does not fully validate. Validate against [v1.schema.json](../contracts/rcs-schema.md) in CI. Plan: `feat/fp-5-cli-validate`. |
+| **FP-5.04** | Full `arcflow validate` schema check | **Stub** | CLI command exists but does not fully validate. Validate against [RCS v1 JSON Schema](../contracts/rcs-v1-schema.md) in CI. Plan: `feat/fp-5-cli-validate`. |
 | FP-7 | Production signoff checklist | Tracking | See FINAL-PRODUCTION-READINESS-PLAN in repo planning docs |
 
 ### FP-1.01: Graph recovery (partial)
@@ -59,9 +59,9 @@ Operators today:
 - Call admin routes (`POST /v1/admin/sites`, knowledge ingest, chat publish) with `ARCFLOW_ADMIN_API_KEY`
 - Run `arcflow migrate up` and health checks via CLI
 - Query Postgres for runs and traces
-- Sync private dashboard repo from [deploy/arcflow-dashboard-v0/](../../deploy/arcflow-dashboard-v0/) when building UI
+- Use the v0 starter in `deploy/arcflow-dashboard-v0/` when building a custom UI
 
-OSS spec must lead API changes; dashboard implementation must not drift admin semantics without spec updates.
+Document admin behavior in [Static product overview](../static-product/overview.md) and the [HTTP API reference](../server/http-api-reference.md) before shipping UI changes.
 
 ### FP-4: OTel (alpha)
 

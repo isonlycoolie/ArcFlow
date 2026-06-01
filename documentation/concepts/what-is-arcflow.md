@@ -14,10 +14,10 @@ Different readers care about different guarantees. The table below maps personas
 | Platform engineer | Shared runtime, recovery, workflow registry, Postgres-backed runs |
 | Agent engineer | Multi-agent pipelines, tools, RAG, conditional graph routing |
 | Frontend developer | Chat and forms in the browser without CDN or bundle secrets |
-| Operator | Sites, knowledge bases, semver publish for published chat workflows |
+| Platform operator | Sites, knowledge bases, semver publish via admin API |
 | Compliance | SEC-1 metadata-only traces, self-hosted API keys, clear auth boundaries |
 
-If you are deciding where to start, platform and agent engineers usually begin with the SDK or server path. Frontend and operator readers usually begin with Relay, the static SDK, and the admin API. Compliance readers should read [SEC-1 and data safety](sec-1-and-data-safety.md) before any production deployment.
+If you are deciding where to start, platform and agent engineers usually begin with the SDK or server path. Frontend and static-product readers usually begin with Relay, the static SDK, and the admin API. Compliance readers should read [SEC-1 and data safety](sec-1-and-data-safety.md) before any production deployment.
 
 ## What ArcFlow is not
 

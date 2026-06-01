@@ -16,7 +16,7 @@ All paths call `arcflow-core::WorkflowEngine`. Workflow semantics, trace event k
 | arcflow-static | `packages/arcflow-static` | Browser `runPublished()` | No (calls Relay or server) |
 | arcflow CLI | `cli/arcflow-cli` | Local run, trace, migrate | For `migrate` only |
 | VS Code extension | `extensions/vscode-arcflow` | Authoring, debug, graph view | No |
-| WASM | `runtime/arcflow-wasm` | Edge Workers (alpha) | No |
+| WASM | [Edge alpha](../wasm/edge-alpha.md) | Edge Workers (alpha) | No |
 
 ## Scenario guide
 
@@ -26,7 +26,7 @@ All paths call `arcflow-core::WorkflowEngine`. Workflow semantics, trace event k
 | Multi-tenant SaaS backend | arcflow-server + your auth layer | Central registry, idempotency, persisted runs and traces |
 | Public website chat widget | Relay + static SDK + admin publish | Site token + origin gate; LLM keys on server only |
 | Local debugging | SDK or CLI, optional VS Code | Fast iteration; trace via SDK result or `arcflow trace` |
-| Operator runbooks | CLI + SQL + admin API | Dashboard UI deferred (FP-3.01); use admin routes and scripts today |
+| Platform runbooks | CLI + SQL + admin API | Dashboard UI deferred (FP-3.01); use admin routes and scripts today |
 | Edge experiment | WASM (alpha) | Linear stub only; no graph, RAG, or recovery |
 
 ## Surface details
@@ -45,7 +45,7 @@ The production HTTP API: `POST /v1/runs`, run status, trace, HITL approve, exter
 
 ### arcflow-relay
 
-Stateless proxy for browsers. Validates site token, checks `Origin` against `allowed_origins`, enforces `rate_limit_rpm`. Proxies run create, status, and trace to upstream server with scoped keys. Does not execute workflows itself. BYO deployment example: `examples/relay/byo-docker/`.
+Stateless proxy for browsers. Validates site token, checks `Origin` against `allowed_origins`, enforces `rate_limit_rpm`. Proxies run create, status, and trace to upstream server with scoped keys. Does not execute workflows itself. BYO deployment walkthrough: [Relay BYO deployment](../examples/relay-byo-deployment.md).
 
 ### arcflow-static (`@arcflow/static`)
 
@@ -61,7 +61,7 @@ In-repo extension for workflow graph visualization, run from workspace, metadata
 
 ### WASM (alpha)
 
-`runtime/arcflow-wasm` targets Cloudflare Workers and edge experiments. Linear workflow stub only. Graph, RAG, and recovery are not supported. Not recommended for production.
+See [Edge alpha](../wasm/edge-alpha.md). Linear workflow stub only for Cloudflare Workers and edge experiments. Graph, RAG, and recovery are not supported. Not recommended for production.
 
 ## Postgres: when it matters
 

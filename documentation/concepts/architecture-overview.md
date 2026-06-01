@@ -9,7 +9,7 @@ At the top sit the **surfaces**: Python SDK, TypeScript SDK, `arcflow-server`, `
 
 Below that is **RCS v1 JSON**: workflow definitions, agent definitions, run requests, and `exec_config`. Normative schemas are documented in [RCS schema](../contracts/rcs-schema.md). See [The RCS contract](the-rcs-contract.md) for how contract-first design keeps SDK and HTTP behavior aligned.
 
-The **engine** (`arcflow-core`) performs validate, schedule, execute, trace, and recover. Entry point for runs is `WorkflowEngine::execute_with_config`. Linear runs use sorted steps; graph runs use the graph scheduler in `workflow/graph/scheduler.rs`.
+The **engine** (`arcflow-core`) performs validate, schedule, execute, trace, and recover. Linear runs use sorted steps; graph runs use the graph scheduler with explicit nodes, edges, and join points.
 
 **Persistence and external services** split by concern:
 

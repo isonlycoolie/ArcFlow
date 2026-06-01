@@ -30,7 +30,7 @@ All execution paths converge on `arcflow-core::WorkflowEngine`. Behavior is cons
 | arcflow-static | `packages/arcflow-static` | Browser `runPublished()` | No (calls Relay or server) |
 | arcflow CLI | `cli/arcflow-cli` | Local run, trace, migrate | For `migrate` only |
 | VS Code extension | `extensions/vscode-arcflow` | Authoring, debug, graph view | No |
-| WASM | `runtime/arcflow-wasm` | Edge Workers (alpha) | No |
+| WASM | [Edge alpha](../wasm/edge-alpha.md) | Edge Workers (alpha) | No |
 
 | Scenario | Recommended surface |
 |----------|---------------------|
@@ -38,7 +38,7 @@ All execution paths converge on `arcflow-core::WorkflowEngine`. Behavior is cons
 | Multi-tenant SaaS backend | arcflow-server plus your auth layer |
 | Public website chat widget | Relay + static SDK + admin publish |
 | Local debugging | SDK or CLI, optional VS Code |
-| Operator runbooks | CLI, SQL, admin API; dashboard UI deferred (FP-3.01) |
+| Platform runbooks | CLI, SQL, admin API; dashboard UI deferred (FP-3.01) |
 
 For a full comparison and Postgres notes, see [Surfaces and when to use them](../concepts/surfaces-and-when-to-use-them.md).
 

@@ -5,15 +5,15 @@ RCS (Runtime Contract Schema) v1 is the shared language between ArcFlow surfaces
 
 ## Why contract-first matters
 
-Without a single schema, each surface would drift: the server might accept a field the Python SDK never sends, or traces might omit fields the VS Code timeline expects. ArcFlow treats [RCS schema](../contracts/rcs-schema.md) and Rust types in `runtime/arcflow-core/src/rcs/types.rs` as the source of truth for structure. Surface APIs are adapters, not parallel definitions.
+Without a single schema, each surface would drift: the server might accept a field the Python SDK never sends, or traces might omit fields the VS Code timeline expects. ArcFlow treats the published [RCS schema](../contracts/rcs-schema.md) and [RCS v1 JSON Schema](../contracts/rcs-v1-schema.md) as the structural source of truth. Surface APIs are adapters, not parallel definitions.
 
 The hierarchy in practice:
 
-1. **Normative contracts** under published contract pages when marked current and matching code
-2. **this documentation site** for end-to-end flows, parity, and JSON examples
-3. **Source code** when contracts are silent or known stale
+1. **Contract pages** on this site ([RCS schema](../contracts/rcs-schema.md), [Trace events (normative)](../contracts/trace-events-normative.md))
+2. **Guides and quickstarts** for end-to-end flows, parity, and JSON examples
+3. **Release notes and maturity** when a page is marked stale or deferred
 
-Server route documentation note: [HTTP API reference](../server/http-api-reference.md) may lag the implemented routes in `server/arcflow-server/src/lib.rs`. Prefer the [HTTP API reference](../server/http-api-reference.md) or [server/](../server/overview.md) docs when integrating via HTTP.
+When integrating via HTTP, use the [HTTP API reference](../server/http-api-reference.md) and [Server overview](../server/overview.md). Some older summaries may lag implemented routes; prefer the server reference over draft contract filenames.
 
 ## Core RCS types
 
@@ -98,7 +98,7 @@ Trace event names and allowed fields are normative under [Trace events (normativ
 
 ## Validation today
 
-Rust validates before run. CI should validate workflow JSON against `v1.schema.json` until `arcflow validate` ships (FP-5.04). Graph recovery resume uses checkpoint schema in Postgres but dispatch is incomplete (FP-1.01).
+Rust validates before run. CI should validate workflow JSON against the [RCS v1 JSON Schema](../contracts/rcs-v1-schema.md) until `arcflow validate` ships (FP-5.04). Graph recovery resume uses checkpoint schema in Postgres but dispatch is incomplete (FP-1.01).
 
 ## Related pages
 
