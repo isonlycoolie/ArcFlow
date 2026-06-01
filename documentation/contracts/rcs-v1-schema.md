@@ -93,3 +93,98 @@ Machine-readable JSON Schema for the Runtime Contract Specification (RCS) v0.1. 
         "GraphIterationLimitReached"
       ],
       "description": "Observability event classification. Sprint 5 tracing engine."
+    },
+    "ProviderId": {
+      "type": "string",
+      "enum": ["OpenAI", "Anthropic", "Gemini", "Custom"],
+      "description": "LLM provider identifier on ProviderConfig. Sprint 6 providers."
+    },
+    "RetryPolicy": {
+      "type": "object",
+      "description": "Retry limits for workflow or step failures. Sprint 7 retry engine.",
+      "properties": {
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Total attempts including the first run. Sprint 7."
+        },
+        "backoff_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Initial backoff delay in milliseconds. Sprint 7."
+        },
+        "max_backoff_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Upper bound on backoff delay in milliseconds. Sprint 7."
+        }
+      },
+      "required": ["max_attempts", "backoff_ms", "max_backoff_ms"],
+      "additionalProperties": false
+    },
+    "MemoryConfig": {
+      "type": "object",
+      "description": "Agent memory access configuration. Sprint 4, extended Phase 2.5 (RCS v0.5).",
+      "properties": {
+        "memory_type": { "$ref": "#/$defs/MemoryType" },
+        "scope": { "$ref": "#/$defs/MemoryScope" },
+        "namespace": {
+          "type": "string",
+          "description": "Required for persistent and vector backends. Sprint 4."
+        },
+        "ttl_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Optional TTL for memory entries in seconds. Sprint 4."
+        },
+        "embedding": {
+          "type": "string",
+          "description": "Embedding provider spec, e.g. openai/text-embedding-3-small. Phase 2.5."
+        },
+        "retrieval": { "$ref": "#/$defs/MemoryRetrievalConfig" },
+        "chunking": { "$ref": "#/$defs/MemoryChunkingConfig" }
+      },
+      "required": ["memory_type", "scope"],
+      "additionalProperties": false
+    },
+    "RetrievalModeSpec": {
+      "type": "string",
+      "enum": ["dense", "hybrid"],
+      "description": "Vector retrieval mode. Phase 2.5."
+    },
+    "RerankProviderSpec": {
+      "type": "string",
+      "enum": ["cohere", "local"],
+      "description": "Optional rerank provider. Phase 2.5."
+    },
+    "MemoryRetrievalConfig": {
+      "type": "object",
+      "description": "Hybrid retrieval and rerank settings. Phase 2.5.",
+      "properties": {
+        "mode": { "$ref": "#/$defs/RetrievalModeSpec" },
+        "dense_weight": { "type": "number", "minimum": 0, "maximum": 1 },
+        "sparse_weight": { "type": "number", "minimum": 0, "maximum": 1 },
+        "rerank": { "$ref": "#/$defs/RerankProviderSpec" },
+        "top_k": { "type": "integer", "minimum": 1, "maximum": 100 }
+      },
+      "additionalProperties": false
+    },
+    "MemoryChunkingConfig": {
+      "type": "object",
+      "description": "Document chunking for vector ingest. Phase 2.5.",
+      "properties": {
+        "strategy": { "type": "string" },
+        "chunk_size": { "type": "integer", "minimum": 64 },
+        "overlap": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "ToolDefinition": {
+      "type": "object",
+      "description": "External tool exposed to an agent. Sprint 4 tool runtime.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Tool name used for dispatch. Sprint 4."
+        },
+        "input_schema": {
