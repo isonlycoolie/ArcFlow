@@ -378,3 +378,46 @@
 
 ## System events
 
+### TraceEventKind::TraceStorageWarning
+
+**Emitted by:** `TraceEventEmitter` / `TraceStore`  
+**Emitted when:** Per-run event cap reached; oldest events dropped.  
+**Count per run:** As needed (warning, not fatal).
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id | string | Run UUID |
+| events_dropped | u32 | Dropped since last warning |
+| capacity_limit | u32 | `MAX_TRACE_EVENTS_PER_RUN` |
+
+---
+
+### TraceEventKind::RetryAttempted
+
+**Emitted by:** Retry engine (variant defined Sprint 5; wired Sprint 7)  
+**Emitted when:** Step retry scheduled.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id | string | Identifiers |
+| attempt_number | u32 | 1-based retry index |
+| max_attempts | u32 | Policy cap |
+| backoff_ms | u64 | Delay before retry |
+| trigger_error_code | string | Sanitized trigger |
+
+---
+
+## Sprint 4 â†’ Sprint 5 migration
+
+| Sprint 4 (RCS / emitter) | Sprint 5 |
+|--------------------------|----------|
+| `ToolExecuted` (single event) | `ToolCallStarted` + `ToolCallCompleted` \| `ToolCallFailed` |
+| `MemoryRead` / `MemoryWrite` (JSON metadata blob) | Same kinds, structured fields per table above |
+| No `sequence` on events | `sequence` required on envelope |
+| Events in `rcs::types` | Canonical enum in `tracing::events`; RCS may re-export subset |
+
+## Approval
+
+- [ ] CAA â€” schema complete, SEC-1 satisfied  
+- [ ] OBA â€” field names semantic, granularity approved  
+- [ ] QAA â€” test matrix can be derived from this document  
