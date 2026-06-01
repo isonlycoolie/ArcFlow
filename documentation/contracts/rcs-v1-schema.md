@@ -283,3 +283,98 @@ Machine-readable JSON Schema for the Runtime Contract Specification (RCS) v0.1. 
       "description": "Ordered step within a workflow. Sprint 2 execution.",
       "properties": {
         "id": { "$ref": "#/$defs/Uuid" },
+        "agent_id": {
+          "$ref": "#/$defs/Uuid",
+          "description": "Agent that executes this step. Sprint 2â€“3."
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Execution order among steps. Sprint 2."
+        },
+        "fallback_step_id": {
+          "$ref": "#/$defs/Uuid",
+          "description": "Optional fallback step on failure. Sprint 7."
+        },
+        "hitl": {
+          "$ref": "#/$defs/HitlConfig",
+          "description": "Optional human approval gate (Phase 1.4)."
+        }
+      },
+      "required": ["id", "agent_id", "order"],
+      "additionalProperties": false
+    },
+    "HitlConfig": {
+      "type": "object",
+      "description": "Human-in-the-loop gate on a step (Phase 1.4).",
+      "properties": {
+        "approval_key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable key scoped to the run for approval requests."
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Wall-clock seconds before the approval expires."
+        },
+        "interrupt": {
+          "type": "boolean",
+          "default": true,
+          "description": "When true, checkpoint and return Interrupted instead of blocking."
+        }
+      },
+      "required": ["approval_key", "timeout_seconds"],
+      "additionalProperties": false
+    },
+    "ExecutionMode": {
+      "type": "string",
+      "enum": ["linear", "graph"],
+      "default": "linear",
+      "description": "Workflow execution strategy. linear = ordered steps; graph = DAG with conditional edges. Phase 1.1."
+    },
+    "GraphNode": {
+      "type": "object",
+      "description": "Node in a graph workflow referencing a StepDefinition. Phase 1.1.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Graph-local node identifier."
+        },
+        "step_ref": {
+          "$ref": "#/$defs/Uuid",
+          "description": "References StepDefinition.id."
+        },
+        "inputs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional input state keys for this node."
+        },
+        "outputs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional output state keys for this node."
+        }
+      },
+      "required": ["id", "step_ref"],
+      "additionalProperties": false
+    },
+    "GraphEdge": {
+      "type": "object",
+      "description": "Directed edge between graph nodes. Phase 1.1.",
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Source node id."
+        },
+        "to": {
+          "type": "string",
+          "description": "Target node id; omit for terminal."
+        },
+        "condition": {
+          "type": "string",
+          "description": "Edge key returned by source node; omit for unconditional."
+        }
+      },
+      "required": ["from"],
+      "additionalProperties": false
