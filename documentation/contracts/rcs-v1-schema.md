@@ -473,3 +473,98 @@ Machine-readable JSON Schema for the Runtime Contract Specification (RCS) v0.1. 
     },
     "ExternalOutcomeStatus": {
       "type": "string",
+      "enum": ["success", "failed", "needs_input"]
+    },
+    "ExternalOutcomeReport": {
+      "type": "object",
+      "properties": {
+        "binding_id": { "type": "string" },
+        "status": { "$ref": "#/$defs/ExternalOutcomeStatus" },
+        "error_code": { "type": "string" },
+        "fields": { "type": "object" },
+        "artifact_refs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["binding_id", "status"],
+      "additionalProperties": false
+    },
+    "WorkflowDefinition": {
+      "type": "object",
+      "description": "Complete workflow registered with the runtime. Sprint 2â€“3, Sprint 7 retry.",
+      "properties": {
+        "id": { "$ref": "#/$defs/Uuid" },
+        "name": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Human-readable workflow name for traces and errors. Sprint 2â€“3."
+        },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/StepDefinition" },
+          "description": "Steps comprising the workflow. Sprint 2â€“3."
+        },
+        "retry_policy": {
+          "$ref": "#/$defs/RetryPolicy",
+          "description": "Default retry policy for all steps. Sprint 7."
+        },
+        "execution_mode": {
+          "$ref": "#/$defs/ExecutionMode",
+          "description": "linear (default) or graph. Phase 1.1."
+        },
+        "graph": {
+          "$ref": "#/$defs/GraphDefinition",
+          "description": "Required when execution_mode is graph. Phase 1.1."
+        },
+        "external_bindings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ExternalBinding" },
+          "description": "Developer-owned external systems (RCS v0.7)."
+        }
+      },
+      "required": ["id", "name", "steps"],
+      "additionalProperties": false
+    },
+    "RunRequest": {
+      "type": "object",
+      "description": "Instruction to execute a registered workflow. Sprint 2â€“3, Sprint 5â€“6.",
+      "properties": {
+        "workflow_id": {
+          "$ref": "#/$defs/Uuid",
+          "description": "Registered workflow id. Sprint 2â€“3."
+        },
+        "input": {
+          "type": "string",
+          "description": "Caller input text for the run. Sprint 2â€“3."
+        },
+        "trace_id": {
+          "$ref": "#/$defs/Uuid",
+          "description": "Correlation id for observability. Sprint 5."
+        },
+        "provider_config": {
+          "$ref": "#/$defs/ProviderConfig",
+          "description": "Optional provider override. Sprint 6."
+        }
+      },
+      "required": ["workflow_id", "input", "trace_id"],
+      "additionalProperties": false
+    },
+    "StepResult": {
+      "type": "object",
+      "description": "Result of one step within a workflow run. Sprint 5â€“7.",
+      "properties": {
+        "step_id": { "$ref": "#/$defs/Uuid" },
+        "status": { "$ref": "#/$defs/ExecutionStatus" },
+        "output": {
+          "type": "string",
+          "description": "Step output text when present. Sprint 5."
+        },
+        "latency_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Wall-clock latency in milliseconds. Sprint 5."
+        },
+        "tokens_used": {
+          "type": "integer",
+          "minimum": 0,
