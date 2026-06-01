@@ -283,3 +283,98 @@
 
 **Emitted by:** Memory coordinator  
 **Emitted when:** Read completes.  
+**Count per run:** Once per read operation.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id, agent_name | string | Context |
+| memory_type, key | string | Backend + key |
+| hit | bool | Cache hit |
+| duration_ms | u64 | Latency |
+
+**NEVER contains:** Retrieved value.
+
+---
+
+### TraceEventKind::MemoryDegraded
+
+**Emitted by:** Memory coordinator  
+**Emitted when:** Backend unavailable; fallback used.  
+**Count per run:** As needed.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id | string | Run UUID |
+| memory_type | string | Affected backend kind |
+| backend | string | `redis` \| `postgresql` \| `qdrant` |
+| reason | string | Sanitized reason |
+
+---
+
+### TraceEventKind::MemoryEvicted
+
+**Emitted by:** Memory coordinator  
+**Emitted when:** Key evicted (TTL or delete).  
+**Count per run:** As needed.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id | string | Run UUID |
+| memory_type, key | string | Target |
+| eviction_reason | string | `ttl_expiry` \| `explicit_delete` |
+
+---
+
+## Provider events (Sprint 5 schema; Sprint 6 wiring)
+
+### TraceEventKind::ProviderRequestSent
+
+**Emitted by:** Provider layer (stub counts in Sprint 5)  
+**Emitted when:** Before LLM API call.  
+**Count per run:** Per provider call.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id | string | Identifiers |
+| provider_id | string | Provider enum name |
+| model_id | string | Model id |
+| max_tokens_budget | u32 | Configured cap |
+
+**NEVER contains:** Prompt text.
+
+---
+
+### TraceEventKind::ProviderResponseReceived
+
+**Emitted when:** After LLM API returns.  
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id | string | Identifiers |
+| duration_ms | u64 | RTT |
+| tokens | TokenUsage | Usage counts |
+
+**NEVER contains:** Completion text.
+
+---
+
+### TraceEventKind::ProviderRateLimited
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id | string | Identifiers |
+| retry_after_ms | u64 | Hint from provider |
+
+---
+
+### TraceEventKind::ProviderError
+
+| Field | Type | Description |
+|-------|------|-------------|
+| run_id, step_id | string | Identifiers |
+| error_code | string | Sanitized provider error |
+
+---
+
+## System events
+
