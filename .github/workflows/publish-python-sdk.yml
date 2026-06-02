@@ -1,0 +1,91 @@
+name: Publish Python SDK
+
+on:
+  push:
+    tags:
+      - "sdk-python/v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. sdk-python/v0.3.0)"
+        required: true
+        type: string
+      dry_run:
+        description: "Validate and build only; skip PyPI and GitHub Release"
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: pypi-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'isonlycoolie/ArcFlow'
+    uses: ./.github/workflows/publish-python-sdk-build.yml
+    with:
+      tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+
+  pypi-sanity:
+    needs: build
+    if: github.repository == 'isonlycoolie/ArcFlow'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check version not on PyPI
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: bash scripts/check-pypi-version-absent.sh
+
+  publish:
+    needs: [build, pypi-sanity]
+    if: >-
+      github.repository == 'isonlycoolie/ArcFlow' &&
+      github.event_name == 'push' &&
+      startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: dist-download
+          merge-multiple: true
+      - name: Stage dist
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sdk-python/dist
+          find dist-download -type f \( -name '*.whl' -o -name '*.tar.gz' \) -exec cp -t sdk-python/dist {} +
+          ls -la sdk-python/dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: sdk-python/dist
+          verbose: true
+
+  github-release:
+    needs: [build, publish]
+    if: >-
+      github.repository == 'isonlycoolie/ArcFlow' &&
+      github.event_name == 'push' &&
+      startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: release-assets
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.build.outputs.tag }}
+          name: Python SDK ${{ needs.build.outputs.version }}
+          body: |
+            PyPI: https://pypi.org/project/arcflow/${{ needs.build.outputs.version }}/
+            Install: `pip install arcflow==${{ needs.build.outputs.version }}`
+          files: release-assets/**/*
