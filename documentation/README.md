@@ -50,7 +50,7 @@ All surfaces call the same Rust engine (`arcflow-core`). Behavior is consistent;
 
 ## Writing and validation
 
-Pages follow the arcflow-documentation skill: report tone, concrete runnable examples, and cross-links to related guides. Label deferred features (Graph recovery resume through CLI validate command) explicitly in [maturity and known gaps](concepts/maturity-and-known-gaps.md). Brand assets live at [Arcflow.png](assets/brand/arcflow.png) for reuse in docs pages.
+Pages follow the arcflow-documentation skill: report tone, concrete runnable examples, and cross-links to related guides. Label deferred features (Graph recovery resume through CLI validate command) explicitly in [maturity and known gaps](concepts/maturity-and-known-gaps.md). Brand assets live at [ArcFlow logo](assets/brand/arcflow.png) for reuse in docs pages.
 
 **Linking rules for published pages:**
 

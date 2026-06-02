@@ -80,6 +80,7 @@ const SLUG_OVERRIDES = new Map([
   ["external-webhook", "External webhook"],
   ["rag-chatbot", "RAG chatbot"],
   ["catalog", "Examples catalog"],
+  ["arcflow.png", "ArcFlow logo"],
   ["chat-rag", "Chat RAG example"],
   ["online-application-chatbot", "Online application chatbot"],
   ["byo-docker", "BYO Docker relay"],
