@@ -1,6 +1,6 @@
 # Python SDK release (maintainers)
 
-This runbook covers PyPI trusted publishing, GitHub environment setup, and cutting a release for the `arcflow` package.
+This runbook covers PyPI trusted publishing, GitHub environment setup, and cutting a release for the **`arcflow-sdk`** distribution (import package remains `arcflow`).
 
 ## Dual-pipeline CI
 
@@ -30,12 +30,12 @@ Future optimization: `sccache` with an org S3 bucket when `SCCACHE_BUCKET` and I
 
 Configure **after** [`.github/workflows/publish-python-sdk.yml`](../../../.github/workflows/publish-python-sdk.yml) is on `master`.
 
-1. Register the project on [pypi.org](https://pypi.org/) as **`arcflow`** (if not already created).
+1. Register the project on [pypi.org](https://pypi.org/) as **`arcflow-sdk`** (if not already created).
 2. Open **Publishing** → **Add a new pending publisher** and enter:
 
 | Field | Value |
 |-------|--------|
-| PyPI project name | `arcflow` |
+| PyPI project name | `arcflow-sdk` |
 | Owner | `isonlycoolie` |
 | Repository name | `ArcFlow` |
 | Workflow name | `publish-python-sdk.yml` |
@@ -72,7 +72,7 @@ In the **ArcFlow** repository on GitHub:
 6. **Smoke install:**
 
    ```bash
-   pip install "arcflow==0.3.0"
+   pip install "arcflow-sdk==0.3.0"
    python -c "from arcflow import Agent, Workflow; print('ok')"
    ```
 
@@ -113,4 +113,4 @@ make build-wheels   # requires Docker on Linux for manylinux wheels
 3. Create GitHub environment `pypi`.
 4. Run workflow_dispatch with `dry_run: true` for `sdk-python/v0.3.0`.
 5. Push tag `sdk-python/v0.3.0` and approve environment.
-6. Confirm [PyPI project](https://pypi.org/project/arcflow/) and GitHub Release assets.
+6. Confirm [PyPI project](https://pypi.org/project/arcflow-sdk/) and GitHub Release assets.

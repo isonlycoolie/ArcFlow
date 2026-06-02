@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# Fail if the given version is already published on PyPI for project arcflow.
+# Fail if the given version is already published on PyPI for project arcflow-sdk.
 set -euo pipefail
 
 VERSION="${VERSION:-}"
-PROJECT="${PYPI_PROJECT:-arcflow}"
+PROJECT="${PYPI_PROJECT:-arcflow-sdk}"
 if [[ -z "$VERSION" ]]; then
   echo "ERROR: set VERSION (e.g. 0.3.0)"
   exit 1
 fi
 
 URL="https://pypi.org/pypi/${PROJECT}/json"
-HTTP_CODE="$(curl -sS -o /tmp/pypi-arcflow.json -w "%{http_code}" "$URL" || true)"
+HTTP_CODE="$(curl -sS -o /tmp/pypi-project.json -w "%{http_code}" "$URL" || true)"
 
 if [[ "$HTTP_CODE" == "404" ]]; then
   echo "OK: project ${PROJECT} not on PyPI yet (or no releases)"
@@ -24,7 +24,7 @@ fi
 
 if python3 -c "
 import json, sys
-data = json.load(open('/tmp/pypi-arcflow.json'))
+data = json.load(open('/tmp/pypi-project.json'))
 releases = data.get('releases', {})
 if '${VERSION}' in releases and releases['${VERSION}']:
     sys.exit(1)
