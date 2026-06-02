@@ -26,6 +26,12 @@ ArcFlow_Improvement_Plans/
 contracts/sprint1-acceptance-evidence.md
 contracts/sprint*-acceptance-evidence.md
 
+# Local PyPI upload token (scripts/publish-pypi.ps1)
+scripts/.pypi-token
+
+# Local smoke harness (not part of the product)
+/test-app/
+
 # Rust build
 /target/
 
