@@ -40,7 +40,7 @@ Most agent frameworks optimize for getting a demo running quickly. ArcFlow optim
 
 ### One engine, every surface
 
-Orchestration lives entirely in `arcflow-core` (Rust). Python and TypeScript serialize workflow definitions into the Runtime Contract Specification (RCS), invoke the engine, and deserialize results. A retry policy fix or recovery bug patch ships once and applies everywhere. See [ADR-001](docs/architecture/ADR-001.md).
+Orchestration lives entirely in `arcflow-core` (Rust). Python and TypeScript serialize workflow definitions into the Runtime Contract Specification (RCS), invoke the engine, and deserialize results. A retry policy fix or recovery bug patch ships once and applies everywhere. See [Architecture overview](documentation/concepts/architecture-overview.md).
 
 ### Contract-first integration
 
