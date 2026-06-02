@@ -1,0 +1,5 @@
+# Copy to scripts/.pypi-token and paste your PyPI API token on the next line (no quotes).
+# Create token: https://pypi.org/manage/account/token/  (scope: project arcflow-sdk)
+# scripts/.pypi-token is gitignored — never commit it.
+
+pypi-REPLACE_ME
