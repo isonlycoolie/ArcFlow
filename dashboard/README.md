@@ -28,7 +28,7 @@ Keep OSS `dashboard/spec/` in sync when changing admin API bindings; mirror upda
 
 ## Related OSS docs
 
-- [Meta-repo deployment guide](../contracts/guides/deployment/meta-repo.md)
+- [Meta-repo deployment guide](../documentation/deployment/overview.md#meta-repo-layout)
 - [Static site examples](../examples/static/README.md)
 - [Static product overview](../documentation/static-product/overview.md)
 

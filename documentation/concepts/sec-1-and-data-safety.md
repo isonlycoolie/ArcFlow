@@ -16,7 +16,7 @@ Traces and persisted trace events **must not** include:
 | RAG content | Retrieved chunk text, raw embedding inputs |
 | PII | Personal data unless your deployment policy explicitly allows it and you have controls |
 
-This aligns with normative guidance in [contracts/guides/observability/](../../contracts/guides/observability/) and [trace-events-v1.md](../contracts/trace-events-normative.md). Engine implementation: `runtime/arcflow-core/src/tracing/events.rs`.
+This aligns with [Execution traces](../guides/observability/execution-traces.md), [Trace data policy rules](../guides/observability/sec-1-rules.md), and [trace-events-normative.md](../contracts/trace-events-normative.md). Engine implementation: `runtime/arcflow-core/src/tracing/events.rs`.
 
 ### Why the boundary exists
 

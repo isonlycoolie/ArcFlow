@@ -57,7 +57,7 @@ Full auth detail: [authentication.md](authentication.md).
 
 ## Contract drift (K-10)
 
-Normative [server-api-v1.md](../server/http-api-reference.md) lists only `/health`, `/ready`, and deprecated `POST /v1/workflows/run`. The implemented router matches [HTTP API reference](../server/http-api-reference.md). When integrating, prefer this [HTTP API reference](../server/http-api-reference.md).
+When integrating, prefer [HTTP API reference](http-api-reference.md) or [Admin API reference](../operator/admin-api-reference.md). Implemented routes match `server/arcflow-server/src/lib.rs`.
 
 ## Quick verification
 

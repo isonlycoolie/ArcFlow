@@ -251,6 +251,6 @@ Add `-v` only if you intend to wipe the Postgres volume.
 | Tutorial with verification checklist | [Track B: Server API](../tutorials/track-b-server-api.md) |
 | HITL and external on server | [Integrating track](integrating/README.md) |
 | Workflow registry and semver | [Workflow registry](../guides/workflows/workflow-registry.md) |
-| Production compose | `docker/docker-compose.prod.yml`, `contracts/guides/deployment/self-hosted.md` |
+| Production compose | `docker/docker-compose.prod.yml`, [Server deployment](../deployment/server-deployment.md) |
 | Full HTTP reference | [Server overview](../server/overview.md) |
 | Static browser product | [Static site chatbot](paths/static-site-chatbot.md) |

@@ -47,7 +47,7 @@ Relay starts after the upstream server is listening. Relay reads site configurat
 | `docker/docker-compose.prod.yml` | Production-like stack with named volumes |
 | `docker/docker-compose.otel.yml` | Optional OTel collector overlay (OpenTelemetry export (alpha)) |
 
-Contract guides: [contracts/guides/deployment/self-hosted.md](../../contracts/guides/deployment/self-hosted.md), [meta-repo.md](../../contracts/guides/deployment/meta-repo.md).
+Deployment guides: [Server deployment](server-deployment.md), [Meta-repo layout](#meta-repo-layout) below.
 
 Normative HTTP contract (stale in places): [HTTP API reference](../server/http-api-reference.md). Prefer [HTTP API reference](../server/http-api-reference.md) or [Admin API reference](../operator/admin-api-reference.md) for current routes.
 
