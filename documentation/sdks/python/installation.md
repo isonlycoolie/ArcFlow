@@ -1,7 +1,24 @@
 # Python SDK installation
 
+The Python SDK ships as a native extension built with maturin against `arcflow-core`. Published wheels are on PyPI as **`arcflow`** (Linux, macOS, Windows; Python 3.9–3.12).
 
-The Python SDK ships as a native extension built with maturin against `arcflow-core`. There is no published PyPI wheel in this repository workflow; you build from source in the monorepo or from a release artifact your team provides.
+## Install from PyPI
+
+```bash
+pip install arcflow
+```
+
+Pin a release:
+
+```bash
+pip install "arcflow==0.3.0"
+```
+
+Wheels are built in CI when a maintainer pushes a tag `sdk-python/vX.Y.Z`. See [releasing](releasing.md) for the maintainer process.
+
+## Install from source (monorepo)
+
+Use this when developing ArcFlow itself or before a wheel exists for your platform.
 
 ## Requirements
 
