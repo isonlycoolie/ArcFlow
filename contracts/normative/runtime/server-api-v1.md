@@ -1,6 +1,6 @@
 # RUNTIME-SERVER-API v1
 
-**Status:** Implemented (Sprint 8)
+**Status:** Implemented
 
 | Method | Path | Auth |
 |--------|------|------|

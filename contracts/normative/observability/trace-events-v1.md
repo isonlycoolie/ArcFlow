@@ -1,6 +1,6 @@
 # TRACE-EVENT-SCHEMA v1
 
-**Status:** Draft for CAA approval (Sprint 5 Phase 0.2)  
+**Status:** Draft
 **Owner:** Observability Agent (OBA)  
 **Consumers:** `arcflow-core/src/tracing/events.rs`, `ExecutionTraceBuilder`, Python `trace_bridge`, CLI `arcflow trace`
 
@@ -325,11 +325,11 @@
 
 ---
 
-## Provider events (Sprint 5 schema; Sprint 6 wiring)
+## Provider events
 
 ### TraceEventKind::ProviderRequestSent
 
-**Emitted by:** Provider layer (stub counts in Sprint 5)  
+**Emitted by:** Provider layer (stub counts in early schema versions)  
 **Emitted when:** Before LLM API call.  
 **Count per run:** Per provider call.
 
@@ -394,7 +394,7 @@
 
 ### TraceEventKind::RetryAttempted
 
-**Emitted by:** Retry engine (variant defined Sprint 5; wired Sprint 7)  
+**Emitted by:** Retry engine  
 **Emitted when:** Step retry scheduled.
 
 | Field | Type | Description |
@@ -407,9 +407,9 @@
 
 ---
 
-## Sprint 4 → Sprint 5 migration
+## Schema version migration
 
-| Sprint 4 (RCS / emitter) | Sprint 5 |
+| Prior emitter | Current schema |
 |--------------------------|----------|
 | `ToolExecuted` (single event) | `ToolCallStarted` + `ToolCallCompleted` \| `ToolCallFailed` |
 | `MemoryRead` / `MemoryWrite` (JSON metadata blob) | Same kinds, structured fields per table above |
