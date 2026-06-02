@@ -52,6 +52,8 @@ run_step "secrets-scan" bash -c '
 
 run_step "validate-contracts" bash scripts/validate-rcs-schema.sh
 
+run_step "documentation-prose" node scripts/verify-documentation-prose.mjs
+
 run_step "structure-check" bash -c '
   set -euo pipefail
   for dir in runtime/arcflow-core sdk-python sdk-typescript sdk-java sdk-go cli contracts; do
