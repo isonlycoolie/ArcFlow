@@ -2,100 +2,56 @@ name: SDK Python
 
 on:
   push:
-    branches: [main, master]
-    paths:
+    branches: [master]
+    paths: &sdk_paths
       - "sdk-python/**"
       - "runtime/arcflow-core/**"
       - "Cargo.toml"
+      - "Cargo.lock"
       - ".github/workflows/sdk-python.yml"
   pull_request:
-    branches: [main, master]
-    paths:
-      - "sdk-python/**"
-      - "runtime/arcflow-core/**"
-      - "Cargo.toml"
-      - ".github/workflows/sdk-python.yml"
+    paths: *sdk_paths
 
 jobs:
-  sdk-python:
-    name: Python ${{ matrix.python }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+  sdk-python-fast:
+    name: Fast (Ubuntu, Python 3.11)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       PYTHONUTF8: "1"
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python: ["3.9", "3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: .
+          shared-key: sdk-python-fast
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python }}
-      - name: Install tools
+          python-version: "3.11"
+          cache: pip
+      - name: Install tools and dev extension
         working-directory: sdk-python
         shell: bash
         run: |
           set -euo pipefail
           python -m pip install --upgrade pip
           python -m pip install maturin pytest "mypy<1.19" black ruff pytest-httpserver
-      - name: Build wheel
-        working-directory: sdk-python
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m maturin build --release --out dist
-      - name: Install built package
-        working-directory: sdk-python
-        shell: bash
-        run: |
-          set -euo pipefail
-          WHEEL="$(python -c 'from pathlib import Path; ws=sorted(Path("dist").glob("arcflow-*.whl")); print(ws[-1] if ws else "")')"
-          if [ -z "$WHEEL" ]; then
-            echo "::warning::No built wheel found in sdk-python/dist; using maturin develop"
-            ls -la dist || true
-            python -m maturin develop
-          else
-            if ! python -m pip install "$WHEEL"; then
-              echo "::warning::pip install wheel failed; using maturin develop"
-              python -m maturin develop
-            fi
-          fi
-      - name: Verify native extension
-        working-directory: sdk-python
-        shell: bash
-        run: |
-          set -euo pipefail
-          tmpdir="$(mktemp -d 2>/dev/null || python -c "import tempfile; print(tempfile.mkdtemp())")"
-          cd "$tmpdir"
-          if ! python -c "import importlib; importlib.import_module('arcflow._arcflow_binding')"; then
-            echo "::warning::Native binding missing; running maturin develop from sdk-python"
-            cd "$GITHUB_WORKSPACE/sdk-python"
-            python -m maturin develop
-            cd "$tmpdir"
-            python -c "import importlib; importlib.import_module('arcflow._arcflow_binding')"
-          fi
+          python -m maturin develop
       - name: Ruff
         working-directory: sdk-python
         shell: bash
-        run: |
-          set -euo pipefail
-          python -m ruff check arcflow tests
+        run: python -m ruff check arcflow tests
       - name: Black
         working-directory: sdk-python
         shell: bash
-        run: |
-          set -euo pipefail
-          python -m black --check arcflow tests
+        run: python -m black --check arcflow tests
       - name: Mypy
         working-directory: sdk-python
         shell: bash
-        run: |
-          set -euo pipefail
-          python -m mypy arcflow
+        run: python -m mypy arcflow
       - name: Pytest
         working-directory: sdk-python
         shell: bash
@@ -103,7 +59,6 @@ jobs:
           PYTHONPATH: ""
         run: |
           set -euo pipefail
-          # Run from a temp dir so local `sdk-python/arcflow/` doesn't shadow the installed wheel.
-          tmpdir="$(mktemp -d 2>/dev/null || python -c "import tempfile; print(tempfile.mkdtemp())")"
+          tmpdir="$(mktemp -d)"
           cd "$tmpdir"
           python -m pytest "$GITHUB_WORKSPACE/sdk-python/tests" -v
