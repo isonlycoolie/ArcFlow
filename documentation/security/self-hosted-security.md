@@ -3,7 +3,7 @@
 
 Practical security considerations for self-hosted ArcFlow deployments. Complements [Production checklist](../deployment/production-checklist.md) with network, data store, and operational hygiene guidance.
 
-Deployment guides: [contracts/guides/deployment/self-hosted.md](../../contracts/guides/deployment/self-hosted.md), [meta-repo.md](../../contracts/guides/deployment/meta-repo.md).
+Deployment guides: [Server deployment](../deployment/server-deployment.md), [Deployment overview](../deployment/overview.md#meta-repo-layout).
 
 ## Network boundaries
 

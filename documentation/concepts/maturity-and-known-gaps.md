@@ -86,7 +86,7 @@ Full matrix: [SDK parity matrix](../sdks/parity-matrix.md).
 
 ## Contract drift warning
 
-[server-api-v1.md](../server/http-api-reference.md) may list only legacy routes. Implemented server routes match `server/arcflow-server/src/lib.rs` and [HTTP API reference](../server/http-api-reference.md). Update normative docs when promoting from draft.
+Implemented server routes match `server/arcflow-server/src/lib.rs` and [HTTP API reference](../server/http-api-reference.md). Update documentation when routes change.
 
 ## Related pages
 

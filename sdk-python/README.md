@@ -149,7 +149,7 @@ cargo run -p arcflow-cli -- trace <run-id> --format json --verbose
 
 Optional OTLP export: set `ARCFLOW_OTLP_ENDPOINT` before running workflows.
 
-See [contracts/guides/observability/](../contracts/guides/observability/) and [trace-events-v1.md](../contracts/normative/observability/trace-events-v1.md).
+See [Execution traces](../documentation/guides/observability/execution-traces.md) and [trace-events-v1.md](../contracts/normative/observability/trace-events-v1.md).
 
 ## Providers (Sprint 6)
 
@@ -163,7 +163,7 @@ result = wf.run("topic", provider=OpenAI(model="gpt-4o"))
 
 Set `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GEMINI_API_KEY` in the environment. Without `provider=`, workflows use the stub agent (backwards compatible).
 
-See [contracts/guides/providers/getting-started.md](../contracts/guides/providers/getting-started.md).
+See [Default runtime vs live LLM](../documentation/getting-started/fundamentals/04-stub-vs-live-provider.md) and [Provider configuration](../documentation/guides/agents-and-tools/provider-configuration.md).
 
 ## LangChain integration (optional)
 

@@ -63,7 +63,7 @@ ArcFlow-Platform/
 
 Convention ports: server 8080, relay 8090, dashboard dev 5174.
 
-Guide: [contracts/guides/deployment/meta-repo.md](../../contracts/guides/deployment/meta-repo.md).
+Guide: [Deployment overview — Meta-repo layout](../deployment/overview.md#meta-repo-layout).
 
 ## Operator dashboard UI status
 
