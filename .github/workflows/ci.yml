@@ -107,6 +107,17 @@ jobs:
       - name: Compile RCS JSON Schema (draft-07)
         run: bash scripts/validate-rcs-schema.sh
 
+  documentation-prose:
+    name: Documentation prose check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Reject internal planning language in documentation/
+        run: node scripts/verify-documentation-prose.mjs
+
   no-unwrap:
     name: No unwrap in library code
     runs-on: ubuntu-latest
