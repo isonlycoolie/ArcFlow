@@ -125,5 +125,5 @@ Track H connects authoring (IDE graph), execution (CLI), and observability (trac
 | Topic | Link |
 |-------|------|
 | Server promotion | [Track B](track-b-server-api.md) |
-| Certification Level 1 | [level-1-workflow-developer](../certification/level-1-workflow-developer.md) |
+| Certification Level 1 | [Level 1 Workflow Developer](../certification/level-1-workflow-developer.md) |
 | Extension docs | `extensions/vscode-arcflow/README.md` |

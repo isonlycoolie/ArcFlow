@@ -52,7 +52,7 @@ Levels are cumulative. Level 2 assumes Level 1 competencies; Level 4 assumes all
 4. Compare your artifacts to the level checklist.
 5. Claim the level internally when all checks pass.
 
-Recommended track order: A through H in [tutorials](../tutorials/track-a-first-workflow.md), skipping sections you already mastered but not skipping verification commands.
+Recommended track order: A through H in [Track A First Workflow](../tutorials/track-a-first-workflow.md), skipping sections you already mastered but not skipping verification commands.
 
 ## Practical project standards
 

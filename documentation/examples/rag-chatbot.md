@@ -118,5 +118,5 @@ Optional: `MemoryIngested` during separate ingest operations, not during query-o
 | Resource | Link |
 |----------|------|
 | Tutorial track | [Track C](../tutorials/track-c-rag.md) |
-| Static landing-page RAG | [static-chat-widget.md](static-chat-widget.md) |
+| Static landing-page RAG | [Static chat widget](static-chat-widget.md) |
 | Hybrid retrieval guide | [hybrid retrieval and reranking](../guides/memory-and-rag/hybrid-retrieval-and-reranking.md) |

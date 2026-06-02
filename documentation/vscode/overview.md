@@ -55,9 +55,9 @@ Requires VS Code **1.85+** and built `@arcflow/sdk` / native bindings for debug 
 
 | Need | Use instead |
 |------|-------------|
-| Production HTTP integration | [server/http-api-reference.md](../server/http-api-reference.md) |
+| Production HTTP integration | [HTTP API reference](../server/http-api-reference.md) |
 | Operator site admin | Admin API or private dashboard |
-| Browser chat widget | [static-product/overview.md](../static-product/overview.md) |
+| Browser chat widget | [Static product overview](../static-product/overview.md) |
 | Server SSE streaming | Deferred server streaming |
 
 ## Tests
@@ -71,6 +71,6 @@ Uses `@vscode/test-electron` per `package.json` scripts.
 
 ## Related pages
 
-- [graph-view.md](graph-view.md)
-- [trace-timeline.md](trace-timeline.md)
-- [cli/trace.md](../cli/trace.md)
+- [Graph view](graph-view.md)
+- [Trace timeline](trace-timeline.md)
+- [Trace command](../cli/trace.md)

@@ -76,5 +76,5 @@ External callback ingress supports `X-Idempotency-Key` on `POST /v1/runs/{run_id
 
 ## Related pages
 
-- [http-api-reference.md](http-api-reference.md) for create-run contract
-- [run-state-machine.md](run-state-machine.md) for polling after create
+- [HTTP API reference](http-api-reference.md) for create-run contract
+- [Run state machine](run-state-machine.md) for polling after create

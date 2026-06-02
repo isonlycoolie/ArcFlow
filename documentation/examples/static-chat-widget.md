@@ -119,6 +119,6 @@ Internal dev only: [`src/main-dev-direct.ts`](../examples/static-chat-widget.md)
 
 | Resource | Link |
 |----------|------|
-| Relay BYO | [relay-byo-deployment.md](relay-byo-deployment.md) |
+| Relay BYO | [Relay BYO deployment](relay-byo-deployment.md) |
 | Multi-turn intake bot | [`online-application-chatbot`](../examples/static-chat-widget.md) |
 | Tutorial track | [Track F](../tutorials/track-f-static-product.md) |

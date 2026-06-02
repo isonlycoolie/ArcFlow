@@ -11,7 +11,7 @@ A linear workflow chains agents in fixed order: each step receives the prior ste
 
 | Item | Value |
 |------|-------|
-| SDK | Python SDK built per [installation](../sdks/python/installation.md) |
+| SDK | Python SDK built per [Installation](../sdks/python/installation.md) |
 | Provider | Default stub (no `OPENAI_API_KEY` required) |
 | Infrastructure | None for embedded SDK |
 | Tutorial track | [Track A](../tutorials/track-a-first-workflow.md) |
@@ -122,4 +122,4 @@ Events are metadata only per trace data policy. See [trace event reference](../g
 |----------|------|
 | Minimal two-step tutorial | [Track A](../tutorials/track-a-first-workflow.md) |
 | Linear workflow guide | [Linear workflows](../guides/workflows/linear-workflows.md) |
-| Examples catalog | [catalog.md](catalog.md) |
+| Examples catalog | [Examples catalog](catalog.md) |

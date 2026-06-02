@@ -138,7 +138,7 @@ Optional backend unreachable or URL unset.
 | `backend` | `str \| None` |
 | `suggestion` | `str \| None` |
 
-Common case: Postgres or Qdrant not running. Start Docker stack and export env vars from [installation](installation.md).
+Common case: Postgres or Qdrant not running. Start Docker stack and export env vars from [Installation](installation.md).
 
 ## Observability errors
 

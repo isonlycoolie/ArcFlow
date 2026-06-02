@@ -72,11 +72,11 @@ runtime_mode: embedded
 
 1. Replace example workflow with real `Workflow` + `Agent` definitions (Python or TypeScript SDK).
 2. Copy `.env.example` patterns from SDK README for provider keys.
-3. Run via SDK or `arcflow run` (see [run.md](run.md)).
+3. Run via SDK or `arcflow run` (see [Run command](run.md)).
 
-`init` does not install Python packages or npm modules. Install SDK separately per [getting-started/install-and-build.md](../getting-started/install-and-build.md).
+`init` does not install Python packages or npm modules. Install SDK separately per [Install and build](../getting-started/install-and-build.md).
 
 ## Related pages
 
-- [cli/overview.md](overview.md)
-- [cli/run.md](run.md)
+- [Overview](overview.md)
+- [Run command](run.md)

@@ -14,8 +14,8 @@ Run a workflow that interrupts for human approval, approve it via API, and recei
 | Server stack | Docker compose with Postgres |
 | API keys | `ARCFLOW_SERVER_API_KEY=dev-secret` |
 | Tracks | [Track B](track-b-server-api.md) for HTTP basics; [Track A](track-a-first-workflow.md) for SDK |
-| HITL example | [hitl-approval-flow](../examples/hitl-approval-flow.md) |
-| External example | [external-webhook](../examples/external-webhook.md) |
+| HITL example | [HITL approval flow](../examples/hitl-approval-flow.md) |
+| External example | [External webhook](../examples/external-webhook.md) |
 | Guides | [HITL overview](../guides/human-in-the-loop/hitl-overview.md), [external callbacks](../guides/external-integrations/external-callbacks.md), [webhook security](../guides/external-integrations/webhook-security.md) |
 
 ## Part 1: Human approval

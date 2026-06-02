@@ -34,7 +34,7 @@ Relay rejects requests whose `Origin` is not in `allowed_origins`. This limits t
 
 Misconfiguration symptom: **403 origin not allowed** in browser network tab. Fix PATCH on site origins, not CORS on LLM providers.
 
-Detail: [relay/origin-and-rate-limiting.md](../relay/origin-and-rate-limiting.md).
+Detail: [Origin and rate limiting](../relay/origin-and-rate-limiting.md).
 
 ## Site token vs API key
 
@@ -63,7 +63,7 @@ For production, use `mode: "relay"` or `mode: "bff"` where your backend holds se
 
 Traces exported through Relay contain metadata only (event kinds, counts, durations). No prompts, tool payloads, or KB chunk text. Compliance reviewers should verify client-side logging does not duplicate user messages into analytics pipelines with PII policies.
 
-See [guides/observability/sec-1-rules.md](../guides/observability/sec-1-rules.md).
+See [Trace data policy rules](../guides/observability/sec-1-rules.md).
 
 ## Token rotation
 
@@ -82,6 +82,6 @@ Do not expose SSE endpoints to browsers until server SSE streaming ships. Curren
 
 ## Related pages
 
-- [static-product/overview.md](overview.md)
-- [server/authentication.md](../server/authentication.md)
-- Dashboard spec [05-security-model.md](../static-product/security-model.md)
+- [Overview](overview.md)
+- [Authentication](../server/authentication.md)
+- Dashboard spec [Security model](../static-product/security-model.md)

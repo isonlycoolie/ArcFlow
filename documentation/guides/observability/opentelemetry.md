@@ -89,7 +89,7 @@ export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 
 Expect `arcflow.workflow` spans within a few seconds of run completion.
 
-See [docker/observability-otel.md](../../../docker/observability-otel.md) for full compose notes.
+See [OpenTelemetry observability](../../../docker/observability-otel.md) for full compose notes.
 
 ## OpenTelemetry metrics export maturity expectations
 

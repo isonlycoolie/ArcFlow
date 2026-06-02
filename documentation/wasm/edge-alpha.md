@@ -83,8 +83,8 @@ Workers WASM packaging details change with platform versions; treat this as illu
 
 | Scenario | Recommendation |
 |----------|----------------|
-| Production chat widget | [static-product/overview.md](../static-product/overview.md) + Relay |
-| Backend batch jobs | Python/TS SDK or [server/overview.md](../server/overview.md) |
+| Production chat widget | [Static product overview](../static-product/overview.md) + Relay |
+| Backend batch jobs | Python/TS SDK or [Server overview](../server/overview.md) |
 | Edge latency experiment | WASM alpha with stub only |
 | Graph or RAG at edge | Wait for wasm-core parity (not scheduled GA) |
 
@@ -111,4 +111,4 @@ Includes `execute_workflow_json_round_trip` in `lib.rs` tests.
 | Server SSE streaming | Server SSE not related to WASM; browser uses trace poll |
 | Graph recovery resume | Graph recovery partial on server; WASM has no graph |
 
-Maturity: [maturity-and-known-gaps.md](../concepts/maturity-and-known-gaps.md).
+Maturity: [Maturity and known gaps](../concepts/maturity-and-known-gaps.md).

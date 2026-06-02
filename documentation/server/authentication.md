@@ -13,7 +13,7 @@ Every `arcflow-server` route belongs to an auth tier. Requests that fail authent
 | Debug | Localhost + `ARCFLOW_DEBUG=true` | `/v1/debug/*` (feature-gated build) |
 | Relay (separate binary) | Site token + Origin allowlist | `/v1/sites/{site_id}/runs` |
 
-Relay auth is documented in [relay/overview.md](../relay/overview.md). This page covers `arcflow-server` only.
+Relay auth is documented in [Relay overview](../relay/overview.md). This page covers `arcflow-server` only.
 
 ## Runtime API key
 
@@ -93,7 +93,7 @@ Debug routes are compiled behind the `debug-endpoints` feature and gated at runt
 | `ARCFLOW_ADMIN_API_KEY` | Deploy new value, update operator scripts and CI provision jobs |
 | Site token | `POST /v1/admin/sites/{id}/tokens/rotate`, update frontend env (Vite/build injection) |
 
-For external webhooks, `ARCFLOW_WEBHOOK_SECRET` supports dual-verify during rotation (see [webhook-security.md](../guides/external-integrations/webhook-security.md)).
+For external webhooks, `ARCFLOW_WEBHOOK_SECRET` supports dual-verify during rotation (see [Webhook security](../guides/external-integrations/webhook-security.md)).
 
 ## Compliance notes
 
@@ -103,6 +103,6 @@ For external webhooks, `ARCFLOW_WEBHOOK_SECRET` supports dual-verify during rota
 
 ## Related pages
 
-- [http-api-reference.md](http-api-reference.md) for per-route auth column
-- [static-product/security-model.md](../static-product/security-model.md) for browser exposure rules
-- [relay/origin-and-rate-limiting.md](../relay/origin-and-rate-limiting.md) for Origin enforcement
+- [HTTP API reference](http-api-reference.md) for per-route auth column
+- [Security model](../static-product/security-model.md) for browser exposure rules
+- [Origin and rate limiting](../relay/origin-and-rate-limiting.md) for Origin enforcement

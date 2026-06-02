@@ -1,7 +1,7 @@
 # Writing agents
 
 
-This track teaches how to define agents in Python and chain them into multi-step workflows. Each lesson is short, runnable with the built-in stub provider, and builds on the [fundamentals](../fundamentals/) series.
+This track teaches how to define agents in Python and chain them into multi-step workflows. Each lesson is short, runnable with the built-in stub provider, and builds on the [Fundamentals](../fundamentals/) series.
 
 ## What you will learn
 

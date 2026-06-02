@@ -30,7 +30,7 @@ Client (curl, backend, Relay)
  → Postgres (runs, traces, registry, sites, recovery)
 ```
 
-Relay is a separate binary (`arcflow-relay`) that proxies browser traffic to the server with site tokens and origin checks. See [relay/overview.md](../relay/overview.md).
+Relay is a separate binary (`arcflow-relay`) that proxies browser traffic to the server with site tokens and origin checks. See [Relay overview](../relay/overview.md).
 
 ## Authentication tiers
 
@@ -45,7 +45,7 @@ Public probes: `/health` (liveness), `/ready` (Postgres + migrations at head). D
 
 Scoped runtime keys (`ARCFLOW_STATIC_RUNTIME_KEYS`) limit which workflow names a key may start. Relay upstream calls use these keys so browsers never hold the master server key.
 
-Full auth detail: [authentication.md](authentication.md).
+Full auth detail: [Authentication](authentication.md).
 
 ## CORS
 
@@ -82,9 +82,9 @@ curl -s -X POST http://localhost:8080/v1/runs \
 
 | Topic | Page |
 |-------|------|
-| Auth tiers and rotation | [authentication.md](authentication.md) |
-| Full route reference | [http-api-reference.md](http-api-reference.md) |
-| Run lifecycle | [run-state-machine.md](run-state-machine.md) |
-| Idempotent create | [idempotency.md](idempotency.md) |
-| Schema | [postgres-schema.md](postgres-schema.md) |
-| Known gaps | [maturity-and-known-gaps.md](../concepts/maturity-and-known-gaps.md) |
+| Auth tiers and rotation | [Authentication](authentication.md) |
+| Full route reference | [HTTP API reference](http-api-reference.md) |
+| Run lifecycle | [Run state machine](run-state-machine.md) |
+| Idempotent create | [Idempotency](idempotency.md) |
+| Schema | [Postgres schema](postgres-schema.md) |
+| Known gaps | [Maturity and known gaps](../concepts/maturity-and-known-gaps.md) |

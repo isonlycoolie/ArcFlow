@@ -129,7 +129,7 @@ await client.runPublished("chat", "^1.0.0", "Follow up", {
 
 ## Streaming note (streaming deferred)
 
-There is no SSE client in the static SDK for server events. For token-progress UI, poll trace via Relay and read `TokenEmitted` metadata. See [guides/streaming/streaming-in-the-browser.md](../guides/streaming/streaming-in-the-browser.md).
+There is no SSE client in the static SDK for server events. For token-progress UI, poll trace via Relay and read `TokenEmitted` metadata. See [Streaming in the browser](../guides/streaming/streaming-in-the-browser.md).
 
 ## Exports
 
@@ -137,5 +137,5 @@ There is no SSE client in the static SDK for server events. For token-progress U
 
 ## Related pages
 
-- [static-product/security-model.md](security-model.md)
-- [relay/request-path.md](../relay/request-path.md)
+- [Security model](security-model.md)
+- [Request path](../relay/request-path.md)

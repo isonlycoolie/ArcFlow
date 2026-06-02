@@ -45,7 +45,7 @@ Relay is stateless. Postgres holds sites, runs, and registry versions.
 4. Hand Relay URL and token to frontend team via secure channel.
 5. Frontend calls `runPublished("chat", "^1.0.0", userMessage)`.
 
-Step detail: [site-lifecycle.md](site-lifecycle.md), [knowledge-and-publish.md](knowledge-and-publish.md).
+Step detail: [Site lifecycle](site-lifecycle.md), [Knowledge and publish](knowledge-and-publish.md).
 
 ## Typical developer flow
 
@@ -79,7 +79,7 @@ Static product (Relay + admin + static SDK) is **production** per maturity matri
 
 | Page | Topic |
 |------|-------|
-| [browser-sdk-api.md](browser-sdk-api.md) | SDK reference |
-| [security-model.md](security-model.md) | Browser exposure rules |
-| [relay/overview.md](../relay/overview.md) | Proxy behavior |
-| [server/http-api-reference.md](../server/http-api-reference.md) | Admin routes |
+| [Browser SDK API](browser-sdk-api.md) | SDK reference |
+| [Security model](security-model.md) | Browser exposure rules |
+| [Relay overview](../relay/overview.md) | Proxy behavior |
+| [HTTP API reference](../server/http-api-reference.md) | Admin routes |

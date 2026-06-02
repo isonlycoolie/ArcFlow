@@ -106,7 +106,7 @@ Archive site by revoking token, removing origins, and unpublishing workflows as 
 
 ## Related pages
 
-- [knowledge-and-publish.md](knowledge-and-publish.md)
-- [relay/origin-and-rate-limiting.md](../relay/origin-and-rate-limiting.md)
-- [static-product/security-model.md](security-model.md)
-- Dashboard spec [03-admin-api-contract.md](../operator/admin-api-reference.md)
+- [Knowledge and publish](knowledge-and-publish.md)
+- [Origin and rate limiting](../relay/origin-and-rate-limiting.md)
+- [Security model](security-model.md)
+- Dashboard spec [Admin API reference](../operator/admin-api-reference.md)

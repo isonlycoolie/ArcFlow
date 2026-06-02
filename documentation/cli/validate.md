@@ -74,7 +74,7 @@ doc = json.load(open("workflows/demo.json"))
 jsonschema.validate(doc, schema)
 ```
 
-Integration tests with stub provider (`exec_config.test`) complement schema checks. See [guides/workflows/validation-and-testing.md](../guides/workflows/validation-and-testing.md).
+Integration tests with stub provider (`exec_config.test`) complement schema checks. See [Validation and testing](../guides/workflows/validation-and-testing.md).
 
 ## Related commands
 
@@ -86,6 +86,6 @@ arcflow schedule validate schedules/nightly.yaml
 
 ## Related pages
 
-- [maturity-and-known-gaps.md](../concepts/maturity-and-known-gaps.md) (CLI validate command)
-- [cli/overview.md](overview.md)
-- [guides/workflows/validation-and-testing.md](../guides/workflows/validation-and-testing.md)
+- [Maturity and known gaps](../concepts/maturity-and-known-gaps.md) (CLI validate command)
+- [Overview](overview.md)
+- [Validation and testing](../guides/workflows/validation-and-testing.md)

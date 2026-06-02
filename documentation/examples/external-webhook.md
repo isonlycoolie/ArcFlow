@@ -116,5 +116,5 @@ Failed HMAC or invalid payload does not emit completion; check server logs and [
 | Resource | Link |
 |----------|------|
 | Online application bot | [Static chat widget walkthrough](../examples/static-chat-widget.md) |
-| HITL example | [hitl-approval-flow.md](hitl-approval-flow.md) |
+| HITL example | [HITL approval flow](hitl-approval-flow.md) |
 | Tutorial track | [Track E](../tutorials/track-e-hitl-and-external.md) |

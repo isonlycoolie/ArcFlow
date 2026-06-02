@@ -31,8 +31,8 @@ Production static-site path: dashboard owns agents, memory, and knowledge; front
 
 | Example | Use case | Frontend responsibility |
 |---------|----------|-------------------------|
-| [chat-rag](../examples/static-chat-widget.md) | Landing-page support chat | ~30 lines: env vars + chat UI |
-| [online-application-chatbot](../examples/static-chat-widget.md) | Multi-turn intake with external step | Relay + published workflow ref |
+| [Static chat widget](../examples/static-chat-widget.md) | Landing-page support chat | ~30 lines: env vars + chat UI |
+| [Static chat widget](../examples/static-chat-widget.md) | Multi-turn intake with external step | Relay + published workflow ref |
 
 Operator setup flow (from [static README](../examples/static-chat-widget.md)):
 
@@ -90,7 +90,7 @@ Pair with `ExternalBindingConfig` on publish and `report_outcome()` from Python.
 
 | Example | Pattern |
 |---------|---------|
-| [byo-docker](../examples/relay-byo-deployment.md) | Self-hosted Relay with Docker Compose |
+| [Relay BYO deployment](../examples/relay-byo-deployment.md) | Self-hosted Relay with Docker Compose |
 
 Browser env: `VITE_ARCFLOW_RELAY_URL`, `VITE_ARCFLOW_SITE_TOKEN`. Relay validates Origin and rate-limits per site.
 

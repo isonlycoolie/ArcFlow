@@ -37,7 +37,7 @@ Native extension over `arcflow-core` via PyO3. Supports linear and graph workflo
 
 ### TypeScript SDK (`sdk-typescript`)
 
-N-API binding to the same Rust engine. Feature parity with Python for in-process execution (see parity matrix in the this documentation site). Powers the VS Code extension and Node integration tests. Browser bundling is possible but [static-product](../static-product/overview.md) is preferred for production browser use.
+N-API binding to the same Rust engine. Feature parity with Python for in-process execution (see parity matrix in the this documentation site). Powers the VS Code extension and Node integration tests. Browser bundling is possible but [Static product overview](../static-product/overview.md) is preferred for production browser use.
 
 ### arcflow-server
 

@@ -16,7 +16,7 @@ Traces and persisted trace events **must not** include:
 | RAG content | Retrieved chunk text, raw embedding inputs |
 | PII | Personal data unless your deployment policy explicitly allows it and you have controls |
 
-This aligns with [Execution traces](../guides/observability/execution-traces.md), [Trace data policy rules](../guides/observability/sec-1-rules.md), and [trace-events-normative.md](../contracts/trace-events-normative.md). Engine implementation: `runtime/arcflow-core/src/tracing/events.rs`.
+This aligns with [Execution traces](../guides/observability/execution-traces.md), [Trace data policy rules](../guides/observability/sec-1-rules.md), and [Trace events (normative)](../contracts/trace-events-normative.md). Engine implementation: `runtime/arcflow-core/src/tracing/events.rs`.
 
 ### Why the boundary exists
 
@@ -94,4 +94,4 @@ If any answer is yes, redesign the field or gate it behind localhost debug with 
 
 - [Architecture overview](architecture-overview.md) for Relay and trace poll flow
 - [Maturity and known gaps](maturity-and-known-gaps.md) for OpenTelemetry export
-- [security/sec-1-compliance.md](../security/sec-1-compliance.md) for auth and webhook hardening
+- [Trace data policy compliance](../security/sec-1-compliance.md) for auth and webhook hardening

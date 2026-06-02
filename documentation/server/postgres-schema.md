@@ -152,6 +152,6 @@ Daily run counters per site for operator metrics.
 
 ## Related pages
 
-- [cli/migrate.md](../cli/migrate.md)
-- [server/overview.md](overview.md)
-- [static-product/site-lifecycle.md](../static-product/site-lifecycle.md)
+- [Migrate command](../cli/migrate.md)
+- [Overview](overview.md)
+- [Site lifecycle](../static-product/site-lifecycle.md)

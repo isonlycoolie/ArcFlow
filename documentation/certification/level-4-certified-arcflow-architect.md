@@ -37,7 +37,7 @@ All prior level reading plus:
 | Trace policy | [Trace data policy](../concepts/sec-1-and-data-safety.md), [Trace data policy rules](../guides/observability/sec-1-rules.md) |
 | Graph | [Graph workflows](../guides/workflows/graph-workflows.md) |
 | RAG ops | [Knowledge ingestion](../guides/memory-and-rag/knowledge-ingestion.md), [vector RAG pipeline](../guides/memory-and-rag/vector-rag-pipeline.md) |
-| Reliability | Full [reliability](../guides/reliability/recovery-and-resume.md) and [workflow](../guides/workflows/step-fallbacks.md) guides |
+| Reliability | Full [Recovery and resume](../guides/reliability/recovery-and-resume.md) and [Step Fallbacks](../guides/workflows/step-fallbacks.md) guides |
 | Trace complete | [Trace event reference](../guides/observability/trace-event-reference.md) |
 | Normative contracts | published contract pages in repository |
 | Capabilities appendices | Appendices A through K in this documentation site (when published) |

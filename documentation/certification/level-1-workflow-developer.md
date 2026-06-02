@@ -65,7 +65,7 @@ Build a three-step **research, analyze, summarize** pipeline:
 | Resource | Link |
 |----------|------|
 | Blog pipeline sample | [First linear workflow walkthrough](../examples/first-linear-workflow.md) |
-| First linear doc | [first-linear-workflow](../examples/first-linear-workflow.md) |
+| First linear doc | [First linear workflow](../examples/first-linear-workflow.md) |
 
 Extend the blog pipeline pattern with an analyze step and real provider on one agent.
 

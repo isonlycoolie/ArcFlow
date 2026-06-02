@@ -104,4 +104,4 @@ Rust validates before run. CI should validate workflow JSON against `v1.schema.j
 
 - [Execution model](execution-model.md) for linear vs graph scheduling
 - [Architecture overview](architecture-overview.md) for where workflow specification crosses HTTP boundaries
-- [contracts/rcs-schema.md](../contracts/rcs-schema.md) for narrative schema guide
+- [RCS schema guide](../contracts/rcs-schema.md) for narrative schema guide

@@ -24,7 +24,7 @@ Server chunks, embeds, and upserts per `MemoryChunkingConfig`. Requires `ARCFLOW
 | `text` | Raw document content |
 | `key` | Logical document id for re-ingest / replace |
 
-Re-ingest with the same `key` to update content. See [guides/memory-and-rag/knowledge-ingestion.md](../guides/memory-and-rag/knowledge-ingestion.md) for chunk tuning.
+Re-ingest with the same `key` to update content. See [Knowledge ingestion](../guides/memory-and-rag/knowledge-ingestion.md) for chunk tuning.
 
 ## Publish chat workflow
 
@@ -122,6 +122,6 @@ Stub embedding works for local smoke only, not production RAG quality.
 
 ## Related pages
 
-- [site-lifecycle.md](site-lifecycle.md)
-- [browser-sdk-api.md](browser-sdk-api.md)
-- [guides/workflows/workflow-registry.md](../guides/workflows/workflow-registry.md)
+- [Site lifecycle](site-lifecycle.md)
+- [Browser SDK API](browser-sdk-api.md)
+- [Workflow registry](../guides/workflows/workflow-registry.md)

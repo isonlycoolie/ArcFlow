@@ -14,7 +14,7 @@ This track teaches how to declare tools, attach them to agents, bound the tool e
 
 ## Prerequisites
 
-Complete [Install and build](../install-and-build.md), the [fundamentals](../fundamentals/) track, and at least [01 Linear pipelines](../writing-workflows/01-linear-pipelines.md). You should be comfortable defining agents and running `workflow.run(input)` with stub output.
+Complete [Install and build](../install-and-build.md), the [Fundamentals](../fundamentals/) track, and at least [01 Linear pipelines](../writing-workflows/01-linear-pipelines.md). You should be comfortable defining agents and running `workflow.run(input)` with stub output.
 
 Quick sanity check:
 

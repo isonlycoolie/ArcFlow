@@ -93,4 +93,4 @@ Implemented server routes match `server/arcflow-server/src/lib.rs` and [HTTP API
 - [Surfaces and when to use them](surfaces-and-when-to-use-them.md) for Postgres and Relay requirements
 - [Execution model](execution-model.md) for graph and recovery behavior
 - [Trace data policy](sec-1-and-data-safety.md) for trace policy
-- [home/index.md](../home/index.md) for entry paths
+- [Index](../home/index.md) for entry paths

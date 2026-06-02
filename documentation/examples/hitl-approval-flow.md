@@ -114,6 +114,6 @@ Exact HITL kind names appear in [trace event reference](../guides/observability/
 
 | Resource | Link |
 |----------|------|
-| Approve and reject guide | [approve-and-reject](../guides/human-in-the-loop/approve-and-reject.md) |
-| Configuring interrupts | [configuring-interrupts](../guides/human-in-the-loop/configuring-interrupts.md) |
+| Approve and reject guide | [Approve And Reject](../guides/human-in-the-loop/approve-and-reject.md) |
+| Configuring interrupts | [Configuring Interrupts](../guides/human-in-the-loop/configuring-interrupts.md) |
 | Tutorial track | [Track E](../tutorials/track-e-hitl-and-external.md) |

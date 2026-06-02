@@ -70,7 +70,7 @@ Payload uses `workflow_ref` so agent definitions stay on the server registry, no
 
 1. **Site lookup** from in-memory store (loaded from Postgres-backed admin or `ARCFLOW_RELAY_SITES_JSON`).
 2. **Token verify** against configured site token hash.
-3. **Origin check** against `allowed_origins` (see [origin-and-rate-limiting.md](origin-and-rate-limiting.md)).
+3. **Origin check** against `allowed_origins` (see [Origin and rate limiting](origin-and-rate-limiting.md)).
 4. **Rate limit** token bucket per site (`429` when exceeded).
 
 
@@ -103,7 +103,7 @@ curl -s "http://localhost:8090/v1/sites/s_dev/runs/RUN_ID/trace" \
  -H "Origin: http://localhost:5173"
 ```
 
-See [guides/streaming/streaming-in-the-browser.md](../guides/streaming/streaming-in-the-browser.md).
+See [Streaming in the browser](../guides/streaming/streaming-in-the-browser.md).
 
 ## HITL through Relay
 
@@ -111,5 +111,5 @@ When a run returns `Interrupted`, the static SDK throws `WorkflowInterruptedErro
 
 ## Related pages
 
-- [relay/overview.md](overview.md)
-- [static-product/browser-sdk-api.md](../static-product/browser-sdk-api.md)
+- [Overview](overview.md)
+- [Browser SDK API](../static-product/browser-sdk-api.md)

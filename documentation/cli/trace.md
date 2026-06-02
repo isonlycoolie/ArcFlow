@@ -99,5 +99,5 @@ Events are metadata-only trace only (no prompt text).
 
 ## Related pages
 
-- [guides/observability/execution-traces.md](../guides/observability/execution-traces.md)
-- [vscode/trace-timeline.md](../vscode/trace-timeline.md)
+- [Execution traces](../guides/observability/execution-traces.md)
+- [Trace timeline](../vscode/trace-timeline.md)

@@ -112,7 +112,7 @@ curl -s "http://localhost:8080/v1/runs/RUN_ID/trace" \
 
 ## Related pages
 
-- [idempotency.md](idempotency.md) for safe create retries
-- [guides/human-in-the-loop/hitl-overview.md](../guides/human-in-the-loop/hitl-overview.md)
-- [guides/reliability/recovery-and-resume.md](../guides/reliability/recovery-and-resume.md)
-- [postgres-schema.md](postgres-schema.md)
+- [Idempotency](idempotency.md) for safe create retries
+- [Human-in-the-loop overview](../guides/human-in-the-loop/hitl-overview.md)
+- [Recovery and resume](../guides/reliability/recovery-and-resume.md)
+- [Postgres schema](postgres-schema.md)

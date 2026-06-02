@@ -74,10 +74,10 @@ Graph **execution** is production-ready. **Resume from checkpoint after failure*
 
 ## Related authoring docs
 
-- [guides/workflows/graph-workflows.md](../guides/workflows/graph-workflows.md)
-- [guides/workflows/workflow-registry.md](../guides/workflows/workflow-registry.md)
+- [Graph workflows](../guides/workflows/graph-workflows.md)
+- [Workflow registry](../guides/workflows/workflow-registry.md)
 
 ## Related pages
 
-- [vscode/overview.md](overview.md)
-- [trace-timeline.md](trace-timeline.md)
+- [Overview](overview.md)
+- [Trace timeline](trace-timeline.md)

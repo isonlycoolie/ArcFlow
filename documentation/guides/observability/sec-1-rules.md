@@ -99,5 +99,5 @@ If any answer is yes, redesign the field or gate behind localhost debug with `AR
 ## Related pages
 
 - [Trace event reference](trace-event-reference.md) per-event trace data policy classification
-- [OpenTelemetry](opentelemetry.md) for OpenTelemetry metrics export span attribute rules
+- [Opentelemetry](opentelemetry.md) for OpenTelemetry metrics export span attribute rules
 - [Webhook security](../external-integrations/webhook-security.md) for callback body logging

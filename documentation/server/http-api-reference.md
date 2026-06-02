@@ -339,7 +339,7 @@ Feature-gated. Not for production.
 
 ## Related pages
 
-- [authentication.md](authentication.md)
-- [run-state-machine.md](run-state-machine.md)
-- [idempotency.md](idempotency.md)
-- [relay/request-path.md](../relay/request-path.md) for browser proxy routes
+- [Authentication](authentication.md) — API keys and scoped access
+- [Run state machine](run-state-machine.md) — polling and lifecycle states
+- [Idempotency](idempotency.md) — safe create retries
+- [Request path](../relay/request-path.md) — browser proxy routes

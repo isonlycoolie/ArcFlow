@@ -20,9 +20,9 @@ Published operator docs on this site:
 |----------|---------|
 | [Dashboard spec](dashboard-spec.md) | Personas, tiers, non-goals |
 | [Dashboard spec](dashboard-spec.md) | Navigation and screen map |
-| [03-admin-api-contract.md](../operator/admin-api-reference.md) | Admin REST routes (matches §13) |
+| [Admin API reference](../operator/admin-api-reference.md) | Admin REST routes (matches §13) |
 | [API key management](../security/api-key-management.md) | Auth headers, 403 matrix |
-| [05-security-model.md](../static-product/security-model.md) | Tokens, origins, trace data policy |
+| [Security model](../static-product/security-model.md) | Tokens, origins, trace data policy |
 | [Dashboard spec](dashboard-spec.md) | R1 feature scope |
 | [Dashboard spec](dashboard-spec.md) | Future tier features |
 | [Dashboard spec](dashboard-spec.md) | UI states and error mapping |

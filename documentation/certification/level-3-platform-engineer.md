@@ -29,7 +29,7 @@ Read server, Relay, static product, deployment, operator, and security documenta
 | Topic | Document |
 |-------|----------|
 | Traces and trace data policy | [Execution traces](../guides/observability/execution-traces.md), [Trace data policy rules](../guides/observability/sec-1-rules.md) |
-| OpenTelemetry | [OpenTelemetry](../guides/observability/opentelemetry.md) |
+| OpenTelemetry | [Opentelemetry](../guides/observability/opentelemetry.md) |
 | Data safety | [Trace data policy](../concepts/sec-1-and-data-safety.md) |
 | Surfaces | [Surfaces and when to use them](../concepts/surfaces-and-when-to-use-them.md) |
 
@@ -44,8 +44,8 @@ Also complete example walkthroughs:
 
 | Example | Link |
 |---------|------|
-| Static chat widget | [static-chat-widget](../examples/static-chat-widget.md) |
-| Relay BYO | [relay-byo-deployment](../examples/relay-byo-deployment.md) |
+| Static chat widget | [Static chat widget](../examples/static-chat-widget.md) |
+| Relay BYO | [Relay BYO deployment](../examples/relay-byo-deployment.md) |
 
 ## Practical project
 
@@ -87,7 +87,7 @@ cargo run -p arcflow-cli -- migrate up
 cargo run -p arcflow-cli -- trace RUN_ID --format json
 ```
 
-BYO Relay optional second phase per [relay-byo-deployment](../examples/relay-byo-deployment.md).
+BYO Relay optional second phase per [Relay BYO deployment](../examples/relay-byo-deployment.md).
 
 ### trace data policy verification
 

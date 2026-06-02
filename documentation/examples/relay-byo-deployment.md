@@ -30,7 +30,7 @@ curl -sf http://localhost:8080/ready
 
 ## Step 2: Configure Relay sites JSON
 
-Export upstream URL and site definition (from [`README.md`](../examples/relay-byo-deployment.md)):
+Export upstream URL and site definition (from [Relay BYO deployment walkthrough](relay-byo-deployment.md)):
 
 ```bash
 export ARCFLOW_UPSTREAM_URL=http://host.docker.internal:8080
@@ -112,6 +112,6 @@ Retrieve via Relay trace route or server admin tools. Expect standard workflow l
 
 | Resource | Link |
 |----------|------|
-| Static chat widget | [static-chat-widget.md](static-chat-widget.md) |
+| Static chat widget | [Static chat widget](static-chat-widget.md) |
 | Static examples index | [Static chat widget walkthrough](../examples/static-chat-widget.md) |
 | Tutorial track | [Track F](../tutorials/track-f-static-product.md) |

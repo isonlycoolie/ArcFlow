@@ -78,12 +78,12 @@ arcflow trace RUN_ID --server http://localhost:8080 --tui
 
 ## Field reference
 
-Full event catalog: [guides/observability/trace-event-reference.md](../guides/observability/trace-event-reference.md).
+Full event catalog: [Trace event reference](../guides/observability/trace-event-reference.md).
 
 Normative contract: [Trace events (normative)](../contracts/trace-events-normative.md).
 
 ## Related pages
 
-- [cli/trace.md](../cli/trace.md)
-- [guides/observability/execution-traces.md](../guides/observability/execution-traces.md)
-- [vscode/overview.md](overview.md)
+- [Trace command](../cli/trace.md)
+- [Execution traces](../guides/observability/execution-traces.md)
+- [Overview](overview.md)

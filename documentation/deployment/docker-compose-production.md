@@ -91,7 +91,7 @@ docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.otel.y
 
 Set `ARCFLOW_OTEL_ENABLED=true` and `ARCFLOW_OTLP_ENDPOINT` on the server. OTel metrics remain alpha under OpenTelemetry metrics export; core operation does not require them.
 
-See `docker/observability-otel.md` and [OpenTelemetry guide](../guides/observability/opentelemetry.md).
+See [OpenTelemetry observability](../../../docker/observability-otel.md) and [OpenTelemetry guide](../guides/observability/opentelemetry.md).
 
 ## When to prefer Kubernetes over Compose
 

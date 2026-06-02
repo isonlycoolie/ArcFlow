@@ -14,7 +14,7 @@ Create an admin site, ingest knowledge, publish a workflow, embed the static SDK
 | Server + Relay | `docker compose -f docker/docker-compose.server.yml up -d` |
 | Node.js | 18+ for Vite example |
 | Operator scripts or dashboard | Site, ingest, publish |
-| Primary examples | [static-chat-widget](../examples/static-chat-widget.md), [relay-byo-deployment](../examples/relay-byo-deployment.md) |
+| Primary examples | [Static chat widget](../examples/static-chat-widget.md), [Relay BYO deployment](../examples/relay-byo-deployment.md) |
 | App | [Static chat widget walkthrough](../examples/static-chat-widget.md) |
 | Track B | Helpful for understanding server admin APIs |
 
@@ -73,7 +73,7 @@ Pass criteria:
 
 ## Step 5: Optional BYO Relay
 
-Deploy self-hosted Relay per [relay-byo-deployment](../examples/relay-byo-deployment.md) and point env vars at port 8090.
+Deploy self-hosted Relay per [Relay BYO deployment](../examples/relay-byo-deployment.md) and point env vars at port 8090.
 
 ## Expected output
 

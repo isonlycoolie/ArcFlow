@@ -69,8 +69,8 @@ Per-command detail in linked pages.
 
 | Page | Topic |
 |------|-------|
-| [init.md](init.md) | Project scaffold |
-| [run.md](run.md) | Local execution |
-| [trace.md](trace.md) | Trace inspection |
-| [migrate.md](migrate.md) | Database migrations |
-| [validate.md](validate.md) | Stub validate + CI workaround |
+| [Init command](init.md) | Project scaffold |
+| [Run command](run.md) | Local execution |
+| [Trace command](trace.md) | Trace inspection |
+| [Migrate command](migrate.md) | Database migrations |
+| [Validate command](validate.md) | Stub validate + CI workaround |

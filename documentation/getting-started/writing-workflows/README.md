@@ -15,7 +15,7 @@ This track teaches how to build ArcFlow workflows beyond a single agent step: li
 
 ## Prerequisites
 
-Complete [Install and build](../install-and-build.md) and the [fundamentals](../fundamentals/) track. You should also finish [Writing agents](../writing-agents/) so `Agent`, `ContextPolicy`, and multi-step pipelines are familiar.
+Complete [Install and build](../install-and-build.md) and the [Fundamentals](../fundamentals/) track. You should also finish [Writing agents](../writing-agents/) so `Agent`, `ContextPolicy`, and multi-step pipelines are familiar.
 
 Quick sanity check:
 

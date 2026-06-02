@@ -115,10 +115,10 @@ After deploy, run repository scripts if available:
 ./scripts/static-smoke.sh
 ```
 
-Or manual curl from [origin-and-rate-limiting.md](origin-and-rate-limiting.md).
+Or manual curl from [Origin and rate limiting](origin-and-rate-limiting.md).
 
 ## Related pages
 
-- [relay/overview.md](overview.md)
-- [relay/request-path.md](request-path.md)
-- [examples/relay-byo-deployment.md](../examples/relay-byo-deployment.md) (when published)
+- [Overview](overview.md)
+- [Request path](request-path.md)
+- [Relay BYO deployment](../examples/relay-byo-deployment.md) (when published)

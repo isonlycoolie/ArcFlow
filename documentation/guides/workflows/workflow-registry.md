@@ -3,7 +3,7 @@
 
 The workflow registry stores versioned workflow definitions on the server so clients resolve semver ranges instead of sending full JSON on every run. Platform teams publish definitions with `PUT /v1/workflows/{name}/versions/{version}`. Callers use `workflow_ref` in `POST /v1/runs` or the static SDK `runPublished("chat", "^1.0.0", message)`.
 
-Registry requires Postgres and a running [arcflow-server](../../getting-started/quickstart-server-api.md). Embedded SDK runs without the server do not use the registry unless you call registry HTTP routes yourself.
+Registry requires Postgres and a running [Server API quickstart](../../getting-started/quickstart-server-api.md). Embedded SDK runs without the server do not use the registry unless you call registry HTTP routes yourself.
 
 ## Operations
 

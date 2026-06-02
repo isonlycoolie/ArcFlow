@@ -111,6 +111,6 @@ Rate limits protect upstream LLM cost and server capacity. They do not replace W
 
 ## Related pages
 
-- [static-product/site-lifecycle.md](../static-product/site-lifecycle.md)
-- [static-product/security-model.md](../static-product/security-model.md)
-- [byo-relay-deployment.md](byo-relay-deployment.md)
+- [Site lifecycle](../static-product/site-lifecycle.md)
+- [Security model](../static-product/security-model.md)
+- [BYO Relay deployment](byo-relay-deployment.md)

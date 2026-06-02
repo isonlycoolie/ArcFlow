@@ -29,7 +29,7 @@ Browser (static SDK, site token)
  ← run_id, status
 ```
 
-Detail: [request-path.md](request-path.md).
+Detail: [Request path](request-path.md).
 
 ## Relay routes
 
@@ -54,10 +54,10 @@ Relay does not expose SSE. Browser streaming UX uses trace polling for `TokenEmi
 | Admin-provisioned `relay_url` | Operator creates site via admin API |
 | BYO Relay | Self-hosted binary with JSON site config |
 
-BYO guide: [byo-relay-deployment.md](byo-relay-deployment.md).
+BYO guide: [BYO Relay deployment](byo-relay-deployment.md).
 
 ## Related pages
 
-- [origin-and-rate-limiting.md](origin-and-rate-limiting.md)
-- [static-product/overview.md](../static-product/overview.md)
-- [static-product/security-model.md](../static-product/security-model.md)
+- [Origin and rate limiting](origin-and-rate-limiting.md)
+- [Static product overview](../static-product/overview.md)
+- [Security model](../static-product/security-model.md)

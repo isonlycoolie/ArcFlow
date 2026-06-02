@@ -58,7 +58,7 @@ Migrations use `IF NOT EXISTS` and version tracking inside `arcflow_core::migrat
 | 000006 | `arcflow_workflows`, `arcflow_workflow_aliases` |
 | 000007 | `arcflow_sites`, tokens, usage daily |
 
-Table detail: [server/postgres-schema.md](../server/postgres-schema.md).
+Table detail: [Postgres schema](../server/postgres-schema.md).
 
 ## Deploy runbook
 
@@ -91,6 +91,6 @@ Expect **200**. **503** indicates connection failure or pending migrations.
 
 ## Related pages
 
-- [server/postgres-schema.md](../server/postgres-schema.md)
-- [server/overview.md](../server/overview.md)
-- [cli/overview.md](overview.md)
+- [Postgres schema](../server/postgres-schema.md)
+- [Server overview](../server/overview.md)
+- [Overview](overview.md)

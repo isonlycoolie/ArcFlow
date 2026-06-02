@@ -110,6 +110,6 @@ Stream iterators may surface token deltas before `StepCompleted` appears in trac
 
 | Resource | Link |
 |----------|------|
-| SDK streaming guide | [sdk-streaming](../guides/streaming/sdk-streaming.md) |
+| SDK streaming guide | [SDK Streaming](../guides/streaming/sdk-streaming.md) |
 | Browser streaming note | [streaming in the browser](../guides/streaming/streaming-in-the-browser.md) |
 | Server streaming gap | [maturity and known gaps](../concepts/maturity-and-known-gaps.md) |

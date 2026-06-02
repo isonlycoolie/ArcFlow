@@ -49,7 +49,7 @@ Or run the workflow file directly:
 python workflows/example_workflow.py
 ```
 
-TypeScript: use `@arcflow/sdk` with `node` or `tsx` per [quickstart-typescript.md](../getting-started/quickstart-typescript.md).
+TypeScript: use `@arcflow/sdk` with `node` or `tsx` per [TypeScript quickstart](../getting-started/quickstart-typescript.md).
 
 ## Remote runtime (--runtime planned)
 
@@ -72,6 +72,6 @@ Until native remote run ships, use curl `POST /v1/runs` or Python `Workflow(...,
 
 ## Related pages
 
-- [cli/init.md](init.md)
-- [getting-started/quickstart-python.md](../getting-started/quickstart-python.md)
-- [server/http-api-reference.md](../server/http-api-reference.md)
+- [Init command](init.md)
+- [Python quickstart](../getting-started/quickstart-python.md)
+- [HTTP API reference](../server/http-api-reference.md)

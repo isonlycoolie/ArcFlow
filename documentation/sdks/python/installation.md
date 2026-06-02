@@ -14,7 +14,7 @@ Pin a release:
 pip install "arcflow-sdk==0.3.3"
 ```
 
-Wheels are built in CI when a maintainer pushes a tag `sdk-python/vX.Y.Z`. See [releasing](releasing.md) for the maintainer process.
+Wheels are built in CI when a maintainer pushes a tag `sdk-python/vX.Y.Z`. See [Releasing](releasing.md) for the maintainer process.
 
 ## Install from source (monorepo)
 
