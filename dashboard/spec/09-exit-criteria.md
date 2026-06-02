@@ -41,13 +41,13 @@ Dashboard flows must produce the same server state as:
 
 ## Production readiness alignment
 
-| Plan item | Status with spec-only handoff |
+| Work item | Status with spec-only handoff |
 |-----------|-------------------------------|
-| FP-3.01 Dashboard UI | **Deferred** — spec complete |
-| FP-3.02 Static scripts | Done (OSS) |
-| FP-3.03 Meta-repo template | Done |
-| FP-3.04 Relay hardening | Separate workstream |
-| FP-3.06 E2E without dashboard | Python E2E against admin API |
+| Dashboard UI | **Deferred** — spec complete |
+| Static provisioning scripts | Done (OSS) |
+| Meta-repo template | Done |
+| Relay hardening | Separate workstream |
+| E2E without dashboard | Python E2E against admin API |
 
 ## Sign-off owners
 
@@ -57,4 +57,4 @@ Dashboard flows must produce the same server state as:
 | Security | BFF and token UX reviewed |
 | Platform | Admin API contract matches `arcflow-server` handlers |
 
-When all E*, S*, and D* items pass in the dashboard repository CI, FP-3.01 may be marked complete in the production readiness plan.
+When all E*, S*, and D* items pass in the dashboard repository CI, the dashboard UI may be marked complete.

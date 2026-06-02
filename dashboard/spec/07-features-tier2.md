@@ -30,7 +30,7 @@ Tier 2 extends operator control after R1 stabilizes. Spec now so Tier 1 UI does 
 
 - Graph canvas for steps and edges
 - Export to RCS YAML; publish via registry API
-- Out of scope until FP-5 debugger UX matures in VS Code extension
+- Out of scope until VS Code extension debugger UX matures
 
 ## T2-6 — Account and billing
 
