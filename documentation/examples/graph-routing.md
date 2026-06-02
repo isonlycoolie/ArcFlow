@@ -130,4 +130,4 @@ Conditional re-entry adds repeated `GraphNodeStarted` for the same node id acros
 |----------|------|
 | Tutorial track | [Track D](../tutorials/track-d-graph-workflows.md) |
 | Graph guide | [Graph workflows](../guides/workflows/graph-workflows.md) |
-| Maturity note | [Graph recovery resume graph resume](../../concepts/maturity-and-known-gaps.md) |
+| Maturity note | [Maturity and known gaps](../concepts/maturity-and-known-gaps.md) |
