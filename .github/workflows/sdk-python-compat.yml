@@ -1,0 +1,90 @@
+name: SDK Python Compat
+
+on:
+  push:
+    branches: [master]
+    paths: &sdk_paths
+      - "sdk-python/**"
+      - "runtime/arcflow-core/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/sdk-python-compat.yml"
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  sdk-python-compat:
+    name: Python ${{ matrix.python }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    env:
+      PYTHONUTF8: "1"
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: .
+          shared-key: sdk-python-compat-${{ matrix.os }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install tools
+        working-directory: sdk-python
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install maturin pytest "mypy<1.19" black ruff pytest-httpserver
+      - name: Build wheel
+        working-directory: sdk-python
+        shell: bash
+        run: python -m maturin build --release --out dist
+      - name: Install built package
+        working-directory: sdk-python
+        shell: bash
+        run: |
+          set -euo pipefail
+          WHEEL="$(python -c 'from pathlib import Path; ws=sorted(Path("dist").glob("arcflow-*.whl")); print(ws[-1] if ws else "")')"
+          if [ -z "$WHEEL" ]; then
+            echo "::error::No wheel in sdk-python/dist"
+            exit 1
+          fi
+          python -m pip install "$WHEEL"
+      - name: Verify native extension
+        working-directory: sdk-python
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmpdir="$(mktemp -d 2>/dev/null || python -c "import tempfile; print(tempfile.mkdtemp())")"
+          cd "$tmpdir"
+          python -c "import importlib; importlib.import_module('arcflow._arcflow_binding')"
+      - name: Ruff
+        working-directory: sdk-python
+        shell: bash
+        run: python -m ruff check arcflow tests
+      - name: Black
+        working-directory: sdk-python
+        shell: bash
+        run: python -m black --check arcflow tests
+      - name: Mypy
+        working-directory: sdk-python
+        shell: bash
+        run: python -m mypy arcflow
+      - name: Pytest
+        working-directory: sdk-python
+        shell: bash
+        env:
+          PYTHONPATH: ""
+        run: |
+          set -euo pipefail
+          tmpdir="$(mktemp -d 2>/dev/null || python -c "import tempfile; print(tempfile.mkdtemp())")"
+          cd "$tmpdir"
+          python -m pytest "$GITHUB_WORKSPACE/sdk-python/tests" -v
