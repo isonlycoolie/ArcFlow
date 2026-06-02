@@ -85,6 +85,51 @@ Use **Actions** → **Publish Python SDK** → **Run workflow**:
 
 This runs validate, test, and wheel builds only. The workflow sets `dry_run: true` so **publish** and **github-release** jobs are skipped. PyPI upload and GitHub Release run **only** on tag push, not on `workflow_dispatch`.
 
+## Publish from your machine (API token)
+
+Use this when GitHub Actions minutes are exhausted. **Never** commit a PyPI token or paste it in chat.
+
+### Windows (recommended scripts)
+
+From the repo root in PowerShell:
+
+```powershell
+cd C:\path\to\ArcFlow
+
+# 1) Build only (verifies Rust + maturin)
+.\scripts\build-python-sdk.ps1
+
+# 2) Upload (token scoped to arcflow-sdk on pypi.org)
+$env:PYPI_API_TOKEN = "pypi-...."
+.\scripts\publish-pypi-local.ps1 -SkipBuild
+
+# Or build + upload in one step:
+$env:PYPI_API_TOKEN = "pypi-...."
+.\scripts\publish-pypi-local.ps1
+```
+
+The upload step uploads only `sdk-python\dist\arcflow_sdk-*.whl` (not legacy `arcflow-*.whl` files).
+
+### Linux / macOS
+
+```bash
+cd /path/to/ArcFlow/sdk-python
+pip install maturin twine
+maturin build --release --out dist
+export TWINE_USERNAME=__token__
+export TWINE_PASSWORD="pypi-...."
+twine upload --non-interactive dist/arcflow_sdk-*.whl
+```
+
+**Platform note:** A Windows-only build ships a Windows wheel for the Python version you built with (e.g. cp313). Use GitHub Actions + cibuildwheel later for Linux/macOS and older Python versions.
+
+Verify:
+
+```bash
+pip install "arcflow-sdk==0.3.0"
+python -c "from arcflow import Agent, Workflow; print('ok')"
+```
+
 ## Local checks
 
 From `sdk-python/`:
