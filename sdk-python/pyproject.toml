@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "arcflow-sdk"
-version = "0.3.0"
+version = "0.3.3"
 description = "AI workflow orchestration runtime — structured, observable, reusable."
 readme = "README.md"
 license = { text = "MIT OR Apache-2.0" }
