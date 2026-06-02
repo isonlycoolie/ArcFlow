@@ -78,9 +78,9 @@ Recommended Kubernetes pattern:
 
 ```yaml
 lifecycle:
-  preStop:
-    exec:
-      command: ["sleep", "5"]
+ preStop:
+ exec:
+ command: ["sleep", "5"]
 terminationGracePeriodSeconds: 30
 ```
 
@@ -99,9 +99,9 @@ curl -sf http://localhost:8080/health
 curl -sf http://localhost:8080/ready
 
 curl -sf -X POST http://localhost:8080/v1/runs \
-  -H "Authorization: Bearer $ARCFLOW_SERVER_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"workflow":{"id":"00000000-0000-4000-8000-000000000001","name":"smoke","execution_mode":"linear","steps":[]},"agents":[],"input":"hi","exec_config":{"recovery_enabled":false}}'
+ -H "Authorization: Bearer $ARCFLOW_SERVER_API_KEY" \
+ -H "Content-Type: application/json" \
+ -d '{"workflow":{"id":"00000000-0000-4000-8000-000000000001","name":"smoke","execution_mode":"linear","steps":[]},"agents":[],"input":"hi","exec_config":{"recovery_enabled":false}}'
 ```
 
 Adjust workflow JSON to match a valid minimal definition in your environment.

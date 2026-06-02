@@ -1,9 +1,9 @@
 
 # arcflow validate
 
-Validate workflow definition files before commit or CI deploy. **Current status: stub (FP-5.04).** The command checks file readability only; it does **not** validate against [RCS schema](../contracts/rcs-schema.md) yet.
+Validate workflow definition files before commit or CI deploy. **Current status: stub (CLI validate command).** The command checks file readability only; it does **not** validate against [workflow schema](../contracts/rcs-schema.md) yet.
 
-Plan: `feat/fp-5-cli-validate`.
+.
 
 ## Usage
 
@@ -38,21 +38,21 @@ Exit code **4**.
 Missing file:
 
 ```text
-[ArcFlow] Cannot read workflows/missing.json: ...
+[ArcFlow] Cannot read workflows/missing.json:...
 ```
 
 Exit code **1**.
 
-## What FP-5.04 will add
+## What CLI validate command will add
 
 Target behavior (not shipped):
 
-- Parse JSON/YAML workflow against RCS v1 JSON Schema
+- Parse JSON/YAML workflow against workflow specification JSON Schema
 - Report `WorkflowConfigurationError` paths with line hints
 - `--format json` machine-readable diagnostics for CI
 - Exit code 4 on schema violations
 
-Do not rely on `arcflow validate` for production gates until FP-5.04 closes.
+Do not rely on `arcflow validate` for production gates until CLI validate command closes.
 
 ## CI workaround today
 
@@ -86,6 +86,6 @@ arcflow schedule validate schedules/nightly.yaml
 
 ## Related pages
 
-- [maturity-and-known-gaps.md](../concepts/maturity-and-known-gaps.md) (FP-5.04)
+- [maturity-and-known-gaps.md](../concepts/maturity-and-known-gaps.md) (CLI validate command)
 - [cli/overview.md](overview.md)
 - [guides/workflows/validation-and-testing.md](../guides/workflows/validation-and-testing.md)

@@ -3,7 +3,7 @@
 
 Practical security considerations for self-hosted ArcFlow deployments. Complements [Production checklist](../deployment/production-checklist.md) with network, data store, and operational hygiene guidance.
 
-Deployment guides: [contracts/guides/deployment/self-hosted.md](../../contracts/guides/deployment/self-hosted.md), [meta-repo.md](../../contracts/guides/deployment/meta-repo.md).
+Deployment guides: [Server deployment](../deployment/server-deployment.md), [Deployment overview](../deployment/overview.md#meta-repo-layout).
 
 ## Network boundaries
 
@@ -73,7 +73,7 @@ Vector data may contain embedded knowledge from site ingest; treat as confidenti
 
 Structured logs may include `run_id`, `site_id`, HTTP status, duration.
 
-Align logs with SEC-1: do not duplicate trace exports with richer content. See [SEC-1 compliance](sec-1-compliance.md).
+Align logs with the trace data policy: do not duplicate trace exports with richer content. See [Trace data policy compliance](sec-1-compliance.md).
 
 ## CORS and browser direct access
 

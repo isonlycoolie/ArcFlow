@@ -7,7 +7,7 @@
 
 ## What certified means at this level
 
-You deploy `arcflow-server` and `arcflow-relay` in production-oriented configurations, manage Postgres migrations, configure authentication tiers correctly, operate the static product (sites, knowledge, publish, Relay), monitor health and readiness, rotate API keys without downtime, configure OpenTelemetry export, apply the production checklist, and enforce SEC-1 compliance in running systems.
+You deploy `arcflow-server` and `arcflow-relay` in production-oriented configurations, manage Postgres migrations, configure authentication tiers correctly, operate the static product (sites, knowledge, publish, Relay), monitor health and readiness, rotate API keys without downtime, configure OpenTelemetry export, apply the production checklist, and enforce the trace data policy compliance in running systems.
 
 ## Competencies added over Level 2
 
@@ -19,7 +19,7 @@ You deploy `arcflow-server` and `arcflow-relay` in production-oriented configura
 | Static product | Site provision, ingest, publish, browser chat via Relay |
 | Observability | `/health`, `/ready`, persisted traces, optional OTel |
 | Key rotation | Rotate runtime or site token without failed requests |
-| SEC-1 | Traces and exports contain metadata only |
+| Trace policy | Traces and exports contain metadata only |
 | Production checklist | Complete operator checklist for your environment |
 
 ## Required reading
@@ -28,9 +28,9 @@ Read server, Relay, static product, deployment, operator, and security documenta
 
 | Topic | Document |
 |-------|----------|
-| Traces and SEC-1 | [Execution traces](../guides/observability/execution-traces.md), [SEC-1 rules](../guides/observability/sec-1-rules.md) |
+| Traces and trace data policy | [Execution traces](../guides/observability/execution-traces.md), [Trace data policy rules](../guides/observability/sec-1-rules.md) |
 | OpenTelemetry | [OpenTelemetry](../guides/observability/opentelemetry.md) |
-| Data safety | [SEC-1 and data safety](../concepts/sec-1-and-data-safety.md) |
+| Data safety | [Trace data policy](../concepts/sec-1-and-data-safety.md) |
 | Surfaces | [Surfaces and when to use them](../concepts/surfaces-and-when-to-use-them.md) |
 
 ## Tutorial tracks
@@ -49,7 +49,7 @@ Also complete example walkthroughs:
 
 ## Practical project
 
-Deploy the **full ArcFlow stack** (server, Relay, Postgres, Qdrant), provision a static product site with knowledge and published workflow, verify SEC-1 compliance, and perform token rotation without downtime.
+Deploy the **full ArcFlow stack** (server, Relay, Postgres, Qdrant), provision a static product site with knowledge and published workflow, verify trace data policy compliance, and perform token rotation without downtime.
 
 ### Stack components
 
@@ -69,7 +69,7 @@ Deploy the **full ArcFlow stack** (server, Relay, Postgres, Qdrant), provision a
 | Migrations | Document initial and re-run migrate |
 | Static site | Provision, ingest, publish `chat` workflow |
 | Browser verification | Chat works from allowed origin; blocked from disallowed |
-| SEC-1 audit | Sample trace and HTTP export reviewed; no prompt bodies |
+| trace data policy audit | Sample trace and HTTP export reviewed; no prompt bodies |
 | Key rotation | Procedure documented; demo rotation of runtime or site token |
 | OpenTelemetry | Exporter configured or documented skip with reason |
 | Runbook | Start, stop, backup, restore outline |
@@ -89,7 +89,7 @@ cargo run -p arcflow-cli -- trace RUN_ID --format json
 
 BYO Relay optional second phase per [relay-byo-deployment](../examples/relay-byo-deployment.md).
 
-### SEC-1 verification
+### trace data policy verification
 
 | Check | Method |
 |-------|--------|
@@ -118,7 +118,7 @@ Demonstrate at least one rotation in dev with zero failed chat requests during r
 | Idempotent migrate | yes |
 | Static chat end-to-end | yes |
 | Origin enforcement | yes |
-| SEC-1 sample audit signed off | yes |
+| trace data policy sample audit signed off | yes |
 | Rotation procedure executed | yes |
 | OTel or documented exception | yes |
 
@@ -133,4 +133,4 @@ Demonstrate at least one rotation in dev with zero failed chat requests during r
 
 ## Next level
 
-Proceed to [Level 4: Architect](level-4-certified-arcflow-architect.md) for multi-tenant design, RCS evolution, and enterprise tradeoffs.
+Proceed to [Level 4: Architect](level-4-certified-arcflow-architect.md) for multi-tenant design, workflow specification evolution, and enterprise tradeoffs.

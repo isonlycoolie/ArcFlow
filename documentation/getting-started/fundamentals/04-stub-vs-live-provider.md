@@ -22,11 +22,19 @@ The provider applies to the run (and can be overridden per advanced configs late
 OpenAI reads the API key from the environment variable `OPENAI_API_KEY`. The SDK never accepts raw secrets in source code. Set the variable in your shell or `.env` loader before running:
 
 ```bash
-export OPENAI_API_KEY="sk-your-key-here"   # macOS / Linux
-# $env:OPENAI_API_KEY="sk-your-key-here"   # PowerShell
+export OPENAI_API_KEY="sk-your-key-here" # macOS / Linux
+# $env:OPENAI_API_KEY="sk-your-key-here" # PowerShell
 ```
 
 Other built-in provider classes (`Anthropic`, `Gemini`) follow the same pattern with their own environment variables. This lesson focuses on the default path vs OpenAI because that is the most common first switch.
+
+For CI pipelines that must exercise live provider code paths without outbound network calls, set optional mock endpoint overrides (test harness only):
+
+| Variable | Purpose |
+|----------|---------|
+| `ARCFLOW_OPENAI_API_ENDPOINT` | Redirect OpenAI HTTP calls to a local mock server |
+| `ARCFLOW_ANTHROPIC_API_ENDPOINT` | Redirect Anthropic HTTP calls |
+| `ARCFLOW_GEMINI_API_ENDPOINT` | Redirect Gemini HTTP calls |
 
 Provider misconfiguration (empty model name, invalid temperature) raises `ProviderConfigurationError` before the run starts. Provider failures during a live call raise `ProviderExecutionError` with context you can log.
 
@@ -38,9 +46,9 @@ Save as `default_runtime.py`:
 from arcflow import Agent, Workflow
 
 agent = Agent(
-    name="summarizer",
-    role="summarize",
-    instructions="Summarize in three sentences.",
+ name="summarizer",
+ role="summarize",
+ instructions="Summarize in three sentences.",
 )
 
 wf = Workflow("default_demo")
@@ -70,20 +78,20 @@ import os
 from arcflow import Agent, OpenAI, Workflow
 
 if not os.environ.get("OPENAI_API_KEY"):
-    raise SystemExit("Set OPENAI_API_KEY before running this script.")
+ raise SystemExit("Set OPENAI_API_KEY before running this script.")
 
 agent = Agent(
-    name="summarizer",
-    role="summarize",
-    instructions="Summarize in three sentences.",
+ name="summarizer",
+ role="summarize",
+ instructions="Summarize in three sentences.",
 )
 
 wf = Workflow("openai_demo")
 wf.step(agent)
 
 result = wf.run(
-    "Battery recycling methods",
-    provider=OpenAI(model="gpt-4o"),
+ "Battery recycling methods",
+ provider=OpenAI(model="gpt-4o"),
 )
 print("live output:", result.output)
 print("completed:", result.status)

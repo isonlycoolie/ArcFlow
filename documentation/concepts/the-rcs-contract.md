@@ -1,11 +1,11 @@
 
-# The RCS contract
+# Workflow specification
 
-RCS (Runtime Contract Schema) v1 is the shared language between ArcFlow surfaces and `arcflow-core`. Workflows, agents, run requests, trace envelopes, and error codes are defined as JSON with a normative schema before Python, TypeScript, or HTTP handlers add their own ergonomics. Contract-first design is why a graph workflow validated in the CLI matches behavior on the server and in Relay-backed browser runs.
+ArcFlow workflow specification (version 1) is the shared language between ArcFlow surfaces and `arcflow-core`. Workflows, agents, run requests, trace envelopes, and error codes are defined as JSON with a normative schema before Python, TypeScript, or HTTP handlers add their own ergonomics. Contract-first design is why a graph workflow validated in the CLI matches behavior on the server and in Relay-backed browser runs.
 
 ## Why contract-first matters
 
-Without a single schema, each surface would drift: the server might accept a field the Python SDK never sends, or traces might omit fields the VS Code timeline expects. ArcFlow treats [RCS schema](../contracts/rcs-schema.md) and Rust types in `runtime/arcflow-core/src/rcs/types.rs` as the source of truth for structure. Surface APIs are adapters, not parallel definitions.
+Without a single schema, each surface would drift: the server might accept a field the Python SDK never sends, or traces might omit fields the VS Code timeline expects. ArcFlow treats [workflow schema](../contracts/rcs-schema.md) and Rust types in `runtime/arcflow-core/src/rcs/types.rs` as the source of truth for structure. Surface APIs are adapters, not parallel definitions.
 
 The hierarchy in practice:
 
@@ -15,7 +15,7 @@ The hierarchy in practice:
 
 Server route documentation note: [HTTP API reference](../server/http-api-reference.md) may lag the implemented routes in `server/arcflow-server/src/lib.rs`. Prefer the [HTTP API reference](../server/http-api-reference.md) or [server/](../server/overview.md) docs when integrating via HTTP.
 
-## Core RCS types
+## Core schema types
 
 ### WorkflowDefinition
 
@@ -49,21 +49,21 @@ Example minimal linear workflow fragment:
 
 ```json
 {
-  "id": "00000000-0000-4000-8000-000000000001",
-  "name": "research_pipeline",
-  "execution_mode": "linear",
-  "steps": [
-    { "id": "00000000-0000-4000-8000-000000000010", "agent_id": "00000000-0000-4000-8000-000000000020", "order": 1 },
-    { "id": "00000000-0000-4000-8000-000000000011", "agent_id": "00000000-0000-4000-8000-000000000021", "order": 2 }
-  ]
+ "id": "00000000-0000-4000-8000-000000000001",
+ "name": "research_pipeline",
+ "execution_mode": "linear",
+ "steps": [
+ { "id": "00000000-0000-4000-8000-000000000010", "agent_id": "00000000-0000-4000-8000-000000000020", "order": 1 },
+ { "id": "00000000-0000-4000-8000-000000000011", "agent_id": "00000000-0000-4000-8000-000000000021", "order": 2 }
+ ]
 }
 ```
 
 ## SDKs as interface layers
 
-Python and TypeScript do not redefine workflow semantics. They expose native types that serialize to the same RCS JSON the engine consumes.
+Python and TypeScript do not redefine workflow semantics. They expose native types that serialize to the same workflow JSON the engine consumes.
 
-**Python** (`sdk-python`): `Workflow`, `Agent`, `workflow.run(input, recovery_enabled=True)`. Errors map to `WorkflowConfigurationError`, `WorkflowExecutionError`, `InfrastructureUnavailableError` from RCS codes.
+**Python** (`sdk-python`): `Workflow`, `Agent`, `workflow.run(input, recovery_enabled=True)`. Errors map to `WorkflowConfigurationError`, `WorkflowExecutionError`, `InfrastructureUnavailableError` from workflow specification codes.
 
 **TypeScript** (`sdk-typescript`): `Workflow`, `Agent`, `workflow.run(input, { recoveryEnabled: true })`. Used by VS Code and Node tests.
 
@@ -71,7 +71,7 @@ Python and TypeScript do not redefine workflow semantics. They expose native typ
 
 **Static browser** (`@arcflow/static`): Does not embed full workflow JSON in production. Calls `runPublished("chat", "^1.0.0", message)` so definitions live in the server registry after admin publish.
 
-**CLI**: Executes local workflow files; migrate applies SQL migrations aligned with server schema. Full `arcflow validate` against schema is deferred (FP-5.04).
+**CLI**: Executes local workflow files; migrate applies SQL migrations aligned with server schema. Full `arcflow validate` against schema is deferred (CLI validate command).
 
 The engine entry for all paths is `WorkflowEngine::execute_with_config`. Validation runs via `validate_workflow` and `validate_graph` before execution.
 
@@ -81,12 +81,12 @@ The engine entry for all paths is `WorkflowEngine::execute_with_config`. Validat
 
 ```json
 {
-  "recovery_enabled": true,
-  "workflow_timeout_secs": 600,
-  "step_timeout_secs": 120,
-  "stream": { "enabled": false },
-  "initial_state": {},
-  "retry": { "max_attempts": 3, "backoff": { "kind": "exponential", "base_ms": 1000 } }
+ "recovery_enabled": true,
+ "workflow_timeout_secs": 600,
+ "step_timeout_secs": 120,
+ "stream": { "enabled": false },
+ "initial_state": {},
+ "retry": { "max_attempts": 3, "backoff": { "kind": "exponential", "base_ms": 1000 } }
 }
 ```
 
@@ -94,14 +94,14 @@ Recovery gates Postgres persistence. Test mode (`exec_config.test`) allows deter
 
 ## Observability contract
 
-Trace event names and allowed fields are normative under [Trace events (normative)](../contracts/trace-events-normative.md). SEC-1 requires metadata-only payloads (see [SEC-1 and data safety](sec-1-and-data-safety.md)).
+Trace event names and allowed fields are normative under [Trace events (normative)](../contracts/trace-events-normative.md). trace data policy requires metadata-only payloads (see [Trace data policy](sec-1-and-data-safety.md)).
 
 ## Validation today
 
-Rust validates before run. CI should validate workflow JSON against `v1.schema.json` until `arcflow validate` ships (FP-5.04). Graph recovery resume uses checkpoint schema in Postgres but dispatch is incomplete (FP-1.01).
+Rust validates before run. CI should validate workflow JSON against `v1.schema.json` until `arcflow validate` ships (CLI validate command). Graph recovery resume uses checkpoint schema in Postgres but dispatch is incomplete (Graph recovery resume).
 
 ## Related pages
 
 - [Execution model](execution-model.md) for linear vs graph scheduling
-- [Architecture overview](architecture-overview.md) for where RCS crosses HTTP boundaries
+- [Architecture overview](architecture-overview.md) for where workflow specification crosses HTTP boundaries
 - [contracts/rcs-schema.md](../contracts/rcs-schema.md) for narrative schema guide

@@ -23,11 +23,11 @@ Postgres is **required** for `POST /v1/runs`. If `ARCFLOW_POSTGRESQL_URL` is uns
 
 ```text
 Client (curl, backend, Relay)
-  → arcflow-server :8080
-      → middleware (API key / admin key)
-      → handlers (runs, registry, admin)
-      → arcflow-core WorkflowEngine
-      → Postgres (runs, traces, registry, sites, recovery)
+ → arcflow-server :8080
+ → middleware (API key / admin key)
+ → handlers (runs, registry, admin)
+ → arcflow-core WorkflowEngine
+ → Postgres (runs, traces, registry, sites, recovery)
 ```
 
 Relay is a separate binary (`arcflow-relay`) that proxies browser traffic to the server with site tokens and origin checks. See [relay/overview.md](../relay/overview.md).
@@ -51,13 +51,13 @@ Full auth detail: [authentication.md](authentication.md).
 
 `ARCFLOW_CORS_ORIGINS` accepts a comma-separated list of allowed browser origins for direct server calls. Production static sites should use Relay instead of exposing the server API key in the browser. CORS on the server is mainly for local development with `mode: "direct"` in the static SDK.
 
-## Deferred: server SSE (FP-2)
+## Deferred: server SSE (streaming deferred)
 
-`GET /v1/runs/{run_id}/events` (Server-Sent Events) is **not implemented**. Poll `GET /v1/runs/{run_id}` or fetch the trace. SDK `run_stream()` works in-process only. Plan: `feat/fp-2-server-streaming`.
+`GET /v1/runs/{run_id}/events` (Server-Sent Events) is **not implemented**. Poll `GET /v1/runs/{run_id}` or fetch the trace. SDK `run_stream()` works in-process only..
 
 ## Contract drift (K-10)
 
-Normative [server-api-v1.md](../server/http-api-reference.md) lists only `/health`, `/ready`, and deprecated `POST /v1/workflows/run`. The implemented router matches [HTTP API reference](../server/http-api-reference.md). When integrating, prefer this [HTTP API reference](../server/http-api-reference.md).
+When integrating, prefer [HTTP API reference](http-api-reference.md) or [Admin API reference](../operator/admin-api-reference.md). Implemented routes match `server/arcflow-server/src/lib.rs`.
 
 ## Quick verification
 
@@ -73,9 +73,9 @@ Create a stub run (see [Server API quickstart](../getting-started/quickstart-ser
 
 ```bash
 curl -s -X POST http://localhost:8080/v1/runs \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer dev-secret" \
-  -d '{"workflow":{"id":"00000000-0000-4000-8000-000000000099","name":"demo","execution_mode":"linear","steps":[{"id":"00000000-0000-4000-8000-000000000001","agent_id":"00000000-0000-4000-8000-000000000010","order":1}]},"agents":[{"id":"00000000-0000-4000-8000-000000000010","name":"writer","role":"author","instructions":"Summarize."}],"input":"hello"}'
+ -H "Content-Type: application/json" \
+ -H "Authorization: Bearer dev-secret" \
+ -d '{"workflow":{"id":"00000000-0000-4000-8000-000000000099","name":"demo","execution_mode":"linear","steps":[{"id":"00000000-0000-4000-8000-000000000001","agent_id":"00000000-0000-4000-8000-000000000010","order":1}]},"agents":[{"id":"00000000-0000-4000-8000-000000000010","name":"writer","role":"author","instructions":"Summarize."}],"input":"hello"}'
 ```
 
 ## Related pages

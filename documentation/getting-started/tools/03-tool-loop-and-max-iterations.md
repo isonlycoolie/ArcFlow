@@ -35,30 +35,30 @@ from arcflow import Agent, Tool, ToolExecutionConfig, Workflow
 
 
 def lookup_execute(payload: dict) -> str:
-    topic = str(payload.get("topic", ""))
-    return f"stub lookup result for {topic}"
+ topic = str(payload.get("topic", ""))
+ return f"stub lookup result for {topic}"
 
 
 lookup = Tool(
-    name="lookup",
-    description="Look up facts about a topic.",
-    input_schema={
-        "type": "object",
-        "properties": {"topic": {"type": "string"}},
-        "required": ["topic"],
-    },
-    execute=lookup_execute,
+ name="lookup",
+ description="Look up facts about a topic.",
+ input_schema={
+ "type": "object",
+ "properties": {"topic": {"type": "string"}},
+ "required": ["topic"],
+ },
+ execute=lookup_execute,
 )
 
 agent = Agent(
-    name="researcher",
-    role="Researcher",
-    instructions="Research using lookup when needed.",
-    tools=(lookup,),
-    tool_execution=ToolExecutionConfig(
-        mode="llm_select",
-        max_iterations=3,
-    ),
+ name="researcher",
+ role="Researcher",
+ instructions="Research using lookup when needed.",
+ tools=(lookup,),
+ tool_execution=ToolExecutionConfig(
+ mode="llm_select",
+ max_iterations=3,
+ ),
 )
 
 workflow = Workflow("tool-loop-demo")
@@ -91,10 +91,10 @@ from arcflow import ToolExecutionConfig
 from arcflow.exceptions import WorkflowConfigurationError
 
 for bad in (0, 21):
-    try:
-        ToolExecutionConfig(max_iterations=bad)
-    except WorkflowConfigurationError as err:
-        print(f"max_iterations={bad} rejected:", err)
+ try:
+ ToolExecutionConfig(max_iterations=bad)
+ except WorkflowConfigurationError as err:
+ print(f"max_iterations={bad} rejected:", err)
 ```
 
 ## Next

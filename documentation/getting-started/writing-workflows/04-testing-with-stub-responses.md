@@ -40,36 +40,36 @@ Save as `stub_test_demo.py`:
 from arcflow import Agent, Workflow
 
 researcher = Agent(
-    name="researcher",
-    role="Research",
-    instructions="Research the topic.",
+ name="researcher",
+ role="Research",
+ instructions="Research the topic.",
 )
 
 writer = Agent(
-    name="writer",
-    role="Writer",
-    instructions="Write a summary.",
+ name="writer",
+ role="Writer",
+ instructions="Write a summary.",
 )
 
 workflow = Workflow("stub-test-demo")
 workflow.step(researcher).step(writer)
 
 results = workflow.test(
-    [
-        {
-            "name": "two-step happy path",
-            "input": "Solar panel efficiency",
-            "expected_output": "Final summary text",
-            "stub_responses": {
-                "step_1": {"output": "Fact one. Fact two."},
-                "step_2": {"output": "Final summary text"},
-            },
-        }
-    ]
+ [
+ {
+ "name": "two-step happy path",
+ "input": "Solar panel efficiency",
+ "expected_output": "Final summary text",
+ "stub_responses": {
+ "step_1": {"output": "Fact one. Fact two."},
+ "step_2": {"output": "Final summary text"},
+ },
+ }
+ ]
 )
 
 for row in results:
-    print(row["name"], "passed=", row["passed"], "output=", row["output"])
+ print(row["name"], "passed=", row["passed"], "output=", row["output"])
 ```
 
 Run:
@@ -97,16 +97,16 @@ agent = Agent(name="writer", role="Writer", instructions="Write.")
 wf = Workflow("fail-times-demo").step(agent)
 
 results = wf.test(
-    [
-        {
-            "name": "recover after stub failures",
-            "input": "hello",
-            "expected_output": "recovered",
-            "stub_responses": {
-                "step_1": {"fail_times": 2, "then_output": "recovered"},
-            },
-        }
-    ]
+ [
+ {
+ "name": "recover after stub failures",
+ "input": "hello",
+ "expected_output": "recovered",
+ "stub_responses": {
+ "step_1": {"fail_times": 2, "then_output": "recovered"},
+ },
+ }
+ ]
 )
 print(results[0]["passed"], results[0]["output"])
 ```

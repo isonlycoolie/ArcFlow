@@ -1,7 +1,7 @@
 
 # Vector RAG pipeline
 
-Vector memory connects agent turns to a Qdrant collection through embed, store, retrieve, and optional rerank stages. The engine injects retrieved context into the agent prompt while traces record only chunk counts and byte totals (SEC-1).
+Vector memory connects agent turns to a Qdrant collection through embed, store, retrieve, and optional rerank stages. The engine injects retrieved context into the agent prompt while traces record only chunk counts and byte totals (trace data policy).
 
 Types overview: [Memory types](memory-types.md). Retrieval tuning: [Hybrid retrieval and reranking](hybrid-retrieval-and-reranking.md). Ingest paths: [Knowledge ingestion](knowledge-ingestion.md).
 
@@ -9,37 +9,37 @@ Types overview: [Memory types](memory-types.md). Retrieval tuning: [Hybrid retri
 
 ```text
 Ingest → Chunk → Embed → Upsert (Qdrant)
-                ↓
+ ↓
 Run turn → Query embed → Retrieve (dense / hybrid) → Rerank? → Prompt injection
-                ↓
-         MemoryRetrieved trace (chunk_count, total_bytes)
+ ↓
+ MemoryRetrieved trace (chunk_count, total_bytes)
 ```
 
 ## Agent memory_config
 
 ```json
 {
-  "memory_config": {
-    "memory_type": "vector",
-    "scope": "workflow",
-    "namespace": "product-docs",
-    "embedding": "openai/text-embedding-3-small",
-    "retrieval": {
-      "mode": "hybrid",
-      "top_k": 8,
-      "dense_weight": 0.65,
-      "sparse_weight": 0.35,
-      "rerank": {
-        "provider": "cohere",
-        "model": "rerank-english-v3.0",
-        "top_n": 4
-      }
-    },
-    "chunking": {
-      "chunk_size": 512,
-      "chunk_overlap": 64
-    }
-  }
+ "memory_config": {
+ "memory_type": "vector",
+ "scope": "workflow",
+ "namespace": "product-docs",
+ "embedding": "openai/text-embedding-3-small",
+ "retrieval": {
+ "mode": "hybrid",
+ "top_k": 8,
+ "dense_weight": 0.65,
+ "sparse_weight": 0.35,
+ "rerank": {
+ "provider": "cohere",
+ "model": "rerank-english-v3.0",
+ "top_n": 4
+ }
+ },
+ "chunking": {
+ "chunk_size": 512,
+ "chunk_overlap": 64
+ }
+ }
 }
 ```
 
@@ -57,10 +57,10 @@ Text is split using `MemoryChunkingConfig`:
 
 ```json
 {
-  "chunking": {
-    "chunk_size": 512,
-    "chunk_overlap": 64
-  }
+ "chunking": {
+ "chunk_size": 512,
+ "chunk_overlap": 64
+ }
 }
 ```
 
@@ -92,52 +92,52 @@ Optional Cohere rerank narrows `top_k` chunks to `top_n` before prompt injection
 
 ```json
 {
-  "rerank": {
-    "provider": "cohere",
-    "model": "rerank-english-v3.0",
-    "top_n": 3
-  }
+ "rerank": {
+ "provider": "cohere",
+ "model": "rerank-english-v3.0",
+ "top_n": 3
+ }
 }
 ```
 
 Failure maps to `RerankError` (502). Engine may degrade per configuration; watch for `MemoryDegraded` traces.
 
-## Stage 4: Trace (SEC-1)
+## Stage 4: Trace (trace data policy)
 
 ```json
 {
-  "kind": "MemoryRetrieved",
-  "run_id": "r1",
-  "step_id": "s1",
-  "agent_name": "support",
-  "chunk_count": 5,
-  "total_bytes": 4200
+ "kind": "MemoryRetrieved",
+ "run_id": "r1",
+ "step_id": "s1",
+ "agent_name": "support",
+ "chunk_count": 5,
+ "total_bytes": 4200
 }
 ```
 
-No chunk text in traces or persisted `arcflow_trace_events`. [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md).
+No chunk text in traces or persisted `arcflow_trace_events`. [Trace data policy](../../concepts/sec-1-and-data-safety.md).
 
 ## Full agent example
 
 ```json
 {
-  "id": "00000000-0000-4000-8000-000000000020",
-  "name": "support",
-  "role": "Support agent",
-  "instructions": "Answer only from retrieved knowledge. Say when unsure.",
-  "memory_config": {
-    "memory_type": "vector",
-    "scope": "workflow",
-    "namespace": "acme-support",
-    "embedding": "openai/text-embedding-3-small",
-    "retrieval": { "mode": "hybrid", "top_k": 5 },
-    "chunking": { "chunk_size": 512, "chunk_overlap": 64 }
-  },
-  "provider": {
-    "provider_id": "openai",
-    "model": "gpt-4o-mini",
-    "api_key_env": "OPENAI_API_KEY"
-  }
+ "id": "00000000-0000-4000-8000-000000000020",
+ "name": "support",
+ "role": "Support agent",
+ "instructions": "Answer only from retrieved knowledge. Say when unsure.",
+ "memory_config": {
+ "memory_type": "vector",
+ "scope": "workflow",
+ "namespace": "acme-support",
+ "embedding": "openai/text-embedding-3-small",
+ "retrieval": { "mode": "hybrid", "top_k": 5 },
+ "chunking": { "chunk_size": 512, "chunk_overlap": 64 }
+ },
+ "provider": {
+ "provider_id": "openai",
+ "model": "gpt-4o-mini",
+ "api_key_env": "OPENAI_API_KEY"
+ }
 }
 ```
 

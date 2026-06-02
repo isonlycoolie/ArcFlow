@@ -1,15 +1,15 @@
 
 # Trace events (normative)
 
-Normative naming contract for ArcFlow engine trace event kinds. This is a reference document, not a tutorial. Each event serializes as `{ "kind": "<PascalCaseName>", ...fields }`.
+Normative naming contract for ArcFlow engine trace event kinds. This is a reference document, not a tutorial. Each event serializes as `{ "kind": "<PascalCaseName>",...fields }`.
 
-**SEC-1 (absolute):** No LLM prompts/responses, tool input/output values, memory values, credentials, raw workflow input, or PII in stored or exported traces.
+**trace data policy (absolute):** No LLM prompts/responses, tool input/output values, memory values, credentials, raw workflow input, or PII in stored or exported traces.
 
 
 
 Tutorial-style reference: [Trace event reference](../guides/observability/trace-event-reference.md).
 
-**Total engine event kinds:** 40 (K-02). RCS graph envelope kinds may appear in extended exports alongside engine events.
+**Total engine event kinds:** 40 (K-02). workflow graph envelope kinds may appear in extended exports alongside engine events.
 
 ## Envelope
 
@@ -24,7 +24,7 @@ Every event shares correlation fields where applicable:
 
 ## D.1 Workflow lifecycle
 
-| Kind | Trigger | Fields | SEC-1 |
+| Kind | Trigger | Fields | Trace policy |
 |------|---------|--------|-------|
 | `WorkflowStarted` | Run begins | run_id, workflow_name, step_count | Safe |
 | `WorkflowCompleted` | All steps success | run_id, duration_ms, total_tokens | Safe |
@@ -35,7 +35,7 @@ Every event shares correlation fields where applicable:
 
 ## D.2 Step lifecycle
 
-| Kind | Trigger | Fields | SEC-1 |
+| Kind | Trigger | Fields | Trace policy |
 |------|---------|--------|-------|
 | `StepStarted` | Before agent for step | run_id, step_id, step_index, agent_name, agent_role | Safe if names not PII |
 | `StepCompleted` | Step success | run_id, step_id, step_index, duration_ms, tokens, output_size_bytes | Safe |
@@ -45,7 +45,7 @@ Every event shares correlation fields where applicable:
 
 ## D.3 Agent and provider
 
-| Kind | Trigger | Fields | SEC-1 |
+| Kind | Trigger | Fields | Trace policy |
 |------|---------|--------|-------|
 | `AgentInvoked` | Agent processing starts | run_id, step_id, agent_name, input_size_bytes | Safe |
 | `AgentResponseReceived` | Agent output ready | run_id, step_id, agent_name, output_size_bytes | Safe |
@@ -57,7 +57,7 @@ Every event shares correlation fields where applicable:
 
 ## D.4 Tools
 
-| Kind | Trigger | Fields | SEC-1 |
+| Kind | Trigger | Fields | Trace policy |
 |------|---------|--------|-------|
 | `ToolCallStarted` | Tool dispatch | run_id, step_id, tool_name, input_schema_hash | Safe |
 | `ToolCallCompleted` | Tool success | run_id, step_id, tool_name, duration_ms, output_size_bytes | Safe |
@@ -66,7 +66,7 @@ Every event shares correlation fields where applicable:
 
 ## D.5 Memory
 
-| Kind | Trigger | Fields | SEC-1 |
+| Kind | Trigger | Fields | Trace policy |
 |------|---------|--------|-------|
 | `MemoryWrite` | Write to memory | run_id, step_id, agent_name, memory_type, key, duration_ms | Safe |
 | `MemoryRead` | Read from memory | run_id, step_id, agent_name, memory_type, key, hit, duration_ms | Safe |
@@ -76,7 +76,7 @@ Every event shares correlation fields where applicable:
 
 ## D.6 Reliability
 
-| Kind | Trigger | Fields | SEC-1 |
+| Kind | Trigger | Fields | Trace policy |
 |------|---------|--------|-------|
 | `RetryAttempted` | Retry scheduled | run_id, step_id, attempt_number, max_attempts, backoff_ms, trigger_error_code | Safe |
 | `RetryExhausted` | Retries exhausted | run_id, step_id, total_attempts, last_error_code | Safe |
@@ -85,7 +85,7 @@ Every event shares correlation fields where applicable:
 
 ## D.7 Streaming
 
-| Kind | Trigger | Fields | SEC-1 |
+| Kind | Trigger | Fields | Trace policy |
 |------|---------|--------|-------|
 | `StreamChunkReceived` | Stream chunk (size only in trace) | run_id, step_id, chunk_bytes | Safe |
 | `TokenEmitted` | Token delta accounting | run_id, step_id, completion_token_delta, prompt_token_delta | Safe |
@@ -94,7 +94,7 @@ SDK streaming may expose text to the local process during `run_stream()`; persis
 
 ## D.8 External bindings
 
-| Kind | Trigger | Fields | SEC-1 |
+| Kind | Trigger | Fields | Trace policy |
 |------|---------|--------|-------|
 | `ExternalBindingStarted` | External wait begins | run_id, binding_id, step_id, mode | Safe |
 | `ExternalBindingCompleted` | External success | run_id, binding_id, step_id, duration_ms | Safe |
@@ -105,18 +105,18 @@ SDK streaming may expose text to the local process during `run_stream()`; persis
 
 ```json
 [
-  { "kind": "WorkflowStarted", "run_id": "r1", "workflow_name": "demo", "step_count": 2 },
-  { "kind": "StepStarted", "run_id": "r1", "step_id": "s1", "step_index": 0, "agent_name": "a1", "agent_role": "Analyst" },
-  { "kind": "ProviderRequestSent", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "max_tokens": 1024, "prompt_size_bytes": 512 },
-  { "kind": "ProviderResponseReceived", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "tokens": { "input": 120, "output": 45, "total": 165 }, "latency_ms": 890 },
-  { "kind": "StepCompleted", "run_id": "r1", "step_id": "s1", "step_index": 0, "duration_ms": 920, "tokens": { "input": 120, "output": 45, "total": 165 }, "output_size_bytes": 180 },
-  { "kind": "WorkflowCompleted", "run_id": "r1", "duration_ms": 950, "total_tokens": { "input": 120, "output": 45, "total": 165 } }
+ { "kind": "WorkflowStarted", "run_id": "r1", "workflow_name": "demo", "step_count": 2 },
+ { "kind": "StepStarted", "run_id": "r1", "step_id": "s1", "step_index": 0, "agent_name": "a1", "agent_role": "Analyst" },
+ { "kind": "ProviderRequestSent", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "max_tokens": 1024, "prompt_size_bytes": 512 },
+ { "kind": "ProviderResponseReceived", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "tokens": { "input": 120, "output": 45, "total": 165 }, "latency_ms": 890 },
+ { "kind": "StepCompleted", "run_id": "r1", "step_id": "s1", "step_index": 0, "duration_ms": 920, "tokens": { "input": 120, "output": 45, "total": 165 }, "output_size_bytes": 180 },
+ { "kind": "WorkflowCompleted", "run_id": "r1", "duration_ms": 950, "total_tokens": { "input": 120, "output": 45, "total": 165 } }
 ]
 ```
 
 ## Persistence
 
-When Postgres persistence is enabled, events are stored in `arcflow_trace_events` (migration 000005). Payloads must remain SEC-1 compliant at rest.
+When Postgres persistence is enabled, events are stored in `arcflow_trace_events` (migration 000005). Payloads must remain trace data policy compliant at rest.
 
 ## Adding new event kinds
 
@@ -124,11 +124,11 @@ Before merging new `TraceEventKind` variants:
 
 1. Update this page when engine events change.
 2. Update `events.rs` and this page.
-3. Pass SEC-1 review: no forbidden field categories.
+3. Pass trace data policy review: no forbidden field categories.
 4. Consider Relay browser exposure path.
 
 ## Related pages
 
-- [SEC-1 compliance](../security/sec-1-compliance.md)
+- [Trace data policy compliance](../security/sec-1-compliance.md)
 - [Execution traces](../guides/observability/execution-traces.md)
-- [RCS schema](rcs-schema.md)
+- [workflow schema](rcs-schema.md)

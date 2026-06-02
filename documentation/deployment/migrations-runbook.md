@@ -15,7 +15,7 @@ Normative recovery DDL (partial): [Postgres schema](../server/postgres-schema.md
 | `20240531000002` | Graph columns on recovery (`current_node_id`, `graph_iteration_count`, `pending_join`) |
 | `20240531000003` | `arcflow_runs` (run status, result snapshot) |
 | `20240531000004` | `arcflow_human_approvals`, HITL snapshot columns |
-| `20240531000005` | `arcflow_trace_events` (SEC-1 persisted events) |
+| `20240531000005` | `arcflow_trace_events` (trace data policy persisted events) |
 | `20240531000006` | `arcflow_workflows`, `arcflow_workflow_aliases` (semver registry) |
 | `20240531000007` | `arcflow_sites`, `arcflow_site_tokens`, `arcflow_site_usage_daily` |
 
@@ -45,11 +45,11 @@ Docker one-shot (production compose):
 
 ```yaml
 arcflow-migrate:
-  build:
-    dockerfile: server/arcflow-server/Dockerfile.migrate
-  environment:
-    ARCFLOW_POSTGRESQL_URL: ...
-  restart: "no"
+ build:
+ dockerfile: server/arcflow-server/Dockerfile.migrate
+ environment:
+ ARCFLOW_POSTGRESQL_URL:...
+ restart: "no"
 ```
 
 Server depends on `service_completed_successfully` for migrate.
@@ -73,7 +73,7 @@ cargo test -p arcflow-server migrations
 ## Fresh install
 
 ```bash
-createdb arcflow   # or use managed Postgres
+createdb arcflow # or use managed Postgres
 export ARCFLOW_POSTGRESQL_URL=postgres://arcflow:arcflow@localhost:5432/arcflow
 arcflow migrate up
 arcflow migrate validate

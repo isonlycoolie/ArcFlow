@@ -44,8 +44,8 @@ Set `OPENAI_API_KEY` (or Anthropic/Gemini equivalents) in the environment.
 
 ## Documentation
 
-- [Getting started](../contracts/guides/sdks/typescript/getting-started.md)
-- [Provider guide](../contracts/guides/providers/getting-started.md)
+- [TypeScript quickstart](../documentation/getting-started/quickstart-typescript.md)
+- [Provider configuration](../documentation/guides/agents-and-tools/provider-configuration.md)
 - [Runtime contracts](../contracts/README.md)
 
 ## Zero production npm dependencies

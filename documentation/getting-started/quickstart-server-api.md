@@ -57,42 +57,42 @@ Save the payload as `run-payload.json` in your working directory:
 
 ```json
 {
-  "workflow": {
-    "id": "00000000-0000-4000-8000-000000000099",
-    "name": "research_pipeline",
-    "execution_mode": "linear",
-    "steps": [
-      {
-        "id": "00000000-0000-4000-8000-000000000001",
-        "agent_id": "00000000-0000-4000-8000-000000000010",
-        "order": 1
-      },
-      {
-        "id": "00000000-0000-4000-8000-000000000002",
-        "agent_id": "00000000-0000-4000-8000-000000000011",
-        "order": 2
-      }
-    ]
-  },
-  "agents": [
-    {
-      "id": "00000000-0000-4000-8000-000000000010",
-      "name": "researcher",
-      "role": "research",
-      "instructions": "Research the given topic thoroughly."
-    },
-    {
-      "id": "00000000-0000-4000-8000-000000000011",
-      "name": "writer",
-      "role": "write",
-      "instructions": "Write a clear summary of the research."
-    }
-  ],
-  "input": "Analyze renewable energy trends",
-  "exec_config": {
-    "recovery_enabled": true,
-    "workflow_timeout_secs": 300
-  }
+ "workflow": {
+ "id": "00000000-0000-4000-8000-000000000099",
+ "name": "research_pipeline",
+ "execution_mode": "linear",
+ "steps": [
+ {
+ "id": "00000000-0000-4000-8000-000000000001",
+ "agent_id": "00000000-0000-4000-8000-000000000010",
+ "order": 1
+ },
+ {
+ "id": "00000000-0000-4000-8000-000000000002",
+ "agent_id": "00000000-0000-4000-8000-000000000011",
+ "order": 2
+ }
+ ]
+ },
+ "agents": [
+ {
+ "id": "00000000-0000-4000-8000-000000000010",
+ "name": "researcher",
+ "role": "research",
+ "instructions": "Research the given topic thoroughly."
+ },
+ {
+ "id": "00000000-0000-4000-8000-000000000011",
+ "name": "writer",
+ "role": "write",
+ "instructions": "Write a clear summary of the research."
+ }
+ ],
+ "input": "Analyze renewable energy trends",
+ "exec_config": {
+ "recovery_enabled": true,
+ "workflow_timeout_secs": 300
+ }
 }
 ```
 
@@ -100,27 +100,27 @@ Submit the run:
 
 ```bash
 curl -s -X POST http://localhost:8080/v1/runs \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer dev-secret" \
-  -d @run-payload.json
+ -H "Content-Type: application/json" \
+ -H "Authorization: Bearer dev-secret" \
+ -d @run-payload.json
 ```
 
 On Windows PowerShell:
 
 ```powershell
 curl.exe -s -X POST http://localhost:8080/v1/runs `
-  -H "Content-Type: application/json" `
-  -H "Authorization: Bearer dev-secret" `
-  -d "@run-payload.json"
+ -H "Content-Type: application/json" `
+ -H "Authorization: Bearer dev-secret" `
+ -d "@run-payload.json"
 ```
 
 Example **201** response:
 
 ```json
 {
-  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-  "trace_id": "trace-7c9e6679",
-  "status": "Running"
+ "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+ "trace_id": "trace-7c9e6679",
+ "status": "Running"
 }
 ```
 
@@ -132,7 +132,7 @@ Replace `RUN_ID` with the value from the create response:
 
 ```bash
 curl -s http://localhost:8080/v1/runs/RUN_ID \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
 Repeat until `status` is terminal (`Completed`, `Failed`, `Cancelled`, or `Interrupted`). Sample workflows typically finish in seconds.
@@ -141,14 +141,14 @@ Example **200** when complete:
 
 ```json
 {
-  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-  "status": "Completed",
-  "result": {
-    "output": "Final answer text",
-    "step_outputs": {}
-  },
-  "error": null,
-  "interrupt": null
+ "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+ "status": "Completed",
+ "result": {
+ "output": "Final answer text",
+ "step_outputs": {}
+ },
+ "error": null,
+ "interrupt": null
 }
 ```
 
@@ -157,9 +157,9 @@ Poll loop (bash):
 ```bash
 RUN_ID="paste-uuid-here"
 until STATUS=$(curl -s "http://localhost:8080/v1/runs/${RUN_ID}" \
-  -H "Authorization: Bearer dev-secret" | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])") \
-  && [[ "$STATUS" == "Completed" || "$STATUS" == "Failed" ]]; do
-  sleep 1
+ -H "Authorization: Bearer dev-secret" | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])") \
+ && [[ "$STATUS" == "Completed" || "$STATUS" == "Failed" ]]; do
+ sleep 1
 done
 echo "terminal status: $STATUS"
 ```
@@ -169,9 +169,9 @@ Poll loop (PowerShell):
 ```powershell
 $runId = "paste-uuid-here"
 do {
-  Start-Sleep -Seconds 1
-  $body = curl.exe -s "http://localhost:8080/v1/runs/$runId" -H "Authorization: Bearer dev-secret"
-  $status = ($body | ConvertFrom-Json).status
+ Start-Sleep -Seconds 1
+ $body = curl.exe -s "http://localhost:8080/v1/runs/$runId" -H "Authorization: Bearer dev-secret"
+ $status = ($body | ConvertFrom-Json).status
 } until ($status -in @("Completed", "Failed"))
 Write-Host "terminal status: $status"
 ```
@@ -182,10 +182,10 @@ HTTP API status strings use PascalCase. The embedded Python SDK exposes lowercas
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/RUN_ID/trace" \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
-The response is an `ExecutionTrace` JSON document with metadata-only events (SEC-1). Expect lifecycle kinds such as `WorkflowStarted`, `StepCompleted`, and `WorkflowCompleted`.
+The response is an `ExecutionTrace` JSON document with metadata-only events (trace data policy). Expect lifecycle kinds such as `WorkflowStarted`, `StepCompleted`, and `WorkflowCompleted`.
 
 From the repo root you can also inspect a run with the CLI:
 
@@ -251,6 +251,6 @@ Add `-v` only if you intend to wipe the Postgres volume.
 | Tutorial with verification checklist | [Track B: Server API](../tutorials/track-b-server-api.md) |
 | HITL and external on server | [Integrating track](integrating/README.md) |
 | Workflow registry and semver | [Workflow registry](../guides/workflows/workflow-registry.md) |
-| Production compose | `docker/docker-compose.prod.yml`, `contracts/guides/deployment/self-hosted.md` |
+| Production compose | `docker/docker-compose.prod.yml`, [Server deployment](../deployment/server-deployment.md) |
 | Full HTTP reference | [Server overview](../server/overview.md) |
 | Static browser product | [Static site chatbot](paths/static-site-chatbot.md) |

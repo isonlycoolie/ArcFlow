@@ -48,7 +48,7 @@ Defines a behavioral unit. Does not execute directly.
 |-------------------|------|-------|
 | `name`, `role`, `instructions` | `str` | Required non-empty strings |
 | `model` | `str` | Declarative; provider model set via `run(provider=...)` |
-| `tools` | `tuple[Tool, ...]` | Duplicate tool names rejected at construct time |
+| `tools` | `tuple[Tool,...]` | Duplicate tool names rejected at construct time |
 | `memory` | `MemoryConfig \| None` | Backend config serialized to Rust |
 | `context` | `ContextPolicy \| None` | Prior-step inclusion policy |
 | `tool_execution` | `ToolExecutionConfig \| None` | LLM tool loop bounds |
@@ -149,7 +149,7 @@ Pass to `workflow.run(..., provider=OpenAI(model="gpt-4o"))`.
 | `output` | `str` | Final step text |
 | `run_id` | `str` | UUID for trace and CLI |
 | `step_count` | `int` | Steps executed |
-| `trace_events` | `tuple[dict, ...]` | Metadata-only RCS events |
+| `trace_events` | `tuple[dict,...]` | Metadata-only workflow specification events |
 | `status` | `str` | Terminal status (e.g. `completed`) |
 | `approval_key` | `str \| None` | Set when HITL interrupt occurs |
 
@@ -162,7 +162,7 @@ Pass to `workflow.run(..., provider=OpenAI(model="gpt-4o"))`.
 | `run_id`, `workflow_name`, `status` | Run identity |
 | `started_at`, `completed_at` | UTC datetimes |
 | `total_duration_seconds`, `total_tokens_consumed` | Aggregates |
-| `steps` | `tuple[StepTrace, ...]` |
+| `steps` | `tuple[StepTrace,...]` |
 | `warnings` | e.g. dropped trace events |
 
 Methods: `summary()`, `failed_step()`, iteration support.
@@ -227,20 +227,20 @@ Builds publish payload metadata for external async callbacks.
 
 ```python
 report_outcome(
-    run_id,
-    binding_id,
-    outcome,  # dict with status: success | failed | needs_input
-    *,
-    base_url="http://localhost:8080",
-    api_key=None,
-    webhook_secret=None,
-    idempotency_key=None,
+ run_id,
+ binding_id,
+ outcome, # dict with status: success | failed | needs_input
+ *,
+ base_url="http://localhost:8080",
+ api_key=None,
+ webhook_secret=None,
+ idempotency_key=None,
 ) -> dict
 ```
 
 POSTs an external outcome report to `POST /v1/runs/{run_id}/external/{binding_id}` with HMAC signature. Requires `ARCFLOW_SERVER_API_KEY` and `ARCFLOW_WEBHOOK_SECRET` when args omitted.
 
-There is no Python type named `ExternalOutcome`. The server RCS type is `ExternalOutcomeReport`; Python accepts a plain `dict` for `outcome`.
+There is no Python type named `ExternalOutcome`. The server workflow specification type is `ExternalOutcomeReport`; Python accepts a plain `dict` for `outcome`.
 
 ## ScheduleManifest
 
@@ -254,7 +254,7 @@ Not exported from top-level `__all__`. Requires optional `[langchain]` extra.
 |--------|-------------------------|---------|
 | (requested `FromLangChain`) | `from_langchain_tool` | Wrap a LangChain tool as `arcflow.Tool` |
 | (requested `LangChainToArcflow`) | `langgraph_to_arcflow` | Convert LangGraph to `Workflow` |
-| | `langgraph_to_rcs_json` | Convert LangGraph to RCS JSON string |
+| | `langgraph_to_rcs_json` | Convert LangGraph to workflow JSON string |
 | | `to_arcflow_step` | Map LangGraph node to ArcFlow step helper |
 
 `CommonTools` does not exist in this repository.

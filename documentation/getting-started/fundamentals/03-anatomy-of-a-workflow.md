@@ -13,7 +13,7 @@ Typical lifecycle:
 
 1. `Workflow("my_pipeline")` creates an empty linear workflow.
 2. `workflow.step(agent)` appends an agent in order. Each call returns the same workflow object, so you can chain calls.
-3. `workflow.run("user input")` validates, serializes to RCS, and executes in Rust.
+3. `workflow.run("user input")` validates, serializes to the workflow specification, and executes in Rust.
 4. `run()` returns a `WorkflowResult` dataclass with the fields you read most often in application code.
 
 `WorkflowResult` fields for beginner workflows:
@@ -24,7 +24,7 @@ Typical lifecycle:
 | `run_id` | `str` | UUID for this execution. Use it with `workflow.trace()` or CLI trace commands. |
 | `step_count` | `int` | How many steps ran (equals the number of `step()` calls in a simple linear workflow). |
 | `status` | `str` | Terminal status string, typically `"completed"` on success. |
-| `trace_events` | `tuple[dict, ...]` | Metadata-only trace events for this run (no raw prompts in SEC-1 safe payloads). |
+| `trace_events` | `tuple[dict,...]` | Metadata-only trace events for this run (no raw prompts in trace data policy safe payloads). |
 | `approval_key` | `str \| None` | Set when human-in-the-loop interrupts a run; `None` for normal completed runs. |
 
 Validation on `run()` catches common mistakes early: empty input, or a workflow with no steps. Those raise `WorkflowConfigurationError` with messages like `Cannot run a workflow with no steps` or `Workflow input must be a non-empty string`.
@@ -39,14 +39,14 @@ Save as `workflow_anatomy.py`:
 from arcflow import Agent, Workflow
 
 researcher = Agent(
-    name="researcher",
-    role="research",
-    instructions="List three facts about the topic.",
+ name="researcher",
+ role="research",
+ instructions="List three facts about the topic.",
 )
 writer = Agent(
-    name="writer",
-    role="write",
-    instructions="Turn the facts into one paragraph.",
+ name="writer",
+ role="write",
+ instructions="Turn the facts into one paragraph.",
 )
 
 workflow = Workflow("research_pipeline")
@@ -77,14 +77,14 @@ python workflow_anatomy.py
 from arcflow.exceptions import WorkflowConfigurationError
 
 try:
-    Workflow("empty").run("hello")
+ Workflow("empty").run("hello")
 except WorkflowConfigurationError as err:
-    print(err)
+ print(err)
 ```
 
 You should see `[ArcFlow] Cannot run a workflow with no steps.`
 
-**Empty input.** With at least one step registered, call `run("")` or `run("   ")`. Expect `[ArcFlow] Workflow input must be a non-empty string.`
+**Empty input.** With at least one step registered, call `run("")` or `run(" ")`. Expect `[ArcFlow] Workflow input must be a non-empty string.`
 
 **Trace after run.** After a successful run, `workflow.trace()` returns a parsed trace object. Calling it before `run()` raises `TraceNotFoundError`. That behavior is covered in the [Python quickstart](../quickstart-python.md); you do not need it for this lesson beyond knowing it exists.
 

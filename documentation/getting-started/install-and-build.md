@@ -30,8 +30,8 @@ pip install -e ".[dev]"
 The commands above work unchanged on macOS and Linux. Use a virtual environment if your system Python is managed (recommended):
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+python3 -m venv.venv
+source.venv/bin/activate
 cd sdk-python
 pip install maturin
 maturin develop
@@ -41,7 +41,7 @@ pip install -e ".[dev]"
 ### Windows (PowerShell)
 
 ```powershell
-python -m venv .venv
+python -m venv.venv
 .\.venv\Scripts\Activate.ps1
 cd sdk-python
 pip install maturin

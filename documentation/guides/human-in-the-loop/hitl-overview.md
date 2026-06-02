@@ -27,14 +27,14 @@ Embedded SDK runs without the server can still declare HITL on steps, but produc
 
 ```text
 Running
-  └→ step with hitl completes agent work
-       └→ Interrupted
-            ├→ approve (approved: true)  → Running → Completed
-            ├→ approve (approved: false) → Failed (HumanRejected)
-            └→ timeout                   → Failed (HumanTimeout)
+ └→ step with hitl completes agent work
+ └→ Interrupted
+ ├→ approve (approved: true) → Running → Completed
+ ├→ approve (approved: false) → Failed (HumanRejected)
+ └→ timeout → Failed (HumanTimeout)
 ```
 
-Trace events during the gate follow SEC-1: you see step lifecycle metadata (`StepCompleted` on the gated step before interrupt, later `StepStarted` on resume) but not approval notes or full agent transcripts in trace storage.
+Trace events during the gate follow trace data policy: you see step lifecycle metadata (`StepCompleted` on the gated step before interrupt, later `StepStarted` on resume) but not approval notes or full agent transcripts in trace storage.
 
 ## HITL error codes
 
@@ -55,22 +55,22 @@ Python attaches HITL per step with `HitlConfig`:
 from arcflow import Agent, HitlConfig, Workflow
 
 wf = (
-    Workflow("support_escalation", runtime="http://localhost:8080")
-    .enable_recovery()
-    .step(Agent(name="triage", role="support", instructions="Summarize the ticket."))
-    .step(
-        Agent(name="lead", role="manager", instructions="Review before customer reply."),
-        hitl=HitlConfig(approval_key="manager_signoff", timeout_seconds=86400),
-    )
+ Workflow("support_escalation", runtime="http://localhost:8080")
+.enable_recovery()
+.step(Agent(name="triage", role="support", instructions="Summarize the ticket."))
+.step(
+ Agent(name="lead", role="manager", instructions="Review before customer reply."),
+ hitl=HitlConfig(approval_key="manager_signoff", timeout_seconds=86400),
+ )
 )
 ```
 
-RCS JSON uses a `hitl` object on the step definition with `approval_key` and `timeout_seconds`. Optional `interrupt: true` is the default in the Python helper.
+workflow JSON uses a `hitl` object on the step definition with `approval_key` and `timeout_seconds`. Optional `interrupt: true` is the default in the Python helper.
 
 ## Compliance notes
 
 - Interrupt payloads on `GET /v1/runs/{id}` expose `approval_key`, `expires_at`, and optional `step_index`, not full conversation text.
-- Trace exports remain metadata-only under SEC-1. See [SEC-1 rules](../observability/sec-1-rules.md).
+- Trace exports remain metadata-only under trace data policy. See [Trace data policy rules](../observability/sec-1-rules.md).
 - Approver interfaces should authenticate to the server (Bearer API key) or Relay-scoped keys when proxying approve calls.
 
 ## Related pages

@@ -18,19 +18,19 @@ Implementation: `server/arcflow-server/src/handlers/runs.rs`, `server/arcflow-se
 
 ```bash
 curl -s -X POST http://localhost:8080/v1/runs \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer dev-secret" \
-  -H "Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000" \
-  -d @run-payload.json
+ -H "Content-Type: application/json" \
+ -H "Authorization: Bearer dev-secret" \
+ -H "Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000" \
+ -d @run-payload.json
 ```
 
 Response:
 
 ```json
 {
-  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-  "trace_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "status": "Running"
+ "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+ "trace_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+ "status": "Running"
 }
 ```
 
@@ -40,10 +40,10 @@ Repeat the identical curl (same key, same body). The server returns the same `ru
 
 ```bash
 curl -s -X POST http://localhost:8080/v1/runs \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer dev-secret" \
-  -H "Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000" \
-  -d @run-payload.json
+ -H "Content-Type: application/json" \
+ -H "Authorization: Bearer dev-secret" \
+ -H "Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000" \
+ -d @run-payload.json
 ```
 
 ## Generating good keys

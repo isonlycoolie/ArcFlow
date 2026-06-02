@@ -55,9 +55,9 @@ Build a **graph-routed customer support workflow** with RAG, HITL escalation, re
 
 ```
 classify (graph entry)
-  ├─ billing branch
-  └─ technical branch
-       └─ join → answer with RAG
+ ├─ billing branch
+ └─ technical branch
+ └─ join → answer with RAG
 escalation branch → HITL manager approve → external notify webhook
 ```
 
@@ -67,7 +67,7 @@ escalation branch → HITL manager approve → external notify webhook
 |-------------|--------|
 | Graph routing | At least two conditional branches plus one join |
 | RAG | Knowledge base ingested; answers cite retrieved context in output behavior |
-| HITL | Escalation path interrupts; approve via `POST .../approve/{key}` |
+| HITL | Escalation path interrupts; approve via `POST.../approve/{key}` |
 | Retry | Configure retry on a flaky tool or stub failure injection |
 | External webhook | Post outcome via `report_outcome` or signed HTTP |
 | Server runtime | Use `arcflow-server` for HITL and external paths |
@@ -88,7 +88,7 @@ escalation branch → HITL manager approve → external notify webhook
 ```bash
 docker compose -f docker/docker-compose.server.yml up -d
 python your_support_workflow/run.py
-bash examples/hitl/approve_cli.sh RUN_ID   # when escalated
+bash examples/hitl/approve_cli.sh RUN_ID # when escalated
 python examples/external/playwright_stub_callback.py --run-id RUN_ID --status success
 curl -s "http://localhost:8080/v1/runs/RUN_ID/trace" -H "Authorization: Bearer dev-secret"
 ```
@@ -102,14 +102,14 @@ Pass criteria:
 | HITL `Interrupted` then `Completed` after approve | yes |
 | External callback accepted | run advances |
 | Retry event in trace when failure injected | yes |
-| SEC-1 | no prompts in exported trace |
+| Trace policy | no prompts in exported trace |
 
 ## Known gaps to acknowledge
 
 | ID | Impact on project |
 |----|-------------------|
-| FP-1.01 | Graph checkpoint resume partial; design linear recovery fallback |
-| FP-2 | Server SSE streaming deferred; use SDK streaming or poll |
+| Graph recovery resume | Graph checkpoint resume partial; design linear recovery fallback |
+| Server SSE streaming | Server SSE streaming deferred; use SDK streaming or poll |
 
 Note these in your README.
 
@@ -124,4 +124,4 @@ Note these in your README.
 
 ## Next level
 
-Proceed to [Level 3: Platform Engineer](level-3-platform-engineer.md) for deployment, static product, and SEC-1 operations.
+Proceed to [Level 3: Platform Engineer](level-3-platform-engineer.md) for deployment, static product, and trace data policy operations.

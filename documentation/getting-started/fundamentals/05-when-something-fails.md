@@ -41,15 +41,15 @@ from arcflow.exceptions import WorkflowConfigurationError
 
 # Configuration error: invalid agent
 try:
-    Agent(name="", role="x", instructions="y")
+ Agent(name="", role="x", instructions="y")
 except WorkflowConfigurationError as err:
-    print("config (agent):", err)
+ print("config (agent):", err)
 
 # Configuration error: no steps
 try:
-    Workflow("lonely").run("hello")
+ Workflow("lonely").run("hello")
 except WorkflowConfigurationError as err:
-    print("config (workflow):", err)
+ print("config (workflow):", err)
 
 # Success path for contrast
 ok = Agent(name="writer", role="write", instructions="Reply briefly.")
@@ -75,8 +75,8 @@ You should see two `[ArcFlow]` configuration messages, then a successful UUID on
 
 ```python
 except ProviderExecutionError as err:
-    print(err)
-    print(getattr(err, "provider_id", None))
+ print(err)
+ print(getattr(err, "provider_id", None))
 ```
 
 Stub-only workflows in this track rarely raise `WorkflowExecutionError` unless you add tools, timeouts, or test hooks later.
@@ -85,10 +85,33 @@ Stub-only workflows in this track rarely raise `WorkflowExecutionError` unless y
 
 ```python
 except WorkflowExecutionError as err:
-    print(err.run_id, err.failed_step)
-    # after run() on the same workflow instance:
-    # trace = workflow.trace()
+ print(err.run_id, err.failed_step)
+ # after run() on the same workflow instance:
+ # trace = workflow.trace()
 ```
+
+When `run()` raises before `workflow.trace()` is available on the same instance, use the internal trace accessor:
+
+```python
+from arcflow import Agent, Workflow
+from arcflow.exceptions import WorkflowExecutionError
+from arcflow._internal.runtime import get_trace
+
+researcher = Agent(name="researcher", role="researcher", instructions="Research.")
+failing = Agent(name="failing", role="__fail__", instructions="This step fails.")
+
+wf = Workflow("debug-demo")
+wf.step(researcher)
+wf.step(failing)
+
+try:
+ wf.run("debug topic")
+except WorkflowExecutionError as err:
+ trace = get_trace(err.run_id)
+ print(trace.status, trace.failed_step())
+```
+
+The default in-process backend treats `role="__fail__"` as a deterministic failure hook for tests and debugging walkthroughs (`STUB_FAIL_ROLE` in the Rust runtime). Expect event order ending with `StepFailed` then `WorkflowFailed`. Traces remain metadata-only: no workflow input, agent instructions, or tool return values.
 
 **Message format drill.** Pick any `WorkflowConfigurationError` from this track (empty name, no steps). Confirm both sentences are present: problem, then remediation.
 

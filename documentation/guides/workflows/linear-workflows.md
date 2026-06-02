@@ -11,7 +11,7 @@ Linear mode works well when the task decomposes into a single path: research the
 
 Engine entry: `WorkflowEngine::execute_with_config` branches to `run_sorted_steps` for linear workflows.
 
-## RCS structure
+## workflow specification structure
 
 A linear workflow is a `WorkflowDefinition` with `execution_mode: "linear"`, a `steps` array, and `graph: null`. Each `StepDefinition` references an agent by UUID and carries an `order` field used only for sorting (not for graph routing).
 
@@ -27,27 +27,27 @@ Example two-step research pipeline:
 
 ```json
 {
-  "id": "00000000-0000-4000-8000-000000000001",
-  "name": "research_pipeline",
-  "execution_mode": "linear",
-  "steps": [
-    {
-      "id": "00000000-0000-4000-8000-000000000010",
-      "agent_id": "00000000-0000-4000-8000-000000000020",
-      "order": 1,
-      "fallback_step_id": null,
-      "hitl": null
-    },
-    {
-      "id": "00000000-0000-4000-8000-000000000011",
-      "agent_id": "00000000-0000-4000-8000-000000000021",
-      "order": 2,
-      "fallback_step_id": null,
-      "hitl": null
-    }
-  ],
-  "graph": null,
-  "external_bindings": null
+ "id": "00000000-0000-4000-8000-000000000001",
+ "name": "research_pipeline",
+ "execution_mode": "linear",
+ "steps": [
+ {
+ "id": "00000000-0000-4000-8000-000000000010",
+ "agent_id": "00000000-0000-4000-8000-000000000020",
+ "order": 1,
+ "fallback_step_id": null,
+ "hitl": null
+ },
+ {
+ "id": "00000000-0000-4000-8000-000000000011",
+ "agent_id": "00000000-0000-4000-8000-000000000021",
+ "order": 2,
+ "fallback_step_id": null,
+ "hitl": null
+ }
+ ],
+ "graph": null,
+ "external_bindings": null
 }
 ```
 
@@ -65,21 +65,21 @@ After [installing the Python SDK](../../getting-started/install-and-build.md):
 from arcflow import Agent, Workflow
 
 researcher = Agent(
-    id="00000000-0000-4000-8000-000000000020",
-    name="researcher",
-    role="Research analyst",
-    instructions="Gather facts on the topic.",
+ id="00000000-0000-4000-8000-000000000020",
+ name="researcher",
+ role="Research analyst",
+ instructions="Gather facts on the topic.",
 )
 writer = Agent(
-    id="00000000-0000-4000-8000-000000000021",
-    name="writer",
-    role="Writer",
-    instructions="Summarize the research clearly.",
+ id="00000000-0000-4000-8000-000000000021",
+ name="writer",
+ role="Writer",
+ instructions="Summarize the research clearly.",
 )
 
 workflow = Workflow(
-    name="research_pipeline",
-    execution_mode="linear",
+ name="research_pipeline",
+ execution_mode="linear",
 )
 workflow.step(researcher, order=1)
 workflow.step(writer, order=2)
@@ -94,35 +94,35 @@ With [Server API quickstart](../../getting-started/quickstart-server-api.md) pre
 
 ```json
 {
-  "workflow": {
-    "id": "00000000-0000-4000-8000-000000000001",
-    "name": "research_pipeline",
-    "execution_mode": "linear",
-    "steps": [
-      { "id": "00000000-0000-4000-8000-000000000010", "agent_id": "00000000-0000-4000-8000-000000000020", "order": 1 },
-      { "id": "00000000-0000-4000-8000-000000000011", "agent_id": "00000000-0000-4000-8000-000000000021", "order": 2 }
-    ]
-  },
-  "agents": [
-    {
-      "id": "00000000-0000-4000-8000-000000000020",
-      "name": "researcher",
-      "role": "Research analyst",
-      "instructions": "Gather facts on the topic."
-    },
-    {
-      "id": "00000000-0000-4000-8000-000000000021",
-      "name": "writer",
-      "role": "Writer",
-      "instructions": "Summarize the research clearly."
-    }
-  ],
-  "input": "Renewable energy trends in 2026",
-  "exec_config": {
-    "recovery_enabled": true,
-    "workflow_timeout_secs": 600,
-    "step_timeout_secs": 120
-  }
+ "workflow": {
+ "id": "00000000-0000-4000-8000-000000000001",
+ "name": "research_pipeline",
+ "execution_mode": "linear",
+ "steps": [
+ { "id": "00000000-0000-4000-8000-000000000010", "agent_id": "00000000-0000-4000-8000-000000000020", "order": 1 },
+ { "id": "00000000-0000-4000-8000-000000000011", "agent_id": "00000000-0000-4000-8000-000000000021", "order": 2 }
+ ]
+ },
+ "agents": [
+ {
+ "id": "00000000-0000-4000-8000-000000000020",
+ "name": "researcher",
+ "role": "Research analyst",
+ "instructions": "Gather facts on the topic."
+ },
+ {
+ "id": "00000000-0000-4000-8000-000000000021",
+ "name": "writer",
+ "role": "Writer",
+ "instructions": "Summarize the research clearly."
+ }
+ ],
+ "input": "Renewable energy trends in 2026",
+ "exec_config": {
+ "recovery_enabled": true,
+ "workflow_timeout_secs": 600,
+ "step_timeout_secs": 120
+ }
 }
 ```
 
@@ -134,17 +134,17 @@ A successful linear run typically emits:
 
 ```json
 [
-  { "kind": "WorkflowStarted", "run_id": "r1", "workflow_name": "research_pipeline", "step_count": 2 },
-  { "kind": "StepStarted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000010", "step_index": 0, "agent_name": "researcher", "agent_role": "Research analyst" },
-  { "kind": "StepCompleted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000010", "step_index": 0, "duration_ms": 920, "output_size_bytes": 180 },
-  { "kind": "StateCommitted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000010", "committed_step_count": 1 },
-  { "kind": "StepStarted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000011", "step_index": 1, "agent_name": "writer", "agent_role": "Writer" },
-  { "kind": "StepCompleted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000011", "step_index": 1, "duration_ms": 850, "output_size_bytes": 240 },
-  { "kind": "WorkflowCompleted", "run_id": "r1", "duration_ms": 1800 }
+ { "kind": "WorkflowStarted", "run_id": "r1", "workflow_name": "research_pipeline", "step_count": 2 },
+ { "kind": "StepStarted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000010", "step_index": 0, "agent_name": "researcher", "agent_role": "Research analyst" },
+ { "kind": "StepCompleted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000010", "step_index": 0, "duration_ms": 920, "output_size_bytes": 180 },
+ { "kind": "StateCommitted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000010", "committed_step_count": 1 },
+ { "kind": "StepStarted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000011", "step_index": 1, "agent_name": "writer", "agent_role": "Writer" },
+ { "kind": "StepCompleted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000011", "step_index": 1, "duration_ms": 850, "output_size_bytes": 240 },
+ { "kind": "WorkflowCompleted", "run_id": "r1", "duration_ms": 1800 }
 ]
 ```
 
-Traces are metadata-only per [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md).
+Traces are metadata-only per [Trace data policy](../../concepts/sec-1-and-data-safety.md).
 
 ## Recovery
 
@@ -162,5 +162,5 @@ When `exec_config.recovery_enabled` is true, linear progress persists to Postgre
 ## Related pages
 
 - [Graph workflows](graph-workflows.md) for conditional routing and joins
-- [The RCS contract](../../concepts/the-rcs-contract.md) for type definitions
+- [Workflow specification](../../concepts/the-rcs-contract.md) for type definitions
 - [Python quickstart](../../getting-started/quickstart-python.md) and [TypeScript quickstart](../../getting-started/quickstart-typescript.md)

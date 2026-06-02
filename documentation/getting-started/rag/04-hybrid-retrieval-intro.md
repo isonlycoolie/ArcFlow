@@ -13,11 +13,11 @@ Python SDK shape:
 
 ```python
 MemoryRetrievalConfig(
-    mode="hybrid",           # or "dense"
-    dense_weight=0.7,
-    sparse_weight=0.3,
-    rerank="local",          # optional: "local", "cohere", or None
-    top_k=3,
+ mode="hybrid", # or "dense"
+ dense_weight=0.7,
+ sparse_weight=0.3,
+ rerank="local", # optional: "local", "cohere", or None
+ top_k=3,
 )
 ```
 
@@ -49,18 +49,18 @@ From [RAG chatbot walkthrough](../../examples/rag-chatbot.md):
 from arcflow import MemoryChunkingConfig, MemoryConfig, MemoryRetrievalConfig, MemoryScope, MemoryType
 
 memory = MemoryConfig(
-    MemoryType.VECTOR,
-    MemoryScope.AGENT,
-    namespace="doc_qa",
-    embedding="stub/8",
-    retrieval=MemoryRetrievalConfig(
-        mode="hybrid",
-        dense_weight=0.7,
-        sparse_weight=0.3,
-        rerank="local",
-        top_k=3,
-    ),
-    chunking=MemoryChunkingConfig(chunk_size=256, overlap=32),
+ MemoryType.VECTOR,
+ MemoryScope.AGENT,
+ namespace="doc_qa",
+ embedding="stub/8",
+ retrieval=MemoryRetrievalConfig(
+ mode="hybrid",
+ dense_weight=0.7,
+ sparse_weight=0.3,
+ rerank="local",
+ top_k=3,
+ ),
+ chunking=MemoryChunkingConfig(chunk_size=256, overlap=32),
 )
 ```
 

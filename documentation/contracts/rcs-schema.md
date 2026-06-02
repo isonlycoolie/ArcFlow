@@ -1,11 +1,11 @@
 
-# RCS schema reference
+# Workflow schema reference reference
 
-Authoritative reference for the Runtime Contract Specification (RCS) type system used by workflows, agents, runs, and server API bodies. This page documents the JSON Schema and field semantics.
+Authoritative reference for the ArcFlow workflow specification type system used by workflows, agents, runs, and server API bodies. This page documents the JSON Schema and field semantics.
 
-Validate workflows against schema in CI where possible until `arcflow validate` ships (FP-5.04).
+Validate workflows against schema in CI where possible until `arcflow validate` ships (CLI validate command).
 
-Conceptual intro: [The RCS contract](../concepts/the-rcs-contract.md).
+Conceptual intro: [Workflow specification](../concepts/the-rcs-contract.md).
 
 **Drift note (K-10):** Some older HTTP summaries may lag the live server. Prefer this page and the [HTTP API reference](../server/http-api-reference.md) when integrating.
 
@@ -41,7 +41,7 @@ Conceptual intro: [The RCS contract](../concepts/the-rcs-contract.md).
 | `id` | UUID string | Yes | Agent identity |
 | `name` | string | Yes | Display name |
 | `role` | string | Yes | Role label in traces |
-| `instructions` | string | Yes | System instructions (not in traces, SEC-1) |
+| `instructions` | string | Yes | System instructions (not in traces, trace data policy) |
 | `tools` | ToolDefinition[] | No | Registered tools |
 | `memory_config` | MemoryConfig | No | Memory backend config |
 | `context` | ContextPolicy | No | Prior step context limits |
@@ -86,7 +86,7 @@ UUID ids throughout; do not reuse ids across agents and steps.
 | `id` | string | Join id |
 | `wait_for` | string[] | Node ids to synchronize |
 
-Graph trace kinds in RCS envelope: `GraphNodeStarted`, `GraphNodeCompleted`, `GraphIterationLimitReached`.
+Graph trace kinds in the workflow specification envelope: `GraphNodeStarted`, `GraphNodeCompleted`, `GraphIterationLimitReached`.
 
 ## Memory and context
 
@@ -190,7 +190,7 @@ Provide `workflow` **or** `workflow_ref`, not both.
 |-------|------|-------|
 | `output` | string | Final text |
 | `status` | ExecutionStatus | Terminal or in-flight |
-| `trace` | TraceEvent[] | SEC-1 metadata events |
+| `trace` | TraceEvent[] | metadata-only trace events |
 | `error` | object | Error code + message |
 
 ### ExecutionStatus
@@ -205,16 +205,16 @@ See [Error codes](error-codes.md).
 
 ```json
 {
-  "id": "00000000-0000-4000-8000-000000000001",
-  "name": "demo",
-  "execution_mode": "linear",
-  "steps": [
-    {
-      "id": "00000000-0000-4000-8000-000000000010",
-      "agent_id": "00000000-0000-4000-8000-000000000020",
-      "order": 0
-    }
-  ]
+ "id": "00000000-0000-4000-8000-000000000001",
+ "name": "demo",
+ "execution_mode": "linear",
+ "steps": [
+ {
+ "id": "00000000-0000-4000-8000-000000000010",
+ "agent_id": "00000000-0000-4000-8000-000000000020",
+ "order": 0
+ }
+ ]
 }
 ```
 
@@ -222,10 +222,10 @@ See [Error codes](error-codes.md).
 
 | Path | Content |
 |------|---------|
-| [RCS schema](../contracts/rcs-schema.md) | JSON Schema |
+| [workflow schema](../contracts/rcs-schema.md) | JSON Schema |
 | [Postgres schema](../server/postgres-schema.md) | Recovery DDL (partial) |
 | [Provider configuration](../guides/agents-and-tools/provider-configuration.md) | Provider API |
-| [RCS schema](../contracts/rcs-schema.md) | Index |
+| [workflow schema](../contracts/rcs-schema.md) | Index |
 
 ## Related pages
 

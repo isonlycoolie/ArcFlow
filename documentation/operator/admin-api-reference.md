@@ -23,13 +23,13 @@ Create a Relay site.
 
 ```json
 {
-  "display_name": "Acme Support",
-  "allowed_origins": ["https://www.acme.com"],
-  "rate_limit_rpm": 60,
-  "allow_inline": false,
-  "default_workflow_name": "chat",
-  "upstream_runtime_key": null,
-  "chat_instructions": null
+ "display_name": "Acme Support",
+ "allowed_origins": ["https://www.acme.com"],
+ "rate_limit_rpm": 60,
+ "allow_inline": false,
+ "default_workflow_name": "chat",
+ "upstream_runtime_key": null,
+ "chat_instructions": null
 }
 ```
 
@@ -47,10 +47,10 @@ Create a Relay site.
 
 ```json
 {
-  "site_id": "s_abc123",
-  "relay_url": "http://localhost:8090/v1/sites/s_abc123",
-  "site_token": "st_live_xxxxxxxx",
-  "kb_namespace": "site_s_abc123"
+ "site_id": "s_abc123",
+ "relay_url": "http://localhost:8090/v1/sites/s_abc123",
+ "site_token": "st_live_xxxxxxxx",
+ "kb_namespace": "site_s_abc123"
 }
 ```
 
@@ -66,15 +66,15 @@ Fetch site metadata.
 
 ```json
 {
-  "site_id": "s_abc123",
-  "display_name": "Acme Support",
-  "allowed_origins": ["https://www.acme.com"],
-  "rate_limit_rpm": 60,
-  "allow_inline": false,
-  "default_workflow_name": "chat",
-  "kb_namespace": "site_s_abc123",
-  "chat_instructions": "You are Acme support.",
-  "created_at": "2026-05-31T12:00:00Z"
+ "site_id": "s_abc123",
+ "display_name": "Acme Support",
+ "allowed_origins": ["https://www.acme.com"],
+ "rate_limit_rpm": 60,
+ "allow_inline": false,
+ "default_workflow_name": "chat",
+ "kb_namespace": "site_s_abc123",
+ "chat_instructions": "You are Acme support.",
+ "created_at": "2026-05-31T12:00:00Z"
 }
 ```
 
@@ -88,11 +88,11 @@ Partial update. All body fields optional.
 
 ```json
 {
-  "display_name": "Acme Support EU",
-  "allowed_origins": ["https://eu.acme.com"],
-  "rate_limit_rpm": 120,
-  "allow_inline": false,
-  "chat_instructions": "You are Acme EU support."
+ "display_name": "Acme Support EU",
+ "allowed_origins": ["https://eu.acme.com"],
+ "rate_limit_rpm": 120,
+ "allow_inline": false,
+ "chat_instructions": "You are Acme EU support."
 }
 ```
 
@@ -108,7 +108,7 @@ Invalidate previous site token; issue new token.
 
 ```json
 {
-  "site_token": "st_live_newtoken"
+ "site_token": "st_live_newtoken"
 }
 ```
 
@@ -124,8 +124,8 @@ Ingest text into the site vector namespace (requires Postgres + Qdrant + embeddi
 
 ```json
 {
-  "text": "FAQ: How do I reset my password? ...",
-  "key": "faq-password"
+ "text": "FAQ: How do I reset my password?...",
+ "key": "faq-password"
 }
 ```
 
@@ -138,8 +138,8 @@ Ingest text into the site vector namespace (requires Postgres + Qdrant + embeddi
 
 ```json
 {
-  "chunks_ingested": 12,
-  "namespace": "site_s_abc123"
+ "chunks_ingested": 12,
+ "namespace": "site_s_abc123"
 }
 ```
 
@@ -153,8 +153,8 @@ Publish default chat workflow to semver registry and bind site.
 
 ```json
 {
-  "instructions": "You are Acme Corp support. Answer from knowledge only.",
-  "version": "1.0.0"
+ "instructions": "You are Acme Corp support. Answer from knowledge only.",
+ "version": "1.0.0"
 }
 ```
 
@@ -162,9 +162,9 @@ Publish default chat workflow to semver registry and bind site.
 
 ```json
 {
-  "name": "chat",
-  "version": "1.0.0",
-  "schema_hash": "blake3:..."
+ "name": "chat",
+ "version": "1.0.0",
+ "schema_hash": "blake3:..."
 }
 ```
 
@@ -183,7 +183,7 @@ Browser clients call `runPublished("chat", "^1.0.0", message)` via static SDK.
 | 500 | Server or storage failure |
 | 503 | Postgres required but unavailable |
 
-Dashboard UI (FP-3.01 deferred) maps 401 to key configuration screens. Until the private [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) ships, use curl, HTTP clients, or OSS scripts:
+Dashboard UI (Operator dashboard UI deferred) maps 401 to key configuration screens. Until the private [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) ships, use curl, HTTP clients, or OSS scripts:
 
 - `scripts/static-provision-site.sh`
 - `scripts/static-ingest-knowledge.sh`

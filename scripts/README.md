@@ -12,6 +12,8 @@ Helper scripts for contributors, maintainers, and operators. Run from the reposi
 | [`check-function-length.sh`](check-function-length.sh) | Function length gate |
 | [`check-commit-size.sh`](check-commit-size.sh) | Commit size policy check |
 | [`validate-rcs-schema.sh`](validate-rcs-schema.sh) | Validate RCS JSON Schema |
+| [`verify-documentation-prose.mjs`](verify-documentation-prose.mjs) | Fail on internal planning language in `documentation/` |
+| [`normalize-documentation-prose.mjs`](normalize-documentation-prose.mjs) | One-shot enterprise prose rewrite for `documentation/` |
 | [`validate_documentation_claims.sh`](validate_documentation_claims.sh) | Cross-check doc claims (bash) |
 | [`validate_documentation_claims.ps1`](validate_documentation_claims.ps1) | Cross-check doc claims (PowerShell) |
 | [`install-git-hooks.sh`](install-git-hooks.sh) | Install prepare-commit-msg hook |

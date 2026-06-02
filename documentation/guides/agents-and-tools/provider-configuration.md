@@ -9,15 +9,15 @@ Agent field reference: [Defining agents](defining-agents.md). Install and env se
 
 ```json
 {
-  "provider": {
-    "provider_id": "openai",
-    "model": "gpt-4o-mini",
-    "api_key_env": "OPENAI_API_KEY",
-    "params": {
-      "temperature": 0.3,
-      "max_tokens": 4096
-    }
-  }
+ "provider": {
+ "provider_id": "openai",
+ "model": "gpt-4o-mini",
+ "api_key_env": "OPENAI_API_KEY",
+ "params": {
+ "temperature": 0.3,
+ "max_tokens": 4096
+ }
+ }
 }
 ```
 
@@ -41,9 +41,9 @@ Agent field reference: [Defining agents](defining-agents.md). Install and env se
 
 ```json
 {
-  "provider_id": "openai",
-  "model": "gpt-4o-mini",
-  "api_key_env": "OPENAI_API_KEY"
+ "provider_id": "openai",
+ "model": "gpt-4o-mini",
+ "api_key_env": "OPENAI_API_KEY"
 }
 ```
 
@@ -51,9 +51,9 @@ Agent field reference: [Defining agents](defining-agents.md). Install and env se
 
 ```json
 {
-  "provider_id": "anthropic",
-  "model": "claude-3-5-sonnet-20241022",
-  "api_key_env": "ANTHROPIC_API_KEY"
+ "provider_id": "anthropic",
+ "model": "claude-3-5-sonnet-20241022",
+ "api_key_env": "ANTHROPIC_API_KEY"
 }
 ```
 
@@ -61,9 +61,9 @@ Agent field reference: [Defining agents](defining-agents.md). Install and env se
 
 ```json
 {
-  "provider_id": "stub",
-  "model": "stub-v1",
-  "api_key_env": ""
+ "provider_id": "stub",
+ "model": "stub-v1",
+ "api_key_env": ""
 }
 ```
 
@@ -75,11 +75,11 @@ Vector memory uses a separate embedding string on `memory_config.embedding`, not
 
 ```json
 {
-  "memory_config": {
-    "memory_type": "vector",
-    "embedding": "openai/text-embedding-3-small",
-    "namespace": "product-docs"
-  }
+ "memory_config": {
+ "memory_type": "vector",
+ "embedding": "openai/text-embedding-3-small",
+ "namespace": "product-docs"
+ }
 }
 ```
 
@@ -90,6 +90,25 @@ Production also requires:
 - `OPENAI_API_KEY` (when embedding string uses OpenAI)
 
 See [Vector RAG pipeline](../memory-and-rag/vector-rag-pipeline.md).
+
+## Swapping providers at run time
+
+The same workflow definition works with any supported provider. Pass the provider only at `run()` time; agents, steps, and workflow shape stay unchanged.
+
+```python
+from arcflow import Agent, Anthropic, Gemini, OpenAI, Workflow
+
+agent = Agent(name="writer", role="author", instructions="One paragraph.")
+wf = Workflow("swap-demo").step(agent)
+
+wf.run("topic", provider=OpenAI(model="gpt-4o"))
+wf.run("topic", provider=Anthropic(model="claude-3-5-sonnet-20241022"))
+wf.run("topic", provider=Gemini(model="gemini-1.5-pro"))
+```
+
+Successful runs produce the same `step_count` and structurally equivalent traces (provider-specific token counts may differ). CI validates this with mock HTTP servers and the endpoint overrides above — no live API keys required.
+
+`workflow.run(input)` without a provider continues to use the default in-process backend for backwards compatibility.
 
 ## Trace events
 
@@ -104,13 +123,13 @@ Example:
 
 ```json
 {
-  "kind": "ProviderResponseReceived",
-  "run_id": "r1",
-  "step_id": "s1",
-  "provider_id": "openai",
-  "model_id": "gpt-4o-mini",
-  "tokens": { "input": 120, "output": 45, "total": 165 },
-  "latency_ms": 890
+ "kind": "ProviderResponseReceived",
+ "run_id": "r1",
+ "step_id": "s1",
+ "provider_id": "openai",
+ "model_id": "gpt-4o-mini",
+ "tokens": { "input": 120, "output": 45, "total": 165 },
+ "latency_ms": 890
 }
 ```
 
@@ -132,16 +151,16 @@ Set keys in the server environment or secrets manager, not in Postgres:
 ```bash
 export OPENAI_API_KEY=sk-...
 export ANTHROPIC_API_KEY=sk-ant-...
-export COHERE_API_KEY=...   # rerank only
+export COHERE_API_KEY=... # rerank only
 ```
 
 Docker Compose: `docker/docker-compose.server.yml` documents the expected service env block.
 
 ## Security rules
 
-- No API keys in RCS JSON, registry payloads, or static JS bundles
+- No API keys in workflow JSON, registry payloads, or static JS bundles
 - Relay and static SDK never see LLM keys; server holds them
-- Logs and traces are SEC-1 metadata only ([SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md))
+- Logs and traces are metadata-only trace only ([Trace data policy](../../concepts/sec-1-and-data-safety.md))
 
 ## Python and TypeScript shorthand
 
@@ -151,9 +170,9 @@ TypeScript:
 
 ```typescript
 provider: {
-  providerId: "openai",
-  model: "gpt-4o-mini",
-  apiKeyEnv: "OPENAI_API_KEY",
+ providerId: "openai",
+ model: "gpt-4o-mini",
+ apiKeyEnv: "OPENAI_API_KEY",
 }
 ```
 

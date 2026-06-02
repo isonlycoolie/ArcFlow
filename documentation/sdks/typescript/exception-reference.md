@@ -24,9 +24,9 @@ TypeScript errors inherit from `ArcFlowError`. Native Rust failures arrive as th
 import { mapNativeError } from "arcflow";
 
 try {
-  await wf.run("input");
+ await wf.run("input");
 } catch (err) {
-  throw mapNativeError(err);
+ throw mapNativeError(err);
 }
 ```
 

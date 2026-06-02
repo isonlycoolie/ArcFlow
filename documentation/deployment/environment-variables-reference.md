@@ -16,10 +16,10 @@ Static keys JSON example:
 
 ```json
 {
-  "site-key-1": {
-    "workflows": ["chat"],
-    "publish": false
-  }
+ "site-key-1": {
+ "workflows": ["chat"],
+ "publish": false
+ }
 }
 ```
 
@@ -71,9 +71,9 @@ Relay may share `ARCFLOW_POSTGRESQL_URL` with server for dynamic sites.
 | `ANTHROPIC_API_KEY` | When using Anthropic | none | `sk-ant-...` | Provider | **Never log** |
 | `GEMINI_API_KEY` | When using Gemini | none | Google AI key | Provider | **Never log** |
 
-Provider selection is per-agent in RCS via `ProviderConfig.api_key_env`.
+Provider selection is per-agent in workflow definitions via `ProviderConfig.api_key_env`.
 
-## Observability (alpha, FP-4)
+## Observability (alpha, OpenTelemetry metrics export)
 
 | Variable | Required | Default | Example | Surface | Log classification |
 |----------|----------|---------|---------|---------|-------------------|
