@@ -2,6 +2,14 @@
 
 Build AI workflows as ordered pipelines of agents. Execution runs in the ArcFlow Rust runtime; Python defines structure only.
 
+## Install from PyPI
+
+```bash
+pip install arcflow-sdk
+```
+
+Import remains `from arcflow import ...`. PyPI distribution name is `arcflow-sdk`; product name is ArcFlow.
+
 ## Install (development)
 
 ```bash

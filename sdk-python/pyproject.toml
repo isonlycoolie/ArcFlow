@@ -3,7 +3,7 @@ requires = ["maturin>=1.0,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "arcflow"
+name = "arcflow-sdk"
 version = "0.3.0"
 description = "AI workflow orchestration runtime — structured, observable, reusable."
 readme = "README.md"

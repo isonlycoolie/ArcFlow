@@ -88,6 +88,6 @@ jobs:
           tag_name: ${{ needs.build.outputs.tag }}
           name: Python SDK ${{ needs.build.outputs.version }}
           body: |
-            PyPI: https://pypi.org/project/arcflow/${{ needs.build.outputs.version }}/
-            Install: `pip install arcflow==${{ needs.build.outputs.version }}`
+            PyPI: https://pypi.org/project/arcflow-sdk/${{ needs.build.outputs.version }}/
+            Install: `pip install arcflow-sdk==${{ needs.build.outputs.version }}`
           files: release-assets/**/*

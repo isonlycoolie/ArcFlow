@@ -61,7 +61,7 @@ jobs:
           set -euo pipefail
           python -m pip install --upgrade pip maturin pytest "mypy<1.19" black ruff pytest-httpserver
           python -m maturin build --release --out dist
-          python -m pip install dist/arcflow-*.whl
+          python -m pip install dist/arcflow_sdk-*.whl
           python -m ruff check arcflow tests
           python -m black --check arcflow tests
           python -m mypy arcflow

@@ -4,7 +4,7 @@
 cargo install --path cli/arcflow-cli
 arcflow init my-project
 cd my-project
-# Python: pip install arcflow && python workflows/example_workflow.py
+# Python: pip install arcflow-sdk && python workflows/example_workflow.py
 arcflow trace <run-id>
 ```
 

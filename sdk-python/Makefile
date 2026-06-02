@@ -23,6 +23,6 @@ lint:
 test-publish-gate:
 	python -m pip install --upgrade pip maturin pytest "mypy<1.19" black ruff pytest-httpserver
 	python -m maturin build --release --out dist
-	python -m pip install dist/arcflow-*.whl
+	python -m pip install dist/arcflow_sdk-*.whl
 	@tmpdir=$$(mktemp -d 2>/dev/null || python -c "import tempfile; print(tempfile.mkdtemp())"); \
 	cd "$$tmpdir" && PYTHONPATH="" python -m pytest "$(CURDIR)/tests" -v
