@@ -1,0 +1,88 @@
+name: Publish Python SDK (build)
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+    outputs:
+      version:
+        description: Semver from pyproject.toml
+        value: ${{ jobs.validate.outputs.version }}
+      tag:
+        description: Full git tag
+        value: ${{ jobs.validate.outputs.tag }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set tag
+        id: tag
+        shell: bash
+        run: echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+      - name: Verify tag matches pyproject
+        id: ver
+        shell: bash
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          set -euo pipefail
+          bash scripts/verify-python-sdk-tag.sh | tee /tmp/verify.out
+          VERSION="$(grep '^VERSION=' /tmp/verify.out | cut -d= -f2)"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+  test:
+    needs: validate
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Publish gate
+        working-directory: sdk-python
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip maturin pytest "mypy<1.19" black ruff pytest-httpserver
+          python -m maturin build --release --out dist
+          python -m pip install dist/arcflow-*.whl
+          python -m ruff check arcflow tests
+          python -m black --check arcflow tests
+          python -m mypy arcflow
+          tmpdir="$(mktemp -d)"
+          cd "$tmpdir"
+          PYTHONPATH="" python -m pytest "$GITHUB_WORKSPACE/sdk-python/tests" -v
+
+  build-wheels:
+    needs: [validate, test]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: pypa/cibuildwheel@v2.22.1
+        env:
+          CIBW_PROJECT_DIR: sdk-python
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: sdk-python/dist/*
+          if-no-files-found: error
