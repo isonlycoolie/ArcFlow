@@ -11,10 +11,10 @@ Set on `exec_config`:
 
 ```json
 {
-  "exec_config": {
-    "workflow_timeout_secs": 600,
-    "step_timeout_secs": 120
-  }
+ "exec_config": {
+ "workflow_timeout_secs": 600,
+ "step_timeout_secs": 120
+ }
 }
 ```
 
@@ -27,14 +27,14 @@ Example server run:
 
 ```json
 {
-  "workflow": { "name": "demo", "execution_mode": "linear", "steps": [] },
-  "agents": [],
-  "input": "Long running task",
-  "exec_config": {
-    "recovery_enabled": true,
-    "workflow_timeout_secs": 300,
-    "step_timeout_secs": 60
-  }
+ "workflow": { "name": "demo", "execution_mode": "linear", "steps": [] },
+ "agents": [],
+ "input": "Long running task",
+ "exec_config": {
+ "recovery_enabled": true,
+ "workflow_timeout_secs": 300,
+ "step_timeout_secs": 60
+ }
 }
 ```
 
@@ -44,12 +44,12 @@ Example server run:
 
 ```json
 {
-  "kind": "TimeoutEnforced",
-  "run_id": "r1",
-  "step_id": null,
-  "timeout_type": "workflow",
-  "configured_ms": 600000,
-  "elapsed_ms": 600012
+ "kind": "TimeoutEnforced",
+ "run_id": "r1",
+ "step_id": null,
+ "timeout_type": "workflow",
+ "configured_ms": 600000,
+ "elapsed_ms": 600012
 }
 ```
 
@@ -57,12 +57,12 @@ Example server run:
 
 ```json
 {
-  "kind": "TimeoutEnforced",
-  "run_id": "r1",
-  "step_id": "s1",
-  "timeout_type": "step",
-  "configured_ms": 120000,
-  "elapsed_ms": 120005
+ "kind": "TimeoutEnforced",
+ "run_id": "r1",
+ "step_id": "s1",
+ "timeout_type": "step",
+ "configured_ms": 120000,
+ "elapsed_ms": 120005
 }
 ```
 
@@ -74,13 +74,13 @@ Attach to step:
 
 ```json
 {
-  "id": "s-approve",
-  "agent_id": "a-review",
-  "order": 2,
-  "hitl": {
-    "approval_key": "manager_signoff",
-    "timeout_seconds": 86400
-  }
+ "id": "s-approve",
+ "agent_id": "a-review",
+ "order": 2,
+ "hitl": {
+ "approval_key": "manager_signoff",
+ "timeout_seconds": 86400
+ }
 }
 ```
 
@@ -124,15 +124,15 @@ Retries extend step duration. If `fail_times` retries each approach `step_timeou
 
 ```json
 {
-  "exec_config": {
-    "step_timeout_secs": 180,
-    "retry": { "max_attempts": 3, "backoff": { "kind": "fixed", "base_ms": 5000 } },
-    "test": {
-      "steps": {
-        "s1": { "fail_times": 2, "then_output": "ok" }
-      }
-    }
-  }
+ "exec_config": {
+ "step_timeout_secs": 180,
+ "retry": { "max_attempts": 3, "backoff": { "kind": "fixed", "base_ms": 5000 } },
+ "test": {
+ "steps": {
+ "s1": { "fail_times": 2, "then_output": "ok" }
+ }
+ }
+ }
 }
 ```
 
@@ -146,9 +146,9 @@ Python:
 
 ```python
 result = workflow.run(
-    "input",
-    workflow_timeout_secs=600,
-    step_timeout_secs=120,
+ "input",
+ workflow_timeout_secs=600,
+ step_timeout_secs=120,
 )
 ```
 
@@ -163,4 +163,4 @@ TypeScript equivalent on `workflow.run()` options object. See [Python quickstart
 - [Retry and backoff](retry-and-backoff.md)
 - [Recovery and resume](recovery-and-resume.md)
 - [Linear workflows](../workflows/linear-workflows.md)
-- [The RCS contract](../../concepts/the-rcs-contract.md) (HitlConfig)
+- [Workflow specification](../../concepts/the-rcs-contract.md) (HitlConfig)

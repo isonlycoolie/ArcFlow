@@ -30,11 +30,11 @@ Ephemeral key-value within a single run. Lost when the run completes.
 
 ```json
 {
-  "memory_config": {
-    "memory_type": "session",
-    "scope": "agent",
-    "namespace": "scratch"
-  }
+ "memory_config": {
+ "memory_type": "session",
+ "scope": "agent",
+ "namespace": "scratch"
+ }
 }
 ```
 
@@ -46,11 +46,11 @@ Multiple agents in the same workflow read/write the same in-run namespace.
 
 ```json
 {
-  "memory_config": {
-    "memory_type": "shared",
-    "scope": "workflow",
-    "namespace": "handoff"
-  }
+ "memory_config": {
+ "memory_type": "shared",
+ "scope": "workflow",
+ "namespace": "handoff"
+ }
 }
 ```
 
@@ -62,12 +62,12 @@ Facts survive across runs when Postgres is available.
 
 ```json
 {
-  "memory_config": {
-    "memory_type": "persistent",
-    "scope": "workflow",
-    "namespace": "customer-acme-4421",
-    "ttl_seconds": 604800
-  }
+ "memory_config": {
+ "memory_type": "persistent",
+ "scope": "workflow",
+ "namespace": "customer-acme-4421",
+ "ttl_seconds": 604800
+ }
 }
 ```
 
@@ -79,20 +79,20 @@ Semantic retrieval from Qdrant. Requires embedding provider and Qdrant URL in pr
 
 ```json
 {
-  "memory_config": {
-    "memory_type": "vector",
-    "scope": "workflow",
-    "namespace": "product-docs",
-    "embedding": "openai/text-embedding-3-small",
-    "retrieval": {
-      "mode": "hybrid",
-      "top_k": 8
-    },
-    "chunking": {
-      "chunk_size": 512,
-      "chunk_overlap": 64
-    }
-  }
+ "memory_config": {
+ "memory_type": "vector",
+ "scope": "workflow",
+ "namespace": "product-docs",
+ "embedding": "openai/text-embedding-3-small",
+ "retrieval": {
+ "mode": "hybrid",
+ "top_k": 8
+ },
+ "chunking": {
+ "chunk_size": 512,
+ "chunk_overlap": 64
+ }
+ }
 }
 ```
 
@@ -108,18 +108,18 @@ See [Vector RAG pipeline](vector-rag-pipeline.md), [Hybrid retrieval and reranki
 | `MemoryDegraded` | backend, reason |
 | `MemoryEvicted` | key, eviction_reason |
 
-SEC-1: no chunk text or values in traces. [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md).
+trace data policy: no chunk text or values in traces. [Trace data policy](../../concepts/sec-1-and-data-safety.md).
 
 Example vector retrieval trace:
 
 ```json
 {
-  "kind": "MemoryRetrieved",
-  "run_id": "r1",
-  "step_id": "s1",
-  "agent_name": "researcher",
-  "chunk_count": 5,
-  "total_bytes": 3840
+ "kind": "MemoryRetrieved",
+ "run_id": "r1",
+ "step_id": "s1",
+ "agent_name": "researcher",
+ "chunk_count": 5,
+ "total_bytes": 3840
 }
 ```
 

@@ -44,28 +44,28 @@ from arcflow import Agent, Tool, Workflow
 
 
 def echo_execute(payload: dict) -> str:
-    message = str(payload.get("message", ""))
-    return f"echo:{message}"
+ message = str(payload.get("message", ""))
+ return f"echo:{message}"
 
 
 echo = Tool(
-    name="echo",
-    description="Return the message field unchanged with an echo prefix.",
-    input_schema={
-        "type": "object",
-        "properties": {
-            "message": {"type": "string", "description": "Text to echo"},
-        },
-        "required": ["message"],
-    },
-    execute=echo_execute,
+ name="echo",
+ description="Return the message field unchanged with an echo prefix.",
+ input_schema={
+ "type": "object",
+ "properties": {
+ "message": {"type": "string", "description": "Text to echo"},
+ },
+ "required": ["message"],
+ },
+ execute=echo_execute,
 )
 
 agent = Agent(
-    name="worker",
-    role="Worker",
-    instructions="Use the echo tool when helpful.",
-    tools=(echo,),
+ name="worker",
+ role="Worker",
+ instructions="Use the echo tool when helpful.",
+ tools=(echo,),
 )
 
 workflow = Workflow("define-tool-demo")
@@ -89,8 +89,8 @@ Stub runs may not always invoke the tool the way a live model would, but the wor
 | Check | Expected |
 |-------|----------|
 | Valid tool construction | No exception |
-| Invalid schema type | `Tool(..., input_schema="bad", ...)` raises `ToolConfigurationError` |
-| Empty name | `Tool(name="", ...)` raises `ToolConfigurationError` |
+| Invalid schema type | `Tool(..., input_schema="bad",...)` raises `ToolConfigurationError` |
+| Empty name | `Tool(name="",...)` raises `ToolConfigurationError` |
 
 Invalid schema check:
 
@@ -99,14 +99,14 @@ from arcflow import Tool
 from arcflow.exceptions import ToolConfigurationError
 
 try:
-    Tool(
-        name="t",
-        description="d",
-        input_schema="not-a-dict",
-        execute=lambda _: "x",
-    )
+ Tool(
+ name="t",
+ description="d",
+ input_schema="not-a-dict",
+ execute=lambda _: "x",
+ )
 except ToolConfigurationError as err:
-    print(err)
+ print(err)
 ```
 
 ## Next

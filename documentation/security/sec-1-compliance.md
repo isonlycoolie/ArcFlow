@@ -1,13 +1,13 @@
 
-# SEC-1 compliance
+# Trace data policy compliance
 
-SEC-1 is ArcFlow's mandatory trace data policy. Traces and persisted trace events describe **what happened** (identifiers, timings, sizes, error codes) without exposing **what was said** (prompts, completions, tool payloads, retrieved chunk text). This page is the authoritative compliance reference for audit teams.
+The ArcFlow trace data policy is mandatory for production deployments. Traces and persisted trace events describe **what happened** (identifiers, timings, sizes, error codes) without exposing **what was said** (prompts, completions, tool payloads, retrieved chunk text). This page is the authoritative compliance reference for audit teams.
 
-Product context: [SEC-1 and data safety](../concepts/sec-1-and-data-safety.md). Implementation guide: [SEC-1 rules](../guides/observability/sec-1-rules.md).
+Product context: [Trace data policy](../concepts/sec-1-and-data-safety.md). Implementation guide: [Trace data policy rules](../guides/observability/sec-1-rules.md).
 
 Normative contract: [Trace events (normative)](../contracts/trace-events-normative.md).
 
-## The SEC-1 rule
+## The trace data policy
 
 Traces and persisted trace events MUST NOT contain:
 
@@ -18,25 +18,25 @@ Traces and persisted trace events MUST NOT contain:
 
 Allowed metadata includes: ids, names, roles, byte sizes, token counts, durations, error codes, schema hashes.
 
-## Where SEC-1 applies
+## Where the trace data policy applies
 
-| Surface | SEC-1 scope |
+| Surface | Trace policy scope |
 |---------|-------------|
 | SDK in-memory trace on `RunResult` | Yes (export JSON) |
 | `GET /v1/runs/{id}/trace` | Yes |
-| Relay `GET .../runs/{id}/trace` | Yes (browser reachable) |
+| Relay `GET.../runs/{id}/trace` | Yes (browser reachable) |
 | Postgres `arcflow_trace_events` | Yes (migration 000005) |
 | VS Code timeline from export | Yes |
-| OTel span attributes (FP-4 alpha) | Yes when enabled |
+| OTel span attributes (OpenTelemetry export (alpha)) | Yes when enabled |
 | Application logs | Policy: do not duplicate traces with richer content |
 
-Run **result** payloads on `GET /v1/runs/{id}` may include final output text under your product policy. SEC-1 governs trace events specifically, not every API field.
+Run **result** payloads on `GET /v1/runs/{id}` may include final output text under your product policy. The trace data policy governs trace events specifically, not every API field.
 
 ## Runtime enforcement
 
 Engine emission is implemented in `runtime/arcflow-core/src/tracing/events.rs`. Examples:
 
-| Event | SEC-1 safe fields | Forbidden |
+| Event | Policy-compliant fields | Forbidden |
 |-------|-------------------|-----------|
 | `ProviderRequestSent` | `prompt_size_bytes`, `model_id` | Prompt text |
 | `ToolCallStarted` | `input_schema_hash` | Tool arguments |
@@ -68,7 +68,7 @@ Replace `payload` with actual column names from migration SQL in `server/arcflow
 
 1. **Sample export:** `GET /v1/runs/{id}/trace` for a RAG and tool-heavy run.
 2. **Secret grep:** Search JSON for `@`, `sk-`, `Bearer `, large base64 blobs.
-3. **Field review:** Compare each event kind to [Trace events normative](../contracts/trace-events-normative.md) SEC-1 column.
+3. **Field review:** Compare each event kind to [Trace events normative](../contracts/trace-events-normative.md) Trace policy column.
 4. **Browser path:** Repeat via Relay trace URL with site token.
 5. **Logs:** Confirm application logs do not duplicate traces with prompt text.
 6. **OTel (if enabled):** Inspect Jaeger/Tempo for forbidden attribute keys.
@@ -95,7 +95,7 @@ Manual review: no substring matches for user-provided essay content, API keys, o
 
 ## Dashboard and BFF alignment
 
-Private dashboard repo must pass SEC-1 CI (exit criteria in [Dashboard spec](dashboard-spec.md)):
+Private dashboard repo must pass trace data policy checks CI (exit criteria in [Dashboard spec](dashboard-spec.md)):
 
 - No hardcoded API keys
 - No logging of `site_token` or admin key

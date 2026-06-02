@@ -28,38 +28,38 @@ Body:
 
 ```json
 {
-  "definition": {
-    "id": "00000000-0000-4000-8000-000000000001",
-    "name": "chat",
-    "execution_mode": "linear",
-    "steps": [
-      {
-        "id": "00000000-0000-4000-8000-000000000010",
-        "agent_id": "00000000-0000-4000-8000-000000000020",
-        "order": 1
-      }
-    ]
-  },
-  "agents": [
-    {
-      "id": "00000000-0000-4000-8000-000000000020",
-      "name": "assistant",
-      "role": "Support",
-      "instructions": "Answer from ingested knowledge only. Say when unsure.",
-      "memory_config": {
-        "memory_type": "vector",
-        "scope": "workflow",
-        "namespace": "acme-support-kb",
-        "embedding": "openai/text-embedding-3-small",
-        "retrieval": { "mode": "hybrid", "top_k": 5 }
-      },
-      "provider": {
-        "provider_id": "openai",
-        "model": "gpt-4o-mini",
-        "api_key_env": "OPENAI_API_KEY"
-      }
-    }
-  ]
+ "definition": {
+ "id": "00000000-0000-4000-8000-000000000001",
+ "name": "chat",
+ "execution_mode": "linear",
+ "steps": [
+ {
+ "id": "00000000-0000-4000-8000-000000000010",
+ "agent_id": "00000000-0000-4000-8000-000000000020",
+ "order": 1
+ }
+ ]
+ },
+ "agents": [
+ {
+ "id": "00000000-0000-4000-8000-000000000020",
+ "name": "assistant",
+ "role": "Support",
+ "instructions": "Answer from ingested knowledge only. Say when unsure.",
+ "memory_config": {
+ "memory_type": "vector",
+ "scope": "workflow",
+ "namespace": "acme-support-kb",
+ "embedding": "openai/text-embedding-3-small",
+ "retrieval": { "mode": "hybrid", "top_k": 5 }
+ },
+ "provider": {
+ "provider_id": "openai",
+ "model": "gpt-4o-mini",
+ "api_key_env": "OPENAI_API_KEY"
+ }
+ }
+ ]
 }
 ```
 
@@ -76,14 +76,14 @@ Response:
 
 ```json
 {
-  "name": "chat",
-  "version": "1.0.2",
-  "definition": {
-    "id": "00000000-0000-4000-8000-000000000001",
-    "name": "chat",
-    "execution_mode": "linear",
-    "steps": []
-  }
+ "name": "chat",
+ "version": "1.0.2",
+ "definition": {
+ "id": "00000000-0000-4000-8000-000000000001",
+ "name": "chat",
+ "execution_mode": "linear",
+ "steps": []
+ }
 }
 ```
 
@@ -101,7 +101,7 @@ Content-Type: application/json
 
 ```json
 {
-  "version": "1.0.2"
+ "version": "1.0.2"
 }
 ```
 
@@ -111,14 +111,14 @@ Clients omit inline `workflow` and pass `workflow_ref` instead (not both):
 
 ```json
 {
-  "workflow_ref": {
-    "name": "chat",
-    "version": "^1.0.0"
-  },
-  "input": "What is your refund policy?",
-  "exec_config": {
-    "recovery_enabled": true
-  }
+ "workflow_ref": {
+ "name": "chat",
+ "version": "^1.0.0"
+ },
+ "input": "What is your refund policy?",
+ "exec_config": {
+ "recovery_enabled": true
+ }
 }
 ```
 
@@ -126,9 +126,9 @@ POST `/v1/runs`. Response:
 
 ```json
 {
-  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-  "trace_id": "trace-7c9e6679",
-  "status": "Running"
+ "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+ "trace_id": "trace-7c9e6679",
+ "status": "Running"
 }
 ```
 
@@ -146,8 +146,8 @@ Operators using the static chat product:
 POST /v1/admin/sites/{site_id}/workflows/chat/publish
 
 {
-  "instructions": "Answer only from ingested knowledge. Say when unsure.",
-  "version": "1.0.1"
+ "instructions": "Answer only from ingested knowledge. Say when unsure.",
+ "version": "1.0.1"
 }
 ```
 
@@ -161,7 +161,7 @@ Registry data lives in `arcflow_workflows` and `arcflow_workflow_aliases`. Apply
 
 ## Validation before publish
 
-Validate workflow JSON against [RCS schema](../../contracts/rcs-schema.md) in CI. Engine runs `validate_workflow` and `validate_graph` before execution. CLI `arcflow validate` is a stub (**FP-5.04**); see [Validation and testing](validation-and-testing.md).
+Validate workflow JSON against [workflow schema](../../contracts/rcs-schema.md) in CI. Engine runs `validate_workflow` and `validate_graph` before execution. CLI `arcflow validate` is a stub (**CLI validate command**); see [Validation and testing](validation-and-testing.md).
 
 ## Idempotency on runs
 
@@ -170,6 +170,6 @@ Registry resolves workflow at run creation time. Re-posting the same run body wi
 ## Related pages
 
 - [Linear workflows](linear-workflows.md) and [Graph workflows](graph-workflows.md) for definition authoring
-- [The RCS contract](../../concepts/the-rcs-contract.md)
+- [Workflow specification](../../concepts/the-rcs-contract.md)
 - [Server API quickstart](../../getting-started/quickstart-server-api.md)
 - [Surfaces and when to use them](../../concepts/surfaces-and-when-to-use-them.md)

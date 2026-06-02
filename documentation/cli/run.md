@@ -53,7 +53,7 @@ TypeScript: use `@arcflow/sdk` with `node` or `tsx` per [quickstart-typescript.m
 
 ## Remote runtime (--runtime planned)
 
-Sprint 8 spec includes `--runtime http://host:8080` for server-backed runs. When wired, pattern will be:
+ spec includes `--runtime http://host:8080` for server-backed runs. When wired, pattern will be:
 
 ```bash
 export ARCFLOW_SERVER_API_KEY=dev-secret

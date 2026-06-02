@@ -1,7 +1,7 @@
 
 # Production checklist
 
-Actionable readiness checklist before accepting production traffic. Aligns with FP-7 production signoff themes and Sprint 8 security rules. Mark each item verified in your change ticket.
+Actionable readiness checklist before accepting production traffic. Aligns with Production signoff checklist production signoff themes and security rules. Mark each item verified in your change ticket.
 
 ## Authentication and secrets
 
@@ -10,7 +10,7 @@ Actionable readiness checklist before accepting production traffic. Aligns with 
 | P1 | `ARCFLOW_SERVER_API_KEY` set, ≥ 32 hex chars | `openssl rand -hex 32`; not default `dev-secret` |
 | P2 | `ARCFLOW_ADMIN_API_KEY` set, distinct from server key | Separate env var in secret store |
 | P3 | No API keys in git, Docker images, or frontend bundles | Secret scan CI; inspect built static assets |
-| P4 | LLM keys in environment only | No hardcoded provider keys in RCS JSON |
+| P4 | LLM keys in environment only | No hardcoded provider keys in workflow JSON |
 | P5 | `ARCFLOW_WEBHOOK_SECRET` set if external callbacks used | External POST succeeds with valid HMAC only |
 
 ## Database and migrations
@@ -50,15 +50,15 @@ Actionable readiness checklist before accepting production traffic. Aligns with 
 | P21 | `allow_inline: false` on production sites | No browser workflow override |
 | P22 | Site tokens rotated on schedule | Procedure in [Token rotation](../operator/token-rotation.md) |
 | P23 | Real embedding provider configured | Not `stub` for knowledge ingest |
-| P24 | Chat workflow published to registry | `POST .../workflows/chat/publish` success |
+| P24 | Chat workflow published to registry | `POST.../workflows/chat/publish` success |
 
 ## Observability and compliance
 
 | # | Check | Verification |
 |---|-------|--------------|
-| P25 | SEC-1 audit on sample trace | No prompt/completion text in `GET .../trace` |
+| P25 | trace data policy audit on sample trace | No prompt/completion text in `GET.../trace` |
 | P26 | Application logs do not duplicate trace with richer content | Log review |
-| P27 | OTel configured if required by policy | `ARCFLOW_OTEL_ENABLED` + collector (FP-4 alpha) |
+| P27 | OTel configured if required by policy | `ARCFLOW_OTEL_ENABLED` + collector (OpenTelemetry export (alpha)) |
 | P28 | External callback integrators reach server over HTTPS | Network path test |
 
 ## Operational smoke
@@ -71,22 +71,22 @@ curl -sf http://localhost:8080/ready
 
 # Runtime smoke (adjust workflow body)
 curl -sf -X POST http://localhost:8080/v1/runs \
-  -H "Authorization: Bearer $ARCFLOW_SERVER_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d @examples/minimal-run.json
+ -H "Authorization: Bearer $ARCFLOW_SERVER_API_KEY" \
+ -H "Content-Type: application/json" \
+ -d @examples/minimal-run.json
 
-bash scripts/load-test-runs.sh   # optional capacity check
-bash scripts/static-smoke.sh     # static product end-to-end
+bash scripts/load-test-runs.sh # optional capacity check
+bash scripts/static-smoke.sh # static product end-to-end
 ```
 
 ## Deferred items (do not mark as shipped)
 
 | ID | Item |
 |----|------|
-| FP-3.01 | Operator dashboard UI (private ArcFlow-Dashboard repo) |
-| FP-2 | Server SSE `/v1/runs/{id}/events` |
-| FP-4 | Stable OTel metrics |
-| FP-5.04 | Full `arcflow validate` against schema |
+| Operator dashboard UI | Operator dashboard UI (private ArcFlow-Dashboard repo) |
+| Server SSE streaming | Server SSE `/v1/runs/{id}/events` |
+| OpenTelemetry metrics export | Stable OTel metrics |
+| CLI validate command | Full `arcflow validate` against schema |
 
 ## Sign-off
 
@@ -99,6 +99,6 @@ bash scripts/static-smoke.sh     # static product end-to-end
 ## Related pages
 
 - [Self-hosted security](../security/self-hosted-security.md)
-- [SEC-1 compliance](../security/sec-1-compliance.md)
+- [Trace data policy compliance](../security/sec-1-compliance.md)
 - [API key management](../security/api-key-management.md)
 - [Deployment overview](overview.md)

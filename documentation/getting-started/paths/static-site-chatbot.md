@@ -24,7 +24,7 @@ Browser traffic never carries LLM keys or server admin keys. The site token is s
 
 Published workflows resolve by name and semver range. The default chat workflow name is `chat`. The frontend calls `runPublished("chat", "^1.0.0", userMessage)` with no inline agent JSON in the bundle.
 
-Progressive UI today uses **trace polling**, not server SSE. `GET /v1/runs/{run_id}/events` (SSE) is deferred as **FP-2**. Plan browser streaming around Relay trace poll and `TokenEmitted` metadata events. See [Streaming in the browser](../../guides/streaming/streaming-in-the-browser.md).
+Progressive UI today uses **trace polling**, not server SSE. `GET /v1/runs/{run_id}/events` (SSE) is deferred. Plan browser streaming around Relay trace poll and `TokenEmitted` metadata events. See [Streaming in the browser](../../guides/streaming/streaming-in-the-browser.md).
 
 ## Prerequisites
 
@@ -71,7 +71,7 @@ VITE_ARCFLOW_SITE_TOKEN=st_...
 Export `SITE_ID` for the next steps:
 
 ```bash
-export SITE_ID=s_...   # from script output
+export SITE_ID=s_... # from script output
 ```
 
 The script registers `http://localhost:5173` as an allowed origin by default. Override with `ARCFLOW_SITE_ORIGIN` if your dev server uses another port.
@@ -80,9 +80,9 @@ Manual equivalent:
 
 ```bash
 curl -sf -X POST "http://localhost:8080/v1/admin/sites" \
-  -H "X-ArcFlow-Admin-Key: dev-admin" \
-  -H "Content-Type: application/json" \
-  -d '{"display_name":"Static Dev Site","allowed_origins":["http://localhost:5173"]}'
+ -H "X-ArcFlow-Admin-Key: dev-admin" \
+ -H "Content-Type: application/json" \
+ -d '{"display_name":"Static Dev Site","allowed_origins":["http://localhost:5173"]}'
 ```
 
 When the ArcFlow Dashboard is deployed in your environment, use Sites → Create and copy relay URL and site token from the UI instead.
@@ -100,9 +100,9 @@ Manual equivalent:
 
 ```bash
 curl -sf -X POST "http://localhost:8080/v1/admin/sites/${SITE_ID}/knowledge/ingest" \
-  -H "X-ArcFlow-Admin-Key: dev-admin" \
-  -H "Content-Type: application/json" \
-  -d "{\"text\": \"$(cat examples/static/chat-rag/kb.txt)\", \"key\": \"faq\"}"
+ -H "X-ArcFlow-Admin-Key: dev-admin" \
+ -H "Content-Type: application/json" \
+ -d "{\"text\": \"$(cat examples/static/chat-rag/kb.txt)\", \"key\": \"faq\"}"
 ```
 
 Do not embed or ingest `kb.txt` from frontend code. Knowledge belongs on the server side only.
@@ -118,9 +118,9 @@ Manual equivalent:
 
 ```bash
 curl -sf -X POST "http://localhost:8080/v1/admin/sites/${SITE_ID}/workflows/chat/publish" \
-  -H "X-ArcFlow-Admin-Key: dev-admin" \
-  -H "Content-Type: application/json" \
-  -d '{"instructions": "Answer using the knowledge base. Be concise."}'
+ -H "X-ArcFlow-Admin-Key: dev-admin" \
+ -H "Content-Type: application/json" \
+ -d '{"instructions": "Answer using the knowledge base. Be concise."}'
 ```
 
 After publish, semver `^1.0.0` resolves to the latest `chat` workflow for this site.
@@ -134,8 +134,8 @@ cd examples/static/chat-rag
 Create `.env.local` (or export in the shell):
 
 ```bash
-VITE_ARCFLOW_RELAY_URL=http://localhost:8090/v1/sites/s_...   # from provision output
-VITE_ARCFLOW_SITE_TOKEN=st_...                                 # from provision output
+VITE_ARCFLOW_RELAY_URL=http://localhost:8090/v1/sites/s_... # from provision output
+VITE_ARCFLOW_SITE_TOKEN=st_... # from provision output
 ```
 
 Install and start:
@@ -153,14 +153,14 @@ Production frontend code is intentionally minimal (~30 lines in `src/main.ts`):
 import { ArcFlowClient, StepForm } from "@arcflow/static";
 
 const client = new ArcFlowClient({
-  baseUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
-  apiKey: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
-  mode: "relay",
+ baseUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
+ apiKey: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
+ mode: "relay",
 });
 const form = new StepForm();
 
 const result = await client.runPublished("chat", "^1.0.0", userMessage, {
-  initialState: form.toInitialState(),
+ initialState: form.toInitialState(),
 });
 ```
 
@@ -172,7 +172,7 @@ Open browser devtools → Network. On send you should see:
 
 | Request | Expected |
 |---------|----------|
-| `POST .../v1/sites/{site_id}/runs` | **201** with `run_id` |
+| `POST.../v1/sites/{site_id}/runs` | **201** with `run_id` |
 | Poll until complete | Client receives assistant text |
 
 Optional automated check:
@@ -185,7 +185,7 @@ Operator trace fetch (server direct):
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/RUN_ID/trace" \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
 Trace events you should see for a RAG chat run:
@@ -197,23 +197,23 @@ Trace events you should see for a RAG chat run:
 | `StepCompleted` | Chat agent step finishes |
 | `WorkflowCompleted` | Successful reply |
 
-## Trace polling and FP-2 (no SSE)
+## Trace polling without server SSE
 
-Server SSE at `GET /v1/runs/{run_id}/events` is **not available** (deferred FP-2). Relay does not expose SSE either.
+Server SSE at `GET /v1/runs/{run_id}/events` is **not available** (deferred (server streaming)). Relay does not expose SSE either.
 
 For token-progress UI without waiting for the final `runPublished()` response to block, poll trace through Relay:
 
 ```text
 Browser
-  -> POST /v1/sites/{site_id}/runs        (Relay)
-  -> GET  /v1/sites/{site_id}/runs/{id}/trace  (poll loop)
-  <- TokenEmitted (counts only, SEC-1)
-  <- WorkflowCompleted
+ -> POST /v1/sites/{site_id}/runs (Relay)
+ -> GET /v1/sites/{site_id}/runs/{id}/trace (poll loop)
+ <- TokenEmitted (counts only, trace data policy)
+ <- WorkflowCompleted
 ```
 
 `TokenEmitted` carries token **counts**, not prompt or completion strings. Build UX around progress indicators or reveal the final `result.output` when polling completes. Full pattern: [Streaming in the browser](../../guides/streaming/streaming-in-the-browser.md).
 
-Do not depend on an SSE URL in production browser code until FP-2 ships.
+Do not depend on an SSE URL in production browser code until server SSE streaming ships.
 
 ## Step 7: Verify origin enforcement
 
@@ -226,7 +226,7 @@ Re-add the origin and confirm chat works again.
 | Allowed origin chat | Success |
 | Disallowed origin | Blocked at Relay |
 | Production bundle | Site token only, no LLM or server runtime keys |
-| Workflow in bundle | None; `runPublished("chat", "^1.0.0", ...)` only |
+| Workflow in bundle | None; `runPublished("chat", "^1.0.0",...)` only |
 
 ## Troubleshooting
 
@@ -240,7 +240,7 @@ Re-add the origin and confirm chat works again.
 | `runPublished` workflow not found | Chat not published | Re-run `static-publish-chat.sh` |
 | Inline workflow rejected | `allow_inline: false` (production default) | Use publish flow; do not ship `main-dev-direct.ts` |
 | Chat hangs forever | Server down or run stuck | Poll `GET /v1/runs/{id}` on server; check logs |
-| Expected SSE stream | FP-2 not shipped | Use trace poll; see [Streaming in the browser](../../guides/streaming/streaming-in-the-browser.md) |
+| Expected SSE stream | Server SSE not shipped | Use trace poll; see [Streaming in the browser](../../guides/streaming/streaming-in-the-browser.md) |
 | Keys in frontend bundle | Used direct mode by mistake | Use Relay mode only in production; see `src/main-dev-direct.ts` for local engine debug only |
 
 ## Advanced: direct mode (internal dev only)

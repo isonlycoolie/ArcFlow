@@ -29,15 +29,15 @@ Save as `two_agent_pipeline.py`:
 from arcflow import Agent, Workflow
 
 researcher = Agent(
-    name="researcher",
-    role="Research",
-    instructions="Research the given topic thoroughly. List key facts.",
+ name="researcher",
+ role="Research",
+ instructions="Research the given topic thoroughly. List key facts.",
 )
 
 writer = Agent(
-    name="writer",
-    role="Writer",
-    instructions="Write a clear summary of the research. Use short paragraphs.",
+ name="writer",
+ role="Writer",
+ instructions="Write a clear summary of the research. Use short paragraphs.",
 )
 
 workflow = Workflow("research-then-write")
@@ -72,10 +72,10 @@ Optional: inspect trace metadata after the run (same pattern as Track A):
 
 ```python
 for event in result.trace_events:
-    print(event.get("kind"), event.get("step_id", ""))
+ print(event.get("kind"), event.get("step_id", ""))
 ```
 
-You should see lifecycle events such as `WorkflowStarted`, `StepCompleted`, and `WorkflowCompleted`. Prompt text never appears in traces (SEC-1).
+You should see lifecycle events such as `WorkflowStarted`, `StepCompleted`, and `WorkflowCompleted`. Prompt text never appears in traces (trace data policy).
 
 ## Next
 

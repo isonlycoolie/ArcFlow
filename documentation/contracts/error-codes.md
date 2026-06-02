@@ -1,7 +1,7 @@
 
 # Error codes
 
-Complete reference for RCS `ErrorCode` variants (16 total, K-03). Defined in `runtime/arcflow-core/src/rcs/types.rs`.
+Complete reference for workflow `ErrorCode` variants (16 total, K-03). Defined in `runtime/arcflow-core/src/rcs/types.rs`.
 
 Errors surface in workflow results, trace events (`WorkflowFailed`, `StepFailed`), and HTTP API responses on the server.
 
@@ -27,13 +27,13 @@ SDK details: [Python exception reference](../sdks/python/exception-reference.md)
 | HTTP (server) | 400 |
 | Python | `WorkflowConfigurationError` |
 | TypeScript | `WorkflowConfigurationError` |
-| Handling | Fix RCS JSON against [v1.schema.json](../contracts/rcs-schema.md) |
+| Handling | Fix workflow JSON against [v1.schema.json](../contracts/rcs-schema.md) |
 
 ### UnsupportedRcsVersion
 
 | Aspect | Value |
 |--------|-------|
-| Typical cause | Workflow declares future RCS version |
+| Typical cause | Workflow declares future workflow specification version |
 | HTTP (server) | 400 |
 | Python | `WorkflowConfigurationError` |
 | TypeScript | `WorkflowConfigurationError` |
@@ -214,6 +214,6 @@ Failed runs emit `WorkflowFailed` or `StepFailed` with `error_code` string match
 
 ## Related pages
 
-- [RCS schema](rcs-schema.md)
+- [workflow schema](rcs-schema.md)
 - [Retry and backoff](../guides/reliability/retry-and-backoff.md)
 - [HITL overview](../guides/human-in-the-loop/hitl-overview.md)

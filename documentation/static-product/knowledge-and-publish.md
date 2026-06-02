@@ -9,12 +9,12 @@ Add text to the site's KB namespace (Qdrant collection derived from `kb_namespac
 
 ```bash
 curl -s -X POST "http://localhost:8080/v1/admin/sites/site_abc123/knowledge/ingest" \
-  -H "Authorization: Bearer dev-admin" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "text": "Refunds are available within 30 days of purchase with receipt.",
-    "key": "faq-refunds"
-  }'
+ -H "Authorization: Bearer dev-admin" \
+ -H "Content-Type: application/json" \
+ -d '{
+ "text": "Refunds are available within 30 days of purchase with receipt.",
+ "key": "faq-refunds"
+ }'
 ```
 
 Server chunks, embeds, and upserts per `MemoryChunkingConfig`. Requires `ARCFLOW_QDRANT_URL` and a non-stub embedding provider in production.
@@ -32,15 +32,15 @@ Publish binds instructions and version to the registry workflow name `chat` (or 
 
 ```bash
 curl -s -X POST "http://localhost:8080/v1/admin/sites/site_abc123/workflows/chat/publish" \
-  -H "Authorization: Bearer dev-admin" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "instructions": "Answer only from ingested knowledge. Say when unsure.",
-    "version": "1.0.1"
-  }'
+ -H "Authorization: Bearer dev-admin" \
+ -H "Content-Type: application/json" \
+ -d '{
+ "instructions": "Answer only from ingested knowledge. Say when unsure.",
+ "version": "1.0.1"
+ }'
 ```
 
-The server builds an RCS workflow with RAG agent tooling and registers `chat@1.0.1`. Prior versions remain addressable by exact version.
+The server builds an workflow specification workflow with RAG agent tooling and registers `chat@1.0.1`. Prior versions remain addressable by exact version.
 
 ## Semver resolution at runtime
 
@@ -54,8 +54,8 @@ Relay proxies to server:
 
 ```json
 {
-  "workflow_ref": { "name": "chat", "version": "^1.0.0" },
-  "input": "What is your refund policy?"
+ "workflow_ref": { "name": "chat", "version": "^1.0.0" },
+ "input": "What is your refund policy?"
 }
 ```
 
@@ -63,16 +63,16 @@ Server resolves highest matching non-deprecated version (e.g. `1.0.2` if publish
 
 ```bash
 curl -s "http://localhost:8080/v1/workflows/chat/resolve?range=%5E1.0.0" \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
 Response:
 
 ```json
 {
-  "name": "chat",
-  "version": "1.0.2",
-  "definition": { }
+ "name": "chat",
+ "version": "1.0.2",
+ "definition": { }
 }
 ```
 
@@ -82,9 +82,9 @@ Operators can pin a friendly alias:
 
 ```bash
 curl -s -X POST "http://localhost:8080/v1/workflows/chat/aliases/latest" \
-  -H "Authorization: Bearer dev-secret" \
-  -H "Content-Type: application/json" \
-  -d '{"version": "1.0.2"}'
+ -H "Authorization: Bearer dev-secret" \
+ -H "Content-Type: application/json" \
+ -d '{"version": "1.0.2"}'
 ```
 
 Static SDK semver ranges (`^1.0.0`) are preferred over alias strings in browser code for predictable upgrades.
@@ -92,11 +92,11 @@ Static SDK semver ranges (`^1.0.0`) are preferred over alias strings in browser 
 ## End-to-end operator sequence
 
 ```text
-1. POST /v1/admin/sites           → site_id, token, kb_namespace
-2. POST .../knowledge/ingest      → FAQ / docs in Qdrant
-3. POST .../workflows/chat/publish → chat@1.0.0
-4. Frontend runPublished          → resolve ^1.0.0 → run
-5. Trace MemoryRetrieved          → chunk_count, total_bytes (SEC-1)
+1. POST /v1/admin/sites → site_id, token, kb_namespace
+2. POST.../knowledge/ingest → FAQ / docs in Qdrant
+3. POST.../workflows/chat/publish → chat@1.0.0
+4. Frontend runPublished → resolve ^1.0.0 → run
+5. Trace MemoryRetrieved → chunk_count, total_bytes (trace data policy)
 ```
 
 ## Smoke scripts

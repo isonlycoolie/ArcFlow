@@ -26,22 +26,22 @@ Example:
 
 ```bash
 curl -s http://localhost:8080/v1/runs/RUN_ID \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
 ```bash
 curl -s http://localhost:8080/v1/runs/RUN_ID \
-  -H "X-ArcFlow-Api-Key: dev-secret"
+ -H "X-ArcFlow-Api-Key: dev-secret"
 ```
 
 Missing or wrong keys return **401**:
 
 ```json
 {
-  "error": {
-    "code": "authentication_failed",
-    "message": "[ArcFlow] Authentication failed. Provide X-ArcFlow-Api-Key or Authorization: Bearer."
-  }
+ "error": {
+ "code": "authentication_failed",
+ "message": "[ArcFlow] Authentication failed. Provide X-ArcFlow-Api-Key or Authorization: Bearer."
+ }
 }
 ```
 
@@ -53,9 +53,9 @@ Admin routes require:
 
 ```bash
 curl -s -X POST http://localhost:8080/v1/admin/sites \
-  -H "Authorization: Bearer dev-admin" \
-  -H "Content-Type: application/json" \
-  -d '{"display_name":"Acme","allowed_origins":["https://www.acme.com"],"rate_limit_rpm":60,"allow_inline":false}'
+ -H "Authorization: Bearer dev-admin" \
+ -H "Content-Type: application/json" \
+ -d '{"display_name":"Acme","allowed_origins":["https://www.acme.com"],"rate_limit_rpm":60,"allow_inline":false}'
 ```
 
 The runtime key must **not** work on `/v1/admin/*`. Separate keys limit blast radius if a frontend site token or backend integration key leaks.
@@ -66,10 +66,10 @@ The runtime key must **not** work on `/v1/admin/*`. Separate keys limit blast ra
 
 ```json
 {
-  "relay-site-key-abc": {
-    "workflows": ["chat"],
-    "publish": false
-  }
+ "relay-site-key-abc": {
+ "workflows": ["chat"],
+ "publish": false
+ }
 }
 ```
 
@@ -97,7 +97,7 @@ For external webhooks, `ARCFLOW_WEBHOOK_SECRET` supports dual-verify during rota
 
 ## Compliance notes
 
-- Keys never appear in SEC-1 execution traces.
+- Keys never appear in trace data policy execution traces.
 - Logs should not print `Authorization` headers or site tokens.
 - Browser bundles must not contain `ARCFLOW_SERVER_API_KEY` or `ARCFLOW_ADMIN_API_KEY`. Use Relay + site token for static product.
 

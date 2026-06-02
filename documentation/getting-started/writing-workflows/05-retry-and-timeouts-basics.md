@@ -32,29 +32,29 @@ from arcflow import Agent, Workflow
 from arcflow.retry import ConstantBackoff
 
 agent = Agent(
-    name="worker",
-    role="Worker",
-    instructions="Process the input.",
+ name="worker",
+ role="Worker",
+ instructions="Process the input.",
 )
 
 workflow = (
-    Workflow("retry-basics")
-    .retry(3, backoff=ConstantBackoff(delay_ms=1))
-    .step(agent)
+ Workflow("retry-basics")
+.retry(3, backoff=ConstantBackoff(delay_ms=1))
+.step(agent)
 )
 
 results = workflow.test(
-    [
-        {
-            "name": "succeeds on third attempt",
-            "input": "process me",
-            "expected_output": "done",
-            "stub_responses": {
-                "step_1": {"fail_times": 2, "then_output": "done"},
-            },
-            "assert_retries": 3,
-        }
-    ]
+ [
+ {
+ "name": "succeeds on third attempt",
+ "input": "process me",
+ "expected_output": "done",
+ "stub_responses": {
+ "step_1": {"fail_times": 2, "then_output": "done"},
+ },
+ "assert_retries": 3,
+ }
+ ]
 )
 
 row = results[0]
@@ -77,10 +77,10 @@ from arcflow import Agent, Workflow
 
 agent = Agent(name="slow", role="Slow", instructions="Work carefully.")
 wf = (
-    Workflow("timeout-demo")
-    .step_timeout(30.0)
-    .timeout(120.0)
-    .step(agent)
+ Workflow("timeout-demo")
+.step_timeout(30.0)
+.timeout(120.0)
+.step(agent)
 )
 ```
 
@@ -99,9 +99,9 @@ from arcflow import Workflow
 from arcflow.exceptions import WorkflowConfigurationError
 
 try:
-    Workflow("bad").retry(0)
+ Workflow("bad").retry(0)
 except WorkflowConfigurationError as err:
-    print(err)
+ print(err)
 ```
 
 ## Next

@@ -9,7 +9,7 @@ You should have completed [First workflow in five minutes](../first-workflow-in-
 
 ArcFlow exposes one execution engine (`arcflow-core`) through two common integration shapes.
 
-**Embedded SDK** loads the runtime inside your application process. Python or TypeScript serializes workflow definitions to the Runtime Contract Specification (RCS), calls the native binding, and reads `WorkflowResult` in memory. Traces live in the in-process store until evicted. This path suits scripts, notebooks, backend services that already run Python or Node, and local development.
+**Embedded SDK** loads the runtime inside your application process. Python or TypeScript serializes workflow definitions to the ArcFlow workflow specification, calls the native binding, and reads `WorkflowResult` in memory. Traces live in the in-process store until evicted. This path suits scripts, notebooks, backend services that already run Python or Node, and local development.
 
 **Server API** runs the same engine inside `arcflow-server`, a Rust HTTP service backed by PostgreSQL. Callers submit JSON to `POST /v1/runs`, poll `GET /v1/runs/{id}`, and fetch traces over HTTP. This path suits polyglot backends, cron jobs, browser-facing products that must not embed the full SDK, and any workflow that needs durable pause and resume (HITL, external callbacks, registry semver resolution).
 

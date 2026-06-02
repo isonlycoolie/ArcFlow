@@ -1,7 +1,7 @@
 
 # Trace timeline (VS Code)
 
-Inspect SEC-1 execution traces as a chronological timeline in VS Code. Useful after failed runs, retry storms, or HITL interrupts.
+Inspect trace data policy execution traces as a chronological timeline in VS Code. Useful after failed runs, retry storms, or HITL interrupts.
 
 ## Open trace timeline
 
@@ -15,8 +15,8 @@ From server:
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/RUN_ID/trace" \
-  -H "Authorization: Bearer dev-secret" \
-  > run.arcflow.trace.json
+ -H "Authorization: Bearer dev-secret" \
+ > run.arcflow.trace.json
 ```
 
 From CLI:
@@ -29,26 +29,26 @@ Rename to `*.arcflow.trace.json` so VS Code activates the ArcFlow trace language
 
 ## Timeline content
 
-Each event shows PascalCase `kind` and metadata fields only (SEC-1). Example sequence for a two-step linear workflow:
+Each event shows PascalCase `kind` and metadata fields only (trace data policy). Example sequence for a two-step linear workflow:
 
 ```text
-t+0ms    WorkflowStarted       step_count=2
-t+12ms   StepStarted           step_id=...
-t+45ms   ProviderRequestSent   provider=stub, input_tokens=10
-t+48ms   ProviderResponseReceived output_tokens=25
-t+50ms   StepCompleted
-t+55ms   StepStarted           step_id=...
-t+90ms   StepCompleted
-t+92ms   WorkflowCompleted     duration_ms=92
+t+0ms WorkflowStarted step_count=2
+t+12ms StepStarted step_id=...
+t+45ms ProviderRequestSent provider=stub, input_tokens=10
+t+48ms ProviderResponseReceived output_tokens=25
+t+50ms StepCompleted
+t+55ms StepStarted step_id=...
+t+90ms StepCompleted
+t+92ms WorkflowCompleted duration_ms=92
 ```
 
 Failed run with retry:
 
 ```text
-t+0ms    WorkflowStarted
-t+20ms   StepStarted
-t+100ms  ProviderError         retryable=true
-t+105ms  RetryAttempted        attempt=1
+t+0ms WorkflowStarted
+t+20ms StepStarted
+t+100ms ProviderError retryable=true
+t+105ms RetryAttempted attempt=1
 t+1200ms StepCompleted
 t+1210ms WorkflowCompleted
 ```
@@ -57,7 +57,7 @@ HITL interrupt:
 
 ```text
 ...
-t+500ms  WorkflowInterrupted   approval_key=manager_signoff
+t+500ms WorkflowInterrupted approval_key=manager_signoff
 ```
 
 No prompt text, tool arguments, or memory chunk content appears in the timeline.

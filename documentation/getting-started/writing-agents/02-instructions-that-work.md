@@ -27,20 +27,20 @@ Save as `instructions_demo.py`:
 from arcflow import Agent, Workflow
 
 vague = Agent(
-    name="helper",
-    role="Assistant",
-    instructions="Help with the topic.",
+ name="helper",
+ role="Assistant",
+ instructions="Help with the topic.",
 )
 
 specific = Agent(
-    name="briefing_writer",
-    role="Briefing writer",
-    instructions=(
-        "Write a briefing note on the topic. "
-        "Use exactly three bullet points. "
-        "Each bullet is one sentence. "
-        "Do not include a title or preamble."
-    ),
+ name="briefing_writer",
+ role="Briefing writer",
+ instructions=(
+ "Write a briefing note on the topic. "
+ "Use exactly three bullet points. "
+ "Each bullet is one sentence. "
+ "Do not include a title or preamble."
+ ),
 )
 
 Workflow("vague").step(vague).run("Quarterly sales review")

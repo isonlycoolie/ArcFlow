@@ -36,15 +36,15 @@ You do not need every track before shipping. After **Fundamentals** and **Writin
 from arcflow import Agent, Workflow
 
 agent = Agent(
-    name="worker",
-    role="assistant",
-    instructions="Do one clear task with the user input.",
+ name="worker",
+ role="assistant",
+ instructions="Do one clear task with the user input.",
 )
 
 workflow = Workflow("my_flow")
 workflow.step(agent)
 
-result = workflow.run("your input here")  # default: no API key required
+result = workflow.run("your input here") # default: no API key required
 print(result.output)
 ```
 

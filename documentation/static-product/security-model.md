@@ -23,9 +23,9 @@ Create site with inline disabled:
 
 ```bash
 curl -s -X POST http://localhost:8080/v1/admin/sites \
-  -H "Authorization: Bearer dev-admin" \
-  -H "Content-Type: application/json" \
-  -d '{"display_name":"Acme","allowed_origins":["https://www.acme.com"],"rate_limit_rpm":60,"allow_inline":false}'
+ -H "Authorization: Bearer dev-admin" \
+ -H "Content-Type: application/json" \
+ -d '{"display_name":"Acme","allowed_origins":["https://www.acme.com"],"rate_limit_rpm":60,"allow_inline":false}'
 ```
 
 ## Origin enforcement
@@ -59,7 +59,7 @@ For production, use `mode: "relay"` or `mode: "bff"` where your backend holds se
 
 `ARCFLOW_CORS_ORIGINS` on the server allows browser-direct calls during development. Production static sites should not rely on server CORS; use Relay.
 
-## SEC-1 traces
+## trace data policy traces
 
 Traces exported through Relay contain metadata only (event kinds, counts, durations). No prompts, tool payloads, or KB chunk text. Compliance reviewers should verify client-side logging does not duplicate user messages into analytics pipelines with PII policies.
 
@@ -71,14 +71,14 @@ Rotate on leak, employee offboarding, or periodic policy:
 
 ```bash
 curl -s -X POST "http://localhost:8080/v1/admin/sites/site_abc123/tokens/rotate" \
-  -H "Authorization: Bearer dev-admin"
+ -H "Authorization: Bearer dev-admin"
 ```
 
 Redeploy frontend env with new token before announcing rotation to avoid user-facing outages.
 
-## Server SSE (FP-2)
+## Server SSE (streaming deferred)
 
-Do not expose SSE endpoints to browsers until FP-2 ships. Current polling model does not widen the attack surface with long-lived authenticated streams.
+Do not expose SSE endpoints to browsers until server SSE streaming ships. Current polling model does not widen the attack surface with long-lived authenticated streams.
 
 ## Related pages
 

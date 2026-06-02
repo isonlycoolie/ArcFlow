@@ -12,7 +12,7 @@ Use this SDK for Node.js backends, integration tests, the VS Code extension, and
 | Linear workflows | `new Workflow({ name })` + `step()` | Full |
 | Graph workflows | `Workflow({ graph: true })` + `node()`, `addEdge()`, `joinNode()` | Full |
 | LLM providers | `OpenAI`, `Anthropic`, `Gemini` | Full |
-| Recovery | `enableRecovery()` | Full for linear; graph resume partial (FP-1.01) |
+| Recovery | `enableRecovery()` | Full for linear; graph resume partial (Graph recovery resume) |
 | HITL | `HitlConfig` on `step()` | Full |
 | Streaming | `runStream()` | In-process; not with remote runtime |
 | Vector ingest/search | `VectorStore`, `ChunkHit` | Full |
@@ -28,11 +28,11 @@ Use this SDK for Node.js backends, integration tests, the VS Code extension, and
 
 ```
 Your Node.js / TS app
-    |
-    v
+ |
+ v
 arcflow package (index.ts + index.native.js)
-    |
-    v
+ |
+ v
 arcflow-core (Rust, same as Python)
 ```
 
@@ -45,15 +45,15 @@ import { Agent, OpenAI, Workflow } from "arcflow";
 
 const wf = new Workflow({ name: "research_pipeline" });
 wf.step(
-  new Agent({
-    name: "writer",
-    role: "author",
-    instructions: "Write a concise summary.",
-  }),
+ new Agent({
+ name: "writer",
+ role: "author",
+ instructions: "Write a concise summary.",
+ }),
 );
 
 const result = await wf.run("Quantum networking", {
-  provider: new OpenAI({ model: "gpt-4o" }),
+ provider: new OpenAI({ model: "gpt-4o" }),
 });
 
 console.log(result.output);
@@ -87,11 +87,11 @@ TypeScript matches Python for core execution paths documented in [parity matrix]
 
 | Gap | Workaround |
 |-----|------------|
-| No `Agent` tools/memory in TS binding | Define workflows in Python or post RCS JSON to server |
-| No LangChain module | Use Python adapter or manual RCS conversion |
+| No `Agent` tools/memory in TS binding | Define workflows in Python or post workflow JSON to server |
+| No LangChain module | Use Python adapter or manual workflow specification conversion |
 | No `reportOutcome()` client | POST to server external callback with fetch + HMAC |
-| Graph recovery resume incomplete | Same FP-1.01 limitation as Python |
-| Server SSE deferred (FP-2) | Use `runStream()` in-process or poll GET run |
+| Graph recovery resume incomplete | Same Graph recovery resume limitation as Python |
+| Server SSE deferred (streaming deferred) | Use `runStream()` in-process or poll GET run |
 
 ## Related pages
 

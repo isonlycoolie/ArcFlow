@@ -96,7 +96,7 @@ Reference implementations:
 
 ```bash
 bash scripts/load-test-runs.sh
-bash scripts/static-smoke.sh   # requires full server + relay + site provisioned
+bash scripts/static-smoke.sh # requires full server + relay + site provisioned
 ```
 
 ## Stop and reset

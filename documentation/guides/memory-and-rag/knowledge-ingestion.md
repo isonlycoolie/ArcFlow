@@ -15,10 +15,10 @@ Chunking config on the agent or ingest request:
 
 ```json
 {
-  "chunking": {
-    "chunk_size": 512,
-    "chunk_overlap": 64
-  }
+ "chunking": {
+ "chunk_size": 512,
+ "chunk_overlap": 64
+ }
 }
 ```
 
@@ -40,8 +40,8 @@ Body:
 
 ```json
 {
-  "text": "Refunds are processed within 5 business days when the return is received.",
-  "key": "refund-policy"
+ "text": "Refunds are processed within 5 business days when the return is received.",
+ "key": "refund-policy"
 }
 ```
 
@@ -58,12 +58,12 @@ Repeat for each FAQ section or document. Keys help replace content without dupli
 POST /v1/admin/sites
 
 {
-  "display_name": "Acme Support",
-  "allowed_origins": ["https://www.acme.com"],
-  "rate_limit_rpm": 60,
-  "allow_inline": false,
-  "default_workflow_name": "chat",
-  "chat_instructions": "Answer from knowledge only."
+ "display_name": "Acme Support",
+ "allowed_origins": ["https://www.acme.com"],
+ "rate_limit_rpm": 60,
+ "allow_inline": false,
+ "default_workflow_name": "chat",
+ "chat_instructions": "Answer from knowledge only."
 }
 ```
 
@@ -71,10 +71,10 @@ Response includes `kb_namespace` (use in published agent memory config):
 
 ```json
 {
-  "site_id": "site-uuid",
-  "relay_url": "https://relay.example.com",
-  "site_token": "shown-once-token",
-  "kb_namespace": "site-acme-kb-uuid"
+ "site_id": "site-uuid",
+ "relay_url": "https://relay.example.com",
+ "site_token": "shown-once-token",
+ "kb_namespace": "site-acme-kb-uuid"
 }
 ```
 
@@ -86,8 +86,8 @@ After ingest, publish so browser clients resolve the workflow:
 POST /v1/admin/sites/{site_id}/workflows/chat/publish
 
 {
-  "instructions": "Answer only from ingested knowledge. Say when unsure.",
-  "version": "1.0.1"
+ "instructions": "Answer only from ingested knowledge. Say when unsure.",
+ "version": "1.0.1"
 }
 ```
 
@@ -95,13 +95,13 @@ Published agents should reference the site namespace:
 
 ```json
 {
-  "memory_config": {
-    "memory_type": "vector",
-    "scope": "workflow",
-    "namespace": "site-acme-kb-uuid",
-    "embedding": "openai/text-embedding-3-small",
-    "retrieval": { "mode": "hybrid", "top_k": 5 }
-  }
+ "memory_config": {
+ "memory_type": "vector",
+ "scope": "workflow",
+ "namespace": "site-acme-kb-uuid",
+ "embedding": "openai/text-embedding-3-small",
+ "retrieval": { "mode": "hybrid", "top_k": 5 }
+ }
 }
 ```
 
@@ -123,10 +123,10 @@ Typical SDK pattern (conceptual):
 from arcflow.memory import VectorStore
 
 store = VectorStore(
-    namespace="product-docs",
-    embedding="openai/text-embedding-3-small",
-    chunk_size=512,
-    chunk_overlap=64,
+ namespace="product-docs",
+ embedding="openai/text-embedding-3-small",
+ chunk_size=512,
+ chunk_overlap=64,
 )
 
 store.ingest_text(key="getting-started", text=open("docs/intro.md").read())
@@ -153,15 +153,15 @@ Production: do not use stub embedding provider. See [Hybrid retrieval and rerank
 
 ```json
 {
-  "kind": "MemoryRetrieved",
-  "run_id": "r1",
-  "agent_name": "support",
-  "chunk_count": 3,
-  "total_bytes": 2400
+ "kind": "MemoryRetrieved",
+ "run_id": "r1",
+ "agent_name": "support",
+ "chunk_count": 3,
+ "total_bytes": 2400
 }
 ```
 
-4. Answer should reflect ingested facts (manual review; traces do not contain chunk text per SEC-1)
+4. Answer should reflect ingested facts (manual review; traces do not contain chunk text per trace data policy)
 
 ## Operational scripts
 

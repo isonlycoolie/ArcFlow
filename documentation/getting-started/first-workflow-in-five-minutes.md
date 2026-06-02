@@ -21,14 +21,14 @@ Save as `first_workflow.py` anywhere on your machine (with the `arcflow` package
 from arcflow import Agent, Workflow
 
 researcher = Agent(
-    name="researcher",
-    role="research",
-    instructions="Research the given topic thoroughly.",
+ name="researcher",
+ role="research",
+ instructions="Research the given topic thoroughly.",
 )
 writer = Agent(
-    name="writer",
-    role="write",
-    instructions="Write a clear summary of the research.",
+ name="writer",
+ role="write",
+ instructions="Write a clear summary of the research.",
 )
 
 workflow = Workflow("research_pipeline")

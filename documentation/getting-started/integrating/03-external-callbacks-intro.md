@@ -39,10 +39,10 @@ from arcflow.external import ExternalBindingConfig, report_outcome
 STEP_ID = "550e8400-e29b-41d4-a716-446655440000"
 
 binding = ExternalBindingConfig(
-    "gov_portal_submit",
-    attach_to_step_id=STEP_ID,
-    kind="browser_automation",
-    mode="async_callback",
+ "gov_portal_submit",
+ attach_to_step_id=STEP_ID,
+ kind="browser_automation",
+ mode="async_callback",
 )
 
 wf = Workflow("online_application", runtime="http://localhost:8080")
@@ -59,13 +59,13 @@ When the run pauses, report success with **ExternalOutcome.report** (`report_out
 ```python
 # ExternalOutcome.report
 response = report_outcome(
-    run_id="<run_id from interrupted run>",
-    binding_id="gov_portal_submit",
-    outcome={
-        "status": "success",
-        "fields": {"confirmation_number": "APP-2026-9912"},
-    },
-    base_url="http://localhost:8080",
+ run_id="<run_id from interrupted run>",
+ binding_id="gov_portal_submit",
+ outcome={
+ "status": "success",
+ "fields": {"confirmation_number": "APP-2026-9912"},
+ },
+ base_url="http://localhost:8080",
 )
 print(response)
 ```

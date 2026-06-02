@@ -18,7 +18,7 @@ Session and shared memory both live inside the runtime for the duration of a wor
 | One agent scratch pad | `SESSION` | `AGENT` | Optional but recommended for clarity |
 | Two agents, same pipeline | `SHARED` | `WORKFLOW` | Required for predictable handoff keys |
 
-Neither type talks to Qdrant. Trace events for reads and writes appear as `MemoryRead` and `MemoryWrite` with keys and hit flags, not chunk text (SEC-1).
+Neither type talks to Qdrant. Trace events for reads and writes appear as `MemoryRead` and `MemoryWrite` with keys and hit flags, not chunk text (trace data policy).
 
 ## Example
 
@@ -30,25 +30,25 @@ Save as `shared_memory_demo.py`:
 from arcflow import Agent, MemoryConfig, MemoryScope, MemoryType, Workflow
 
 extractor = Agent(
-    name="extractor",
-    role="extractor",
-    instructions="Extract three bullet facts from the user topic. Store them in shared memory under key 'facts'.",
-    memory=MemoryConfig(
-        MemoryType.SHARED,
-        MemoryScope.WORKFLOW,
-        namespace="handoff",
-    ),
+ name="extractor",
+ role="extractor",
+ instructions="Extract three bullet facts from the user topic. Store them in shared memory under key 'facts'.",
+ memory=MemoryConfig(
+ MemoryType.SHARED,
+ MemoryScope.WORKFLOW,
+ namespace="handoff",
+ ),
 )
 
 writer = Agent(
-    name="writer",
-    role="writer",
-    instructions="Write a short paragraph using shared memory facts when available.",
-    memory=MemoryConfig(
-        MemoryType.SHARED,
-        MemoryScope.WORKFLOW,
-        namespace="handoff",
-    ),
+ name="writer",
+ role="writer",
+ instructions="Write a short paragraph using shared memory facts when available.",
+ memory=MemoryConfig(
+ MemoryType.SHARED,
+ MemoryScope.WORKFLOW,
+ namespace="handoff",
+ ),
 )
 
 workflow = Workflow("shared-memory-demo")
@@ -66,14 +66,14 @@ Session-only variant (single agent, agent-scoped scratch):
 from arcflow import Agent, MemoryConfig, MemoryScope, MemoryType, Workflow
 
 planner = Agent(
-    name="planner",
-    role="planner",
-    instructions="Plan a three-step outline for the topic.",
-    memory=MemoryConfig(
-        MemoryType.SESSION,
-        MemoryScope.AGENT,
-        namespace="scratch",
-    ),
+ name="planner",
+ role="planner",
+ instructions="Plan a three-step outline for the topic.",
+ memory=MemoryConfig(
+ MemoryType.SESSION,
+ MemoryScope.AGENT,
+ namespace="scratch",
+ ),
 )
 
 result = Workflow("session-demo").step(planner).run("Weekend hiking checklist")

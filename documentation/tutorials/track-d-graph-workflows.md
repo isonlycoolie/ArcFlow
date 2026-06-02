@@ -18,7 +18,7 @@ Build a conditional-branch graph workflow with routing and a join node. Verify c
 | Scripts | [`parallel_search.py`](../examples/graph-routing.md), [`reflection_loop.py`](../examples/graph-routing.md) |
 | Guide | [Graph workflows](../guides/workflows/graph-workflows.md) |
 
-Postgres optional for embedded SDK; required for server recovery paths. Graph resume from checkpoint is partial (FP-1.01).
+Postgres optional for embedded SDK; required for server recovery paths. Graph resume from checkpoint is partial (Graph recovery resume).
 
 ## Step 1: Parallel fan-out and join
 
@@ -32,19 +32,19 @@ Study wiring:
 
 ```python
 wf = (
-    Workflow("parallel_search", graph=True)
-    .max_iterations(10)
-    .node("router", router)
-    .node("search_web", search_web)
-    .node("search_docs", search_docs)
-    .node("synthesize", synthesize)
-    .set_entry("router")
-    .add_edge("router", "search_web")
-    .add_edge("router", "search_docs")
-    .add_edge("search_web", "synthesize")
-    .add_edge("search_docs", "synthesize")
-    .join_node("synthesize", ["search_web", "search_docs"])
-    .add_edge("synthesize", None)
+ Workflow("parallel_search", graph=True)
+.max_iterations(10)
+.node("router", router)
+.node("search_web", search_web)
+.node("search_docs", search_docs)
+.node("synthesize", synthesize)
+.set_entry("router")
+.add_edge("router", "search_web")
+.add_edge("router", "search_docs")
+.add_edge("search_web", "synthesize")
+.add_edge("search_docs", "synthesize")
+.join_node("synthesize", ["search_web", "search_docs"])
+.add_edge("synthesize", None)
 )
 result = wf.run("query=ArcFlow graph execution parallel fan-out")
 ```
@@ -61,9 +61,9 @@ Observe `max_iterations(3)` guarding the revise-to-draft loop.
 
 ```python
 starts = [
-    (e.get("node_id"), e.get("iteration"))
-    for e in result.trace_events
-    if e.get("event_kind") == "GraphNodeStarted"
+ (e.get("node_id"), e.get("iteration"))
+ for e in result.trace_events
+ if e.get("event_kind") == "GraphNodeStarted"
 ]
 print("node start order:", starts)
 ```

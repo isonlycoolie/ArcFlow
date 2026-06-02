@@ -34,17 +34,17 @@ Use the sample from [`document_qa.py`](../examples/rag-chatbot.md):
 
 ```python
 memory = MemoryConfig(
-    MemoryType.VECTOR,
-    MemoryScope.AGENT,
-    namespace="track_c_kb",
-    embedding="stub/8",  # swap for production embedding id
-    retrieval=MemoryRetrievalConfig(
-        mode="hybrid",
-        dense_weight=0.7,
-        sparse_weight=0.3,
-        top_k=3,
-    ),
-    chunking=MemoryChunkingConfig(chunk_size=256, overlap=32),
+ MemoryType.VECTOR,
+ MemoryScope.AGENT,
+ namespace="track_c_kb",
+ embedding="stub/8", # swap for production embedding id
+ retrieval=MemoryRetrievalConfig(
+ mode="hybrid",
+ dense_weight=0.7,
+ sparse_weight=0.3,
+ top_k=3,
+ ),
+ chunking=MemoryChunkingConfig(chunk_size=256, overlap=32),
 )
 agent = Agent(name="researcher", role="researcher", instructions="Answer using retrieved context.", memory=memory)
 workflow = Workflow(name="track-c-rag", agents=[agent])
@@ -87,7 +87,7 @@ assert result.status == "completed"
 print("track C trace checks passed")
 ```
 
-Inspect `MemoryRetrieved` payloads for chunk counts and scores without chunk text (SEC-1).
+Inspect `MemoryRetrieved` payloads for chunk counts and scores without chunk text (trace data policy).
 
 ## Verification checklist
 

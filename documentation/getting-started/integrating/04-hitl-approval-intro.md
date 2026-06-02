@@ -23,11 +23,11 @@ State machine (HITL branch):
 
 ```text
 Running
-  -> step with hitl completes agent work
-       -> Interrupted
-            -> approve (approved: true)  -> Running -> Completed
-            -> approve (approved: false) -> Failed (HumanRejected)
-            -> timeout                   -> Failed (HumanTimeout)
+ -> step with hitl completes agent work
+ -> Interrupted
+ -> approve (approved: true) -> Running -> Completed
+ -> approve (approved: false) -> Failed (HumanRejected)
+ -> timeout -> Failed (HumanTimeout)
 ```
 
 Python SDK callers may catch `WorkflowInterruptedError` with `run_id` and `approval_key` when targeting the HTTP server with recovery enabled.
@@ -52,25 +52,25 @@ manager = Agent(name="manager", role="reviewer", instructions="Manager review ga
 accounting = Agent(name="accounting", role="finance", instructions="Post to accounting.")
 
 wf = (
-    Workflow("expense_reimbursement", runtime=RUNTIME)
-    .enable_recovery()
-    .step(submit)
-    .step(manager, hitl=HitlConfig(approval_key=APPROVAL_KEY, timeout_seconds=3600))
-    .step(accounting)
+ Workflow("expense_reimbursement", runtime=RUNTIME)
+.enable_recovery()
+.step(submit)
+.step(manager, hitl=HitlConfig(approval_key=APPROVAL_KEY, timeout_seconds=3600))
+.step(accounting)
 )
 
 try:
-    result = wf.run("amount=250.00;desc=client lunch")
-    print(result.run_id, result.status)
+ result = wf.run("amount=250.00;desc=client lunch")
+ print(result.run_id, result.status)
 except WorkflowInterruptedError as exc:
-    print(f"Interrupted run_id={exc.run_id} approval_key={exc.approval_key}")
+ print(f"Interrupted run_id={exc.run_id} approval_key={exc.approval_key}")
 ```
 
 When interrupted, poll run status:
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/RUN_ID" \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
 The response includes an `interrupt` object with `approval_key` and `expires_at` (metadata only, no full conversation text).
@@ -79,9 +79,9 @@ Approve to resume:
 
 ```bash
 curl -sS -X POST "http://localhost:8080/v1/runs/RUN_ID/approve/manager_approval" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer dev-secret" \
-  -d '{"approved": true, "data": {"manager_id": "mgr-42"}}'
+ -H "Content-Type: application/json" \
+ -H "Authorization: Bearer dev-secret" \
+ -d '{"approved": true, "data": {"manager_id": "mgr-42"}}'
 ```
 
 Or use the helper script:
@@ -102,7 +102,7 @@ Poll again until `status` is `Completed` and read `result.output`.
 | Reject with `approved: false` | `Failed` with `HumanRejected` |
 | Wrong `approval_key` | `ApprovalNotFound` (404) |
 
-Trace exports remain SEC-1 metadata only. You see step lifecycle events, not approver notes, in trace storage.
+Trace exports remain metadata-only trace only. You see step lifecycle events, not approver notes, in trace storage.
 
 ## Next
 

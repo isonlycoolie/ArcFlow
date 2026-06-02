@@ -39,42 +39,42 @@ Save this payload as `run-payload.json`:
 
 ```json
 {
-  "workflow": {
-    "id": "00000000-0000-4000-8000-000000000099",
-    "name": "research_pipeline",
-    "execution_mode": "linear",
-    "steps": [
-      {
-        "id": "00000000-0000-4000-8000-000000000001",
-        "agent_id": "00000000-0000-4000-8000-000000000010",
-        "order": 1
-      },
-      {
-        "id": "00000000-0000-4000-8000-000000000002",
-        "agent_id": "00000000-0000-4000-8000-000000000011",
-        "order": 2
-      }
-    ]
-  },
-  "agents": [
-    {
-      "id": "00000000-0000-4000-8000-000000000010",
-      "name": "researcher",
-      "role": "research",
-      "instructions": "Research the given topic thoroughly."
-    },
-    {
-      "id": "00000000-0000-4000-8000-000000000011",
-      "name": "writer",
-      "role": "write",
-      "instructions": "Write a clear summary of the research."
-    }
-  ],
-  "input": "Analyze renewable energy trends",
-  "exec_config": {
-    "recovery_enabled": true,
-    "workflow_timeout_secs": 300
-  }
+ "workflow": {
+ "id": "00000000-0000-4000-8000-000000000099",
+ "name": "research_pipeline",
+ "execution_mode": "linear",
+ "steps": [
+ {
+ "id": "00000000-0000-4000-8000-000000000001",
+ "agent_id": "00000000-0000-4000-8000-000000000010",
+ "order": 1
+ },
+ {
+ "id": "00000000-0000-4000-8000-000000000002",
+ "agent_id": "00000000-0000-4000-8000-000000000011",
+ "order": 2
+ }
+ ]
+ },
+ "agents": [
+ {
+ "id": "00000000-0000-4000-8000-000000000010",
+ "name": "researcher",
+ "role": "research",
+ "instructions": "Research the given topic thoroughly."
+ },
+ {
+ "id": "00000000-0000-4000-8000-000000000011",
+ "name": "writer",
+ "role": "write",
+ "instructions": "Write a clear summary of the research."
+ }
+ ],
+ "input": "Analyze renewable energy trends",
+ "exec_config": {
+ "recovery_enabled": true,
+ "workflow_timeout_secs": 300
+ }
 }
 ```
 
@@ -82,18 +82,18 @@ Create the run:
 
 ```bash
 curl -s -X POST http://localhost:8080/v1/runs \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer dev-secret" \
-  -d @run-payload.json
+ -H "Content-Type: application/json" \
+ -H "Authorization: Bearer dev-secret" \
+ -d @run-payload.json
 ```
 
 Example **201** response:
 
 ```json
 {
-  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-  "trace_id": "trace-7c9e6679",
-  "status": "Running"
+ "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+ "trace_id": "trace-7c9e6679",
+ "status": "Running"
 }
 ```
 
@@ -101,17 +101,17 @@ Poll until terminal status (replace `RUN_ID`):
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/RUN_ID" \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
 When complete, `status` is `Completed` and `result.output` holds the final text. Fetch the trace:
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/RUN_ID/trace" \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
-Expect lifecycle kinds such as `WorkflowStarted`, `StepCompleted`, and `WorkflowCompleted`. Trace exports are metadata-only under SEC-1: no prompts, tool payloads, or secrets.
+Expect lifecycle kinds such as `WorkflowStarted`, `StepCompleted`, and `WorkflowCompleted`. Trace exports are metadata-only under trace data policy: no prompts, tool payloads, or secrets.
 
 Stop the stack when finished:
 

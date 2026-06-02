@@ -3,7 +3,7 @@
 
 The ArcFlow Python SDK lets you declare multi-agent workflows in Python and execute them in the Rust runtime (`arcflow-core`). Python owns structure: agents, steps, tools, memory config, graph topology, and run options. The native extension owns execution: LLM calls, tool validation, memory I/O, tracing, recovery, and streaming.
 
-This split keeps workflow definitions readable in application code while preserving deterministic, SEC-1-safe execution in Rust.
+This split keeps workflow definitions readable in application code while preserving deterministic, metadata-only trace execution in Rust.
 
 ## What you can build
 
@@ -14,7 +14,7 @@ This split keeps workflow definitions readable in application code while preserv
 | Tools | `Tool` on `Agent(tools=...)` | JSON Schema validated in Rust; Python supplies callables |
 | Memory | `MemoryConfig`, `VectorStore` | Session, shared, Postgres persistent, Qdrant vector |
 | LLM providers | `OpenAI`, `Anthropic`, `Gemini` | Keys from environment only |
-| Recovery | `enable_recovery()` | Postgres-backed; linear resume supported; graph resume partial (FP-1.01) |
+| Recovery | `enable_recovery()` | Postgres-backed; linear resume supported; graph resume partial (Graph recovery resume) |
 | HITL | `HitlConfig` on `step()` | Interrupt, approve/reject via `resume_with_approval()` |
 | Streaming | `run_stream()` | In-process only; not supported with remote `runtime=` URL |
 | External callbacks | `ExternalBindingConfig`, `report_outcome()` | HMAC-signed POST to server |
@@ -27,18 +27,18 @@ This split keeps workflow definitions readable in application code while preserv
 
 ```
 Your Python app
-    |
-    v
+ |
+ v
 arcflow (PyO3 extension + thin Python wrappers)
-    |
-    v
+ |
+ v
 arcflow-core (Rust)
-    |
-    +-- LLM providers (OpenAI, Anthropic, Gemini)
-    +-- Tool execution + jsonschema validation
-    +-- Memory backends (in-process, Postgres, Qdrant)
-    +-- Trace store (SEC-1 metadata events)
-    +-- Recovery / HITL / external resume
+ |
+ +-- LLM providers (OpenAI, Anthropic, Gemini)
+ +-- Tool execution + jsonschema validation
+ +-- Memory backends (in-process, Postgres, Qdrant)
+ +-- Trace store (metadata-only trace events)
+ +-- Recovery / HITL / external resume
 ```
 
 Python has no runtime dependencies beyond the built extension. Development installs use maturin to compile the native module from this repository.
@@ -49,14 +49,14 @@ Python has no runtime dependencies beyond the built extension. Development insta
 from arcflow import Agent, OpenAI, Workflow
 
 researcher = Agent(
-    name="researcher",
-    role="research",
-    instructions="Research the topic and list key facts.",
+ name="researcher",
+ role="research",
+ instructions="Research the topic and list key facts.",
 )
 writer = Agent(
-    name="writer",
-    role="write",
-    instructions="Write a concise summary from the research.",
+ name="writer",
+ role="write",
+ instructions="Write a concise summary from the research.",
 )
 
 wf = Workflow("research_pipeline")
@@ -64,8 +64,8 @@ wf.step(researcher)
 wf.step(writer)
 
 result = wf.run(
-    "Analyze renewable energy trends",
-    provider=OpenAI(model="gpt-4o"),
+ "Analyze renewable energy trends",
+ provider=OpenAI(model="gpt-4o"),
 )
 print(result.output)
 print(result.run_id)
@@ -95,8 +95,8 @@ Known runtime gaps that affect both SDKs:
 
 | Gap | Impact on Python SDK |
 |-----|----------------------|
-| FP-1.01 Graph recovery resume | `resume()` works for linear runs; mid-graph resume incomplete |
-| FP-2 Server SSE | Use `run_stream()` in-process or poll server GET run |
+| Graph recovery resume Graph recovery resume | `resume()` works for linear runs; mid-graph resume incomplete |
+| Server SSE | Use `run_stream()` in-process or poll server GET run |
 | Remote runtime + streaming | `run_stream()` raises `WorkflowConfigurationError` when `runtime=` is set |
 
 ## Related pages

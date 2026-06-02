@@ -3,7 +3,7 @@
 
 Day-to-day operator guide for ArcFlow static product sites: create, configure, ingest knowledge, publish chat, embed credentials, and monitor usage. Assumes `arcflow-server`, `arcflow-relay`, Postgres, and Qdrant are deployed.
 
-The operator dashboard UI is **deferred (FP-3.01)**. Use this guide with the [Admin API reference](admin-api-reference.md), curl, or OSS shell scripts until the private [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) passes exit criteria.
+The operator dashboard UI is **deferred (Operator dashboard UI)**. Use this guide with the [Admin API reference](admin-api-reference.md), curl, or OSS shell scripts until the private [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) passes exit criteria.
 
 ## Prerequisites
 
@@ -24,15 +24,15 @@ export ARCFLOW_ADMIN_API_KEY=your-admin-key
 
 ```bash
 curl -sf -X POST "$ARCFLOW_ADMIN_URL/v1/admin/sites" \
-  -H "Authorization: Bearer $ARCFLOW_ADMIN_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "display_name": "Acme Support",
-    "allowed_origins": ["https://www.acme.com"],
-    "rate_limit_rpm": 60,
-    "allow_inline": false,
-    "default_workflow_name": "chat"
-  }'
+ -H "Authorization: Bearer $ARCFLOW_ADMIN_API_KEY" \
+ -H "Content-Type: application/json" \
+ -d '{
+ "display_name": "Acme Support",
+ "allowed_origins": ["https://www.acme.com"],
+ "rate_limit_rpm": 60,
+ "allow_inline": false,
+ "default_workflow_name": "chat"
+ }'
 ```
 
 Save the response fields:
@@ -52,12 +52,12 @@ Before marking a site production-ready, ensure at least one HTTPS origin is conf
 
 ```bash
 curl -sf -X PATCH "$ARCFLOW_ADMIN_URL/v1/admin/sites/s_abc123" \
-  -H "Authorization: Bearer $ARCFLOW_ADMIN_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "allowed_origins": ["https://www.acme.com", "https://support.acme.com"],
-    "rate_limit_rpm": 120
-  }'
+ -H "Authorization: Bearer $ARCFLOW_ADMIN_API_KEY" \
+ -H "Content-Type: application/json" \
+ -d '{
+ "allowed_origins": ["https://www.acme.com", "https://support.acme.com"],
+ "rate_limit_rpm": 120
+ }'
 ```
 
 Relay rejects run requests when the browser `Origin` header does not match the allowlist.
@@ -68,12 +68,12 @@ Paste or upload FAQ and documentation text. The server chunks and embeds into th
 
 ```bash
 curl -sf -X POST "$ARCFLOW_ADMIN_URL/v1/admin/sites/s_abc123/knowledge/ingest" \
-  -H "Authorization: Bearer $ARCFLOW_ADMIN_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "text": "Password reset: click Forgot Password on the login page.",
-    "key": "faq-password"
-  }'
+ -H "Authorization: Bearer $ARCFLOW_ADMIN_API_KEY" \
+ -H "Content-Type: application/json" \
+ -d '{
+ "text": "Password reset: click Forgot Password on the login page.",
+ "key": "faq-password"
+ }'
 ```
 
 Expect `chunks_ingested > 0`. Re-ingest with the same `key` overwrites prior chunks for that key.
@@ -86,12 +86,12 @@ Set instructions and publish a semver version to the registry:
 
 ```bash
 curl -sf -X POST "$ARCFLOW_ADMIN_URL/v1/admin/sites/s_abc123/workflows/chat/publish" \
-  -H "Authorization: Bearer $ARCFLOW_ADMIN_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "instructions": "Answer only from ingested knowledge. Say when unsure.",
-    "version": "1.0.0"
-  }'
+ -H "Authorization: Bearer $ARCFLOW_ADMIN_API_KEY" \
+ -H "Content-Type: application/json" \
+ -d '{
+ "instructions": "Answer only from ingested knowledge. Say when unsure.",
+ "version": "1.0.0"
+ }'
 ```
 
 Frontend static SDK:
@@ -100,10 +100,10 @@ Frontend static SDK:
 import { runPublished } from "@arcflow/static";
 
 const result = await runPublished("chat", "^1.0.0", userMessage, {
-  mode: "relay",
-  relayUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
-  siteId: import.meta.env.VITE_ARCFLOW_SITE_ID,
-  siteToken: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
+ mode: "relay",
+ relayUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
+ siteId: import.meta.env.VITE_ARCFLOW_SITE_ID,
+ siteToken: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
 });
 ```
 
@@ -129,7 +129,7 @@ Manual checks:
 
 1. Chat from allowed origin succeeds.
 2. Same request from wrong origin returns 403 at Relay.
-3. `GET .../runs/{id}/trace` contains metadata events only (SEC-1).
+3. `GET.../runs/{id}/trace` contains metadata events only (trace data policy).
 
 ## Monitor usage
 

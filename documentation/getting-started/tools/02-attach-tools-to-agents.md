@@ -38,46 +38,46 @@ from arcflow import Agent, Tool, Workflow
 
 
 def add_execute(payload: dict) -> str:
-    a = float(payload.get("a", 0))
-    b = float(payload.get("b", 0))
-    return str(a + b)
+ a = float(payload.get("a", 0))
+ b = float(payload.get("b", 0))
+ return str(a + b)
 
 
 def greet_execute(payload: dict) -> str:
-    name = str(payload.get("name", "world"))
-    return f"Hello, {name}!"
+ name = str(payload.get("name", "world"))
+ return f"Hello, {name}!"
 
 
 add_numbers = Tool(
-    name="add_numbers",
-    description="Add two numbers.",
-    input_schema={
-        "type": "object",
-        "properties": {
-            "a": {"type": "number"},
-            "b": {"type": "number"},
-        },
-        "required": ["a", "b"],
-    },
-    execute=add_execute,
+ name="add_numbers",
+ description="Add two numbers.",
+ input_schema={
+ "type": "object",
+ "properties": {
+ "a": {"type": "number"},
+ "b": {"type": "number"},
+ },
+ "required": ["a", "b"],
+ },
+ execute=add_execute,
 )
 
 greet = Tool(
-    name="greet",
-    description="Greet someone by name.",
-    input_schema={
-        "type": "object",
-        "properties": {"name": {"type": "string"}},
-        "required": ["name"],
-    },
-    execute=greet_execute,
+ name="greet",
+ description="Greet someone by name.",
+ input_schema={
+ "type": "object",
+ "properties": {"name": {"type": "string"}},
+ "required": ["name"],
+ },
+ execute=greet_execute,
 )
 
 agent = Agent(
-    name="assistant",
-    role="Assistant",
-    instructions="Help the user using available tools.",
-    tools=(add_numbers, greet),
+ name="assistant",
+ role="Assistant",
+ instructions="Help the user using available tools.",
+ tools=(add_numbers, greet),
 )
 
 workflow = Workflow("attach-tools-demo")
@@ -108,15 +108,15 @@ from arcflow import Agent, Tool
 from arcflow.exceptions import WorkflowConfigurationError
 
 def stub_execute(_: dict) -> str:
-    return "ok"
+ return "ok"
 
 t1 = Tool("dup", "first", {"type": "object"}, stub_execute)
 t2 = Tool("dup", "second", {"type": "object"}, stub_execute)
 
 try:
-    Agent(name="a", role="A", instructions="Run.", tools=(t1, t2))
+ Agent(name="a", role="A", instructions="Run.", tools=(t1, t2))
 except WorkflowConfigurationError as err:
-    print(err)
+ print(err)
 ```
 
 ## Next

@@ -21,10 +21,10 @@ SDK clients may expose lowercase (`completed`); HTTP uses PascalCase. They refer
 
 ```text
 POST /v1/runs
-  → Pending → Running → Completed
-                    └→ Failed → (retry?) → Retrying → Running
-                    └→ Interrupted (HITL) → (approve) → Running
-                    └→ Cancelled
+ → Pending → Running → Completed
+ └→ Failed → (retry?) → Retrying → Running
+ └→ Interrupted (HITL) → (approve) → Running
+ └→ Cancelled
 ```
 
 After create, the server marks the run `Running` and executes synchronously in the request handler for typical stub/short runs, then persists terminal status before returning from background work depending on workflow length. Clients should poll until a terminal status appears.
@@ -35,31 +35,31 @@ A step with `hitl` configuration pauses the workflow:
 
 ```text
 Running → step with hitl → Interrupted
-Interrupted + POST approve (approved=true)  → Running
+Interrupted + POST approve (approved=true) → Running
 Interrupted + POST approve (approved=false) → Failed (HumanRejected)
-Interrupted + timeout                     → Failed (HumanTimeout)
+Interrupted + timeout → Failed (HumanTimeout)
 ```
 
 Poll interrupted runs:
 
 ```bash
 curl -s http://localhost:8080/v1/runs/RUN_ID \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
 Example **200** when waiting for approval:
 
 ```json
 {
-  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-  "status": "Interrupted",
-  "result": null,
-  "error": null,
-  "interrupt": {
-    "approval_key": "manager_signoff",
-    "step_id": "00000000-0000-4000-8000-000000000030",
-    "metadata": { "summary_bytes": 256 }
-  }
+ "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+ "status": "Interrupted",
+ "result": null,
+ "error": null,
+ "interrupt": {
+ "approval_key": "manager_signoff",
+ "step_id": "00000000-0000-4000-8000-000000000030",
+ "metadata": { "summary_bytes": 256 }
+ }
 }
 ```
 
@@ -67,9 +67,9 @@ Approve:
 
 ```bash
 curl -s -X POST "http://localhost:8080/v1/runs/RUN_ID/approve/manager_signoff" \
-  -H "Authorization: Bearer dev-secret" \
-  -H "Content-Type: application/json" \
-  -d '{"approved": true, "data": {}}'
+ -H "Authorization: Bearer dev-secret" \
+ -H "Content-Type: application/json" \
+ -d '{"approved": true, "data": {}}'
 ```
 
 HITL requires `exec_config.recovery_enabled: true` so interrupt state survives process restarts.
@@ -79,10 +79,10 @@ HITL requires `exec_config.recovery_enabled: true` so interrupt state survives p
 When `recovery_enabled` is true and a linear run fails mid-workflow, recovery state is written to `arcflow_recovery_state`. Resume via SDK `workflow.resume(run_id)` or server-side recovery APIs where implemented.
 
 ```text
-Failed (recovery_enabled) + resume → WorkflowRecoveryStarted → Running → ...
+Failed (recovery_enabled) + resume → WorkflowRecoveryStarted → Running →...
 ```
 
-**Graph checkpoint resume is partial (FP-1.01).** Graph runs persist `current_node_id`, `graph_iteration_count`, and `pending_join` for observability, but dispatch to continue from checkpoint after crash is incomplete. Treat graph runs as non-resumable for SLA planning until FP-1.01 closes. Linear recovery is production-ready.
+**Graph checkpoint resume is partial (Graph recovery resume).** Graph runs persist `current_node_id`, `graph_iteration_count`, and `pending_join` for observability, but dispatch to continue from checkpoint after crash is incomplete. Treat graph runs as non-resumable for SLA planning until Graph recovery resume closes. Linear recovery is production-ready.
 
 ## RecoveryState fields (Postgres)
 
@@ -93,7 +93,7 @@ Failed (recovery_enabled) + resume → WorkflowRecoveryStarted → Running → .
 | `completed_steps` | Steps finished before failure |
 | `failed_at_step_index` | Linear resume pointer |
 | `execution_mode` | `linear` or `graph` |
-| `current_node_id` | Graph checkpoint (FP-1.01) |
+| `current_node_id` | Graph checkpoint (Graph recovery resume) |
 | `graph_iteration_count` | Graph guard counter |
 | `pending_join` | Join node state JSON |
 
@@ -107,7 +107,7 @@ Trace events follow the same lifecycle: `WorkflowStarted`, step events, optional
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/RUN_ID/trace" \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
 ## Related pages
