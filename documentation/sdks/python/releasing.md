@@ -13,9 +13,9 @@ Three workflows share responsibility so PRs stay fast and releases stay complete
 | [Publish Python SDK](https://github.com/isonlycoolie/ArcFlow/actions/workflows/publish-python-sdk.yml) | Tag `sdk-python/v*` only | **Release:** cibuildwheel, PyPI OIDC, GitHub Release |
 
 ```text
-PR / feature branch  -->  SDK Python (fast)
-merge to master      -->  SDK Python Compat (full matrix)
-tag sdk-python/v*    -->  Publish Python SDK (cibuildwheel + PyPI)
+PR / feature branch --> SDK Python (fast)
+merge to master --> SDK Python Compat (full matrix)
+tag sdk-python/v* --> Publish Python SDK (cibuildwheel + PyPI)
 ```
 
 ### Branch protection (recommended)
@@ -60,21 +60,21 @@ In the **ArcFlow** repository on GitHub:
 2. **Merge to `master`.** Wait for [SDK Python Compat](https://github.com/isonlycoolie/ArcFlow/actions/workflows/sdk-python-compat.yml) to pass on `master` before tagging.
 3. **Create and push an annotated tag** on that commit:
 
-   ```bash
-   git tag -a sdk-python/v0.3.0 -m "Python SDK 0.3.0"
-   git push origin sdk-python/v0.3.0
-   ```
+ ```bash
+ git tag -a sdk-python/v0.3.0 -m "Python SDK 0.3.0"
+ git push origin sdk-python/v0.3.0
+ ```
 
-   The tag suffix must match `version` in `pyproject.toml` (e.g. tag `sdk-python/v0.3.0` → `version = "0.3.0"`).
+ The tag suffix must match `version` in `pyproject.toml` (e.g. tag `sdk-python/v0.3.0` → `version = "0.3.0"`).
 
 4. **Approve** the `pypi` environment deployment when GitHub prompts (if reviewers are configured).
 5. **Verify** the [Publish Python SDK](https://github.com/isonlycoolie/ArcFlow/actions/workflows/publish-python-sdk.yml) workflow: validate → test → cibuildwheel (Linux, macOS, Windows) → PyPI sanity → upload → GitHub Release.
 6. **Smoke install:**
 
-   ```bash
-   pip install "arcflow-sdk==0.3.0"
-   python -c "from arcflow import Agent, Workflow; print('ok')"
-   ```
+ ```bash
+ pip install "arcflow-sdk==0.3.0"
+ python -c "from arcflow import Agent, Workflow; print('ok')"
+ ```
 
 ## Dry run (no upload)
 
@@ -94,7 +94,7 @@ make verify-tag TAG=sdk-python/v0.3.0
 make check-pypi VERSION=0.3.0
 make lint
 make test-publish-gate
-make build-wheels   # requires Docker on Linux for manylinux wheels
+make build-wheels # requires Docker on Linux for manylinux wheels
 ```
 
 ## Failure handling

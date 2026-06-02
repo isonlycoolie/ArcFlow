@@ -45,25 +45,25 @@ Save as `context_policy_demo.py`:
 from arcflow import Agent, ContextPolicy, Workflow
 
 researcher = Agent(
-    name="researcher",
-    role="Research",
-    instructions="Research the given topic thoroughly.",
-    context=ContextPolicy(
-        include_prior_steps="none",
-        include_run_input=True,
-        max_prior_step_chars=4096,
-    ),
+ name="researcher",
+ role="Research",
+ instructions="Research the given topic thoroughly.",
+ context=ContextPolicy(
+ include_prior_steps="none",
+ include_run_input=True,
+ max_prior_step_chars=4096,
+ ),
 )
 
 writer = Agent(
-    name="writer",
-    role="Writer",
-    instructions="Write a summary of the research only.",
-    context=ContextPolicy(
-        include_prior_steps="last",
-        include_run_input=False,
-        max_prior_step_chars=8192,
-    ),
+ name="writer",
+ role="Writer",
+ instructions="Write a summary of the research only.",
+ context=ContextPolicy(
+ include_prior_steps="last",
+ include_run_input=False,
+ max_prior_step_chars=8192,
+ ),
 )
 
 workflow = Workflow("context-demo")
@@ -99,12 +99,12 @@ from arcflow import ContextPolicy
 from arcflow.exceptions import WorkflowConfigurationError
 
 try:
-    ContextPolicy(include_prior_steps="sometimes")
+ ContextPolicy(include_prior_steps="sometimes")
 except WorkflowConfigurationError:
-    print("Invalid include_prior_steps rejected as expected")
+ print("Invalid include_prior_steps rejected as expected")
 ```
 
-Trace metadata records sizes, not prompt content. After a run, `ProviderRequestSent` (when using a real provider) includes `prompt_size_bytes`; no instruction or user text is logged (SEC-1).
+Trace metadata records sizes, not prompt content. After a run, `ProviderRequestSent` (when using a real provider) includes `prompt_size_bytes`; no instruction or user text is logged (trace data policy).
 
 ## Next
 

@@ -73,7 +73,7 @@ Vector data may contain embedded knowledge from site ingest; treat as confidenti
 
 Structured logs may include `run_id`, `site_id`, HTTP status, duration.
 
-Align logs with SEC-1: do not duplicate trace exports with richer content. See [SEC-1 compliance](sec-1-compliance.md).
+Align logs with the trace data policy: do not duplicate trace exports with richer content. See [Trace data policy compliance](sec-1-compliance.md).
 
 ## CORS and browser direct access
 

@@ -5,7 +5,7 @@ Authoritative route list for `arcflow-server`. Matches [HTTP API reference](../s
 
 This page reflects the implemented HTTP API.
 
-**FP-2:** `GET /v1/runs/{run_id}/events` (SSE) is **deferred**. Not listed below.
+**Server streaming (deferred):** `GET /v1/runs/{run_id}/events` (SSE) is **deferred**. Not listed below.
 
 Base URL examples use `http://localhost:8080`. Replace with your deployment host.
 
@@ -39,31 +39,31 @@ Body (inline workflow):
 
 ```json
 {
-  "workflow": {
-    "id": "00000000-0000-4000-8000-000000000099",
-    "name": "demo",
-    "execution_mode": "linear",
-    "steps": [
-      {
-        "id": "00000000-0000-4000-8000-000000000001",
-        "agent_id": "00000000-0000-4000-8000-000000000010",
-        "order": 1
-      }
-    ]
-  },
-  "agents": [
-    {
-      "id": "00000000-0000-4000-8000-000000000010",
-      "name": "writer",
-      "role": "author",
-      "instructions": "Summarize the input."
-    }
-  ],
-  "input": "Analyze renewable energy trends",
-  "exec_config": {
-    "recovery_enabled": true,
-    "workflow_timeout_secs": 300
-  }
+ "workflow": {
+ "id": "00000000-0000-4000-8000-000000000099",
+ "name": "demo",
+ "execution_mode": "linear",
+ "steps": [
+ {
+ "id": "00000000-0000-4000-8000-000000000001",
+ "agent_id": "00000000-0000-4000-8000-000000000010",
+ "order": 1
+ }
+ ]
+ },
+ "agents": [
+ {
+ "id": "00000000-0000-4000-8000-000000000010",
+ "name": "writer",
+ "role": "author",
+ "instructions": "Summarize the input."
+ }
+ ],
+ "input": "Analyze renewable energy trends",
+ "exec_config": {
+ "recovery_enabled": true,
+ "workflow_timeout_secs": 300
+ }
 }
 ```
 
@@ -71,8 +71,8 @@ Or registry reference (do **not** send both inline workflow and `workflow_ref`):
 
 ```json
 {
-  "workflow_ref": { "name": "chat", "version": "^1.0.0" },
-  "input": "Hello"
+ "workflow_ref": { "name": "chat", "version": "^1.0.0" },
+ "input": "Hello"
 }
 ```
 
@@ -80,19 +80,19 @@ Optional header: `Idempotency-Key: <uuid>`.
 
 ```bash
 curl -s -X POST http://localhost:8080/v1/runs \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer dev-secret" \
-  -H "Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000" \
-  -d @run-payload.json
+ -H "Content-Type: application/json" \
+ -H "Authorization: Bearer dev-secret" \
+ -H "Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000" \
+ -d @run-payload.json
 ```
 
 **201** response:
 
 ```json
 {
-  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-  "trace_id": "trace-7c9e6679",
-  "status": "Running"
+ "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+ "trace_id": "trace-7c9e6679",
+ "status": "Running"
 }
 ```
 
@@ -104,18 +104,18 @@ Poll status, result, error, interrupt.
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/7c9e6679-7425-40de-944b-e07fc1f90ae7" \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
 **200** completed:
 
 ```json
 {
-  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-  "status": "Completed",
-  "result": { "output": "Final answer text", "step_outputs": {} },
-  "error": null,
-  "interrupt": null
+ "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+ "status": "Completed",
+ "result": { "output": "Final answer text", "step_outputs": {} },
+ "error": null,
+ "interrupt": null
 }
 ```
 
@@ -123,25 +123,25 @@ curl -s "http://localhost:8080/v1/runs/7c9e6679-7425-40de-944b-e07fc1f90ae7" \
 
 ```json
 {
-  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-  "status": "Interrupted",
-  "result": null,
-  "error": null,
-  "interrupt": {
-    "approval_key": "manager_signoff",
-    "step_id": "00000000-0000-4000-8000-000000000030",
-    "metadata": { "summary_bytes": 256 }
-  }
+ "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+ "status": "Interrupted",
+ "result": null,
+ "error": null,
+ "interrupt": {
+ "approval_key": "manager_signoff",
+ "step_id": "00000000-0000-4000-8000-000000000030",
+ "metadata": { "summary_bytes": 256 }
+ }
 }
 ```
 
 ### GET /v1/runs/{run_id}/trace
 
-SEC-1 metadata-only `ExecutionTrace` JSON.
+metadata-only trace `ExecutionTrace` JSON.
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/7c9e6679-7425-40de-944b-e07fc1f90ae7/trace" \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
 ### POST /v1/runs/{run_id}/approve/{approval_key}
@@ -150,9 +150,9 @@ Resume or reject HITL interrupt.
 
 ```bash
 curl -s -X POST "http://localhost:8080/v1/runs/RUN_ID/approve/manager_signoff" \
-  -H "Authorization: Bearer dev-secret" \
-  -H "Content-Type: application/json" \
-  -d '{"approved": true, "data": {}}'
+ -H "Authorization: Bearer dev-secret" \
+ -H "Content-Type: application/json" \
+ -d '{"approved": true, "data": {}}'
 ```
 
 **200** on approve:
@@ -169,10 +169,10 @@ External system callback. Body: `ExternalOutcomeReport` JSON. Verify `X-ArcFlow-
 
 ```bash
 curl -s -X POST "http://localhost:8080/v1/runs/RUN_ID/external/binding-uuid" \
-  -H "Authorization: Bearer dev-secret" \
-  -H "Content-Type: application/json" \
-  -H "X-ArcFlow-Signature: sha256=..." \
-  -d '{"status":"completed","output":{"ticket_id":"T-99"}}'
+ -H "Authorization: Bearer dev-secret" \
+ -H "Content-Type: application/json" \
+ -H "X-ArcFlow-Signature: sha256=..." \
+ -d '{"status":"completed","output":{"ticket_id":"T-99"}}'
 ```
 
 ## Workflow registry (runtime API key)
@@ -183,9 +183,9 @@ Publish a versioned workflow definition.
 
 ```bash
 curl -s -X PUT "http://localhost:8080/v1/workflows/chat/versions/1.0.0" \
-  -H "Authorization: Bearer dev-secret" \
-  -H "Content-Type: application/json" \
-  -d '{"definition":{"id":"00000000-0000-4000-8000-000000000099","name":"chat","execution_mode":"linear","steps":[]},"agents":[]}'
+ -H "Authorization: Bearer dev-secret" \
+ -H "Content-Type: application/json" \
+ -d '{"definition":{"id":"00000000-0000-4000-8000-000000000099","name":"chat","execution_mode":"linear","steps":[]},"agents":[]}'
 ```
 
 Note: handler expects publish payload per `handlers/registry.rs` (definition + agents structure).
@@ -196,7 +196,7 @@ Fetch exact version.
 
 ```bash
 curl -s "http://localhost:8080/v1/workflows/chat/versions/1.0.0" \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
 ### GET /v1/workflows/{name}/resolve?range={semver}
@@ -205,7 +205,7 @@ Resolve semver range to highest matching version.
 
 ```bash
 curl -s "http://localhost:8080/v1/workflows/chat/resolve?range=%5E1.0.0" \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
 Response:
@@ -220,9 +220,9 @@ Point alias (e.g. `latest`) at a version.
 
 ```bash
 curl -s -X POST "http://localhost:8080/v1/workflows/chat/aliases/latest" \
-  -H "Authorization: Bearer dev-secret" \
-  -H "Content-Type: application/json" \
-  -d '{"version": "1.0.2"}'
+ -H "Authorization: Bearer dev-secret" \
+ -H "Content-Type: application/json" \
+ -d '{"version": "1.0.2"}'
 ```
 
 ## Deprecated
@@ -233,9 +233,9 @@ Legacy single-shot run. Prefer `POST /v1/runs`. Still registered for backward co
 
 ```bash
 curl -s -X POST http://localhost:8080/v1/workflows/run \
-  -H "Authorization: Bearer dev-secret" \
-  -H "Content-Type: application/json" \
-  -d @run-payload.json
+ -H "Authorization: Bearer dev-secret" \
+ -H "Content-Type: application/json" \
+ -d @run-payload.json
 ```
 
 ## Admin (admin API key)
@@ -248,26 +248,26 @@ Create site; `site_token` returned once.
 
 ```bash
 curl -s -X POST http://localhost:8080/v1/admin/sites \
-  -H "Authorization: Bearer dev-admin" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "display_name": "Acme Support",
-    "allowed_origins": ["https://www.acme.com"],
-    "rate_limit_rpm": 60,
-    "allow_inline": false,
-    "default_workflow_name": "chat",
-    "chat_instructions": "Answer from knowledge only."
-  }'
+ -H "Authorization: Bearer dev-admin" \
+ -H "Content-Type: application/json" \
+ -d '{
+ "display_name": "Acme Support",
+ "allowed_origins": ["https://www.acme.com"],
+ "rate_limit_rpm": 60,
+ "allow_inline": false,
+ "default_workflow_name": "chat",
+ "chat_instructions": "Answer from knowledge only."
+ }'
 ```
 
 Response:
 
 ```json
 {
-  "site_id": "site_abc123",
-  "relay_url": "http://localhost:8090/v1/sites/site_abc123",
-  "site_token": "st_live_...",
-  "kb_namespace": "site-site_abc123-kb"
+ "site_id": "site_abc123",
+ "relay_url": "http://localhost:8090/v1/sites/site_abc123",
+ "site_token": "st_live_...",
+ "kb_namespace": "site-site_abc123-kb"
 }
 ```
 
@@ -275,7 +275,7 @@ Response:
 
 ```bash
 curl -s "http://localhost:8080/v1/admin/sites/site_abc123" \
-  -H "Authorization: Bearer dev-admin"
+ -H "Authorization: Bearer dev-admin"
 ```
 
 ### PATCH /v1/admin/sites/{site_id}
@@ -284,9 +284,9 @@ Update origins, rate limits, defaults.
 
 ```bash
 curl -s -X PATCH "http://localhost:8080/v1/admin/sites/site_abc123" \
-  -H "Authorization: Bearer dev-admin" \
-  -H "Content-Type: application/json" \
-  -d '{"allowed_origins":["https://app.acme.com"],"rate_limit_rpm":120}'
+ -H "Authorization: Bearer dev-admin" \
+ -H "Content-Type: application/json" \
+ -d '{"allowed_origins":["https://app.acme.com"],"rate_limit_rpm":120}'
 ```
 
 ### POST /v1/admin/sites/{site_id}/tokens/rotate
@@ -295,16 +295,16 @@ Invalidate prior token; returns new token once.
 
 ```bash
 curl -s -X POST "http://localhost:8080/v1/admin/sites/site_abc123/tokens/rotate" \
-  -H "Authorization: Bearer dev-admin"
+ -H "Authorization: Bearer dev-admin"
 ```
 
 ### POST /v1/admin/sites/{site_id}/knowledge/ingest
 
 ```bash
 curl -s -X POST "http://localhost:8080/v1/admin/sites/site_abc123/knowledge/ingest" \
-  -H "Authorization: Bearer dev-admin" \
-  -H "Content-Type: application/json" \
-  -d '{"text":"Our refund policy allows returns within 30 days.","key":"faq-refunds"}'
+ -H "Authorization: Bearer dev-admin" \
+ -H "Content-Type: application/json" \
+ -d '{"text":"Our refund policy allows returns within 30 days.","key":"faq-refunds"}'
 ```
 
 ### POST /v1/admin/sites/{site_id}/workflows/chat/publish
@@ -313,9 +313,9 @@ Publish chat workflow to registry for the site.
 
 ```bash
 curl -s -X POST "http://localhost:8080/v1/admin/sites/site_abc123/workflows/chat/publish" \
-  -H "Authorization: Bearer dev-admin" \
-  -H "Content-Type: application/json" \
-  -d '{"instructions":"Answer only from ingested knowledge. Say when unsure.","version":"1.0.1"}'
+ -H "Authorization: Bearer dev-admin" \
+ -H "Content-Type: application/json" \
+ -d '{"instructions":"Answer only from ingested knowledge. Say when unsure.","version":"1.0.1"}'
 ```
 
 Full admin contract: [Admin API reference](../operator/admin-api-reference.md).

@@ -57,8 +57,8 @@ python -c "from arcflow import Agent, Workflow; print('import ok')"
 ### macOS and Linux
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+python3 -m venv.venv
+source.venv/bin/activate
 cd sdk-python
 pip install maturin
 maturin develop
@@ -68,7 +68,7 @@ pip install -e ".[dev]"
 ### Windows (PowerShell)
 
 ```powershell
-python -m venv .venv
+python -m venv.venv
 .\.venv\Scripts\Activate.ps1
 cd sdk-python
 pip install maturin

@@ -17,7 +17,7 @@ arcflow trace RUN_ID [options]
 | `--file PATH` | off | Load trace from JSON file |
 | `--server URL` | off | Fetch `GET /v1/runs/{id}/trace` |
 
-Global: `arcflow --no-color trace ...` for CI logs.
+Global: `arcflow --no-color trace...` for CI logs.
 
 ## Examples
 
@@ -44,13 +44,13 @@ Equivalent curl:
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/7c9e6679-7425-40de-944b-e07fc1f90ae7/trace" \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
 Import from file (export saved earlier):
 
 ```bash
-arcflow trace any-id --file ./trace-export.json --format json
+arcflow trace any-id --file./trace-export.json --format json
 ```
 
 TUI viewer:
@@ -72,13 +72,13 @@ With `--verbose`, appends:
 ```text
 events:
 [
-  { "kind": "WorkflowStarted", "run_id": "...", "workflow_name": "research_pipeline", "step_count": 2 },
-  { "kind": "StepCompleted", ... },
-  { "kind": "WorkflowCompleted", ... }
+ { "kind": "WorkflowStarted", "run_id": "...", "workflow_name": "research_pipeline", "step_count": 2 },
+ { "kind": "StepCompleted",... },
+ { "kind": "WorkflowCompleted",... }
 ]
 ```
 
-Events are SEC-1 metadata only (no prompt text).
+Events are metadata-only trace only (no prompt text).
 
 ## Where to find run IDs
 

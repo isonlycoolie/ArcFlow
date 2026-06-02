@@ -9,10 +9,10 @@ Agent setup: [Defining agents](defining-agents.md). Execution context: [Executio
 
 ```json
 {
-  "tool_execution": {
-    "mode": "llm_select",
-    "max_iterations": 5
-  }
+ "tool_execution": {
+ "mode": "llm_select",
+ "max_iterations": 5
+ }
 }
 ```
 
@@ -29,14 +29,14 @@ Default max iterations is enforced by the engine. When exceeded, the step fails 
 1. AgentInvoked
 2. ProviderRequestSent (tools in request)
 3. ProviderResponseReceived
-   a. If text completion → AgentResponseReceived → step done
-   b. If tool calls → for each call:
-      - ToolCallStarted
-      - Validate input against JSON Schema
-      - On validation fail → ToolInputValidationFailed
-      - Execute tool handler
-      - ToolCallCompleted or ToolCallFailed
-      - Feed result to model
+ a. If text completion → AgentResponseReceived → step done
+ b. If tool calls → for each call:
+ - ToolCallStarted
+ - Validate input against JSON Schema
+ - On validation fail → ToolInputValidationFailed
+ - Execute tool handler
+ - ToolCallCompleted or ToolCallFailed
+ - Feed result to model
 4. Repeat from step 2 until text or max_iterations
 5. TokensConsumed (may appear per iteration)
 ```
@@ -45,15 +45,15 @@ Default max iterations is enforced by the engine. When exceeded, the step fails 
 
 ```json
 {
-  "name": "get_weather",
-  "input_schema": {
-    "type": "object",
-    "properties": {
-      "city": { "type": "string" },
-      "units": { "type": "string", "enum": ["celsius", "fahrenheit"] }
-    },
-    "required": ["city"]
-  }
+ "name": "get_weather",
+ "input_schema": {
+ "type": "object",
+ "properties": {
+ "city": { "type": "string" },
+ "units": { "type": "string", "enum": ["celsius", "fahrenheit"] }
+ },
+ "required": ["city"]
+ }
 }
 ```
 
@@ -61,7 +61,7 @@ Invalid call example the runtime rejects:
 
 ```json
 {
-  "city": 42
+ "city": 42
 }
 ```
 
@@ -69,11 +69,11 @@ Trace:
 
 ```json
 {
-  "kind": "ToolInputValidationFailed",
-  "run_id": "r1",
-  "step_id": "s1",
-  "tool_name": "get_weather",
-  "violation_description": "city: expected string"
+ "kind": "ToolInputValidationFailed",
+ "run_id": "r1",
+ "step_id": "s1",
+ "tool_name": "get_weather",
+ "violation_description": "city: expected string"
 }
 ```
 
@@ -81,14 +81,14 @@ Trace:
 
 ```json
 [
-  { "kind": "ToolCallStarted", "run_id": "r1", "step_id": "s1", "tool_name": "search_kb", "input_schema_hash": "abc123" },
-  { "kind": "ToolCallCompleted", "run_id": "r1", "step_id": "s1", "tool_name": "search_kb", "duration_ms": 45, "output_size_bytes": 512 },
-  { "kind": "ProviderRequestSent", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "prompt_size_bytes": 2048 },
-  { "kind": "ProviderResponseReceived", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "tokens": { "input": 300, "output": 80, "total": 380 }, "latency_ms": 1100 }
+ { "kind": "ToolCallStarted", "run_id": "r1", "step_id": "s1", "tool_name": "search_kb", "input_schema_hash": "abc123" },
+ { "kind": "ToolCallCompleted", "run_id": "r1", "step_id": "s1", "tool_name": "search_kb", "duration_ms": 45, "output_size_bytes": 512 },
+ { "kind": "ProviderRequestSent", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "prompt_size_bytes": 2048 },
+ { "kind": "ProviderResponseReceived", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "tokens": { "input": 300, "output": 80, "total": 380 }, "latency_ms": 1100 }
 ]
 ```
 
-SEC-1: traces record schema hashes and byte sizes, not tool arguments or results. See [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md).
+trace data policy: traces record schema hashes and byte sizes, not tool arguments or results. See [Trace data policy](../../concepts/sec-1-and-data-safety.md).
 
 ## Python tool registration
 
@@ -99,15 +99,15 @@ from arcflow import Agent, tool, Workflow
 
 @tool
 def search_kb(query: str) -> str:
-    """Search the knowledge base."""
-    return f"Results for: {query}"
+ """Search the knowledge base."""
+ return f"Results for: {query}"
 
 agent = Agent(
-    name="researcher",
-    role="Analyst",
-    instructions="Use search_kb when you need facts.",
-    tools=[search_kb],
-    tool_execution={"mode": "llm_select", "max_iterations": 5},
+ name="researcher",
+ role="Analyst",
+ instructions="Use search_kb when you need facts.",
+ tools=[search_kb],
+ tool_execution={"mode": "llm_select", "max_iterations": 5},
 )
 ```
 
@@ -131,13 +131,13 @@ Use stub provider and test mode to avoid live API:
 
 ```json
 {
-  "exec_config": {
-    "test": {
-      "steps": {
-        "s1": { "output": "Final answer without live tools" }
-      }
-    }
-  }
+ "exec_config": {
+ "test": {
+ "steps": {
+ "s1": { "output": "Final answer without live tools" }
+ }
+ }
+ }
 }
 ```
 

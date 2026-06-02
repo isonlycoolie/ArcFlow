@@ -14,7 +14,7 @@ Apply migrations, verify `/ready`, export trace via CLI, and confirm idempotent 
 | Docker Compose | Server stack |
 | Rust toolchain | For `arcflow-cli` from repo root |
 | Prior reading | [Track B](track-b-server-api.md) for server basics |
-| Guides | [execution traces](../guides/observability/execution-traces.md), [SEC-1 rules](../guides/observability/sec-1-rules.md) |
+| Guides | [execution traces](../guides/observability/execution-traces.md), [Trace data policy rules](../guides/observability/sec-1-rules.md) |
 
 ## Step 1: Start stack with migrate job
 
@@ -49,9 +49,9 @@ Use [Track B](track-b-server-api.md) payload or quick curl create. Copy `run_id`
 
 ```bash
 curl -s -X POST http://localhost:8080/v1/runs \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer dev-secret" \
-  -d @run-payload.json
+ -H "Content-Type: application/json" \
+ -H "Authorization: Bearer dev-secret" \
+ -d @run-payload.json
 ```
 
 ## Step 4: Export trace via CLI
@@ -64,10 +64,10 @@ Compare CLI output to HTTP trace:
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/YOUR_RUN_ID/trace" \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
-Pass criteria: both exports list lifecycle events; no prompt text or secrets in JSON (SEC-1).
+Pass criteria: both exports list lifecycle events; no prompt text or secrets in JSON (trace data policy).
 
 ## Step 5: Idempotent re-migration
 
@@ -96,7 +96,7 @@ Verify `/ready` still **200** after re-migration.
 | CLI trace | JSON with event kinds |
 | HTTP trace | Consistent with CLI for server runs |
 | Second migrate | Idempotent, no failures |
-| SEC-1 | No raw prompts in export |
+| Trace policy | No raw prompts in export |
 
 ## Expected output
 

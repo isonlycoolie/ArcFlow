@@ -58,10 +58,10 @@ from arcflow import Agent, Workflow
 from arcflow.tools import CommonTools
 
 researcher = Agent(
-    name="researcher",
-    role="Researcher",
-    instructions="Use web_search or read_document when helpful.",
-    tools=CommonTools.bundle(),
+ name="researcher",
+ role="Researcher",
+ instructions="Use web_search or read_document when helpful.",
+ tools=CommonTools.bundle(),
 )
 
 workflow = Workflow("common-tools-demo")
@@ -78,10 +78,10 @@ If you are on **main** without the facade branch, replace the import block with:
 from arcflow_tools import common_tools
 
 researcher = Agent(
-    name="researcher",
-    role="Researcher",
-    instructions="Use web_search or read_document when helpful.",
-    tools=common_tools(),
+ name="researcher",
+ role="Researcher",
+ instructions="Use web_search or read_document when helpful.",
+ tools=common_tools(),
 )
 ```
 

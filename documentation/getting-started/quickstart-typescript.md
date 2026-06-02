@@ -45,15 +45,15 @@ Save as `quickstart.ts`:
 import { Agent, Workflow } from "arcflow";
 
 const researcher = new Agent({
-  name: "researcher",
-  role: "research",
-  instructions: "Research the given topic and list key facts.",
+ name: "researcher",
+ role: "research",
+ instructions: "Research the given topic and list key facts.",
 });
 
 const writer = new Agent({
-  name: "writer",
-  role: "write",
-  instructions: "Turn the research into a short paragraph.",
+ name: "writer",
+ role: "write",
+ instructions: "Turn the research into a short paragraph.",
 });
 
 const workflow = new Workflow({ name: "research_pipeline" });
@@ -84,8 +84,8 @@ The fluent `step()` pattern returns `this`, so you can chain:
 
 ```typescript
 const wf = new Workflow({ name: "research_pipeline" })
-  .step(researcher)
-  .step(writer);
+.step(researcher)
+.step(writer);
 
 const result = await wf.run("Analyze renewable energy trends");
 ```
@@ -102,8 +102,8 @@ const result = await wf.run("Analyze renewable energy trends");
 
 ```typescript
 for (const event of result.traceEvents ?? []) {
-  const row = event as { event_kind?: string; sequence?: number };
-  console.log(row.event_kind, row.sequence);
+ const row = event as { event_kind?: string; sequence?: number };
+ console.log(row.event_kind, row.sequence);
 }
 ```
 
@@ -128,15 +128,15 @@ import { Agent, OpenAI, Workflow } from "arcflow";
 
 const wf = new Workflow({ name: "demo" });
 wf.step(
-  new Agent({
-    name: "writer",
-    role: "author",
-    instructions: "Summarize in three sentences.",
-  }),
+ new Agent({
+ name: "writer",
+ role: "author",
+ instructions: "Summarize in three sentences.",
+ }),
 );
 
 const result = await wf.run("Quantum networking", {
-  provider: new OpenAI({ model: "gpt-4o" }),
+ provider: new OpenAI({ model: "gpt-4o" }),
 });
 
 console.log(result.output);
@@ -152,10 +152,10 @@ All execution entry points return Promises. Use `async`/`await` in scripts:
 
 ```typescript
 async function main() {
-  const result = await new Workflow({ name: "demo" })
-    .step(new Agent({ name: "a", role: "researcher", instructions: "Work." }))
-    .run("input");
-  console.log(result.output);
+ const result = await new Workflow({ name: "demo" })
+.step(new Agent({ name: "a", role: "researcher", instructions: "Work." }))
+.run("input");
+ console.log(result.output);
 }
 
 main().catch(console.error);

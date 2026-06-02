@@ -43,13 +43,13 @@ import hmac
 import json
 
 def sign_body(secret: str, body: bytes) -> str:
-    digest = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
-    return f"sha256={digest}"
+ digest = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+ return f"sha256={digest}"
 
 outcome = {
-    "binding_id": "payment_webhook",
-    "status": "success",
-    "fields": {"transaction_id": "tx_123"},
+ "binding_id": "payment_webhook",
+ "status": "success",
+ "fields": {"transaction_id": "tx_123"},
 }
 body = json.dumps(outcome).encode()
 signature = sign_body("your-webhook-secret", body)
@@ -61,8 +61,8 @@ signature = sign_body("your-webhook-secret", body)
 import { createHmac } from "node:crypto";
 
 function signBody(secret: string, body: Buffer): string {
-  const digest = createHmac("sha256", secret).update(body).digest("hex");
-  return `sha256=${digest}`;
+ const digest = createHmac("sha256", secret).update(body).digest("hex");
+ return `sha256=${digest}`;
 }
 
 const outcome = { binding_id: "payment_webhook", status: "success" };
@@ -77,11 +77,11 @@ import hashlib
 import hmac
 
 def verify_webhook_signature(secret: str, body: bytes, signature_header: str) -> bool:
-    expected = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
-    provided = signature_header.strip().removeprefix("sha256=")
-    if len(provided) != len(expected):
-        return False
-    return hmac.compare_digest(provided, expected)
+ expected = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+ provided = signature_header.strip().removeprefix("sha256=")
+ if len(provided) != len(expected):
+ return False
+ return hmac.compare_digest(provided, expected)
 ```
 
 ## Constant-time comparison
@@ -119,10 +119,10 @@ BODY='{"binding_id":"payment_webhook","status":"success"}'
 SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$ARCFLOW_WEBHOOK_SECRET" | awk '{print $2}')
 
 curl -X POST "http://localhost:8080/v1/runs/$RUN_ID/external/payment_webhook" \
-  -H "Authorization: Bearer $ARCFLOW_SERVER_API_KEY" \
-  -H "Content-Type: application/json" \
-  -H "X-ArcFlow-Signature: sha256=$SIG" \
-  -d "$BODY"
+ -H "Authorization: Bearer $ARCFLOW_SERVER_API_KEY" \
+ -H "Content-Type: application/json" \
+ -H "X-ArcFlow-Signature: sha256=$SIG" \
+ -d "$BODY"
 ```
 
 ## Network reachability
@@ -132,5 +132,5 @@ Integrators must reach `arcflow-server` over HTTPS in production. Do not embed w
 ## Related pages
 
 - [External callbacks](../guides/external-integrations/external-callbacks.md)
-- [SEC-1 compliance](sec-1-compliance.md)
+- [Trace data policy compliance](sec-1-compliance.md)
 - [Self-hosted security](self-hosted-security.md)

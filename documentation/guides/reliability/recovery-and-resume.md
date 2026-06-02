@@ -1,7 +1,7 @@
 
 # Recovery and resume
 
-Recovery persists run and step progress to PostgreSQL when `exec_config.recovery_enabled` is true. After failure or interrupt, a new run or resume API can continue from the last committed state instead of restarting from step zero. Linear recovery is production-ready. Graph checkpoint persistence exists, but full resume dispatch from mid-graph checkpoints is **partial (FP-1.01)**.
+Recovery persists run and step progress to PostgreSQL when `exec_config.recovery_enabled` is true. After failure or interrupt, a new run or resume API can continue from the last committed state instead of restarting from step zero. Linear recovery is production-ready. Graph checkpoint persistence exists, but full resume dispatch from mid-graph checkpoints is **partial (Graph recovery resume)**.
 
 Architecture: [Execution model](../../concepts/execution-model.md). Known gap detail: [Maturity and known gaps](../../concepts/maturity-and-known-gaps.md).
 
@@ -9,11 +9,11 @@ Architecture: [Execution model](../../concepts/execution-model.md). Known gap de
 
 ```json
 {
-  "exec_config": {
-    "recovery_enabled": true,
-    "workflow_timeout_secs": 600,
-    "step_timeout_secs": 120
-  }
+ "exec_config": {
+ "recovery_enabled": true,
+ "workflow_timeout_secs": 600,
+ "step_timeout_secs": 120
+ }
 }
 ```
 
@@ -60,25 +60,25 @@ Example trace excerpt:
 
 ```json
 [
-  {
-    "kind": "WorkflowRecoveryStarted",
-    "run_id": "r2",
-    "original_run_id": "r1",
-    "resume_from_step": 1
-  },
-  { "kind": "StepStarted", "run_id": "r2", "step_id": "s2", "step_index": 1 },
-  {
-    "kind": "WorkflowRecoveryCompleted",
-    "run_id": "r2",
-    "original_run_id": "r1",
-    "steps_re_executed": 1
-  }
+ {
+ "kind": "WorkflowRecoveryStarted",
+ "run_id": "r2",
+ "original_run_id": "r1",
+ "resume_from_step": 1
+ },
+ { "kind": "StepStarted", "run_id": "r2", "step_id": "s2", "step_index": 1 },
+ {
+ "kind": "WorkflowRecoveryCompleted",
+ "run_id": "r2",
+ "original_run_id": "r1",
+ "steps_re_executed": 1
+ }
 ]
 ```
 
 Linear flows: [Linear workflows](../workflows/linear-workflows.md).
 
-## Graph checkpoints (FP-1.01 partial)
+## Graph checkpoints (Graph recovery resume partial)
 
 After each graph node, when recovery is enabled, `persist_graph_checkpoint` upserts:
 
@@ -86,7 +86,7 @@ After each graph node, when recovery is enabled, `persist_graph_checkpoint` upse
 - `graph_iteration_count`
 - `pending_join` (join synchronization)
 
-**FP-1.01:** Schema and persist path are implemented. Resume dispatch that continues mid-DAG from checkpoint is **incomplete**. Do not depend on graph resume in production until FP-1.01 closes (plan ref `feat/fp-1-graph-recovery`).
+**Graph recovery resume:** Schema and persist path are implemented. Resume dispatch that continues mid-DAG from checkpoint is **incomplete**. Do not depend on graph resume in production until Graph recovery resume closes.
 
 Safe today:
 
@@ -119,13 +119,13 @@ Poll interrupt payload:
 GET /v1/runs/{run_id}
 
 {
-  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-  "status": "Interrupted",
-  "interrupt": {
-    "approval_key": "manager_signoff",
-    "step_id": "00000000-0000-4000-8000-000000000030",
-    "metadata": { "summary_bytes": 256 }
-  }
+ "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+ "status": "Interrupted",
+ "interrupt": {
+ "approval_key": "manager_signoff",
+ "step_id": "00000000-0000-4000-8000-000000000030",
+ "metadata": { "summary_bytes": 256 }
+ }
 }
 ```
 
@@ -164,16 +164,16 @@ Pending migrations cause `/ready` to fail. See [Install and build](../../getting
 
 ```text
 Pending → Running → Completed
-                 └→ Failed → (recovery?) → WorkflowRecoveryStarted → Running
-                 └→ Interrupted (HITL) → approve → Running
-                 └→ Cancelled
+ └→ Failed → (recovery?) → WorkflowRecoveryStarted → Running
+ └→ Interrupted (HITL) → approve → Running
+ └→ Cancelled
 ```
 
 `ExecutionStatus` values: `Pending`, `Running`, `Completed`, `Failed`, `Retrying`, `Cancelled`, `Interrupted`.
 
 ## Trace persistence
 
-When configured, SEC-1 events also land in `arcflow_trace_events` (migration `20240531000005`). CLI: `arcflow trace <run_id>`. Server: `GET /v1/runs/{id}/trace`.
+When configured, trace data policy events also land in `arcflow_trace_events` (migration `20240531000005`). CLI: `arcflow trace <run_id>`. Server: `GET /v1/runs/{id}/trace`.
 
 ## Testing recovery
 
@@ -181,15 +181,15 @@ Use test mode for step outputs plus recovery enabled:
 
 ```json
 {
-  "exec_config": {
-    "recovery_enabled": true,
-    "test": {
-      "steps": {
-        "s1": { "output": "done" },
-        "s2": { "output": "done" }
-      }
-    }
-  }
+ "exec_config": {
+ "recovery_enabled": true,
+ "test": {
+ "steps": {
+ "s1": { "output": "done" },
+ "s2": { "output": "done" }
+ }
+ }
+ }
 }
 ```
 

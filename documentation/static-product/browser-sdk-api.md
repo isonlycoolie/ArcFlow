@@ -23,10 +23,10 @@ Primary entry point.
 import { ArcFlowClient } from "@arcflow/static";
 
 const client = new ArcFlowClient({
-  baseUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
-  apiKey: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
-  mode: "relay",
-  siteId: import.meta.env.VITE_ARCFLOW_SITE_ID,
+ baseUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
+ apiKey: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
+ mode: "relay",
+ siteId: import.meta.env.VITE_ARCFLOW_SITE_ID,
 });
 ```
 
@@ -46,10 +46,10 @@ Resolve semver range from registry and execute:
 
 ```typescript
 const result = await client.runPublished(
-  "chat",
-  "^1.0.0",
-  userMessage,
-  { initialState: { locale: "en" } },
+ "chat",
+ "^1.0.0",
+ userMessage,
+ { initialState: { locale: "en" } },
 );
 ```
 
@@ -57,9 +57,9 @@ Sends:
 
 ```json
 {
-  "workflow_ref": { "name": "chat", "version": "^1.0.0" },
-  "input": "user message",
-  "exec_config": { "initial_state": { "locale": "en" } }
+ "workflow_ref": { "name": "chat", "version": "^1.0.0" },
+ "input": "user message",
+ "exec_config": { "initial_state": { "locale": "en" } }
 }
 ```
 
@@ -111,11 +111,11 @@ Structured multi-turn input for workflows reading `initial_state.conversation_tu
 import { StepForm } from "@arcflow/static";
 
 const form = new StepForm()
-  .addTurn("user", "I need a refund")
-  .addTurn("assistant", "I can help with that.");
+.addTurn("user", "I need a refund")
+.addTurn("assistant", "I can help with that.");
 
 await client.runPublished("chat", "^1.0.0", "Follow up", {
-  initialState: form.toInitialState(),
+ initialState: form.toInitialState(),
 });
 ```
 
@@ -127,7 +127,7 @@ await client.runPublished("chat", "^1.0.0", "Follow up", {
 | `StaticExecutionError` | Run failed or HTTP error |
 | `WorkflowInterruptedError` | HITL pause; includes `runId`, `approvalKey` |
 
-## Streaming note (FP-2)
+## Streaming note (streaming deferred)
 
 There is no SSE client in the static SDK for server events. For token-progress UI, poll trace via Relay and read `TokenEmitted` metadata. See [guides/streaming/streaming-in-the-browser.md](../guides/streaming/streaming-in-the-browser.md).
 

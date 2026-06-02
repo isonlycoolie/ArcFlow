@@ -27,24 +27,24 @@ From [RAG chatbot walkthrough](../examples/rag-chatbot.md):
 from arcflow import Agent, MemoryChunkingConfig, MemoryConfig, MemoryRetrievalConfig, MemoryScope, MemoryType, Workflow
 
 memory = MemoryConfig(
-    MemoryType.VECTOR,
-    MemoryScope.AGENT,
-    namespace="doc_qa",
-    embedding="stub/8",
-    retrieval=MemoryRetrievalConfig(
-        mode="hybrid",
-        dense_weight=0.7,
-        sparse_weight=0.3,
-        rerank="local",
-        top_k=3,
-    ),
-    chunking=MemoryChunkingConfig(chunk_size=256, overlap=32),
+ MemoryType.VECTOR,
+ MemoryScope.AGENT,
+ namespace="doc_qa",
+ embedding="stub/8",
+ retrieval=MemoryRetrievalConfig(
+ mode="hybrid",
+ dense_weight=0.7,
+ sparse_weight=0.3,
+ rerank="local",
+ top_k=3,
+ ),
+ chunking=MemoryChunkingConfig(chunk_size=256, overlap=32),
 )
 agent = Agent(
-    name="researcher",
-    role="researcher",
-    instructions="Answer using retrieved context.",
-    memory=memory,
+ name="researcher",
+ role="researcher",
+ instructions="Answer using retrieved context.",
+ memory=memory,
 )
 workflow = Workflow(name="document-qa", agents=[agent])
 ```
@@ -78,7 +78,7 @@ result = workflow.run("Summarize hybrid retrieval in ArcFlow.")
 kinds = {e.get("event_kind") for e in result.trace_events}
 print(sorted(kinds))
 if "MemoryRetrieved" in kinds:
-    print("MemoryRetrieved present")
+ print("MemoryRetrieved present")
 ```
 
 With populated vector store and matching namespace, expect `MemoryRetrieved` with chunk counts and scores (metadata only, no chunk text in trace export).

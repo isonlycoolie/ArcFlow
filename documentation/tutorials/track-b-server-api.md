@@ -46,42 +46,42 @@ Save payload as `run-payload.json`:
 
 ```json
 {
-  "workflow": {
-    "id": "00000000-0000-4000-8000-000000000099",
-    "name": "research_pipeline",
-    "execution_mode": "linear",
-    "steps": [
-      {
-        "id": "00000000-0000-4000-8000-000000000001",
-        "agent_id": "00000000-0000-4000-8000-000000000010",
-        "order": 1
-      },
-      {
-        "id": "00000000-0000-4000-8000-000000000002",
-        "agent_id": "00000000-0000-4000-8000-000000000011",
-        "order": 2
-      }
-    ]
-  },
-  "agents": [
-    {
-      "id": "00000000-0000-4000-8000-000000000010",
-      "name": "researcher",
-      "role": "research",
-      "instructions": "Research the given topic thoroughly."
-    },
-    {
-      "id": "00000000-0000-4000-8000-000000000011",
-      "name": "writer",
-      "role": "write",
-      "instructions": "Write a clear summary of the research."
-    }
-  ],
-  "input": "Analyze renewable energy trends",
-  "exec_config": {
-    "recovery_enabled": true,
-    "workflow_timeout_secs": 300
-  }
+ "workflow": {
+ "id": "00000000-0000-4000-8000-000000000099",
+ "name": "research_pipeline",
+ "execution_mode": "linear",
+ "steps": [
+ {
+ "id": "00000000-0000-4000-8000-000000000001",
+ "agent_id": "00000000-0000-4000-8000-000000000010",
+ "order": 1
+ },
+ {
+ "id": "00000000-0000-4000-8000-000000000002",
+ "agent_id": "00000000-0000-4000-8000-000000000011",
+ "order": 2
+ }
+ ]
+ },
+ "agents": [
+ {
+ "id": "00000000-0000-4000-8000-000000000010",
+ "name": "researcher",
+ "role": "research",
+ "instructions": "Research the given topic thoroughly."
+ },
+ {
+ "id": "00000000-0000-4000-8000-000000000011",
+ "name": "writer",
+ "role": "write",
+ "instructions": "Write a clear summary of the research."
+ }
+ ],
+ "input": "Analyze renewable energy trends",
+ "exec_config": {
+ "recovery_enabled": true,
+ "workflow_timeout_secs": 300
+ }
 }
 ```
 
@@ -89,9 +89,9 @@ Submit:
 
 ```bash
 curl -s -X POST http://localhost:8080/v1/runs \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer dev-secret" \
-  -d @run-payload.json
+ -H "Content-Type: application/json" \
+ -H "Authorization: Bearer dev-secret" \
+ -d @run-payload.json
 ```
 
 Copy `run_id` from **201** response. Optional: add `Idempotency-Key: <uuid>` header for deduplication.
@@ -101,7 +101,7 @@ Copy `run_id` from **201** response. Optional: add `Idempotency-Key: <uuid>` hea
 ```bash
 RUN_ID="paste-uuid-here"
 curl -s "http://localhost:8080/v1/runs/${RUN_ID}" \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
 Poll until `status` is `Completed`, `Failed`, `Cancelled`, or `Interrupted`. Stub runs typically finish in seconds.
@@ -110,9 +110,9 @@ Bash loop:
 
 ```bash
 until STATUS=$(curl -s "http://localhost:8080/v1/runs/${RUN_ID}" \
-  -H "Authorization: Bearer dev-secret" | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])") \
-  && [[ "$STATUS" == "Completed" || "$STATUS" == "Failed" ]]; do
-  sleep 1
+ -H "Authorization: Bearer dev-secret" | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])") \
+ && [[ "$STATUS" == "Completed" || "$STATUS" == "Failed" ]]; do
+ sleep 1
 done
 echo "terminal status: $STATUS"
 ```
@@ -123,10 +123,10 @@ Track B pass criteria: `Completed` with non-empty `result.output`.
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/${RUN_ID}/trace" \
-  -H "Authorization: Bearer dev-secret"
+ -H "Authorization: Bearer dev-secret"
 ```
 
-Verify event kinds include `WorkflowStarted`, `StepCompleted`, and `WorkflowCompleted`. Payloads are SEC-1 metadata only.
+Verify event kinds include `WorkflowStarted`, `StepCompleted`, and `WorkflowCompleted`. Payloads are metadata-only trace only.
 
 Optional CLI:
 
@@ -150,9 +150,9 @@ Create response shape:
 
 ```json
 {
-  "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-  "trace_id": "trace-7c9e6679",
-  "status": "Running"
+ "run_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+ "trace_id": "trace-7c9e6679",
+ "status": "Running"
 }
 ```
 

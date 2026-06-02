@@ -15,7 +15,7 @@ Self-assessment means you own the honesty bar. Share artifacts (repo links, run 
 |-------|-------|------------------------------|
 | 1 | [Certified ArcFlow Workflow Developer](level-1-workflow-developer.md) | Builds SDK workflows, configures agents and providers, reads basic traces |
 | 2 | [Certified ArcFlow Systems Engineer](level-2-systems-engineer.md) | Adds graph routing, RAG, HITL, external callbacks, streaming, reliability patterns |
-| 3 | [Certified ArcFlow Platform Engineer](level-3-platform-engineer.md) | Deploys server and Relay, operates migrations, static product, SEC-1 compliance |
+| 3 | [Certified ArcFlow Platform Engineer](level-3-platform-engineer.md) | Deploys server and Relay, operates migrations, static product, trace data policy compliance |
 | 4 | [Certified ArcFlow Architect](level-4-certified-arcflow-architect.md) | Designs multi-tenant deployments, evaluates surfaces, audits compliance, guides schema evolution |
 
 Levels are cumulative. Level 2 assumes Level 1 competencies; Level 4 assumes all prior levels.
@@ -38,8 +38,8 @@ Levels are cumulative. Level 2 assumes Level 1 competencies; Level 4 assumes all
 | Auth tiers and key rotation | | | yes | yes |
 | Static product and Relay | | | yes | yes |
 | OpenTelemetry export | | | yes | yes |
-| SEC-1 operational enforcement | | | yes | yes |
-| Rust runtime and RCS depth | | | | yes |
+| trace data policy operational enforcement | | | yes | yes |
+| Rust runtime and workflow specification depth | | | | yes |
 | Multi-tenant architecture | | | | yes |
 | Enterprise reliability design | | | | yes |
 | Deferred feature tradeoffs | | | | yes |

@@ -26,7 +26,7 @@ From repository root:
 ```bash
 docker compose -f docker/docker-compose.server.yml up -d
 bash scripts/static-provision-site.sh
-export SITE_ID=...  # from script output
+export SITE_ID=... # from script output
 export TEXT_FILE=examples/static/chat-rag/kb.txt
 bash scripts/static-ingest-knowledge.sh
 bash scripts/static-publish-chat.sh
@@ -61,9 +61,9 @@ Production client pattern from [`src/main.ts`](../examples/static-chat-widget.md
 import { ArcFlowClient } from "@arcflow/static";
 
 const client = new ArcFlowClient({
-  baseUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
-  apiKey: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
-  mode: "relay",
+ baseUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
+ apiKey: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
+ mode: "relay",
 });
 
 await client.runPublished("chat", "^1.0.0", userMessage);
@@ -102,7 +102,7 @@ Fetch trace via Relay or server (operator tools):
 | `StepCompleted` | Chat agent step |
 | `WorkflowCompleted` | Successful reply |
 
-Traces are metadata only (SEC-1). End users do not receive raw trace JSON in the widget unless you add operator tooling.
+Traces are metadata only (trace data policy). End users do not receive raw trace JSON in the widget unless you add operator tooling.
 
 ## Troubleshooting
 

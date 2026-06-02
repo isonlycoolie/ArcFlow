@@ -7,17 +7,17 @@ The ArcFlow static product is the combination of **admin API**, **workflow regis
 
 ```text
 Operator (admin key)
-  → POST /v1/admin/sites
-  → POST .../knowledge/ingest
-  → POST .../workflows/chat/publish
+ → POST /v1/admin/sites
+ → POST.../knowledge/ingest
+ → POST.../workflows/chat/publish
 
 Developer (frontend)
-  → embed Relay URL + site token (build-time env)
-  → runPublished("chat", "^1.0.0", message)
+ → embed Relay URL + site token (build-time env)
+ → runPublished("chat", "^1.0.0", message)
 
 Browser
-  → Relay → Server → arcflow-core
-  → poll status / trace (SSE deferred FP-2)
+ → Relay → Server → arcflow-core
+ → poll status / trace (SSE deferred (server streaming))
 ```
 
 | Tier | Actor | Tools |
@@ -53,10 +53,10 @@ Step detail: [site-lifecycle.md](site-lifecycle.md), [knowledge-and-publish.md](
 import { ArcFlowClient } from "@arcflow/static";
 
 const client = new ArcFlowClient({
-  baseUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
-  apiKey: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
-  mode: "relay",
-  siteId: import.meta.env.VITE_ARCFLOW_SITE_ID,
+ baseUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
+ apiKey: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
+ mode: "relay",
+ siteId: import.meta.env.VITE_ARCFLOW_SITE_ID,
 });
 
 const result = await client.runPublished("chat", "^1.0.0", "What is your refund policy?");
@@ -67,8 +67,8 @@ Example app: `examples/static/chat-rag/`.
 
 ## What static product does not do
 
-- **Server SSE (FP-2):** no `GET /v1/runs/{id}/events` on server; use trace polling for streaming UX.
-- **Operator dashboard UI (FP-3.01):** OSS spec exists; UI in private ArcFlow-Dashboard repo.
+- **Server SSE (streaming deferred):** no `GET /v1/runs/{id}/events` on server; use trace polling for streaming UX.
+- **Operator dashboard UI (Operator dashboard UI):** OSS spec exists; UI in private ArcFlow-Dashboard repo.
 - **Inline workflow from browser** when `allow_inline: false` (recommended production default).
 
 ## Maturity

@@ -1,9 +1,9 @@
 
 # Trace event reference
 
-Complete reference for engine `TraceEventKind` variants emitted by `arcflow-core`. Each event serializes as `{ "kind": "<Name>", ...fields }` with PascalCase kind tags.
+Complete reference for engine `TraceEventKind` variants emitted by `arcflow-core`. Each event serializes as `{ "kind": "<Name>",...fields }` with PascalCase kind tags.
 
-**SEC-1:** All listed events are metadata-only in storage and HTTP export. No prompt text, tool payloads, or chunk content.
+**Trace data policy:** All listed events are metadata-only in storage and HTTP export. No prompt text, tool payloads, or chunk content.
 
 See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
@@ -13,7 +13,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### WorkflowStarted
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `workflow_name` | string | Declared workflow name | Safe |
@@ -23,7 +23,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### WorkflowCompleted
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `duration_ms` | u64 | Total wall time | Safe |
@@ -33,18 +33,18 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### WorkflowFailed
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `duration_ms` | u64 | Time until failure | Safe |
 | `failed_step_index` | usize optional | Zero-based step index | Safe |
-| `error_code` | string | RCS error code | Safe |
+| `error_code` | string | workflow specification error code | Safe |
 
 **Emitter:** workflow engine on terminal failure.
 
 ### WorkflowValidationFailed
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `reason` | string | Validation summary (must not embed user input) | Safe if bounded |
@@ -53,7 +53,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### WorkflowRecoveryStarted
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | New resume run id | Safe |
 | `original_run_id` | string | Failed run id | Safe |
@@ -63,7 +63,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### WorkflowRecoveryCompleted
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Resume run id | Safe |
 | `original_run_id` | string | Source failed run | Safe |
@@ -75,7 +75,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### StepStarted
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -87,7 +87,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### StepCompleted
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -100,20 +100,20 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### StepFailed
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
 | `step_index` | usize | Step order | Safe |
 | `duration_ms` | u64 | Time until failure | Safe |
-| `error_code` | string | RCS code | Safe |
+| `error_code` | string | workflow specification code | Safe |
 | `error_message` | string | Safe summary text | Safe if no user content |
 
 **Emitter:** step executor.
 
 ### StateCommitted
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -123,7 +123,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### StepFallbackActivated
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -136,7 +136,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### AgentInvoked
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -147,7 +147,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### AgentResponseReceived
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -158,7 +158,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### TokensConsumed
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -169,7 +169,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### ProviderRequestSent
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -182,7 +182,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### ProviderResponseReceived
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -195,7 +195,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### ProviderRateLimited
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -206,12 +206,12 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### ProviderError
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
 | `provider_id` | string | Provider slug | Safe |
-| `error_code` | string | Provider or RCS code | Safe |
+| `error_code` | string | Provider or workflow specification code | Safe |
 | `error_message` | string | Safe summary | Safe if bounded |
 
 **Emitter:** provider adapter.
@@ -220,7 +220,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### ToolCallStarted
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -231,7 +231,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### ToolCallCompleted
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -243,20 +243,20 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### ToolCallFailed
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
 | `tool_name` | string | Tool name | Safe |
 | `duration_ms` | u64 | Time until failure | Safe |
 | `failure_reason` | string | Bounded reason | Safe if bounded |
-| `error_code` | string | RCS code | Safe |
+| `error_code` | string | workflow specification code | Safe |
 
 **Emitter:** tool executor.
 
 ### ToolInputValidationFailed
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -269,7 +269,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### MemoryWrite
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -282,7 +282,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### MemoryRead
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -296,7 +296,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### MemoryRetrieved
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -308,7 +308,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### MemoryDegraded
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `memory_type` | string | Backend type | Safe |
@@ -319,7 +319,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### MemoryEvicted
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `memory_type` | string | Backend type | Safe |
@@ -332,7 +332,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### RetryAttempted
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -345,7 +345,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### RetryExhausted
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -356,7 +356,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### TimeoutEnforced
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -368,7 +368,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### TraceStorageWarning
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `events_dropped` | u32 | Dropped event count | Safe |
@@ -380,7 +380,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### StreamChunkReceived
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -390,7 +390,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### TokenEmitted
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `step_id` | string | Step UUID | Safe |
@@ -403,7 +403,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### ExternalBindingStarted
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `binding_id` | string | Binding id | Safe |
@@ -414,7 +414,7 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### ExternalBindingCompleted
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `binding_id` | string | Binding id | Safe |
@@ -425,19 +425,19 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 ### ExternalBindingFailed
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `binding_id` | string | Binding id | Safe |
 | `step_id` | string | Step UUID | Safe |
-| `error_code` | string | Outcome or RCS code | Safe |
+| `error_code` | string | Outcome or workflow specification code | Safe |
 | `status` | string | Outcome status string | Safe |
 
 **Emitter:** external monitor on failed callback.
 
 ### ExternalRecoveryTriggered
 
-| Field | Type | Meaning | SEC-1 |
+| Field | Type | Meaning | Trace policy |
 |-------|------|---------|-------|
 | `run_id` | string | Execution UUID | Safe |
 | `binding_id` | string | Binding id | Safe |
@@ -446,9 +446,9 @@ See [Trace events (normative)](../../contracts/trace-events-normative.md).
 
 **Emitter:** external recovery policy.
 
-## RCS graph kinds (extended exports)
+## workflow graph kinds (extended exports)
 
-These kinds are documented in RCS types and may appear alongside engine events in graph workflow exports. They follow the same SEC-1 rule (metadata only):
+These kinds are documented in the workflow specification types and may appear alongside engine events in graph workflow exports. They follow the same trace data policy rule (metadata only):
 
 | Event | Typical fields |
 |-------|----------------|
@@ -462,7 +462,7 @@ Confirm availability in your runtime version via a sample graph trace export.
 
 Nested in multiple events:
 
-| Field | Meaning | SEC-1 |
+| Field | Meaning | Trace policy |
 |-------|---------|-------|
 | `input` | Prompt token count | Safe |
 | `output` | Completion token count | Safe |
@@ -472,17 +472,17 @@ Nested in multiple events:
 
 ```json
 [
-  { "kind": "WorkflowStarted", "run_id": "r1", "workflow_name": "demo", "step_count": 2 },
-  { "kind": "StepStarted", "run_id": "r1", "step_id": "s1", "step_index": 0, "agent_name": "a1", "agent_role": "Analyst" },
-  { "kind": "ProviderRequestSent", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "max_tokens": 1024, "prompt_size_bytes": 512 },
-  { "kind": "ProviderResponseReceived", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "tokens": { "input": 120, "output": 45, "total": 165 }, "latency_ms": 890 },
-  { "kind": "StepCompleted", "run_id": "r1", "step_id": "s1", "step_index": 0, "duration_ms": 920, "tokens": { "input": 120, "output": 45, "total": 165 }, "output_size_bytes": 180 },
-  { "kind": "WorkflowCompleted", "run_id": "r1", "duration_ms": 950, "total_tokens": { "input": 120, "output": 45, "total": 165 } }
+ { "kind": "WorkflowStarted", "run_id": "r1", "workflow_name": "demo", "step_count": 2 },
+ { "kind": "StepStarted", "run_id": "r1", "step_id": "s1", "step_index": 0, "agent_name": "a1", "agent_role": "Analyst" },
+ { "kind": "ProviderRequestSent", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "max_tokens": 1024, "prompt_size_bytes": 512 },
+ { "kind": "ProviderResponseReceived", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "tokens": { "input": 120, "output": 45, "total": 165 }, "latency_ms": 890 },
+ { "kind": "StepCompleted", "run_id": "r1", "step_id": "s1", "step_index": 0, "duration_ms": 920, "tokens": { "input": 120, "output": 45, "total": 165 }, "output_size_bytes": 180 },
+ { "kind": "WorkflowCompleted", "run_id": "r1", "duration_ms": 950, "total_tokens": { "input": 120, "output": 45, "total": 165 } }
 ]
 ```
 
 ## Related pages
 
 - [Execution traces](execution-traces.md) for SDK and HTTP access patterns
-- [SEC-1 rules](sec-1-rules.md) for audit checklist
+- [Trace data policy rules](sec-1-rules.md) for audit checklist
 - [SDK streaming](../streaming/sdk-streaming.md) for stream event UX vs trace storage

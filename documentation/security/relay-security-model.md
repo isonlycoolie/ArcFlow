@@ -19,13 +19,13 @@ Primary goal: prevent LLM key exfiltration via browser bundles or DevTools.
 
 ```text
 Browser (untrusted)
-    → Relay (site token + Origin header)
-        → ArcFlow Server (scoped upstream runtime key)
-            → Postgres / Qdrant / LLM providers
+ → Relay (site token + Origin header)
+ → ArcFlow Server (scoped upstream runtime key)
+ → Postgres / Qdrant / LLM providers
 
 Operator browser (untrusted)
-    → BFF (operator session)
-        → Admin API (ARCFLOW_ADMIN_API_KEY)
+ → BFF (operator session)
+ → Admin API (ARCFLOW_ADMIN_API_KEY)
 ```
 
 See [Static product security model](../static-product/security-model.md).
@@ -83,20 +83,20 @@ Example secure config:
 
 ```typescript
 await runPublished("chat", "^1.0.0", message, {
-  mode: "relay",
-  relayUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
-  siteId: import.meta.env.VITE_ARCFLOW_SITE_ID,
-  siteToken: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
+ mode: "relay",
+ relayUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
+ siteId: import.meta.env.VITE_ARCFLOW_SITE_ID,
+ siteToken: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
 });
 ```
 
-## SEC-1 and browser trace poll
+## Trace data policy and browser trace poll
 
-Relay exposes `GET .../trace` to the browser. Trace events are SEC-1 metadata only. See [SEC-1 compliance](sec-1-compliance.md).
+Relay exposes `GET.../trace` to the browser. Trace events are metadata-only trace only. See [Trace data policy compliance](sec-1-compliance.md).
 
 ## Token rotation and race conditions
 
-After `POST .../tokens/rotate`, old tokens fail immediately at Relay. Plan deploys to avoid user-visible auth errors during rotation. See [Token rotation](../operator/token-rotation.md).
+After `POST.../tokens/rotate`, old tokens fail immediately at Relay. Plan deploys to avoid user-visible auth errors during rotation. See [Token rotation](../operator/token-rotation.md).
 
 ## CSRF on operator BFF
 

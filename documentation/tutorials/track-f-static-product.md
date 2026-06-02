@@ -25,7 +25,7 @@ Frontend developers do not define agents in browser code in production. Dashboar
 ```bash
 docker compose -f docker/docker-compose.server.yml up -d
 bash scripts/static-provision-site.sh
-export SITE_ID=...  # from output
+export SITE_ID=... # from output
 export TEXT_FILE=examples/static/chat-rag/kb.txt
 bash scripts/static-ingest-knowledge.sh
 bash scripts/static-publish-chat.sh
@@ -69,7 +69,7 @@ Pass criteria:
 | Allowed origin chat | Success |
 | Disallowed origin | Blocked at Relay |
 | Bundle | No LLM or server runtime keys, only site token |
-| Published name | Client calls `runPublished("chat", "^1.0.0", ...)` |
+| Published name | Client calls `runPublished("chat", "^1.0.0",...)` |
 
 ## Step 5: Optional BYO Relay
 

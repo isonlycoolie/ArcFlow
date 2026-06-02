@@ -33,8 +33,8 @@ import hmac
 import json
 
 def sign_body(secret: str, body: bytes) -> str:
-    digest = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
-    return f"sha256={digest}"
+ digest = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+ return f"sha256={digest}"
 
 outcome = {"binding_id": "payment_webhook", "status": "success", "fields": {"transaction_id": "tx_123"}}
 body = json.dumps(outcome).encode()
@@ -49,8 +49,8 @@ Use the same helper inside `report_outcome` in `sdk-python/arcflow/external.py` 
 import { createHmac } from "node:crypto";
 
 function signBody(secret: string, body: Buffer): string {
-  const digest = createHmac("sha256", secret).update(body).digest("hex");
-  return `sha256=${digest}`;
+ const digest = createHmac("sha256", secret).update(body).digest("hex");
+ return `sha256=${digest}`;
 }
 
 const outcome = { binding_id: "payment_webhook", status: "success" };
@@ -67,9 +67,9 @@ import hashlib
 import hmac
 
 def verify_webhook_signature(secret: str, body: bytes, signature_header: str) -> bool:
-    expected = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
-    provided = signature_header.strip().removeprefix("sha256=")
-    return hmac.compare_digest(provided, expected)
+ expected = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+ provided = signature_header.strip().removeprefix("sha256=")
+ return hmac.compare_digest(provided, expected)
 ```
 
 ## Constant-time comparison
@@ -128,5 +128,5 @@ Async callbacks require the integrator to reach `arcflow-server` over HTTPS in p
 ## Related pages
 
 - [External callbacks](external-callbacks.md) for binding configuration and ExternalOutcome.report
-- [SEC-1 rules](../observability/sec-1-rules.md) for trace and log policy
-- [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md) for compliance overview
+- [Trace data policy rules](../observability/sec-1-rules.md) for trace and log policy
+- [Trace data policy](../../concepts/sec-1-and-data-safety.md) for compliance overview

@@ -19,17 +19,17 @@ Hybrid requires `retrieval.mode: "hybrid"` **and** `ARCFLOW_QDRANT_HYBRID=true` 
 
 ```json
 {
-  "retrieval": {
-    "mode": "hybrid",
-    "top_k": 8,
-    "dense_weight": 0.65,
-    "sparse_weight": 0.35,
-    "rerank": {
-      "provider": "cohere",
-      "model": "rerank-english-v3.0",
-      "top_n": 4
-    }
-  }
+ "retrieval": {
+ "mode": "hybrid",
+ "top_k": 8,
+ "dense_weight": 0.65,
+ "sparse_weight": 0.35,
+ "rerank": {
+ "provider": "cohere",
+ "model": "rerank-english-v3.0",
+ "top_n": 4
+ }
+ }
 }
 ```
 
@@ -59,10 +59,10 @@ Without `ARCFLOW_QDRANT_HYBRID=true`, the engine may fall back to dense behavior
 
 ```json
 {
-  "retrieval": {
-    "mode": "dense",
-    "top_k": 6
-  }
+ "retrieval": {
+ "mode": "dense",
+ "top_k": 6
+ }
 }
 ```
 
@@ -70,15 +70,15 @@ Compare latency and `MemoryRetrieved.total_bytes` against hybrid on the same que
 
 ## Rerank stage
 
-Cohere rerank receives query + chunk texts server-side (not in SEC-1 traces). Config:
+Cohere rerank receives query + chunk texts server-side (not in trace data policy traces). Config:
 
 ```json
 {
-  "rerank": {
-    "provider": "cohere",
-    "model": "rerank-english-v3.0",
-    "top_n": 3
-  }
+ "rerank": {
+ "provider": "cohere",
+ "model": "rerank-english-v3.0",
+ "top_n": 3
+ }
 }
 ```
 
@@ -92,10 +92,10 @@ Disable rerank during dev to reduce dependencies:
 
 ```json
 {
-  "retrieval": {
-    "mode": "hybrid",
-    "top_k": 5
-  }
+ "retrieval": {
+ "mode": "hybrid",
+ "top_k": 5
+ }
 }
 ```
 
@@ -105,25 +105,25 @@ Disable rerank during dev to reduce dependencies:
 
 ```json
 {
-  "memory_type": "vector",
-  "scope": "workflow",
-  "namespace": "product-docs",
-  "embedding": "openai/text-embedding-3-small",
-  "retrieval": {
-    "mode": "hybrid",
-    "top_k": 8,
-    "dense_weight": 0.65,
-    "sparse_weight": 0.35,
-    "rerank": {
-      "provider": "cohere",
-      "model": "rerank-english-v3.0",
-      "top_n": 4
-    }
-  },
-  "chunking": {
-    "chunk_size": 512,
-    "chunk_overlap": 64
-  }
+ "memory_type": "vector",
+ "scope": "workflow",
+ "namespace": "product-docs",
+ "embedding": "openai/text-embedding-3-small",
+ "retrieval": {
+ "mode": "hybrid",
+ "top_k": 8,
+ "dense_weight": 0.65,
+ "sparse_weight": 0.35,
+ "rerank": {
+ "provider": "cohere",
+ "model": "rerank-english-v3.0",
+ "top_n": 4
+ }
+ },
+ "chunking": {
+ "chunk_size": 512,
+ "chunk_overlap": 64
+ }
 }
 ```
 
@@ -151,5 +151,5 @@ Site knowledge ingests into site `kb_namespace`. Published chat agents should us
 
 - [Vector RAG pipeline](vector-rag-pipeline.md)
 - [Provider configuration](../agents-and-tools/provider-configuration.md)
-- [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md)
+- [Trace data policy](../../concepts/sec-1-and-data-safety.md)
 - [Validation and testing](../workflows/validation-and-testing.md)

@@ -19,14 +19,14 @@ Procedure for rotating site tokens and server API keys without unnecessary downt
 
 ```bash
 curl -sf -X POST "$ARCFLOW_ADMIN_URL/v1/admin/sites/s_abc123/tokens/rotate" \
-  -H "Authorization: Bearer $ARCFLOW_ADMIN_API_KEY"
+ -H "Authorization: Bearer $ARCFLOW_ADMIN_API_KEY"
 ```
 
 Response:
 
 ```json
 {
-  "site_token": "st_live_newtoken"
+ "site_token": "st_live_newtoken"
 }
 ```
 
@@ -57,10 +57,10 @@ Redeploy static assets. Do not commit tokens to git.
 ```bash
 # Old token should fail
 curl -X POST "https://relay.example.com/v1/sites/s_abc123/runs" \
-  -H "Authorization: Bearer st_live_old" \
-  -H "Origin: https://www.acme.com" \
-  -H "Content-Type: application/json" \
-  -d '{"input":"test"}'
+ -H "Authorization: Bearer st_live_old" \
+ -H "Origin: https://www.acme.com" \
+ -H "Content-Type: application/json" \
+ -d '{"input":"test"}'
 
 # New token should succeed (with valid publish + workflow)
 ```

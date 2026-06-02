@@ -15,8 +15,8 @@ Confirms the process is running and serving HTTP.
 
 ```json
 {
-  "status": "ok",
-  "version": "0.1.0"
+ "status": "ok",
+ "version": "0.1.0"
 }
 ```
 
@@ -43,8 +43,8 @@ Confirms the server can accept runtime traffic: Postgres reachable and migration
 
 ```json
 {
-  "status": "ready",
-  "version": "0.1.0"
+ "status": "ready",
+ "version": "0.1.0"
 }
 ```
 
@@ -52,9 +52,9 @@ Confirms the server can accept runtime traffic: Postgres reachable and migration
 
 ```json
 {
-  "status": "ready",
-  "version": "0.1.0",
-  "postgres": "not_configured"
+ "status": "ready",
+ "version": "0.1.0",
+ "postgres": "not_configured"
 }
 ```
 
@@ -64,25 +64,25 @@ When `ARCFLOW_POSTGRESQL_URL` is unset, `/ready` returns 200 with `postgres: not
 
 ```json
 {
-  "status": "degraded",
-  "version": "0.1.0",
-  "reason": "postgres_unavailable"
+ "status": "degraded",
+ "version": "0.1.0",
+ "reason": "postgres_unavailable"
 }
 ```
 
 ```json
 {
-  "status": "degraded",
-  "version": "0.1.0",
-  "reason": "migrations_pending"
+ "status": "degraded",
+ "version": "0.1.0",
+ "reason": "migrations_pending"
 }
 ```
 
 ```json
 {
-  "status": "degraded",
-  "version": "0.1.0",
-  "reason": "migration_check_failed"
+ "status": "degraded",
+ "version": "0.1.0",
+ "reason": "migration_check_failed"
 }
 ```
 
@@ -98,19 +98,19 @@ Use for **readiness** probes. Remove instance from load balancer when readiness 
 
 ```yaml
 livenessProbe:
-  httpGet:
-    path: /health
-    port: 8080
-  initialDelaySeconds: 10
-  periodSeconds: 10
+ httpGet:
+ path: /health
+ port: 8080
+ initialDelaySeconds: 10
+ periodSeconds: 10
 
 readinessProbe:
-  httpGet:
-    path: /ready
-    port: 8080
-  initialDelaySeconds: 5
-  periodSeconds: 5
-  failureThreshold: 3
+ httpGet:
+ path: /ready
+ port: 8080
+ initialDelaySeconds: 5
+ periodSeconds: 5
+ failureThreshold: 3
 ```
 
 Gate Ingress or Service traffic on readiness 200 only.

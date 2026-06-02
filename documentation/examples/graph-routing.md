@@ -25,7 +25,7 @@ This document focuses on reflection and parallel search; open `react_agent.py` f
 | Reading | [Graph workflows](../guides/workflows/graph-workflows.md) |
 | Tutorial track | [Track D](../tutorials/track-d-graph-workflows.md) |
 
-Note: graph checkpoint resume remains partial (FP-1.01). Linear recovery is complete; do not rely on mid-graph resume in production.
+Note: graph checkpoint resume remains partial (Graph recovery resume). Linear recovery is complete; do not rely on mid-graph resume in production.
 
 ## Step 1: Reflection loop with conditional edge
 
@@ -39,16 +39,16 @@ Core graph wiring from the script:
 
 ```python
 wf = (
-    Workflow("reflection_loop", graph=True)
-    .max_iterations(3)
-    .node("draft", draft)
-    .node("critique", critique)
-    .node("revise", revise)
-    .set_entry("draft")
-    .add_edge("draft", "critique")
-    .add_edge("critique", "revise")
-    .add_edge("revise", "draft", condition="needs_more")
-    .add_edge("revise", None)
+ Workflow("reflection_loop", graph=True)
+.max_iterations(3)
+.node("draft", draft)
+.node("critique", critique)
+.node("revise", revise)
+.set_entry("draft")
+.add_edge("draft", "critique")
+.add_edge("critique", "revise")
+.add_edge("revise", "draft", condition="needs_more")
+.add_edge("revise", None)
 )
 result = wf.run("topic=Benefits of local-first agent runtimes")
 ```
@@ -75,11 +75,11 @@ Expected: router runs first, both search nodes run, synthesize runs after join p
 
 ```python
 node_events = [
-    e for e in result.trace_events
-    if e.get("event_kind") in ("GraphNodeStarted", "GraphNodeCompleted")
+ e for e in result.trace_events
+ if e.get("event_kind") in ("GraphNodeStarted", "GraphNodeCompleted")
 ]
 for e in node_events:
-    print(e.get("event_kind"), e.get("node_id"))
+ print(e.get("event_kind"), e.get("node_id"))
 ```
 
 For parallel search, confirm `search_web` and `search_docs` both appear before final `synthesize` completion events.
@@ -130,4 +130,4 @@ Conditional re-entry adds repeated `GraphNodeStarted` for the same node id acros
 |----------|------|
 | Tutorial track | [Track D](../tutorials/track-d-graph-workflows.md) |
 | Graph guide | [Graph workflows](../guides/workflows/graph-workflows.md) |
-| Maturity note | [FP-1.01 graph resume](../../concepts/maturity-and-known-gaps.md) |
+| Maturity note | [Graph recovery resume graph resume](../../concepts/maturity-and-known-gaps.md) |

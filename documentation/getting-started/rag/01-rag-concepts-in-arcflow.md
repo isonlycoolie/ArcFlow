@@ -22,7 +22,7 @@ Three names must stay aligned:
 
 | Name | Where it appears |
 |------|------------------|
-| `namespace` | `MemoryConfig(..., namespace="doc_qa")` and `VectorStore.ingest("doc_qa", ...)` |
+| `namespace` | `MemoryConfig(..., namespace="doc_qa")` and `VectorStore.ingest("doc_qa",...)` |
 | `embedding` | Agent memory config; ingest uses the runtime default embedding unless you configure otherwise |
 | `key` | Logical document id in `ingest(namespace, key, text)` for updates and replacement |
 
@@ -50,12 +50,12 @@ That text is meant to be ingested into namespace `doc_qa` before the workflow as
 
 ```python
 memory = MemoryConfig(
-    MemoryType.VECTOR,
-    MemoryScope.AGENT,
-    namespace="doc_qa",
-    embedding="stub/8",
-    retrieval=MemoryRetrievalConfig(mode="hybrid", dense_weight=0.7, sparse_weight=0.3, top_k=3),
-    chunking=MemoryChunkingConfig(chunk_size=256, overlap=32),
+ MemoryType.VECTOR,
+ MemoryScope.AGENT,
+ namespace="doc_qa",
+ embedding="stub/8",
+ retrieval=MemoryRetrievalConfig(mode="hybrid", dense_weight=0.7, sparse_weight=0.3, top_k=3),
+ chunking=MemoryChunkingConfig(chunk_size=256, overlap=32),
 )
 ```
 

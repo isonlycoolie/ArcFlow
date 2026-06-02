@@ -95,7 +95,7 @@ If the extension provides run commands, trigger run from the editor and open tra
 | SDK run | `completed` status |
 | CLI run | Zero exit, run id emitted |
 | Trace kinds | SDK and CLI agree on major kinds |
-| SEC-1 | Trace JSON has no prompt bodies |
+| Trace policy | Trace JSON has no prompt bodies |
 
 ## Expected output
 

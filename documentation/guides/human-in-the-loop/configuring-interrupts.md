@@ -1,27 +1,27 @@
 
 # Configuring HITL interrupts
 
-HITL attaches to individual steps, not to the workflow root. Each gated step declares an `approval_key` that approvers use in the approve URL, plus an optional timeout. This guide covers RCS fields, server interrupt payloads, and a support workflow pattern you can copy.
+HITL attaches to individual steps, not to the workflow root. Each gated step declares an `approval_key` that approvers use in the approve URL, plus an optional timeout. This guide covers workflow specification fields, server interrupt payloads, and a support workflow pattern you can copy.
 
 ## Step definition fields
 
 | Field | Required | Purpose |
 |-------|----------|---------|
-| `approval_key` | yes | Stable string passed in `POST .../approve/{approval_key}` |
+| `approval_key` | yes | Stable string passed in `POST.../approve/{approval_key}` |
 | `timeout_seconds` | no (default 3600 in SDK) | Seconds until `HumanTimeout` if no decision |
 | `interrupt` | no (default true) | When false, step skips the gate (rare; used in tests) |
 
-RCS example on a step:
+workflow specification example on a step:
 
 ```json
 {
-  "id": "00000000-0000-4000-8000-000000000030",
-  "agent_id": "00000000-0000-4000-8000-000000000040",
-  "order": 2,
-  "hitl": {
-    "approval_key": "manager_signoff",
-    "timeout_seconds": 86400
-  }
+ "id": "00000000-0000-4000-8000-000000000030",
+ "agent_id": "00000000-0000-4000-8000-000000000040",
+ "order": 2,
+ "hitl": {
+ "approval_key": "manager_signoff",
+ "timeout_seconds": 86400
+ }
 }
 ```
 
@@ -48,19 +48,19 @@ manager = Agent(name="manager", role="reviewer", instructions="Manager review ga
 accounting = Agent(name="accounting", role="finance", instructions="Post to accounting.")
 
 wf = (
-    Workflow("expense_reimbursement", runtime=RUNTIME)
-    .enable_recovery()
-    .step(submit)
-    .step(manager, hitl=HitlConfig(approval_key=APPROVAL_KEY, timeout_seconds=3600))
-    .step(accounting)
+ Workflow("expense_reimbursement", runtime=RUNTIME)
+.enable_recovery()
+.step(submit)
+.step(manager, hitl=HitlConfig(approval_key=APPROVAL_KEY, timeout_seconds=3600))
+.step(accounting)
 )
 
 try:
-    result = wf.run("amount=250.00;desc=client lunch")
-    print(result.run_id, result.status)
+ result = wf.run("amount=250.00;desc=client lunch")
+ print(result.run_id, result.status)
 except WorkflowInterruptedError as exc:
-    print(f"Interrupted run_id={exc.run_id} approval_key={exc.approval_key}")
-    print(f"Approve: POST /v1/runs/{exc.run_id}/approve/{exc.approval_key}")
+ print(f"Interrupted run_id={exc.run_id} approval_key={exc.approval_key}")
+ print(f"Approve: POST /v1/runs/{exc.run_id}/approve/{exc.approval_key}")
 ```
 
 When the manager step finishes agent work, the run stops at `Interrupted`. Downstream accounting does not run until approval.
@@ -71,22 +71,22 @@ Poll run status while waiting for a human decision:
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/RUN_ID" \
-  -H "Authorization: Bearer ${ARCFLOW_SERVER_API_KEY}"
+ -H "Authorization: Bearer ${ARCFLOW_SERVER_API_KEY}"
 ```
 
 When status is `Interrupted`, the response includes an `interrupt` object (metadata only):
 
 ```json
 {
-  "run_id": "550e8400-e29b-41d4-a716-446655440000",
-  "trace_id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
-  "status": "Interrupted",
-  "interrupt": {
-    "approval_key": "manager_approval",
-    "expires_at": "2026-06-01T12:00:00Z",
-    "step_index": 1
-  },
-  "created_at": "2026-05-31T10:00:00Z"
+ "run_id": "550e8400-e29b-41d4-a716-446655440000",
+ "trace_id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+ "status": "Interrupted",
+ "interrupt": {
+ "approval_key": "manager_approval",
+ "expires_at": "2026-06-01T12:00:00Z",
+ "step_index": 1
+ },
+ "created_at": "2026-05-31T10:00:00Z"
 }
 ```
 
@@ -108,7 +108,7 @@ Avoid embedding PII or secrets in `approval_key`. Keys appear in URLs and audit 
 
 ## Graph workflows
 
-Graph steps reference the same `hitl` block on the underlying `StepDefinition`. The interrupted step index in the run payload helps UIs show which node is waiting. Graph recovery resume has a known partial gap (FP-1.01); validate HITL plus graph combinations in your environment before production.
+Graph steps reference the same `hitl` block on the underlying `StepDefinition`. The interrupted step index in the run payload helps UIs show which node is waiting. Graph recovery resume has a known partial gap (Graph recovery resume); validate HITL plus graph combinations in your environment before production.
 
 ## Checklist before first HITL run
 

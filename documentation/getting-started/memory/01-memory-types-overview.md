@@ -18,13 +18,13 @@ ArcFlow memory is configured with two enums from `arcflow`:
 
 ```python
 MemoryConfig(
-    memory_type,           # MemoryType enum (required)
-    scope=MemoryScope.AGENT,
-    namespace=None,        # required for PERSISTENT and VECTOR
-    ttl_seconds=None,      # optional expiry for persistent keys
-    embedding=None,        # vector only, e.g. "stub/8" or "openai/text-embedding-3-small"
-    retrieval=None,        # MemoryRetrievalConfig for vector
-    chunking=None,         # MemoryChunkingConfig for vector ingest alignment
+ memory_type, # MemoryType enum (required)
+ scope=MemoryScope.AGENT,
+ namespace=None, # required for PERSISTENT and VECTOR
+ ttl_seconds=None, # optional expiry for persistent keys
+ embedding=None, # vector only, e.g. "stub/8" or "openai/text-embedding-3-small"
+ retrieval=None, # MemoryRetrievalConfig for vector
+ chunking=None, # MemoryChunkingConfig for vector ingest alignment
 )
 ```
 
@@ -60,10 +60,10 @@ from arcflow import MemoryConfig, MemoryScope, MemoryType
 
 session = MemoryConfig(MemoryType.SESSION, MemoryScope.AGENT, namespace="scratch")
 vector = MemoryConfig(
-    MemoryType.VECTOR,
-    MemoryScope.AGENT,
-    namespace="doc_qa",
-    embedding="stub/8",
+ MemoryType.VECTOR,
+ MemoryScope.AGENT,
+ namespace="doc_qa",
+ embedding="stub/8",
 )
 
 print(session.memory_type, session.scope, session.namespace)
@@ -76,15 +76,15 @@ Attach memory to an agent (vector config matches [RAG chatbot walkthrough](../..
 from arcflow import Agent, MemoryConfig, MemoryScope, MemoryType
 
 agent = Agent(
-    name="researcher",
-    role="researcher",
-    instructions="Answer using retrieved context.",
-    memory=MemoryConfig(
-        MemoryType.VECTOR,
-        MemoryScope.AGENT,
-        namespace="doc_qa",
-        embedding="stub/8",
-    ),
+ name="researcher",
+ role="researcher",
+ instructions="Answer using retrieved context.",
+ memory=MemoryConfig(
+ MemoryType.VECTOR,
+ MemoryScope.AGENT,
+ namespace="doc_qa",
+ embedding="stub/8",
+ ),
 )
 ```
 

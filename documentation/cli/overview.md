@@ -25,7 +25,7 @@ cargo run -p arcflow-cli -- --help
 | `arcflow init` | developer | Scaffold workflow project |
 | `arcflow run` | developer | Execute workflow file locally |
 | `arcflow trace` | developer, operator | Inspect execution trace |
-| `arcflow validate` | developer | **Stub (FP-5.04)** readability check only |
+| `arcflow validate` | developer | **Stub (CLI validate command)** readability check only |
 | `arcflow schedule validate` | developer | Validate cron schedule manifest |
 | `arcflow migrate up` | operator, platform | Apply Postgres migrations |
 
@@ -61,7 +61,7 @@ Per-command detail in linked pages.
 
 | Item | Status |
 |------|--------|
-| `arcflow validate` full JSON Schema | **Stub FP-5.04** |
+| `arcflow validate` full JSON Schema | **Stub CLI validate command** |
 | `arcflow run` native execution | Delegates to Python SDK message today |
 | Graph/RAG via CLI run | Use SDK or server API |
 

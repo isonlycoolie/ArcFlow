@@ -26,7 +26,7 @@ All paths call `arcflow-core::WorkflowEngine`. Workflow semantics, trace event k
 | Multi-tenant SaaS backend | arcflow-server + your auth layer | Central registry, idempotency, persisted runs and traces |
 | Public website chat widget | Relay + static SDK + admin publish | Site token + origin gate; LLM keys on server only |
 | Local debugging | SDK or CLI, optional VS Code | Fast iteration; trace via SDK result or `arcflow trace` |
-| Operator runbooks | CLI + SQL + admin API | Dashboard UI deferred (FP-3.01); use admin routes and scripts today |
+| Operator runbooks | CLI + SQL + admin API | Dashboard UI deferred (Operator dashboard UI); use admin routes and scripts today |
 | Edge experiment | WASM (alpha) | Linear stub only; no graph, RAG, or recovery |
 
 ## Surface details
@@ -53,7 +53,7 @@ Browser client for published workflows. Production mode is `relay`. `direct` mod
 
 ### arcflow CLI
 
-Local `arcflow run`, `arcflow trace <run_id> [--tui]`, `arcflow migrate up`. **`arcflow validate` is a stub** (FP-5.04): schema validation in CI should use [RCS schema](../contracts/rcs-schema.md) until the CLI command ships.
+Local `arcflow run`, `arcflow trace <run_id> [--tui]`, `arcflow migrate up`. **`arcflow validate` is a stub** (CLI validate command): schema validation in CI should use [workflow schema](../contracts/rcs-schema.md) until the CLI command ships.
 
 ### VS Code extension
 
@@ -78,4 +78,4 @@ In-repo extension for workflow graph visualization, run from workspace, metadata
 
 - [Architecture overview](architecture-overview.md) for static product and backend sequence flows
 - [What is ArcFlow?](what-is-arcflow.md) for personas
-- [Maturity and known gaps](maturity-and-known-gaps.md) for FP-2 (server SSE), FP-3.01 (dashboard), FP-5.04 (CLI validate)
+- [Maturity and known gaps](maturity-and-known-gaps.md) for server streaming (server SSE), Operator dashboard UI (dashboard), CLI validate command (CLI validate)

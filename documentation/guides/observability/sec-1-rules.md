@@ -1,13 +1,13 @@
 
-# SEC-1 rules (implementation guide)
+# Trace data policy rules (implementation guide)
 
-SEC-1 is ArcFlow's mandatory trace data policy. Observability outputs describe **what happened** (ids, timings, sizes, codes) without exposing **what was said** (prompts, completions, tool payloads, retrieved text). This page is the implementation and audit guide; [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md) covers product context.
+The ArcFlow trace data policy is mandatory for production deployments. Observability outputs describe **what happened** (ids, timings, sizes, codes) without exposing **what was said** (prompts, completions, tool payloads, retrieved text). This page is the implementation and audit guide; [Trace data policy](../../concepts/sec-1-and-data-safety.md) covers product context.
 
-The rule applies everywhere traces leak: SDK memory, `GET /v1/runs/{id}/trace`, Relay trace poll, Postgres `arcflow_trace_events`, VS Code timeline exports, and optional OTel span attributes (FP-4 alpha).
+The rule applies everywhere traces leak: SDK memory, `GET /v1/runs/{id}/trace`, Relay trace poll, Postgres `arcflow_trace_events`, VS Code timeline exports, and optional OTel span attributes (OpenTelemetry export (alpha)).
 
 ## Allowed field categories
 
-| Category | Examples | SEC-1 class |
+| Category | Examples | trace data policy class |
 |----------|----------|-------------|
 | Identifiers | `run_id`, `step_id`, `trace_id`, workflow name | Safe |
 | Names / roles | `agent_name`, `agent_role`, `tool_name`, `binding_id` | Safe if not user PII |
@@ -15,7 +15,7 @@ The rule applies everywhere traces leak: SDK memory, `GET /v1/runs/{id}/trace`, 
 | Counts | `chunk_count`, `total_bytes`, `step_count`, token deltas | Safe |
 | Tokens struct | `tokens.input`, `tokens.output`, `tokens.total` | Safe |
 | Durations | `duration_ms`, `latency_ms`, `backoff_ms` | Safe |
-| Error codes | RCS `error_code`, bounded `error_message` | Safe when no embedded user text |
+| Error codes | workflow specification `error_code`, bounded `error_message` | Safe when no embedded user text |
 | Schema hashes | `input_schema_hash` | Safe |
 | Provider metadata | `provider_id`, `model_id`, `retry_after_seconds` | Safe |
 | Status enums | `status`, `mode`, `action` on external events | Safe |
@@ -45,7 +45,7 @@ Streaming at the SDK layer may expose `event.text` to **your** process during `r
 
 ## Developer responsibilities
 
-SEC-1 is not only an engine concern. Workflow authors must avoid:
+trace data policy is not only an engine concern. Workflow authors must avoid:
 
 | Mistake | Trace impact |
 |---------|--------------|
@@ -54,11 +54,11 @@ SEC-1 is not only an engine concern. Workflow authors must avoid:
 | Returning retrieved chunks in tool names | Appears in `ToolCallStarted` |
 | Custom debug flags that dump envelopes to stdout | Out of band leakage |
 
-Use neutral agent and tool names. Keep PII in your application database, not in RCS identifiers that emit to trace.
+Use neutral agent and tool names. Keep PII in your application database, not in the workflow specification identifiers that emit to trace.
 
 ## Run results vs traces
 
-`GET /v1/runs/{id}` **result** payload may include final `output` text appropriate to your product policy. SEC-1 governs **trace events**, not every API field. HITL interrupt objects expose `approval_key` and `expires_at`, not transcripts.
+`GET /v1/runs/{id}` **result** payload may include final `output` text appropriate to your product policy. The trace data policy governs **trace events**, not every API field. HITL interrupt objects expose `approval_key` and `expires_at`, not transcripts.
 
 Document separately which API fields your compliance team treats as sensitive.
 
@@ -66,10 +66,10 @@ Document separately which API fields your compliance team treats as sensitive.
 
 1. **Sample export**: Pull `GET /v1/runs/{id}/trace` for a RAG and tool-heavy run.
 2. **Greppable secrets**: Search JSON for `@`, `sk-`, `Bearer `, large base64 blobs.
-3. **Field review**: Compare each event kind to [trace event reference](trace-event-reference.md) SEC-1 column.
+3. **Field review**: Compare each event kind to [trace event reference](trace-event-reference.md) Trace policy column.
 4. **Browser path**: Repeat via Relay trace URL with a site token.
 5. **Logs**: Confirm application logs do not duplicate traces with richer content.
-6. **OTel (if FP-4 enabled)**: Inspect span attributes in Jaeger for prompt or completion keys.
+6. **OTel (if OpenTelemetry metrics export enabled)**: Inspect span attributes in Jaeger for prompt or completion keys.
 
 Normative contract: [Trace events (normative)](../../contracts/trace-events-normative.md).
 
@@ -77,11 +77,11 @@ Normative contract: [Trace events (normative)](../../contracts/trace-events-norm
 
 ```json
 [
-  { "kind": "WorkflowStarted", "run_id": "r1", "workflow_name": "demo", "step_count": 2 },
-  { "kind": "ProviderRequestSent", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "prompt_size_bytes": 512 },
-  { "kind": "MemoryRetrieved", "run_id": "r1", "step_id": "s1", "agent_name": "researcher", "chunk_count": 5, "total_bytes": 8192 },
-  { "kind": "ToolCallCompleted", "run_id": "r1", "step_id": "s1", "tool_name": "search_kb", "duration_ms": 210, "output_size_bytes": 8192 },
-  { "kind": "WorkflowCompleted", "run_id": "r1", "duration_ms": 950, "total_tokens": { "input": 120, "output": 45, "total": 165 } }
+ { "kind": "WorkflowStarted", "run_id": "r1", "workflow_name": "demo", "step_count": 2 },
+ { "kind": "ProviderRequestSent", "run_id": "r1", "step_id": "s1", "provider_id": "openai", "model_id": "gpt-4o-mini", "prompt_size_bytes": 512 },
+ { "kind": "MemoryRetrieved", "run_id": "r1", "step_id": "s1", "agent_name": "researcher", "chunk_count": 5, "total_bytes": 8192 },
+ { "kind": "ToolCallCompleted", "run_id": "r1", "step_id": "s1", "tool_name": "search_kb", "duration_ms": 210, "output_size_bytes": 8192 },
+ { "kind": "WorkflowCompleted", "run_id": "r1", "duration_ms": 950, "total_tokens": { "input": 120, "output": 45, "total": 165 } }
 ]
 ```
 
@@ -98,6 +98,6 @@ If any answer is yes, redesign the field or gate behind localhost debug with `AR
 
 ## Related pages
 
-- [Trace event reference](trace-event-reference.md) per-event SEC-1 classification
-- [OpenTelemetry](opentelemetry.md) for FP-4 span attribute rules
+- [Trace event reference](trace-event-reference.md) per-event trace data policy classification
+- [OpenTelemetry](opentelemetry.md) for OpenTelemetry metrics export span attribute rules
 - [Webhook security](../external-integrations/webhook-security.md) for callback body logging

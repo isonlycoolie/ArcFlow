@@ -3,7 +3,7 @@
 
 ArcFlow validates workflow definitions before execution and supports deterministic test mode for CI without live LLM calls. Validation catches schema errors, broken graph references, and missing agent ids early. Test mode simulates step outputs and controlled failures so you can verify retry, fallback, and trace shape cheaply.
 
-Normative schema: [RCS schema](../../contracts/rcs-schema.md). Conceptual overview: [The RCS contract](../../concepts/the-rcs-contract.md).
+Normative schema: [workflow schema](../../contracts/rcs-schema.md). Conceptual overview: [Workflow specification](../../concepts/the-rcs-contract.md).
 
 ## Engine validation
 
@@ -23,19 +23,19 @@ Common failures:
 - Join node `wait_for` referencing unknown node ids
 - `execution_mode: "graph"` without `graph` object
 
-## CLI validate (FP-5.04)
+## CLI validate (CLI validate command)
 
 ```bash
 arcflow validate workflow.json
 ```
 
-**Status: stub.** Full schema validation in the CLI is deferred (**FP-5.04**, plan ref `feat/fp-5-cli-validate`). Today:
+**Status: stub.** Full schema validation in the CLI is deferred (**CLI validate command**, ). Today:
 
 - Use JSON Schema validation in CI against `v1.schema.json`
 - Rely on engine validation at run time
 - Use `arcflow run` with test mode for integration checks
 
-Do not document `arcflow validate` as production-complete until FP-5.04 ships.
+Do not document `arcflow validate` as production-complete until CLI validate command ships.
 
 ## JSON Schema in CI
 
@@ -53,20 +53,20 @@ Validate both workflow and agent bundles before `PUT` registry publish. See [Wor
 
 ```json
 {
-  "recovery_enabled": false,
-  "test": {
-    "steps": {
-      "00000000-0000-4000-8000-000000000010": {
-        "output": "mock step 1",
-        "fail_times": 0
-      },
-      "00000000-0000-4000-8000-000000000011": {
-        "fail_times": 1,
-        "output": "fail first",
-        "then_output": "success second attempt"
-      }
-    }
-  }
+ "recovery_enabled": false,
+ "test": {
+ "steps": {
+ "00000000-0000-4000-8000-000000000010": {
+ "output": "mock step 1",
+ "fail_times": 0
+ },
+ "00000000-0000-4000-8000-000000000011": {
+ "fail_times": 1,
+ "output": "fail first",
+ "then_output": "success second attempt"
+ }
+ }
+ }
 }
 ```
 
@@ -84,11 +84,11 @@ For runs that still invoke the agent loop but need deterministic LLM behavior, s
 
 ```json
 {
-  "provider": {
-    "provider_id": "stub",
-    "model": "stub-v1",
-    "api_key_env": ""
-  }
+ "provider": {
+ "provider_id": "stub",
+ "model": "stub-v1",
+ "api_key_env": ""
+ }
 }
 ```
 
@@ -108,13 +108,13 @@ Test routing with test mode outputs that match edge conditions:
 
 ```json
 {
-  "test": {
-    "steps": {
-      "s-classify": { "output": "billing" },
-      "s-billing": { "output": "billing resolution" },
-      "s-merge": { "output": "merged summary" }
-    }
-  }
+ "test": {
+ "steps": {
+ "s-classify": { "output": "billing" },
+ "s-billing": { "output": "billing resolution" },
+ "s-merge": { "output": "merged summary" }
+ }
+ }
 }
 ```
 
@@ -122,12 +122,12 @@ Test routing with test mode outputs that match edge conditions:
 
 ```bash
 curl -s -X POST http://localhost:8080/v1/runs \
-  -H "Authorization: Bearer $ARCFLOW_SERVER_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d @test-run.json
+ -H "Authorization: Bearer $ARCFLOW_SERVER_API_KEY" \
+ -H "Content-Type: application/json" \
+ -d @test-run.json
 ```
 
-Poll `GET /v1/runs/{run_id}/trace` and assert event kinds. Traces are SEC-1 safe; see [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md).
+Poll `GET /v1/runs/{run_id}/trace` and assert event kinds. Traces are trace data policy safe; see [Trace data policy](../../concepts/sec-1-and-data-safety.md).
 
 ## Recovery testing
 
@@ -135,17 +135,17 @@ Linear recovery with test mode:
 
 ```json
 {
-  "recovery_enabled": true,
-  "test": {
-    "steps": {
-      "00000000-0000-4000-8000-000000000010": { "output": "step one" },
-      "00000000-0000-4000-8000-000000000011": { "fail_times": 999, "output": "never" }
-    }
-  }
+ "recovery_enabled": true,
+ "test": {
+ "steps": {
+ "00000000-0000-4000-8000-000000000010": { "output": "step one" },
+ "00000000-0000-4000-8000-000000000011": { "fail_times": 999, "output": "never" }
+ }
+ }
 }
 ```
 
-Simulate interrupt mid-run, then resume per [Recovery and resume](../reliability/recovery-and-resume.md). **Graph checkpoint resume is partial (FP-1.01)**; do not treat graph resume tests as release gates until FP-1.01 closes.
+Simulate interrupt mid-run, then resume per [Recovery and resume](../reliability/recovery-and-resume.md). **Graph checkpoint resume is partial (Graph recovery resume)**; do not treat graph resume tests as release gates until Graph recovery resume closes.
 
 ## Verification matrix
 
@@ -161,5 +161,5 @@ Simulate interrupt mid-run, then resume per [Recovery and resume](../reliability
 
 - [Linear workflows](linear-workflows.md)
 - [Graph workflows](graph-workflows.md)
-- [Maturity and known gaps](../../concepts/maturity-and-known-gaps.md) (FP-5.04, FP-1.01)
+- [Maturity and known gaps](../../concepts/maturity-and-known-gaps.md) (CLI validate command, Graph recovery resume)
 - [Install and build](../../getting-started/install-and-build.md)

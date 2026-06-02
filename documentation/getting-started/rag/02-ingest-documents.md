@@ -19,7 +19,7 @@ Stub embedding works without `ARCFLOW_EMBEDDING_PROVIDER`. Production ingest sho
 from arcflow.memory import VectorStore
 
 store = VectorStore()
-chunk_count = store.ingest(namespace, key, text)  # returns int
+chunk_count = store.ingest(namespace, key, text) # returns int
 ```
 
 | Argument | Role |
@@ -55,16 +55,16 @@ Optional rerank improves top-k precision on noisy corpora.
 """
 
 def main() -> None:
-    store = VectorStore()
-    chunks = store.ingest(NAMESPACE, KEY, SAMPLE_DOC)
-    print(f"ingested {chunks} chunks into namespace={NAMESPACE!r} key={KEY!r}")
+ store = VectorStore()
+ chunks = store.ingest(NAMESPACE, KEY, SAMPLE_DOC)
+ print(f"ingested {chunks} chunks into namespace={NAMESPACE!r} key={KEY!r}")
 
-    hits = store.search(NAMESPACE, "hybrid retrieval", top_k=2)
-    for i, hit in enumerate(hits, start=1):
-        print(f"hit {i}: {hit.byte_len} bytes, preview={hit.text[:80]!r}...")
+ hits = store.search(NAMESPACE, "hybrid retrieval", top_k=2)
+ for i, hit in enumerate(hits, start=1):
+ print(f"hit {i}: {hit.byte_len} bytes, preview={hit.text[:80]!r}...")
 
 if __name__ == "__main__":
-    main()
+ main()
 ```
 
 Run:

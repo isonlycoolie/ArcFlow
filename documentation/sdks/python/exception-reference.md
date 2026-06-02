@@ -9,8 +9,8 @@ ArcFlow Python exceptions inherit from `ArcFlowError`. Messages follow the forma
 ArcFlowError
 ├── WorkflowConfigurationError
 ├── WorkflowExecutionError
-│   ├── RetryExhaustedError
-│   └── WorkflowTimeoutError
+│ ├── RetryExhaustedError
+│ └── WorkflowTimeoutError
 ├── ToolConfigurationError
 ├── ToolExecutionError
 ├── MemoryConfigurationError
@@ -20,8 +20,8 @@ ArcFlowError
 ├── InfrastructureUnavailableError
 ├── TraceNotFoundError
 ├── TraceStorageWarning
-├── HumanRejectedError          (arcflow.hitl)
-└── WorkflowInterruptedError    (arcflow.hitl)
+├── HumanRejectedError (arcflow.hitl)
+└── WorkflowInterruptedError (arcflow.hitl)
 ```
 
 ## Configuration errors (fix before run)

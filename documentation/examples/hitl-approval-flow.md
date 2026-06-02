@@ -39,11 +39,11 @@ The script enables recovery and attaches HITL to the manager step:
 
 ```python
 wf = (
-    Workflow("expense_reimbursement", runtime=RUNTIME)
-    .enable_recovery()
-    .step(submit)
-    .step(manager, hitl=HitlConfig(approval_key=APPROVAL_KEY, timeout_seconds=3600))
-    .step(accounting)
+ Workflow("expense_reimbursement", runtime=RUNTIME)
+.enable_recovery()
+.step(submit)
+.step(manager, hitl=HitlConfig(approval_key=APPROVAL_KEY, timeout_seconds=3600))
+.step(accounting)
 )
 ```
 
@@ -58,7 +58,7 @@ export ARCFLOW_SERVER_API_KEY=dev-secret
 bash examples/hitl/approve_cli.sh YOUR_RUN_ID
 ```
 
-The script posts to `POST /v1/runs/{run_id}/approve/manager_approval` with `{"approved": true, ...}` then polls run status.
+The script posts to `POST /v1/runs/{run_id}/approve/manager_approval` with `{"approved": true,...}` then polls run status.
 
 ## Step 4: Re-run or poll to completion
 
@@ -66,7 +66,7 @@ After approval, either poll:
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/YOUR_RUN_ID" \
-  -H "X-ArcFlow-Api-Key: dev-secret"
+ -H "X-ArcFlow-Api-Key: dev-secret"
 ```
 
 Or re-invoke the workflow logic that resumes from checkpoint (server handles continuation after approve). Terminal HTTP status should be `Completed`.
@@ -99,7 +99,7 @@ HTTP API uses PascalCase statuses (`Interrupted`, `Completed`). SDK embedded run
 | `StepCompleted` | Manager and accounting after resume |
 | `WorkflowCompleted` | Full pipeline success |
 
-Exact HITL kind names appear in [trace event reference](../guides/observability/trace-event-reference.md). Trace exports remain SEC-1 metadata only.
+Exact HITL kind names appear in [trace event reference](../guides/observability/trace-event-reference.md). Trace exports remain metadata-only trace only.
 
 ## Troubleshooting
 

@@ -11,26 +11,26 @@ Declare bindings on the workflow definition, not on individual agents:
 
 ```json
 {
-  "external_bindings": [
-    {
-      "id": "payment_webhook",
-      "kind": "http_callback",
-      "attach_to_step_id": "00000000-0000-4000-8000-000000000050",
-      "mode": "async_callback",
-      "outcome_schema": {
-        "type": "object",
-        "properties": {
-          "status": { "enum": ["success", "failed", "needs_input"] }
-        },
-        "required": ["status"]
-      },
-      "recovery": {
-        "max_retries": 3,
-        "on_needs_input": "agent_reask",
-        "on_fatal": "fail_run"
-      }
-    }
-  ]
+ "external_bindings": [
+ {
+ "id": "payment_webhook",
+ "kind": "http_callback",
+ "attach_to_step_id": "00000000-0000-4000-8000-000000000050",
+ "mode": "async_callback",
+ "outcome_schema": {
+ "type": "object",
+ "properties": {
+ "status": { "enum": ["success", "failed", "needs_input"] }
+ },
+ "required": ["status"]
+ },
+ "recovery": {
+ "max_retries": 3,
+ "on_needs_input": "agent_reask",
+ "on_fatal": "fail_run"
+ }
+ }
+ ]
 }
 ```
 
@@ -54,15 +54,15 @@ from arcflow.external import ExternalBindingConfig, report_outcome
 STEP_ID = "550e8400-e29b-41d4-a716-446655440000"
 
 binding = ExternalBindingConfig(
-    "gov_portal_submit",
-    attach_to_step_id=STEP_ID,
-    kind="browser_automation",
-    mode="async_callback",
-    recovery={
-        "max_retries": 2,
-        "on_needs_input": "agent_reask",
-        "on_fatal": "hitl_escalate",
-    },
+ "gov_portal_submit",
+ attach_to_step_id=STEP_ID,
+ kind="browser_automation",
+ mode="async_callback",
+ recovery={
+ "max_retries": 2,
+ "on_needs_input": "agent_reask",
+ "on_fatal": "hitl_escalate",
+ },
 )
 
 wf = Workflow("online_application", runtime="http://localhost:8080")
@@ -92,13 +92,13 @@ from arcflow.external import ExternalBindingConfig, report_outcome
 
 # ExternalOutcome.report
 response = report_outcome(
-    "550e8400-e29b-41d4-a716-446655440000",
-    "gov_portal_submit",
-    {
-        "status": "success",
-        "fields": {"confirmation_number": "APP-2026-9912"},
-    },
-    base_url="http://localhost:8080",
+ "550e8400-e29b-41d4-a716-446655440000",
+ "gov_portal_submit",
+ {
+ "status": "success",
+ "fields": {"confirmation_number": "APP-2026-9912"},
+ },
+ base_url="http://localhost:8080",
 )
 print(response)
 ```
@@ -129,10 +129,10 @@ BODY='{"binding_id":"payment_webhook","status":"success","fields":{"transaction_
 SIG="sha256=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$ARCFLOW_WEBHOOK_SECRET" | awk '{print $2}')"
 
 curl -sS -X POST "http://localhost:8080/v1/runs/${RUN_ID}/external/payment_webhook" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer ${ARCFLOW_SERVER_API_KEY}" \
-  -H "X-ArcFlow-Signature: ${SIG}" \
-  -d "$BODY"
+ -H "Content-Type: application/json" \
+ -H "Authorization: Bearer ${ARCFLOW_SERVER_API_KEY}" \
+ -H "X-ArcFlow-Signature: ${SIG}" \
+ -d "$BODY"
 ```
 
 Send `X-Idempotency-Key` on retries; duplicate keys return `202` with `already_processed`.

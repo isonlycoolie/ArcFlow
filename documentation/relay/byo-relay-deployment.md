@@ -10,15 +10,15 @@ Reference implementation: `examples/relay/byo-docker/`.
 ```bash
 export ARCFLOW_UPSTREAM_URL=http://localhost:8080
 export ARCFLOW_RELAY_SITES_JSON='[{
-  "id": "s_dev",
-  "display_name": "Dev",
-  "allowed_origins": ["http://localhost:5173"],
-  "rate_limit_rpm": 60,
-  "allow_inline": false,
-  "default_workflow_name": "chat",
-  "kb_namespace": "site-s_dev-kb",
-  "upstream_runtime_key": "dev-secret",
-  "token": "st_live_devtoken"
+ "id": "s_dev",
+ "display_name": "Dev",
+ "allowed_origins": ["http://localhost:5173"],
+ "rate_limit_rpm": 60,
+ "allow_inline": false,
+ "default_workflow_name": "chat",
+ "kb_namespace": "site-s_dev-kb",
+ "upstream_runtime_key": "dev-secret",
+ "token": "st_live_devtoken"
 }]'
 docker compose -f examples/relay/byo-docker/compose.yml up --build
 ```
@@ -87,10 +87,10 @@ Define scoped keys on the server:
 
 ```json
 {
-  "relay-site-key-abc": {
-    "workflows": ["chat"],
-    "publish": false
-  }
+ "relay-site-key-abc": {
+ "workflows": ["chat"],
+ "publish": false
+ }
 }
 ```
 
@@ -102,7 +102,7 @@ Typical layout:
 
 ```text
 Internet → CDN/WAF → Relay (TLS termination)
-                         → private network → arcflow-server
+ → private network → arcflow-server
 ```
 
 Relay does not terminate LLM traffic; it only proxies JSON run APIs.

@@ -35,15 +35,15 @@ Export upstream URL and site definition (from [`README.md`](../examples/relay-by
 ```bash
 export ARCFLOW_UPSTREAM_URL=http://host.docker.internal:8080
 export ARCFLOW_RELAY_SITES_JSON='[{
-  "id": "s_dev",
-  "display_name": "Dev",
-  "allowed_origins": ["http://localhost:5173"],
-  "rate_limit_rpm": 60,
-  "allow_inline": false,
-  "default_workflow_name": "chat",
-  "kb_namespace": "site-s_dev-kb",
-  "upstream_runtime_key": "dev-secret",
-  "token": "st_live_devtoken"
+ "id": "s_dev",
+ "display_name": "Dev",
+ "allowed_origins": ["http://localhost:5173"],
+ "rate_limit_rpm": 60,
+ "allow_inline": false,
+ "default_workflow_name": "chat",
+ "kb_namespace": "site-s_dev-kb",
+ "upstream_runtime_key": "dev-secret",
+ "token": "st_live_devtoken"
 }]'
 ```
 
