@@ -28,6 +28,14 @@ export OPENAI_API_KEY="sk-your-key-here" # macOS / Linux
 
 Other built-in provider classes (`Anthropic`, `Gemini`) follow the same pattern with their own environment variables. This lesson focuses on the default path vs OpenAI because that is the most common first switch.
 
+For CI pipelines that must exercise live provider code paths without outbound network calls, set optional mock endpoint overrides (test harness only):
+
+| Variable | Purpose |
+|----------|---------|
+| `ARCFLOW_OPENAI_API_ENDPOINT` | Redirect OpenAI HTTP calls to a local mock server |
+| `ARCFLOW_ANTHROPIC_API_ENDPOINT` | Redirect Anthropic HTTP calls |
+| `ARCFLOW_GEMINI_API_ENDPOINT` | Redirect Gemini HTTP calls |
+
 Provider misconfiguration (empty model name, invalid temperature) raises `ProviderConfigurationError` before the run starts. Provider failures during a live call raise `ProviderExecutionError` with context you can log.
 
 ## Minimal example (no API key)

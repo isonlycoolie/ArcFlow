@@ -91,6 +91,25 @@ Production also requires:
 
 See [Vector RAG pipeline](../memory-and-rag/vector-rag-pipeline.md).
 
+## Swapping providers at run time
+
+The same workflow definition works with any supported provider. Pass the provider only at `run()` time; agents, steps, and workflow shape stay unchanged.
+
+```python
+from arcflow import Agent, Anthropic, Gemini, OpenAI, Workflow
+
+agent = Agent(name="writer", role="author", instructions="One paragraph.")
+wf = Workflow("swap-demo").step(agent)
+
+wf.run("topic", provider=OpenAI(model="gpt-4o"))
+wf.run("topic", provider=Anthropic(model="claude-3-5-sonnet-20241022"))
+wf.run("topic", provider=Gemini(model="gemini-1.5-pro"))
+```
+
+Successful runs produce the same `step_count` and structurally equivalent traces (provider-specific token counts may differ). CI validates this with mock HTTP servers and the endpoint overrides above — no live API keys required.
+
+`workflow.run(input)` without a provider continues to use the default in-process backend for backwards compatibility.
+
 ## Trace events
 
 | Event | When |
