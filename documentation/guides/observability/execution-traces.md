@@ -102,6 +102,17 @@ cargo run -p arcflow-cli -- trace RUN_ID --tui
 
 Requires access to the trace store (local SDK run or server-backed persistence).
 
+## In-process store limits
+
+When traces are held in the SDK process store (embedded runs without server persistence):
+
+| Limit | Value |
+|-------|-------|
+| Events per run | 10,000 (`MAX_TRACE_EVENTS_PER_RUN`) |
+| Completed runs in process store | 100 (`MAX_CONCURRENT_TRACES`) |
+
+Exceeding capacity may add warnings on `TraceResult.warnings` rather than blocking execution.
+
 ## Annotated sample (three-step workflow with tool)
 
 Metadata-only excerpt from a research → tool → write pipeline:
