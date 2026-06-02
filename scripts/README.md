@@ -33,8 +33,10 @@ bash scripts/ci-local.sh
 | [`build-python-sdk-wheels.sh`](build-python-sdk-wheels.sh) | Build Python SDK wheels for CI/release |
 | [`verify-python-sdk-tag.sh`](verify-python-sdk-tag.sh) | Verify tag matches `sdk-python` version |
 | [`check-pypi-version-absent.sh`](check-pypi-version-absent.sh) | Confirm version not already on PyPI |
-
-Windows local publish helpers (`publish-pypi.ps1`, `publish-pypi-local.ps1`, `build-python-sdk.ps1`, `.pypi-token.example`) are added on the release branch; copy `.pypi-token.example` to `scripts/.pypi-token` (gitignored) for local uploads.
+| [`publish-pypi.ps1`](publish-pypi.ps1) | Build and upload with token from env or `scripts/.pypi-token` |
+| [`publish-pypi-local.ps1`](publish-pypi-local.ps1) | Upload wheels from `sdk-python/dist/` |
+| [`build-python-sdk.ps1`](build-python-sdk.ps1) | Windows wheel build into `sdk-python/dist/` |
+| [`.pypi-token.example`](.pypi-token.example) | Template for gitignored `scripts/.pypi-token` |
 
 ## Operator helpers
 
