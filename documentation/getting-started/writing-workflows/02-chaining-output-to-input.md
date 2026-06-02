@@ -41,24 +41,24 @@ Save as `chain_handoff.py`:
 from arcflow import Agent, ContextPolicy, Workflow
 
 researcher = Agent(
-    name="researcher",
-    role="Research",
-    instructions="Research the topic and list key points.",
-    context=ContextPolicy(
-        include_prior_steps="none",
-        include_run_input=True,
-    ),
+ name="researcher",
+ role="Research",
+ instructions="Research the topic and list key points.",
+ context=ContextPolicy(
+ include_prior_steps="none",
+ include_run_input=True,
+ ),
 )
 
 writer = Agent(
-    name="writer",
-    role="Writer",
-    instructions="Write a summary based only on the research output.",
-    context=ContextPolicy(
-        include_prior_steps="last",
-        include_run_input=False,
-        max_prior_step_chars=8192,
-    ),
+ name="writer",
+ role="Writer",
+ instructions="Write a summary based only on the research output.",
+ context=ContextPolicy(
+ include_prior_steps="last",
+ include_run_input=False,
+ max_prior_step_chars=8192,
+ ),
 )
 
 workflow = Workflow("chain-handoff")
@@ -94,9 +94,9 @@ from arcflow import ContextPolicy
 from arcflow.exceptions import WorkflowConfigurationError
 
 try:
-    ContextPolicy(include_prior_steps="sometimes")
+ ContextPolicy(include_prior_steps="sometimes")
 except WorkflowConfigurationError:
-    print("Invalid include_prior_steps rejected as expected")
+ print("Invalid include_prior_steps rejected as expected")
 ```
 
 ## Next

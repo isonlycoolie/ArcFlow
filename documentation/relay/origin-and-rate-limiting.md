@@ -11,10 +11,10 @@ On each browser request, Relay reads the `Origin` header (or `Referer` fallback 
 
 ```json
 {
-  "error": {
-    "code": "origin_not_allowed",
-    "message": "[ArcFlow Relay] Origin not allowed for this site."
-  }
+ "error": {
+ "code": "origin_not_allowed",
+ "message": "[ArcFlow Relay] Origin not allowed for this site."
+ }
 }
 ```
 
@@ -22,23 +22,23 @@ On each browser request, Relay reads the `Origin` header (or `Referer` fallback 
 
 ```bash
 curl -s -X POST http://localhost:8080/v1/admin/sites \
-  -H "Authorization: Bearer dev-admin" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "display_name": "Acme",
-    "allowed_origins": ["https://www.acme.com"],
-    "rate_limit_rpm": 60,
-    "allow_inline": false
-  }'
+ -H "Authorization: Bearer dev-admin" \
+ -H "Content-Type: application/json" \
+ -d '{
+ "display_name": "Acme",
+ "allowed_origins": ["https://www.acme.com"],
+ "rate_limit_rpm": 60,
+ "allow_inline": false
+ }'
 ```
 
 ### Updating origins
 
 ```bash
 curl -s -X PATCH "http://localhost:8080/v1/admin/sites/site_abc123" \
-  -H "Authorization: Bearer dev-admin" \
-  -H "Content-Type: application/json" \
-  -d '{"allowed_origins":["https://www.acme.com","https://staging.acme.com"]}'
+ -H "Authorization: Bearer dev-admin" \
+ -H "Content-Type: application/json" \
+ -d '{"allowed_origins":["https://www.acme.com","https://staging.acme.com"]}'
 ```
 
 Redeploy or reload Relay if using JSON file config so in-memory site store picks up changes.
@@ -59,21 +59,21 @@ Relay expects a browser-like Origin:
 
 ```bash
 curl -s -X POST "http://localhost:8090/v1/sites/s_dev/runs" \
-  -H "Authorization: Bearer st_live_devtoken" \
-  -H "Origin: http://localhost:5173" \
-  -H "Content-Type: application/json" \
-  -d '{"workflow_ref":{"name":"chat","version":"^1.0.0"},"input":"test"}'
+ -H "Authorization: Bearer st_live_devtoken" \
+ -H "Origin: http://localhost:5173" \
+ -H "Content-Type: application/json" \
+ -d '{"workflow_ref":{"name":"chat","version":"^1.0.0"},"input":"test"}'
 ```
 
 Wrong origin:
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}\n" \
-  -X POST "http://localhost:8090/v1/sites/s_dev/runs" \
-  -H "Authorization: Bearer st_live_devtoken" \
-  -H "Origin: https://evil.example" \
-  -H "Content-Type: application/json" \
-  -d '{"workflow_ref":{"name":"chat","version":"^1.0.0"},"input":"test"}'
+ -X POST "http://localhost:8090/v1/sites/s_dev/runs" \
+ -H "Authorization: Bearer st_live_devtoken" \
+ -H "Origin: https://evil.example" \
+ -H "Content-Type: application/json" \
+ -d '{"workflow_ref":{"name":"chat","version":"^1.0.0"},"input":"test"}'
 ```
 
 Expect **403**.
@@ -86,10 +86,10 @@ When exceeded, Relay returns **429**:
 
 ```json
 {
-  "error": {
-    "code": "rate_limited",
-    "message": "[ArcFlow Relay] Rate limit exceeded."
-  }
+ "error": {
+ "code": "rate_limited",
+ "message": "[ArcFlow Relay] Rate limit exceeded."
+ }
 }
 ```
 

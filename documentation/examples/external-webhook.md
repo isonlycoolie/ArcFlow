@@ -45,18 +45,18 @@ Success path:
 
 ```bash
 python examples/external/playwright_stub_callback.py \
-  --run-id YOUR_RUN_ID \
-  --binding-id gov_portal_submit \
-  --status success
+ --run-id YOUR_RUN_ID \
+ --binding-id gov_portal_submit \
+ --status success
 ```
 
 Needs-input path (validation error simulation):
 
 ```bash
 python examples/external/playwright_stub_callback.py \
-  --run-id YOUR_RUN_ID \
-  --status needs_input \
-  --error-code INVALID_NAME
+ --run-id YOUR_RUN_ID \
+ --status needs_input \
+ --error-code INVALID_NAME
 ```
 
 Script core:
@@ -65,10 +65,10 @@ Script core:
 from arcflow.external import report_outcome
 
 resp = report_outcome(
-    run_id,
-    binding_id,
-    {"status": status, "error_code": error_code},
-    base_url=base_url,
+ run_id,
+ binding_id,
+ {"status": status, "error_code": error_code},
+ base_url=base_url,
 )
 ```
 
@@ -76,7 +76,7 @@ resp = report_outcome(
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/YOUR_RUN_ID" \
-  -H "X-ArcFlow-Api-Key: dev-secret"
+ -H "X-ArcFlow-Api-Key: dev-secret"
 ```
 
 After success outcome, expect progression toward `Completed` or next step state depending on workflow graph.
@@ -86,10 +86,10 @@ After success outcome, expect progression toward `Completed` or next step state 
 Script stdout prints JSON response from the server on success:
 
 ```
-{"run_id": "...", "status": "Running", ...}
+{"run_id": "...", "status": "Running",...}
 ```
 
-On signing or auth failure, stderr shows `[ArcFlow] callback failed: ...` and exit code 1.
+On signing or auth failure, stderr shows `[ArcFlow] callback failed:...` and exit code 1.
 
 ## Trace events you should see
 
@@ -109,7 +109,7 @@ Failed HMAC or invalid payload does not emit completion; check server logs and [
 | Callback failed: 401 | Wrong signing secret or clock skew | Align binding secret with server config |
 | 404 on run or binding | Mismatched `binding_id` | Use id declared in workflow publish payload |
 | Run unchanged after POST | Outcome status not accepted | Use allowed status values: `success`, `failed`, `needs_input` |
-| Calling from browser | SEC-1 violation risk | Never embed server keys in static frontend; use backend relay |
+| Calling from browser | trace data policy violation risk | Never embed server keys in static frontend; use backend relay |
 
 ## Related
 

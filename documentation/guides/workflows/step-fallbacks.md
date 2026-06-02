@@ -15,33 +15,33 @@ Fallbacks complement [Retry and backoff](../reliability/retry-and-backoff.md): r
 
 Fallback is not a substitute for [Graph workflows](graph-workflows.md) routing. It activates on step failure, not on conditional output.
 
-## RCS configuration
+## Workflow configuration
 
 ```json
 {
-  "id": "00000000-0000-4000-8000-000000000001",
-  "name": "resilient_qa",
-  "execution_mode": "linear",
-  "steps": [
-    {
-      "id": "00000000-0000-4000-8000-000000000010",
-      "agent_id": "00000000-0000-4000-8000-000000000020",
-      "order": 1,
-      "fallback_step_id": "00000000-0000-4000-8000-000000000012"
-    },
-    {
-      "id": "00000000-0000-4000-8000-000000000011",
-      "agent_id": "00000000-0000-4000-8000-000000000021",
-      "order": 2,
-      "fallback_step_id": null
-    },
-    {
-      "id": "00000000-0000-4000-8000-000000000012",
-      "agent_id": "00000000-0000-4000-8000-000000000022",
-      "order": 3,
-      "fallback_step_id": null
-    }
-  ]
+ "id": "00000000-0000-4000-8000-000000000001",
+ "name": "resilient_qa",
+ "execution_mode": "linear",
+ "steps": [
+ {
+ "id": "00000000-0000-4000-8000-000000000010",
+ "agent_id": "00000000-0000-4000-8000-000000000020",
+ "order": 1,
+ "fallback_step_id": "00000000-0000-4000-8000-000000000012"
+ },
+ {
+ "id": "00000000-0000-4000-8000-000000000011",
+ "agent_id": "00000000-0000-4000-8000-000000000021",
+ "order": 2,
+ "fallback_step_id": null
+ },
+ {
+ "id": "00000000-0000-4000-8000-000000000012",
+ "agent_id": "00000000-0000-4000-8000-000000000022",
+ "order": 3,
+ "fallback_step_id": null
+ }
+ ]
 }
 ```
 
@@ -53,28 +53,28 @@ Both primary and fallback agents must be defined in the run's `agents` array.
 
 ```json
 [
-  {
-    "id": "00000000-0000-4000-8000-000000000020",
-    "name": "primary_analyst",
-    "role": "Senior analyst",
-    "instructions": "Answer with full tool access.",
-    "provider": {
-      "provider_id": "openai",
-      "model": "gpt-4o",
-      "api_key_env": "OPENAI_API_KEY"
-    }
-  },
-  {
-    "id": "00000000-0000-4000-8000-000000000022",
-    "name": "fallback_analyst",
-    "role": "Backup analyst",
-    "instructions": "Answer concisely without tools.",
-    "provider": {
-      "provider_id": "openai",
-      "model": "gpt-4o-mini",
-      "api_key_env": "OPENAI_API_KEY"
-    }
-  }
+ {
+ "id": "00000000-0000-4000-8000-000000000020",
+ "name": "primary_analyst",
+ "role": "Senior analyst",
+ "instructions": "Answer with full tool access.",
+ "provider": {
+ "provider_id": "openai",
+ "model": "gpt-4o",
+ "api_key_env": "OPENAI_API_KEY"
+ }
+ },
+ {
+ "id": "00000000-0000-4000-8000-000000000022",
+ "name": "fallback_analyst",
+ "role": "Backup analyst",
+ "instructions": "Answer concisely without tools.",
+ "provider": {
+ "provider_id": "openai",
+ "model": "gpt-4o-mini",
+ "api_key_env": "OPENAI_API_KEY"
+ }
+ }
 ]
 ```
 
@@ -86,11 +86,11 @@ When fallback activates:
 
 ```json
 [
-  { "kind": "StepStarted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000010", "agent_name": "primary_analyst" },
-  { "kind": "StepFailed", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000010", "error_code": "ProviderError" },
-  { "kind": "StepFallbackActivated", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000010", "primary_agent_name": "primary_analyst", "fallback_agent_name": "fallback_analyst" },
-  { "kind": "StepStarted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000012", "agent_name": "fallback_analyst" },
-  { "kind": "StepCompleted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000012", "duration_ms": 650 }
+ { "kind": "StepStarted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000010", "agent_name": "primary_analyst" },
+ { "kind": "StepFailed", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000010", "error_code": "ProviderError" },
+ { "kind": "StepFallbackActivated", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000010", "primary_agent_name": "primary_analyst", "fallback_agent_name": "fallback_analyst" },
+ { "kind": "StepStarted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000012", "agent_name": "fallback_analyst" },
+ { "kind": "StepCompleted", "run_id": "r1", "step_id": "00000000-0000-4000-8000-000000000012", "duration_ms": 650 }
 ]
 ```
 
@@ -102,18 +102,18 @@ Workflow or step retry may run before fallback triggers. Typical flow: transient
 
 ```json
 {
-  "exec_config": {
-    "retry": {
-      "max_attempts": 2,
-      "backoff": {
-        "kind": "exponential",
-        "base_ms": 1000,
-        "multiplier": 2.0,
-        "max_ms": 10000,
-        "jitter_ms": 50
-      }
-    }
-  }
+ "exec_config": {
+ "retry": {
+ "max_attempts": 2,
+ "backoff": {
+ "kind": "exponential",
+ "base_ms": 1000,
+ "multiplier": 2.0,
+ "max_ms": 10000,
+ "jitter_ms": 50
+ }
+ }
+ }
 }
 ```
 
@@ -125,19 +125,19 @@ Drive primary failure without live LLM:
 
 ```json
 {
-  "recovery_enabled": false,
-  "test": {
-    "steps": {
-      "00000000-0000-4000-8000-000000000010": {
-        "fail_times": 1,
-        "output": "primary fail",
-        "then_output": "should not reach"
-      },
-      "00000000-0000-4000-8000-000000000012": {
-        "output": "fallback success"
-      }
-    }
-  }
+ "recovery_enabled": false,
+ "test": {
+ "steps": {
+ "00000000-0000-4000-8000-000000000010": {
+ "fail_times": 1,
+ "output": "primary fail",
+ "then_output": "should not reach"
+ },
+ "00000000-0000-4000-8000-000000000012": {
+ "output": "fallback success"
+ }
+ }
+ }
 }
 ```
 

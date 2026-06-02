@@ -29,9 +29,9 @@ Save as `minimal_agent.py`:
 from arcflow import Agent, Workflow
 
 summarizer = Agent(
-    name="summarizer",
-    role="Summarizer",
-    instructions="Summarize the user topic in two short paragraphs.",
+ name="summarizer",
+ role="Summarizer",
+ instructions="Summarize the user topic in two short paragraphs.",
 )
 
 workflow = Workflow("minimal-agent-demo")

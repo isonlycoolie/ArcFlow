@@ -11,21 +11,21 @@ Most workflow libraries blur two jobs: describing what should happen, and actual
 
 In Python you **declare** agents (who does the work) and register them as ordered steps on a `Workflow`. You call `run(input)` when you want execution to start. Python does not call an LLM, loop over steps, or manage retries. Those concerns live in the Rust runtime crate `arcflow-core`.
 
-When `run()` fires, the Python SDK serializes your workflow into **RCS** (Runtime Contract Specification) JSON: agent definitions, step order, run input, and execution config. That payload crosses the native binding boundary into Rust. `WorkflowEngine` validates the shape, picks a provider, runs step one, then step two, and returns a result object back to Python.
+When `run()` fires, the Python SDK serializes your workflow into **workflow specification** (ArcFlow workflow specification) JSON: agent definitions, step order, run input, and execution config. That payload crosses the native binding boundary into Rust. `WorkflowEngine` validates the shape, picks a provider, runs step one, then step two, and returns a result object back to Python.
 
 For learning and CI, the default in-process agent backend returns deterministic placeholder text with no network calls. The same declaration path works when you pass `provider=OpenAI(model="gpt-4o")`; only the execution backend changes, not how you build the workflow.
 
-The mental model in one line: **your script declares structure, RCS carries it, Rust executes it.**
+The mental model in one line: **your script declares structure, workflow specification carries it, Rust executes it.**
 
 ```
-Python script  →  RCS JSON  →  arcflow-core (Rust)  →  WorkflowResult back to Python
-     │                │                    │
-  Agent,          versioned           default or live
-  Workflow,        contract            provider per step
-  run()
+Python script → workflow JSON → arcflow-core (Rust) → WorkflowResult back to Python
+ │ │ │
+ Agent, versioned default or live
+ Workflow, contract provider per step
+ run()
 ```
 
-This split is why Python, TypeScript, and the HTTP server can share behavior: they all speak RCS to the same engine. You can read more in [The RCS contract](../../concepts/the-rcs-contract.md) when you want the schema-level detail. For now, treat RCS as the wire format your declarations become at run time.
+This split is why Python, TypeScript, and the HTTP server can share behavior: they all speak workflow specification to the same engine. You can read more in [Workflow specification](../../concepts/the-rcs-contract.md) when you want the schema-level detail. For now, treat workflow specification as the wire format your declarations become at run time.
 
 ## Minimal example
 
@@ -36,15 +36,15 @@ from arcflow import Agent, Workflow
 
 # Declaration only: no LLM call happens here.
 analyst = Agent(
-    name="analyst",
-    role="analyze",
-    instructions="Break the topic into three bullet points.",
+ name="analyst",
+ role="analyze",
+ instructions="Break the topic into three bullet points.",
 )
 
 pipeline = Workflow("fundamentals_demo")
 pipeline.step(analyst)
 
-# Execution starts here; Python sends RCS to arcflow-core.
+# Execution starts here; Python sends workflow specification to arcflow-core.
 result = pipeline.run("Solar panel efficiency trends")
 
 print(result.output)

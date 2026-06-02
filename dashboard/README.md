@@ -28,10 +28,10 @@ Keep OSS `dashboard/spec/` in sync when changing admin API bindings; mirror upda
 
 ## Related OSS docs
 
-- [Meta-repo deployment guide](../contracts/guides/deployment/meta-repo.md)
+- [Meta-repo deployment guide](../documentation/deployment/overview.md#meta-repo-layout)
 - [Static site examples](../examples/static/README.md)
-- [Relay R1 exit criteria](../ArcFlow_Improvement_Plans/arcflow-static-product-vision/09-relay-r1-exit-criteria.md) (local plan)
+- [Static product overview](../documentation/static-product/overview.md)
 
 ## Status
 
-**FP-3.01 (dashboard UI)** is deferred. This spec folder is the production-readiness handoff artifact until the dashboard repo ships v1.
+**Dashboard UI** is deferred. This spec folder is the production-readiness handoff artifact until the dashboard repo ships v1.

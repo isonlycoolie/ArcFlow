@@ -9,19 +9,19 @@ Reliability context: [Execution model](../../concepts/execution-model.md). Compl
 
 ```json
 {
-  "exec_config": {
-    "recovery_enabled": true,
-    "retry": {
-      "max_attempts": 3,
-      "backoff": {
-        "kind": "exponential",
-        "base_ms": 1000,
-        "multiplier": 2.0,
-        "max_ms": 30000,
-        "jitter_ms": 100
-      }
-    }
-  }
+ "exec_config": {
+ "recovery_enabled": true,
+ "retry": {
+ "max_attempts": 3,
+ "backoff": {
+ "kind": "exponential",
+ "base_ms": 1000,
+ "multiplier": 2.0,
+ "max_ms": 30000,
+ "jitter_ms": 100
+ }
+ }
+ }
 }
 ```
 
@@ -39,11 +39,11 @@ Parsed in `server/arcflow-server/src/exec_config.rs`; same shape for SDK runs.
 
 ```json
 {
-  "backoff": {
-    "kind": "fixed",
-    "base_ms": 2000,
-    "jitter_ms": 0
-  }
+ "backoff": {
+ "kind": "fixed",
+ "base_ms": 2000,
+ "jitter_ms": 0
+ }
 }
 ```
 
@@ -51,13 +51,13 @@ Parsed in `server/arcflow-server/src/exec_config.rs`; same shape for SDK runs.
 
 ```json
 {
-  "backoff": {
-    "kind": "linear",
-    "base_ms": 1000,
-    "multiplier": 1.5,
-    "max_ms": 15000,
-    "jitter_ms": 50
-  }
+ "backoff": {
+ "kind": "linear",
+ "base_ms": 1000,
+ "multiplier": 1.5,
+ "max_ms": 15000,
+ "jitter_ms": 50
+ }
 }
 ```
 
@@ -65,13 +65,13 @@ Parsed in `server/arcflow-server/src/exec_config.rs`; same shape for SDK runs.
 
 ```json
 {
-  "backoff": {
-    "kind": "exponential",
-    "base_ms": 1000,
-    "multiplier": 2.0,
-    "max_ms": 30000,
-    "jitter_ms": 100
-  }
+ "backoff": {
+ "kind": "exponential",
+ "base_ms": 1000,
+ "multiplier": 2.0,
+ "max_ms": 30000,
+ "jitter_ms": 100
+ }
 }
 ```
 
@@ -83,27 +83,27 @@ Workflow definition may set per-step overrides:
 
 ```json
 {
-  "steps": [
-    {
-      "id": "s1",
-      "agent_id": "a1",
-      "order": 1,
-      "retry_policy": {
-        "max_attempts": 5,
-        "backoff": {
-          "kind": "exponential",
-          "base_ms": 500,
-          "multiplier": 2.0,
-          "max_ms": 10000,
-          "jitter_ms": 25
-        }
-      }
-    }
-  ],
-  "retry_policy": {
-    "max_attempts": 2,
-    "backoff": { "kind": "fixed", "base_ms": 1000 }
-  }
+ "steps": [
+ {
+ "id": "s1",
+ "agent_id": "a1",
+ "order": 1,
+ "retry_policy": {
+ "max_attempts": 5,
+ "backoff": {
+ "kind": "exponential",
+ "base_ms": 500,
+ "multiplier": 2.0,
+ "max_ms": 10000,
+ "jitter_ms": 25
+ }
+ }
+ }
+ ],
+ "retry_policy": {
+ "max_attempts": 2,
+ "backoff": { "kind": "fixed", "base_ms": 1000 }
+ }
 }
 ```
 
@@ -115,13 +115,13 @@ Step policy applies to that step; workflow policy applies as default where step 
 
 ```json
 {
-  "kind": "RetryAttempted",
-  "run_id": "r1",
-  "step_id": "s1",
-  "attempt_number": 2,
-  "max_attempts": 3,
-  "backoff_ms": 2000,
-  "trigger_error_code": "ProviderError"
+ "kind": "RetryAttempted",
+ "run_id": "r1",
+ "step_id": "s1",
+ "attempt_number": 2,
+ "max_attempts": 3,
+ "backoff_ms": 2000,
+ "trigger_error_code": "ProviderError"
 }
 ```
 
@@ -129,11 +129,11 @@ Step policy applies to that step; workflow policy applies as default where step 
 
 ```json
 {
-  "kind": "RetryExhausted",
-  "run_id": "r1",
-  "step_id": "s1",
-  "total_attempts": 3,
-  "last_error_code": "ProviderError"
+ "kind": "RetryExhausted",
+ "run_id": "r1",
+ "step_id": "s1",
+ "total_attempts": 3,
+ "last_error_code": "ProviderError"
 }
 ```
 
@@ -149,22 +149,22 @@ Terminal mapping: `RateLimited` error code (HTTP 429) when retries do not recove
 
 ```json
 {
-  "exec_config": {
-    "recovery_enabled": false,
-    "retry": {
-      "max_attempts": 3,
-      "backoff": { "kind": "fixed", "base_ms": 10 }
-    },
-    "test": {
-      "steps": {
-        "s1": {
-          "fail_times": 2,
-          "output": "fail",
-          "then_output": "success on third try"
-        }
-      }
-    }
-  }
+ "exec_config": {
+ "recovery_enabled": false,
+ "retry": {
+ "max_attempts": 3,
+ "backoff": { "kind": "fixed", "base_ms": 10 }
+ },
+ "test": {
+ "steps": {
+ "s1": {
+ "fail_times": 2,
+ "output": "fail",
+ "then_output": "success on third try"
+ }
+ }
+ }
+ }
 }
 ```
 
@@ -176,18 +176,18 @@ HTTP callbacks use separate recovery on bindings:
 
 ```json
 {
-  "external_bindings": [
-    {
-      "id": "payment_webhook",
-      "kind": "http_callback",
-      "attach_to_step_id": "s-pay",
-      "mode": "async",
-      "recovery": {
-        "max_attempts": 3,
-        "on_failure": "retry_with_backoff"
-      }
-    }
-  ]
+ "external_bindings": [
+ {
+ "id": "payment_webhook",
+ "kind": "http_callback",
+ "attach_to_step_id": "s-pay",
+ "mode": "async",
+ "recovery": {
+ "max_attempts": 3,
+ "on_failure": "retry_with_backoff"
+ }
+ }
+ ]
 }
 ```
 

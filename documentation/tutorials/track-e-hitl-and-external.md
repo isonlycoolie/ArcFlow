@@ -47,7 +47,7 @@ Poll until HTTP status is `Completed`:
 
 ```bash
 curl -s "http://localhost:8080/v1/runs/YOUR_RUN_ID" \
-  -H "X-ArcFlow-Api-Key: dev-secret"
+ -H "X-ArcFlow-Api-Key: dev-secret"
 ```
 
 Pass criteria: transition `Interrupted` then `Completed` with accounting step executed.
@@ -64,9 +64,9 @@ Obtain `run_id` when external step activates.
 
 ```bash
 python examples/external/playwright_stub_callback.py \
-  --run-id YOUR_RUN_ID \
-  --binding-id gov_portal_submit \
-  --status success
+ --run-id YOUR_RUN_ID \
+ --binding-id gov_portal_submit \
+ --status success
 ```
 
 For validation retry flows, use `--status needs_input --error-code INVALID_NAME`.
@@ -96,7 +96,7 @@ HITL first phase prints approval instructions with run id. After approve, comple
 | HITL | `WorkflowStarted`, submit `StepCompleted`, interrupt metadata, post-approve steps, `WorkflowCompleted` |
 | External | Step waiting state, `StepCompleted` after outcome, terminal workflow events |
 
-All exports remain SEC-1 metadata. See [trace event reference](../guides/observability/trace-event-reference.md).
+All exports remain metadata-only trace. See [trace event reference](../guides/observability/trace-event-reference.md).
 
 ## Troubleshooting
 

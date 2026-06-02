@@ -9,7 +9,7 @@ Read [03 Anatomy of a workflow](fundamentals/03-anatomy-of-a-workflow.md) so ter
 
 ## Concept
 
-The Python SDK exposes idiomatic `Agent` and `Workflow` types that serialize to the Runtime Contract Specification (RCS) and call the in-process Rust runtime by default. You declare agents and step order in Python; `arcflow-core` executes the graph, invokes providers, and emits trace events.
+The Python SDK exposes idiomatic `Agent` and `Workflow` types that serialize to the ArcFlow workflow specification and call the in-process Rust runtime by default. You declare agents and step order in Python; `arcflow-core` executes the graph, invokes providers, and emits trace events.
 
 Without a `provider=` argument, `run()` uses the default in-process agent backend. No `OPENAI_API_KEY` is required on that path. Passing `runtime="http://localhost:8080"` targets `arcflow-server` instead while keeping the same declaration code.
 
@@ -40,14 +40,14 @@ Save as `quickstart.py`:
 from arcflow import Agent, Workflow
 
 researcher = Agent(
-    name="researcher",
-    role="research",
-    instructions="Research the given topic and list key facts.",
+ name="researcher",
+ role="research",
+ instructions="Research the given topic and list key facts.",
 )
 writer = Agent(
-    name="writer",
-    role="write",
-    instructions="Turn the research into a short paragraph.",
+ name="writer",
+ role="write",
+ instructions="Turn the research into a short paragraph.",
 )
 
 workflow = Workflow("research_pipeline")
@@ -84,10 +84,10 @@ You should see `step_count == 2`, `status` of `completed`, and non-empty `output
 
 ```python
 for event in result.trace_events:
-    print(event.get("event_kind"), event.get("sequence"))
+ print(event.get("event_kind"), event.get("sequence"))
 ```
 
-Trace payloads follow SEC-1 rules: no raw prompts, tool values, or credentials. See [SEC-1 rules](../guides/observability/sec-1-rules.md) and [Trace events (normative)](../contracts/trace-events-normative.md) for event shapes.
+Trace payloads follow trace data policy rules: no raw prompts, tool values, or credentials. See [Trace data policy rules](../guides/observability/sec-1-rules.md) and [Trace events (normative)](../contracts/trace-events-normative.md) for event shapes.
 
 ## Structured trace via `workflow.trace()`
 
@@ -118,8 +118,8 @@ wf = Workflow("demo")
 wf.step(Agent(name="writer", role="author", instructions="Summarize in three sentences."))
 
 result = wf.run(
-    "Quantum networking",
-    provider=OpenAI(model="gpt-4o"),
+ "Quantum networking",
+ provider=OpenAI(model="gpt-4o"),
 )
 print(result.output)
 ```

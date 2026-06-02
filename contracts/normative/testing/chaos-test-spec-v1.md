@@ -1,6 +1,6 @@
 # CHAOS-TEST-SPEC v1
 
-Deterministic failure injection for Sprint 7 fault tolerance. No live provider APIs.
+Deterministic failure injection for fault tolerance testing. No live provider APIs.
 
 ## Rules
 

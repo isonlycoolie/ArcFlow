@@ -30,14 +30,14 @@ The canonical pipeline matches the five-minute guide: a researcher step followed
 from arcflow import Agent, Workflow
 
 researcher = Agent(
-    name="researcher",
-    role="research",
-    instructions="Research the given topic thoroughly.",
+ name="researcher",
+ role="research",
+ instructions="Research the given topic thoroughly.",
 )
 writer = Agent(
-    name="writer",
-    role="write",
-    instructions="Write a clear summary of the research.",
+ name="writer",
+ role="write",
+ instructions="Write a clear summary of the research.",
 )
 
 workflow = Workflow("track-a")
@@ -58,15 +58,15 @@ print("status:", result.status)
 import { Agent, Workflow } from "arcflow";
 
 const researcher = new Agent({
-  name: "researcher",
-  role: "research",
-  instructions: "Research the given topic thoroughly.",
+ name: "researcher",
+ role: "research",
+ instructions: "Research the given topic thoroughly.",
 });
 
 const writer = new Agent({
-  name: "writer",
-  role: "write",
-  instructions: "Write a clear summary of the research.",
+ name: "writer",
+ role: "write",
+ instructions: "Write a clear summary of the research.",
 });
 
 const workflow = new Workflow({ name: "track-a" });
@@ -76,7 +76,7 @@ workflow.step(writer);
 const result = await workflow.run("Analyze renewable energy trends");
 
 const preview =
-  result.output.length > 120 ? `${result.output.slice(0, 120)}...` : result.output;
+ result.output.length > 120 ? `${result.output.slice(0, 120)}...` : result.output;
 console.log("output:", preview);
 console.log("run_id:", result.runId);
 console.log("step_count:", result.stepCount);
@@ -138,7 +138,7 @@ kinds = {event.get("event_kind") for event in result.trace_events}
 required = {"WorkflowStarted", "StepCompleted", "WorkflowCompleted"}
 missing = required - kinds
 if missing:
-    raise SystemExit(f"missing trace kinds: {missing}")
+ raise SystemExit(f"missing trace kinds: {missing}")
 print("trace kinds ok:", sorted(kinds))
 ```
 
@@ -149,12 +149,12 @@ const events = (result.traceEvents ?? []) as Array<{ event_kind?: string }>;
 const kinds = new Set(events.map((e) => e.event_kind).filter(Boolean));
 const required = ["WorkflowStarted", "StepCompleted", "WorkflowCompleted"] as const;
 for (const kind of required) {
-  if (!kinds.has(kind)) throw new Error(`missing trace kind: ${kind}`);
+ if (!kinds.has(kind)) throw new Error(`missing trace kind: ${kind}`);
 }
 console.log("trace kinds ok:", [...kinds].sort());
 ```
 
-Event field name is `event_kind` in SDK exports (see `test_memory_workflow.py` and trace bridge). Payloads are metadata only per SEC-1.
+Event field name is `event_kind` in SDK exports (see `test_memory_workflow.py` and trace bridge). Payloads are metadata only per trace data policy.
 
 ## Step 4: Use structured `trace()`
 

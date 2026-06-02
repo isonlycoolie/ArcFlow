@@ -1,7 +1,7 @@
 # Streaming responses example
 
 
-This walkthrough consumes incremental stream events from the SDK during workflow execution. You iterate `run_stream()` (Python) or `runStream()` (TypeScript) and handle token, step start, and step complete events. Server-side SSE remains deferred (FP-2); this is in-process SDK streaming only.
+This walkthrough consumes incremental stream events from the SDK during workflow execution. You iterate `run_stream()` (Python) or `runStream()` (TypeScript) and handle token, step start, and step complete events. Server-side SSE remains deferred (streaming deferred); this is in-process SDK streaming only.
 
 Scripts: [Streaming responses walkthrough](../examples/streaming-responses.md), [Streaming responses walkthrough](../examples/streaming-responses.md).
 
@@ -28,12 +28,12 @@ Core loop:
 
 ```python
 async for event in wf.run_stream("Hello from ArcFlow"):
-    if event.type == "token":
-        print(event.text, end="", flush=True)
-    elif event.type == "step_start":
-        print(f"\n[step start: {event.step_id}]")
-    elif event.type == "step_complete":
-        print(f"[step complete: {event.step_id} in {event.duration_ms}ms]")
+ if event.type == "token":
+ print(event.text, end="", flush=True)
+ elif event.type == "step_start":
+ print(f"\n[step start: {event.step_id}]")
+ elif event.type == "step_complete":
+ print(f"[step complete: {event.step_id} in {event.duration_ms}ms]")
 ```
 
 ## Step 2: TypeScript streaming run
@@ -48,19 +48,19 @@ Equivalent pattern:
 
 ```typescript
 for await (const event of wf.runStream("Hello from ArcFlow")) {
-  switch (event.type) {
-    case "token":
-      process.stdout.write(event.text);
-      break;
-    case "step_start":
-      process.stdout.write(`\n[step start: ${event.step_id}]\n`);
-      break;
-    case "step_complete":
-      process.stdout.write(
-        `[step complete: ${event.step_id} in ${event.duration_ms}ms]\n`,
-      );
-      break;
-  }
+ switch (event.type) {
+ case "token":
+ process.stdout.write(event.text);
+ break;
+ case "step_start":
+ process.stdout.write(`\n[step start: ${event.step_id}]\n`);
+ break;
+ case "step_complete":
+ process.stdout.write(
+ `[step complete: ${event.step_id} in ${event.duration_ms}ms]\n`,
+ );
+ break;
+ }
 }
 ```
 
@@ -104,7 +104,7 @@ Stream iterators may surface token deltas before `StepCompleted` appears in trac
 | `Expected at least one stream event` | Provider or binding without stream support | Confirm stub path; rebuild SDK |
 | TypeScript import error | SDK not built | Run `npm run build` in `sdk-typescript/` |
 | Empty token events on stub | Normal for some stub versions | Step events still validate streaming plumbing |
-| Expecting HTTP SSE from server | FP-2 not implemented | Use SDK streaming or poll run status |
+| Expecting HTTP SSE from server | Server SSE not implemented | Use SDK streaming or poll run status |
 
 ## Related
 
@@ -112,4 +112,4 @@ Stream iterators may surface token deltas before `StepCompleted` appears in trac
 |----------|------|
 | SDK streaming guide | [sdk-streaming](../guides/streaming/sdk-streaming.md) |
 | Browser streaming note | [streaming in the browser](../guides/streaming/streaming-in-the-browser.md) |
-| FP-2 gap | [maturity and known gaps](../concepts/maturity-and-known-gaps.md) |
+| Server streaming gap | [maturity and known gaps](../concepts/maturity-and-known-gaps.md) |

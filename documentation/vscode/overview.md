@@ -9,8 +9,8 @@ Version: `0.2.0-stable` (see `package.json`).
 
 | Feature | Command / trigger | Purpose |
 |---------|-------------------|---------|
-| Graph visualization | `ArcFlow: Visualize Graph` | Render RCS graph DAG from workflow JSON |
-| Trace timeline | `ArcFlow: View Trace Timeline` | Inspect SEC-1 metadata events over time |
+| Graph visualization | `ArcFlow: Visualize Graph` | Render workflow graph DAG from workflow JSON |
+| Trace timeline | `ArcFlow: View Trace Timeline` | Inspect metadata-only trace events over time |
 | Local debug run | `ArcFlow: Start Debug Run` | Execute workflow from workspace |
 | Breakpoints | `ArcFlow: Toggle Breakpoint` | Pause on steps in debug sessions |
 | Server connect | `ArcFlow: Connect to Local Server` | Point extension at `arcflow-server` |
@@ -19,7 +19,7 @@ Version: `0.2.0-stable` (see `package.json`).
 
 | Language id | Extension | Content |
 |-------------|-----------|---------|
-| `arcflow-workflow` | `.arcflow.json` | Workflow RCS definitions |
+| `arcflow-workflow` | `.arcflow.json` | Workflow specification definitions |
 | `arcflow-trace` | `.arcflow.trace.json` | Exported execution traces |
 
 Editor title bar buttons appear when filename matches `*.arcflow.json` or `*.arcflow.trace.json`.
@@ -58,7 +58,7 @@ Requires VS Code **1.85+** and built `@arcflow/sdk` / native bindings for debug 
 | Production HTTP integration | [server/http-api-reference.md](../server/http-api-reference.md) |
 | Operator site admin | Admin API or private dashboard |
 | Browser chat widget | [static-product/overview.md](../static-product/overview.md) |
-| Server SSE streaming | Deferred FP-2 |
+| Server SSE streaming | Deferred server streaming |
 
 ## Tests
 

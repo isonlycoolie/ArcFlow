@@ -51,7 +51,7 @@ Advanced local-only path: `chat-rag/src/main-dev-direct.ts` (direct runtime key;
 | [reflection_loop.py](../examples/graph-routing.md) | Conditional reflection routing |
 | [parallel_search.py](../examples/graph-routing.md) | Parallel branches and join |
 
-Requires `Workflow(graph=True)` and Postgres for recovery-heavy paths. Graph resume from checkpoint remains partial (FP-1.01).
+Requires `Workflow(graph=True)` and Postgres for recovery-heavy paths. Graph resume from checkpoint remains partial (Graph recovery resume).
 
 ## RAG and memory
 
@@ -76,7 +76,7 @@ Requires `enable_recovery()` and Postgres. Server path supports approve API when
 | [chat_stream.py](../examples/streaming-responses.md) | Python `run_stream()` |
 | [chat_stream.ts](../examples/streaming-responses.md) | TypeScript `runStream()` |
 
-In-process SDK streaming only. Server SSE is deferred (FP-2).
+In-process SDK streaming only. Server SSE is deferred (streaming deferred).
 
 ## External callbacks
 

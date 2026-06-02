@@ -31,8 +31,8 @@ docker compose -f docker/docker-compose.prod.yml up --build -d
 Wait for migrate completion, then verify:
 
 ```bash
-curl -sf http://localhost:8080/ready | jq .
-curl -sf http://localhost:8080/health | jq .
+curl -sf http://localhost:8080/ready | jq.
+curl -sf http://localhost:8080/health | jq.
 ```
 
 ## Production differences from dev compose
@@ -64,12 +64,12 @@ Compose file defaults do not set CPU/memory limits. For production hosts, add:
 
 ```yaml
 deploy:
-  resources:
-    limits:
-      cpus: "2"
-      memory: 2G
-  restart_policy:
-    condition: on-failure
+ resources:
+ limits:
+ cpus: "2"
+ memory: 2G
+ restart_policy:
+ condition: on-failure
 ```
 
 Or use orchestrator-level limits in Kubernetes.
@@ -89,7 +89,7 @@ Optional OpenTelemetry collector:
 docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.otel.yml up -d
 ```
 
-Set `ARCFLOW_OTEL_ENABLED=true` and `ARCFLOW_OTLP_ENDPOINT` on the server. OTel metrics remain alpha under FP-4; core operation does not require them.
+Set `ARCFLOW_OTEL_ENABLED=true` and `ARCFLOW_OTLP_ENDPOINT` on the server. OTel metrics remain alpha under OpenTelemetry metrics export; core operation does not require them.
 
 See `docker/observability-otel.md` and [OpenTelemetry guide](../guides/observability/opentelemetry.md).
 

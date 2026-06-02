@@ -17,7 +17,7 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080/ready
 | `20240531000002_recovery_graph_columns.sql` | Graph checkpoint columns on recovery |
 | `20240531000003_arcflow_runs.sql` | Run tracking and idempotency |
 | `20240531000004_human_approvals.sql` | HITL approvals + run snapshots |
-| `20240531000005_trace_events.sql` | Persisted SEC-1 trace events |
+| `20240531000005_trace_events.sql` | Persisted trace data policy trace events |
 | `20240531000006_workflow_registry.sql` | Semver workflow registry |
 | `20240531000007_arcflow_sites.sql` | Static product sites and tokens |
 
@@ -30,7 +30,7 @@ cargo run -p arcflow-cli -- migrate up
 
 ## arcflow_recovery_state
 
-Supports partial execution recovery (Sprint 7).
+Supports partial execution recovery.
 
 | Column | Type | Notes |
 |--------|------|-------|
@@ -41,7 +41,7 @@ Supports partial execution recovery (Sprint 7).
 | `created_at` | TIMESTAMPTZ | Insert time |
 | `is_consumed` | BOOLEAN | Prevents double resume |
 | `execution_mode` | TEXT | `linear` or `graph` (migration 000002) |
-| `current_node_id` | TEXT | Graph checkpoint (FP-1.01 partial) |
+| `current_node_id` | TEXT | Graph checkpoint (Graph recovery resume partial) |
 | `graph_iteration_count` | INTEGER | Graph guard |
 | `pending_join` | JSONB | Join node state |
 
@@ -90,7 +90,7 @@ Persisted trace for `GET /v1/runs/{id}/trace`.
 | Column | Type | Notes |
 |--------|------|-------|
 | `run_id`, `seq` | TEXT, BIGINT | Composite PK, ordered |
-| `event_json` | JSONB | SEC-1 metadata event |
+| `event_json` | JSONB | metadata-only trace event |
 | `created_at` | TIMESTAMPTZ | Insert time |
 
 ## arcflow_workflows and arcflow_workflow_aliases

@@ -19,8 +19,8 @@ Admin routes (source of truth in OSS):
 - Meta-repo path: `arcflow/dashboard/spec/03-admin-api-contract.md`
 - OSS link: [dashboard/spec/03-admin-api-contract.md](../../dashboard/spec/03-admin-api-contract.md)
 
-Do not use `contracts/normative/runtime/server-api-v1.md` for admin routes — that document is stale for runtime/admin surfaces.
+Admin routes are documented in [dashboard/spec/03-admin-api-contract.md](../../dashboard/spec/03-admin-api-contract.md) and [HTTP API reference](../../documentation/server/http-api-reference.md).
 
 ## Meta-repo
 
-See [deploy/meta-repo-template/](../meta-repo-template/) and [contracts/guides/deployment/meta-repo.md](../../contracts/guides/deployment/meta-repo.md).
+See [deploy/meta-repo-template/](../meta-repo-template/) and [documentation/deployment/overview.md](../../documentation/deployment/overview.md#meta-repo-layout).

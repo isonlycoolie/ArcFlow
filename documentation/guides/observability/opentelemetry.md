@@ -3,7 +3,7 @@
 
 ArcFlow's primary observability path is the native execution trace (`TraceEventEmitter`, SDK `trace()`, HTTP trace, CLI). OpenTelemetry export is an **optional side channel** for platform teams that already run Grafana, Jaeger, or Prometheus.
 
-OTel metrics and live span export are **alpha (FP-4)**. Behavior and label sets may change before production signoff. Core workflow correctness does not require OTel.
+OTel metrics and live span export are **alpha (OpenTelemetry metrics export)**. Behavior and label sets may change before production signoff. Core workflow correctness does not require OTel.
 
 ## ArcFlow-native first
 
@@ -41,16 +41,16 @@ cargo build -p arcflow-core --features otel
 ```text
 arcflow.workflow (run_id, workflow_name)
 └── arcflow.step (step_id, step_index, agent_name)
-    ├── arcflow.llm.invoke (provider, model, tokens.prompt, tokens.completion)
-    ├── arcflow.tool.execute (tool_name, duration_ms, status)
-    └── arcflow.memory (memory_type, operation)
+ ├── arcflow.llm.invoke (provider, model, tokens.prompt, tokens.completion)
+ ├── arcflow.tool.execute (tool_name, duration_ms, status)
+ └── arcflow.memory (memory_type, operation)
 ```
 
 Post-run OTLP export from `ExecutionTrace` remains as a fallback when live span export is unavailable. Both paths can be active when OTel is enabled.
 
-Implementation: `runtime/arcflow-core/src/tracing/otel.rs`, `otel_metrics.rs`, ADR-009.
+Implementation: `runtime/arcflow-core/src/tracing/otel.rs`, `otel_metrics.rs`,.
 
-## Metrics (FP-4 alpha)
+## Metrics (OpenTelemetry export (alpha))
 
 | Metric | Type | Labels |
 |--------|------|--------|
@@ -64,11 +64,11 @@ Implementation: `runtime/arcflow-core/src/tracing/otel.rs`, `otel_metrics.rs`, A
 
 Review label cardinality before enabling in high-tenant deployments. Prefer bounded label values (`workflow_name` from registry, not free-form user strings).
 
-## SEC-1 on spans
+## Trace data policy on spans
 
 Span attributes may include token counts, durations, ids, and status codes. They must **never** include prompt text, completion text, or raw provider bodies. The `otel_sec1` module and tests under `cargo test -p arcflow-core --features otel otel` encode this constraint.
 
-Apply the same discipline as [SEC-1 rules](sec-1-rules.md) when adding custom instrumentation around ArcFlow.
+Apply the same discipline as [Trace data policy rules](sec-1-rules.md) when adding custom instrumentation around ArcFlow.
 
 ## Local collector stack
 
@@ -91,13 +91,13 @@ Expect `arcflow.workflow` spans within a few seconds of run completion.
 
 See [docker/observability-otel.md](../../../docker/observability-otel.md) for full compose notes.
 
-## FP-4 maturity expectations
+## OpenTelemetry metrics export maturity expectations
 
-| Stable enough today | Still stabilizing under FP-4 |
+| Stable enough today | Still stabilizing under OpenTelemetry metrics export |
 |---------------------|------------------------------|
 | Native traces and HTTP trace API | Metric label sets |
 | CLI TUI trace view | Dual live + post-run export tuning |
-| SEC-1 metadata in span translation | Production SLO guidance for collector failures |
+| metadata-only trace in span translation | Production SLO guidance for collector failures |
 
 Export failures are best-effort and never fail workflow execution (`tracing/error.rs`). Monitor collector health separately.
 
@@ -105,22 +105,22 @@ Export failures are best-effort and never fail workflow execution (`tracing/erro
 
 | Command | Expect |
 |---------|--------|
-| `cargo test -p arcflow-core --features otel otel` | Span, SEC-1, metrics smoke tests pass |
+| `cargo test -p arcflow-core --features otel otel` | Span, trace data policy, metrics smoke tests pass |
 | `cargo build -p arcflow-core --no-default-features` | Pass without OTel deps |
 | `cargo build -p arcflow-server` | Pass with OTel enabled |
 
 ## When not to use OTel yet
 
-Skip FP-4 in production if:
+Skip OpenTelemetry metrics export in production if:
 
 - You cannot cap metric cardinality.
 - Compliance has not reviewed span attributes.
 - You only need run-level debugging (native trace is sufficient).
 
-Revisit when FP-4 exits alpha in [maturity and known gaps](../../concepts/maturity-and-known-gaps.md).
+Revisit when OpenTelemetry metrics export exits alpha in [maturity and known gaps](../../concepts/maturity-and-known-gaps.md).
 
 ## Related pages
 
 - [Execution traces](execution-traces.md) for native trace access
-- [SEC-1 rules](sec-1-rules.md) for attribute policy
-- [Maturity and known gaps](../../concepts/maturity-and-known-gaps.md) for FP-4 status
+- [Trace data policy rules](sec-1-rules.md) for attribute policy
+- [Maturity and known gaps](../../concepts/maturity-and-known-gaps.md) for OpenTelemetry metrics export status

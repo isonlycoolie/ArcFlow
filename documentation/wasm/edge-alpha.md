@@ -23,9 +23,9 @@ After build:
 
 ```text
 runtime/arcflow-wasm/pkg/
-  arcflow_wasm.js
-  arcflow_wasm_bg.wasm
-  arcflow_wasm.d.ts
+ arcflow_wasm.js
+ arcflow_wasm_bg.wasm
+ arcflow_wasm.d.ts
 ```
 
 Build from repo (requires `wasm-pack`):
@@ -42,18 +42,18 @@ import init, { executeWorkflow } from "./pkg/arcflow_wasm.js";
 
 await init();
 const workflowJson = JSON.stringify({
-  workflow: {
-    id: "...",
-    name: "echo",
-    execution_mode: "Linear",
-    steps: [{ id: "...", agent_id: "...", order: 0 }],
-  },
-  agents: [{
-    id: "...",
-    name: "echo",
-    role: "assistant",
-    instructions: "Echo input.",
-  }],
+ workflow: {
+ id: "...",
+ name: "echo",
+ execution_mode: "Linear",
+ steps: [{ id: "...", agent_id: "...", order: 0 }],
+ },
+ agents: [{
+ id: "...",
+ name: "echo",
+ role: "assistant",
+ instructions: "Echo input.",
+ }],
 });
 const resultJson = executeWorkflow(workflowJson, JSON.stringify("hello"));
 ```
@@ -69,11 +69,11 @@ import wasm from "./arcflow_wasm_bg.wasm";
 import { executeWorkflow } from "./arcflow_wasm.js";
 
 export default {
-  async fetch(request) {
-    const { workflow, input } = await request.json();
-    const out = executeWorkflow(JSON.stringify(workflow), JSON.stringify(input));
-    return new Response(out, { headers: { "Content-Type": "application/json" } });
-  },
+ async fetch(request) {
+ const { workflow, input } = await request.json();
+ const out = executeWorkflow(JSON.stringify(workflow), JSON.stringify(input));
+ return new Response(out, { headers: { "Content-Type": "application/json" } });
+ },
 };
 ```
 
@@ -108,7 +108,7 @@ Includes `execute_workflow_json_round_trip` in `lib.rs` tests.
 
 | ID | Note |
 |----|------|
-| FP-2 | Server SSE not related to WASM; browser uses trace poll |
-| FP-1.01 | Graph recovery partial on server; WASM has no graph |
+| Server SSE streaming | Server SSE not related to WASM; browser uses trace poll |
+| Graph recovery resume | Graph recovery partial on server; WASM has no graph |
 
 Maturity: [maturity-and-known-gaps.md](../concepts/maturity-and-known-gaps.md).

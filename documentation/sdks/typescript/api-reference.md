@@ -13,9 +13,9 @@ import { Agent, Workflow, OpenAI } from "arcflow";
 
 ```typescript
 interface WorkflowConfig {
-  name?: string;      // default "default"
-  graph?: boolean;    // default false
-  runtime?: string;   // server base URL for remote runs
+ name?: string; // default "default"
+ graph?: boolean; // default false
+ runtime?: string; // server base URL for remote runs
 }
 ```
 
@@ -44,8 +44,8 @@ interface WorkflowConfig {
 
 ```typescript
 interface RunOptions {
-  provider?: Provider;
-  initialState?: Record<string, unknown>;
+ provider?: Provider;
+ initialState?: Record<string, unknown>;
 }
 ```
 
@@ -57,16 +57,16 @@ interface RunOptions {
 
 ```typescript
 interface AgentConfig {
-  name: string;
-  role: string;
-  instructions: string;
-  model?: string;  // default "default"
+ name: string;
+ role: string;
+ instructions: string;
+ model?: string; // default "default"
 }
 ```
 
 Readonly fields: `name`, `role`, `instructions`, `model`, `agentId`.
 
-**Parity gap:** Python `Agent` accepts `tools`, `memory`, `context`, and `tool_execution`. The TypeScript `Agent` binding does not expose these yet. Tool and memory workflows in TypeScript today require server-side definitions or Python-authored RCS.
+**Parity gap:** Python `Agent` accepts `tools`, `memory`, `context`, and `tool_execution`. The TypeScript `Agent` binding does not expose these yet. Tool and memory workflows in TypeScript today require server-side definitions or Python-authored workflow specification.
 
 ## Providers
 
@@ -157,8 +157,8 @@ Method: `toJson()` for step attachment.
 
 ```typescript
 const store = new VectorStore();
-store.ingest(namespace, key, text);  // returns chunk count
-store.search(namespace, query, topK?);  // ChunkHit[]
+store.ingest(namespace, key, text); // returns chunk count
+store.search(namespace, query, topK?); // ChunkHit[]
 ```
 
 ### ChunkHit
@@ -171,7 +171,7 @@ No TypeScript equivalents for `MemoryConfig`, `MemoryType`, or agent-attached me
 
 ### buildGraphJson
 
-Utility to serialize graph structure for tests or RCS payloads. Used internally by `Workflow` graph mode.
+Utility to serialize graph structure for tests or workflow specification payloads. Used internally by `Workflow` graph mode.
 
 ## Fault tolerance helpers
 
@@ -187,14 +187,14 @@ Exported from `./arcflow/types/fault.js`.
 
 ```typescript
 externalBinding(
-  id: string,
-  attachToStepId: string,
-  outcomeSchema: Record<string, unknown>,
-  options?: {
-    kind?: ExternalBindingKind;
-    mode?: ExternalBindingMode;
-    recovery?: ExternalRecoveryPolicy;
-  },
+ id: string,
+ attachToStepId: string,
+ outcomeSchema: Record<string, unknown>,
+ options?: {
+ kind?: ExternalBindingKind;
+ mode?: ExternalBindingMode;
+ recovery?: ExternalRecoveryPolicy;
+ },
 ): ExternalBinding
 ```
 

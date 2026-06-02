@@ -47,13 +47,13 @@ All SDK and server paths execute ordered steps. WASM supports a linear stub for 
 
 ### Graph workflows
 
-Python and TypeScript expose graph builders in-process. CLI does not author graphs interactively. VS Code visualizes graph RCS definitions.
+Python and TypeScript expose graph builders in-process. CLI does not author graphs interactively. VS Code visualizes graph workflow specification definitions.
 
-**Partial recovery (FP-1.01):** Graph runs persist checkpoint fields in Postgres, but mid-graph resume dispatch is incomplete. Linear recovery works. Do not plan SLA around graph resume until FP-1.01 closes.
+**Partial recovery (Graph recovery resume):** Graph runs persist checkpoint fields in Postgres, but mid-graph resume dispatch is incomplete. Linear recovery works. Do not plan SLA around graph resume until Graph recovery resume closes.
 
 ### Tools / LLM
 
-Python `Agent` accepts `Tool` instances and full tool loop config. TypeScript `Agent` is name/role/instructions only in the binding layer; tools work when defined in RCS sent to server or via Python-authored workflows.
+Python `Agent` accepts `Tool` instances and full tool loop config. TypeScript `Agent` is name/role/instructions only in the binding layer; tools work when defined in the workflow specification sent to server or via Python-authored workflows.
 
 VS Code debug path invokes TS SDK for local runs.
 
@@ -83,7 +83,7 @@ Python ships `report_outcome()` helper. TypeScript exports types only.
 
 ### Server SSE
 
-**Deferred (FP-2):** `GET /v1/runs/{id}/events` is not implemented. Do not document server SSE as shipped. Workarounds: SDK streaming in your backend, poll GET run, or static SDK poll for tokens.
+**Deferred (streaming deferred):** `GET /v1/runs/{id}/events` is not implemented. Do not document server SSE as shipped. Workarounds: SDK streaming in your backend, poll GET run, or static SDK poll for tokens.
 
 ### Trace read
 
@@ -125,4 +125,4 @@ Server honors idempotency on mutating routes. Relay forwards the header to upstr
 |------|---------|
 | [Python overview](python/overview.md) | Python SDK capabilities |
 | [TypeScript overview](typescript/overview.md) | TypeScript SDK capabilities |
-| [Maturity and known gaps](../concepts/maturity-and-known-gaps.md) | FP-1.01, FP-2, FP-3.01 |
+| [Maturity and known gaps](../concepts/maturity-and-known-gaps.md) | Graph recovery resume, Operator dashboard UI |

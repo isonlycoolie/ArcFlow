@@ -13,7 +13,7 @@ Read the lessons in order. Each file builds on the previous one. Copy the minima
 
 | Order | Lesson | What you learn |
 |-------|--------|----------------|
-| 1 | [How ArcFlow thinks](01-how-arcflow-thinks.md) | Declaration vs execution, RCS, default runtime |
+| 1 | [How ArcFlow thinks](01-how-arcflow-thinks.md) | Declaration vs execution, workflow specification, default runtime |
 | 2 | [Anatomy of an agent](02-anatomy-of-an-agent.md) | `name`, `role`, `instructions`, validation |
 | 3 | [Anatomy of a workflow](03-anatomy-of-a-workflow.md) | `Workflow()`, `step()`, `run()`, `WorkflowResult` |
 | 4 | [Default runtime vs live LLM](04-stub-vs-live-provider.md) | No API key path, switching to OpenAI |

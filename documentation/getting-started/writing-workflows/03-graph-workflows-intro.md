@@ -23,9 +23,9 @@ You cannot mix `step()` and `node()` on the same workflow. Graph and linear buil
 
 After a node completes, trimmed step output may match an edge `condition` string to pick the next branch. Validate routing in traces (`GraphNodeStarted`, `GraphNodeCompleted`) rather than guessing from final text alone.
 
-### Recovery note (FP-1.01)
+### Recovery note (Graph recovery resume)
 
-Graph **execution** is production-ready: conditional edges, join nodes, and parallel fan-out work today. **Resume from checkpoint after failure** is partial (**FP-1.01**). The runtime persists checkpoint fields (`current_node_id`, `graph_iteration_count`, `pending_join`) for observability, but mid-graph resume dispatch is incomplete. Plan linear recovery patterns for critical SLAs until FP-1.01 closes. See [Maturity and known gaps](../../concepts/maturity-and-known-gaps.md).
+Graph **execution** is production-ready: conditional edges, join nodes, and parallel fan-out work today. **Resume from checkpoint after failure** is partial (**Graph recovery resume**). The runtime persists checkpoint fields (`current_node_id`, `graph_iteration_count`, `pending_join`) for observability, but mid-graph resume dispatch is incomplete. Plan linear recovery patterns for critical SLAs until Graph recovery resume closes. See [Maturity and known gaps](../../concepts/maturity-and-known-gaps.md).
 
 ## Example
 
@@ -37,36 +37,36 @@ Save as `graph_intro.py`:
 from arcflow import Agent, Workflow
 
 classifier = Agent(
-    name="classifier",
-    role="Classifier",
-    instructions=(
-        "Classify the ticket. Reply with exactly one word: billing or technical."
-    ),
+ name="classifier",
+ role="Classifier",
+ instructions=(
+ "Classify the ticket. Reply with exactly one word: billing or technical."
+ ),
 )
 
 billing = Agent(
-    name="billing",
-    role="Billing",
-    instructions="Draft a billing response.",
+ name="billing",
+ role="Billing",
+ instructions="Draft a billing response.",
 )
 
 technical = Agent(
-    name="technical",
-    role="Technical",
-    instructions="Draft a technical support response.",
+ name="technical",
+ role="Technical",
+ instructions="Draft a technical support response.",
 )
 
 workflow = (
-    Workflow("support-router", graph=True)
-    .max_iterations(10)
-    .node("classify", classifier)
-    .node("billing", billing)
-    .node("technical", technical)
-    .set_entry("classify")
-    .add_edge("classify", "billing", condition="billing")
-    .add_edge("classify", "technical", condition="technical")
-    .add_edge("billing", None)
-    .add_edge("technical", None)
+ Workflow("support-router", graph=True)
+.max_iterations(10)
+.node("classify", classifier)
+.node("billing", billing)
+.node("technical", technical)
+.set_entry("classify")
+.add_edge("classify", "billing", condition="billing")
+.add_edge("classify", "technical", condition="technical")
+.add_edge("billing", None)
+.add_edge("technical", None)
 )
 
 result = workflow.run("Customer asks about invoice line items")
@@ -75,9 +75,9 @@ print(result.output[:200], "..." if len(result.output) > 200 else "")
 print(f"status={result.status}")
 
 starts = [
-    e.get("node_id")
-    for e in result.trace_events
-    if e.get("event_kind") == "GraphNodeStarted"
+ e.get("node_id")
+ for e in result.trace_events
+ if e.get("event_kind") == "GraphNodeStarted"
 ]
 print("nodes started:", starts)
 ```
@@ -107,9 +107,9 @@ from arcflow.exceptions import WorkflowConfigurationError
 
 agent = Agent(name="a", role="a", instructions="Run.")
 try:
-    Workflow("g", graph=True).node("a", agent).step(agent)
+ Workflow("g", graph=True).node("a", agent).step(agent)
 except WorkflowConfigurationError as err:
-    print(err)
+ print(err)
 ```
 
 ## Next

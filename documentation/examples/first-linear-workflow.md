@@ -28,10 +28,10 @@ writer = Agent(name="writer", role="writer", instructions="Draft a blog post.")
 seo = Agent(name="seo", role="seo", instructions="Suggest title and meta description.")
 
 wf = (
-    Workflow("blog_pipeline")
-    .step(researcher)
-    .step(writer)
-    .step(seo)
+ Workflow("blog_pipeline")
+.step(researcher)
+.step(writer)
+.step(seo)
 )
 result = wf.run("Write about context assembly in agent workflows")
 print(result.output)
@@ -71,7 +71,7 @@ kinds = {e.get("event_kind") for e in result.trace_events}
 required = {"WorkflowStarted", "StepCompleted", "WorkflowCompleted"}
 missing = required - kinds
 if missing:
-    raise SystemExit(f"missing trace kinds: {missing}")
+ raise SystemExit(f"missing trace kinds: {missing}")
 print("trace kinds ok:", sorted(kinds))
 ```
 
@@ -105,7 +105,7 @@ When you add the verification block, expect `linear workflow checks passed` and 
 | `StepCompleted` | Each agent finishes (three times) |
 | `WorkflowCompleted` | All steps succeed |
 
-Events are metadata only per SEC-1. See [trace event reference](../guides/observability/trace-event-reference.md).
+Events are metadata only per trace data policy. See [trace event reference](../guides/observability/trace-event-reference.md).
 
 ## Troubleshooting
 

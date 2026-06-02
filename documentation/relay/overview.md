@@ -20,13 +20,13 @@ Relay is Postgres-free. Site configuration comes from admin-provisioned records 
 
 ```text
 Browser (static SDK, site token)
-  → arcflow-relay :8090
-      → Origin check
-      → Rate limit check
-      → POST /v1/runs (scoped upstream key)
-  → arcflow-server :8080
-      → arcflow-core execution
-  ← run_id, status
+ → arcflow-relay :8090
+ → Origin check
+ → Rate limit check
+ → POST /v1/runs (scoped upstream key)
+ → arcflow-server :8080
+ → arcflow-core execution
+ ← run_id, status
 ```
 
 Detail: [request-path.md](request-path.md).
@@ -42,9 +42,9 @@ Detail: [request-path.md](request-path.md).
 
 Auth: `Authorization: Bearer <site_token>` plus allowed `Origin` header on mutating requests.
 
-## Server SSE not available (FP-2)
+## Server SSE not available (streaming deferred)
 
-Relay does not expose SSE. Browser streaming UX uses trace polling for `TokenEmitted` metadata events. Server-side `GET /v1/runs/{id}/events` is deferred (FP-2).
+Relay does not expose SSE. Browser streaming UX uses trace polling for `TokenEmitted` metadata events. Server-side `GET /v1/runs/{id}/events` is deferred (streaming deferred).
 
 ## Deployment options
 

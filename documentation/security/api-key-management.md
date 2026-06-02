@@ -30,10 +30,10 @@ JSON in `ARCFLOW_STATIC_RUNTIME_KEYS`:
 
 ```json
 {
-  "relay-upstream-1": {
-    "workflows": ["chat"],
-    "publish": false
-  }
+ "relay-upstream-1": {
+ "workflows": ["chat"],
+ "publish": false
+ }
 }
 ```
 

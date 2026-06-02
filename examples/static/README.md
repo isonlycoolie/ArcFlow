@@ -48,7 +48,7 @@ bash scripts/static-ingest-knowledge.sh
 bash scripts/static-publish-chat.sh
 ```
 
-Dashboard starter: [deploy/arcflow-dashboard-v0/](../../deploy/arcflow-dashboard-v0/). Meta-repo layout: [contracts/guides/deployment/meta-repo.md](../../contracts/guides/deployment/meta-repo.md).
+Dashboard starter: [deploy/arcflow-dashboard-v0/](../../deploy/arcflow-dashboard-v0/). Meta-repo layout: [documentation/deployment/overview.md](../../documentation/deployment/overview.md#meta-repo-layout).
 
 ## Advanced: direct mode (internal dev only)
 

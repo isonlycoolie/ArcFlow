@@ -3,17 +3,17 @@
 
 `ContextPolicy` controls what prior information an agent sees on each step: earlier step outputs, the original run input, and size limits. It applies in both [Linear workflows](../workflows/linear-workflows.md) and [Graph workflows](../workflows/graph-workflows.md). Graph state from node `outputs` may also arrive via `exec_config.initial_state` and the runtime map.
 
-Agent overview: [Defining agents](defining-agents.md). RCS types: [The RCS contract](../../concepts/the-rcs-contract.md).
+Agent overview: [Defining agents](defining-agents.md). workflow specification types: [Workflow specification](../../concepts/the-rcs-contract.md).
 
 ## ContextPolicy fields
 
 ```json
 {
-  "context": {
-    "include_prior_steps": "last",
-    "include_run_input": true,
-    "max_prior_step_chars": 4096
-  }
+ "context": {
+ "include_prior_steps": "last",
+ "include_run_input": true,
+ "max_prior_step_chars": 4096
+ }
 }
 ```
 
@@ -33,11 +33,11 @@ Only the immediately preceding step output is included. Typical for pipelines wh
 
 ```json
 {
-  "context": {
-    "include_prior_steps": "last",
-    "include_run_input": true,
-    "max_prior_step_chars": 4096
-  }
+ "context": {
+ "include_prior_steps": "last",
+ "include_run_input": true,
+ "max_prior_step_chars": 4096
+ }
 }
 ```
 
@@ -51,11 +51,11 @@ Prior step text is omitted. The agent still receives run input if `include_run_i
 
 ```json
 {
-  "context": {
-    "include_prior_steps": "none",
-    "include_run_input": true,
-    "max_prior_step_chars": 4096
-  }
+ "context": {
+ "include_prior_steps": "none",
+ "include_run_input": true,
+ "max_prior_step_chars": 4096
+ }
 }
 ```
 
@@ -67,11 +67,11 @@ Example for a summarize-only second step:
 
 ```json
 {
-  "context": {
-    "include_prior_steps": "last",
-    "include_run_input": false,
-    "max_prior_step_chars": 8192
-  }
+ "context": {
+ "include_prior_steps": "last",
+ "include_run_input": false,
+ "max_prior_step_chars": 8192
+ }
 }
 ```
 
@@ -83,11 +83,11 @@ Raise the limit for long-document workflows:
 
 ```json
 {
-  "context": {
-    "include_prior_steps": "all",
-    "include_run_input": true,
-    "max_prior_step_chars": 16384
-  }
+ "context": {
+ "include_prior_steps": "all",
+ "include_run_input": true,
+ "max_prior_step_chars": 16384
+ }
 }
 ```
 
@@ -99,9 +99,9 @@ Graph nodes may write keys via `outputs`:
 
 ```json
 {
-  "id": "n-classify",
-  "step_ref": "s-classify",
-  "outputs": { "route": "category" }
+ "id": "n-classify",
+ "step_ref": "s-classify",
+ "outputs": { "route": "category" }
 }
 ```
 
@@ -109,12 +109,12 @@ Seed or resume graph state through exec_config:
 
 ```json
 {
-  "exec_config": {
-    "initial_state": {
-      "route": "billing",
-      "observation": "Customer mentioned invoice 8842"
-    }
-  }
+ "exec_config": {
+ "initial_state": {
+ "route": "billing",
+ "observation": "Customer mentioned invoice 8842"
+ }
+ }
 }
 ```
 
@@ -131,11 +131,11 @@ Use shared memory for multi-agent handoff that must survive truncation limits:
 
 ```json
 {
-  "memory_config": {
-    "memory_type": "shared",
-    "scope": "workflow",
-    "namespace": "pipeline-state"
-  }
+ "memory_config": {
+ "memory_type": "shared",
+ "scope": "workflow",
+ "namespace": "pipeline-state"
+ }
 }
 ```
 
@@ -145,30 +145,30 @@ Step 1 researcher with full user input; step 2 writer with last step only:
 
 ```json
 {
-  "agents": [
-    {
-      "id": "a-research",
-      "name": "researcher",
-      "role": "Research",
-      "instructions": "Research the topic.",
-      "context": {
-        "include_prior_steps": "none",
-        "include_run_input": true,
-        "max_prior_step_chars": 4096
-      }
-    },
-    {
-      "id": "a-write",
-      "name": "writer",
-      "role": "Writer",
-      "instructions": "Write a summary of the research.",
-      "context": {
-        "include_prior_steps": "last",
-        "include_run_input": false,
-        "max_prior_step_chars": 8192
-      }
-    }
-  ]
+ "agents": [
+ {
+ "id": "a-research",
+ "name": "researcher",
+ "role": "Research",
+ "instructions": "Research the topic.",
+ "context": {
+ "include_prior_steps": "none",
+ "include_run_input": true,
+ "max_prior_step_chars": 4096
+ }
+ },
+ {
+ "id": "a-write",
+ "name": "writer",
+ "role": "Writer",
+ "instructions": "Write a summary of the research.",
+ "context": {
+ "include_prior_steps": "last",
+ "include_run_input": false,
+ "max_prior_step_chars": 8192
+ }
+ }
+ ]
 }
 ```
 
@@ -179,11 +179,11 @@ Context assembly is not a separate trace event. Related events:
 - `AgentInvoked` with `input_size_bytes`
 - `ProviderRequestSent` with `prompt_size_bytes`
 
-No prompt text appears in traces (SEC-1).
+No prompt text appears in traces (trace data policy).
 
 ## Related pages
 
 - [Defining agents](defining-agents.md)
 - [Linear workflows](../workflows/linear-workflows.md)
 - [Graph workflows](../workflows/graph-workflows.md)
-- [SEC-1 and data safety](../../concepts/sec-1-and-data-safety.md)
+- [Trace data policy](../../concepts/sec-1-and-data-safety.md)

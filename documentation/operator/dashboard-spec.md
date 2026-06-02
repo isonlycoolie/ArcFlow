@@ -1,7 +1,7 @@
 
 # Dashboard specification
 
-The ArcFlow operator dashboard is specified in OSS and implemented in a **private repository**. The UI is **deferred under FP-3.01** until exit criteria pass in [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) CI. Operators today use the admin API, OSS shell scripts, or the v0 starter scaffold.
+The ArcFlow operator dashboard is specified in OSS and implemented in a **private repository**. The UI is **deferred under Operator dashboard UI** until exit criteria pass in [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) CI. Operators today use the admin API, OSS shell scripts, or the v0 starter scaffold.
 
 ## Repository split
 
@@ -22,7 +22,7 @@ Published operator docs on this site:
 | [Dashboard spec](dashboard-spec.md) | Navigation and screen map |
 | [03-admin-api-contract.md](../operator/admin-api-reference.md) | Admin REST routes (matches §13) |
 | [API key management](../security/api-key-management.md) | Auth headers, 403 matrix |
-| [05-security-model.md](../static-product/security-model.md) | Tokens, origins, SEC-1 |
+| [05-security-model.md](../static-product/security-model.md) | Tokens, origins, trace data policy |
 | [Dashboard spec](dashboard-spec.md) | R1 feature scope |
 | [Dashboard spec](dashboard-spec.md) | Future tier features |
 | [Dashboard spec](dashboard-spec.md) | UI states and error mapping |
@@ -56,16 +56,16 @@ Private platform repos submodule both projects. Template: `deploy/meta-repo-temp
 
 ```text
 ArcFlow-Platform/
-  arcflow/      → OSS submodule
-  dashboard/    → ArcFlow-Dashboard submodule
-  docker-compose.yml
+ arcflow/ → OSS submodule
+ dashboard/ → ArcFlow-Dashboard submodule
+ docker-compose.yml
 ```
 
 Convention ports: server 8080, relay 8090, dashboard dev 5174.
 
-Guide: [contracts/guides/deployment/meta-repo.md](../../contracts/guides/deployment/meta-repo.md).
+Guide: [Deployment overview — Meta-repo layout](../deployment/overview.md#meta-repo-layout).
 
-## FP-3.01 status
+## Operator dashboard UI status
 
 | Item | Status |
 |------|--------|
@@ -94,11 +94,11 @@ Admin routes are stable; bind new tools to the [Admin API reference](admin-api-r
 Dashboard and server integrations should cross-check:
 
 - [HTTP API reference](../server/http-api-reference.md) (note: partially stale, K-10)
-- [RCS schema](../contracts/rcs-schema.md)
+- [workflow schema](../contracts/rcs-schema.md)
 - [Trace events (normative)](../contracts/trace-events-normative.md)
 
 ## Related pages
 
 - [Sites management](sites-management.md)
 - [Deployment overview](../deployment/overview.md)
-- [SEC-1 compliance](../security/sec-1-compliance.md)
+- [Trace data policy compliance](../security/sec-1-compliance.md)

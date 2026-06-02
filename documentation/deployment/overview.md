@@ -45,15 +45,15 @@ Relay starts after the upstream server is listening. Relay reads site configurat
 | `docker/docker-compose.dev.yml` | Postgres 16 + Qdrant for host-side dev |
 | `docker/docker-compose.server.yml` | Migrate + server + relay + static demo nginx |
 | `docker/docker-compose.prod.yml` | Production-like stack with named volumes |
-| `docker/docker-compose.otel.yml` | Optional OTel collector overlay (FP-4 alpha) |
+| `docker/docker-compose.otel.yml` | Optional OTel collector overlay (OpenTelemetry export (alpha)) |
 
-Contract guides: [contracts/guides/deployment/self-hosted.md](../../contracts/guides/deployment/self-hosted.md), [meta-repo.md](../../contracts/guides/deployment/meta-repo.md).
+Deployment guides: [Server deployment](server-deployment.md), [Meta-repo layout](#meta-repo-layout) below.
 
 Normative HTTP contract (stale in places): [HTTP API reference](../server/http-api-reference.md). Prefer [HTTP API reference](../server/http-api-reference.md) or [Admin API reference](../operator/admin-api-reference.md) for current routes.
 
 ## Operator dashboard (deferred)
 
-The operator UI lives in the private [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) repository. OSS holds the specification in this documentation and a starter scaffold at `deploy/arcflow-dashboard-v0/`. **FP-3.01** (dashboard v1 UI) is deferred until exit criteria in [Dashboard spec](../operator/dashboard-spec.md) pass in private repo CI. Until then, use admin API directly, OSS shell scripts (`scripts/static-*.sh`), or the v0 starter. See [Dashboard spec](../operator/dashboard-spec.md).
+The operator UI lives in the private [ArcFlow-Dashboard](https://github.com/isonlycoolie/ArcFlow-Dashboard.git) repository. OSS holds the specification in this documentation and a starter scaffold at `deploy/arcflow-dashboard-v0/`. **Operator dashboard UI** (dashboard v1 UI) is deferred until exit criteria in [Dashboard spec](../operator/dashboard-spec.md) pass in private repo CI. Until then, use admin API directly, OSS shell scripts (`scripts/static-*.sh`), or the v0 starter. See [Dashboard spec](../operator/dashboard-spec.md).
 
 ## Meta-repo layout
 

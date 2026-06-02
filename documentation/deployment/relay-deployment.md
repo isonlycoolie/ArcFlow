@@ -7,9 +7,9 @@
 
 ```text
 Browser (static SDK, mode: relay)
-    → Relay (site token + Origin)
-        → arcflow-server (scoped runtime key)
-            → Postgres / Qdrant / LLM providers
+ → Relay (site token + Origin)
+ → arcflow-server (scoped runtime key)
+ → Postgres / Qdrant / LLM providers
 ```
 
 LLM provider keys remain on the server. The browser holds only the site token and public Relay URL.
@@ -20,7 +20,7 @@ LLM provider keys remain on the server. The browser holds only the site token an
 |--------|------|---------|
 | POST | `/v1/sites/{site_id}/runs` | Create run (proxied) |
 | GET | `/v1/sites/{site_id}/runs/{run_id}` | Poll status |
-| GET | `/v1/sites/{site_id}/runs/{run_id}/trace` | Metadata trace (SEC-1) |
+| GET | `/v1/sites/{site_id}/runs/{run_id}/trace` | Metadata trace (trace data policy) |
 
 Admin routes (`/v1/admin/*`) are never exposed through Relay.
 

@@ -11,14 +11,14 @@ This folder is the tracked user-facing documentation site for ArcFlow. Normative
 | Integrating via HTTP | [Server API quickstart](getting-started/quickstart-server-api.md) |
 | Public website chat widget | [Static site chatbot lesson](getting-started/paths/static-site-chatbot.md) |
 | Operating sites, knowledge, and publish | [Static product overview](static-product/overview.md) |
-| Reviewing security and SEC-1 | [SEC-1 and data safety](concepts/sec-1-and-data-safety.md) |
+| Reviewing security and trace data policy | [Trace data policy](concepts/sec-1-and-data-safety.md) |
 
 ## Site map
 
 | Section | Purpose |
 |---------|---------|
 | [home/](home/index.md) | Landing and navigation |
-| [concepts/](concepts/what-is-arcflow.md) | Architecture, RCS, execution model, maturity |
+| [concepts/](concepts/what-is-arcflow.md) | Architecture, workflow specification, execution model, maturity |
 | [getting-started/](getting-started/README.md) | Curriculum: learn agents, workflows, tools, memory, RAG, paths |
 | [guides/](guides/workflows/linear-workflows.md) | Task-oriented how-to guides |
 | [sdks/](sdks/python/overview.md) | Python and TypeScript SDK reference |
@@ -50,7 +50,7 @@ All surfaces call the same Rust engine (`arcflow-core`). Behavior is consistent;
 
 ## Writing and validation
 
-Pages follow the arcflow-documentation skill: report tone, concrete runnable examples, and cross-links to related guides. Label deferred features (FP-1.01 through FP-5.04) explicitly in [maturity and known gaps](concepts/maturity-and-known-gaps.md).
+Pages follow the arcflow-documentation skill: report tone, concrete runnable examples, and cross-links to related guides. Label deferred features (Graph recovery resume through CLI validate command) explicitly in [maturity and known gaps](concepts/maturity-and-known-gaps.md). Brand assets live at [assets/brand/arcflow.png](assets/brand/arcflow.png) for reuse in docs pages.
 
 **Linking rules for published pages:**
 

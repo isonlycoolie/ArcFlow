@@ -43,13 +43,13 @@ Save as `agent_anatomy.py`:
 from arcflow import Agent, Workflow
 
 greeter = Agent(
-    name="greeter",
-    role="greet",
-    instructions=(
-        "Welcome the user by topic. "
-        "Reply in two short sentences. "
-        "Do not use bullet lists."
-    ),
+ name="greeter",
+ role="greet",
+ instructions=(
+ "Welcome the user by topic. "
+ "Reply in two short sentences. "
+ "Do not use bullet lists."
+ ),
 )
 
 wf = Workflow("agent_demo")
@@ -57,7 +57,7 @@ wf.step(greeter)
 
 result = wf.run("ArcFlow fundamentals")
 print(result.output)
-print(greeter)  # repr shows name and role, not instructions
+print(greeter) # repr shows name and role, not instructions
 ```
 
 Run:
@@ -77,9 +77,9 @@ from arcflow import Agent
 from arcflow.exceptions import WorkflowConfigurationError
 
 try:
-    Agent(name="   ", role="test", instructions="ok")
+ Agent(name=" ", role="test", instructions="ok")
 except WorkflowConfigurationError as err:
-    print(err)
+ print(err)
 ```
 
 You should see `[ArcFlow] Agent name must be a non-empty string` in the output. The same rule applies to `role` and `instructions`. Fix the empty field and construction succeeds without touching a workflow.

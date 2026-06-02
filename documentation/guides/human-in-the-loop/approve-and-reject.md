@@ -17,31 +17,31 @@ The path `approval_key` must match the key on the interrupted step and the `inte
 
 ```json
 {
-  "approved": true,
-  "data": {
-    "manager_id": "mgr-42",
-    "notes": "Looks good"
-  }
+ "approved": true,
+ "data": {
+ "manager_id": "mgr-42",
+ "notes": "Looks good"
+ }
 }
 ```
 
-The engine records approval, resumes from the interrupted step, runs remaining steps, and marks the run `Completed` when finished. The `data` object is stored for audit in run state; it does not appear in SEC-1 trace events.
+The engine records approval, resumes from the interrupted step, runs remaining steps, and marks the run `Completed` when finished. The `data` object is stored for audit in run state; it does not appear in trace data policy trace events.
 
 Example with curl:
 
 ```bash
 curl -sS -X POST "http://localhost:8080/v1/runs/${RUN_ID}/approve/manager_approval" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer ${ARCFLOW_SERVER_API_KEY}" \
-  -d '{"approved": true, "data": {"manager_id": "mgr-42"}}'
+ -H "Content-Type: application/json" \
+ -H "Authorization: Bearer ${ARCFLOW_SERVER_API_KEY}" \
+ -d '{"approved": true, "data": {"manager_id": "mgr-42"}}'
 ```
 
 Success response shape:
 
 ```json
 {
-  "status": "Completed",
-  "message": "Approval recorded, workflow completed"
+ "status": "Completed",
+ "message": "Approval recorded, workflow completed"
 }
 ```
 
@@ -51,10 +51,10 @@ Poll `GET /v1/runs/{run_id}` to read final `result.output` when status is `Compl
 
 ```json
 {
-  "approved": false,
-  "data": {
-    "reason": "Insufficient evidence"
-  }
+ "approved": false,
+ "data": {
+ "reason": "Insufficient evidence"
+ }
 }
 ```
 
@@ -98,15 +98,15 @@ export ARCFLOW_SERVER_API_KEY=dev-secret
 
 Replace `RUN_ID` with the UUID printed when `expense_approval.py` raises `WorkflowInterruptedError`.
 
-## Trace visibility (SEC-1)
+## Trace visibility (trace data policy)
 
 Traces show lifecycle metadata around the gate, not approval notes:
 
 ```json
 [
-  { "kind": "StepCompleted", "run_id": "r1", "step_id": "s1", "step_index": 0, "duration_ms": 400, "output_size_bytes": 120 },
-  { "kind": "StepStarted", "run_id": "r1", "step_id": "s2", "step_index": 1, "agent_name": "manager", "agent_role": "reviewer" },
-  { "kind": "StepCompleted", "run_id": "r1", "step_id": "s2", "step_index": 1, "duration_ms": 300, "output_size_bytes": 80 }
+ { "kind": "StepCompleted", "run_id": "r1", "step_id": "s1", "step_index": 0, "duration_ms": 400, "output_size_bytes": 120 },
+ { "kind": "StepStarted", "run_id": "r1", "step_id": "s2", "step_index": 1, "agent_name": "manager", "agent_role": "reviewer" },
+ { "kind": "StepCompleted", "run_id": "r1", "step_id": "s2", "step_index": 1, "duration_ms": 300, "output_size_bytes": 80 }
 ]
 ```
 
@@ -116,4 +116,4 @@ After approval and resume, expect further `StepStarted` / `StepCompleted` events
 
 - [Configuring interrupts](configuring-interrupts.md) for `approval_key` and timeout setup
 - [HITL overview](hitl-overview.md) for the state machine
-- [SEC-1 rules](../observability/sec-1-rules.md) for trace field policy
+- [Trace data policy rules](../observability/sec-1-rules.md) for trace field policy

@@ -11,12 +11,12 @@ Vector memory stores embedded document chunks in Qdrant. At run time the runtime
 
 ```python
 memory = MemoryConfig(
-    MemoryType.VECTOR,
-    MemoryScope.AGENT,
-    namespace="doc_qa",       # must match VectorStore.ingest namespace
-    embedding="stub/8",       # local dev; swap for production embedding id
-    retrieval=MemoryRetrievalConfig(mode="hybrid", top_k=3),
-    chunking=MemoryChunkingConfig(chunk_size=256, overlap=32),
+ MemoryType.VECTOR,
+ MemoryScope.AGENT,
+ namespace="doc_qa", # must match VectorStore.ingest namespace
+ embedding="stub/8", # local dev; swap for production embedding id
+ retrieval=MemoryRetrievalConfig(mode="hybrid", top_k=3),
+ chunking=MemoryChunkingConfig(chunk_size=256, overlap=32),
 )
 ```
 
@@ -45,35 +45,35 @@ Save as `vector_memory_setup.py`:
 
 ```python
 from arcflow import (
-    Agent,
-    MemoryChunkingConfig,
-    MemoryConfig,
-    MemoryRetrievalConfig,
-    MemoryScope,
-    MemoryType,
-    Workflow,
+ Agent,
+ MemoryChunkingConfig,
+ MemoryConfig,
+ MemoryRetrievalConfig,
+ MemoryScope,
+ MemoryType,
+ Workflow,
 )
 
 memory = MemoryConfig(
-    MemoryType.VECTOR,
-    MemoryScope.AGENT,
-    namespace="doc_qa",
-    embedding="stub/8",
-    retrieval=MemoryRetrievalConfig(
-        mode="hybrid",
-        dense_weight=0.7,
-        sparse_weight=0.3,
-        rerank="local",
-        top_k=3,
-    ),
-    chunking=MemoryChunkingConfig(chunk_size=256, overlap=32),
+ MemoryType.VECTOR,
+ MemoryScope.AGENT,
+ namespace="doc_qa",
+ embedding="stub/8",
+ retrieval=MemoryRetrievalConfig(
+ mode="hybrid",
+ dense_weight=0.7,
+ sparse_weight=0.3,
+ rerank="local",
+ top_k=3,
+ ),
+ chunking=MemoryChunkingConfig(chunk_size=256, overlap=32),
 )
 
 agent = Agent(
-    name="researcher",
-    role="researcher",
-    instructions="Answer using retrieved context.",
-    memory=memory,
+ name="researcher",
+ role="researcher",
+ instructions="Answer using retrieved context.",
+ memory=memory,
 )
 
 workflow = Workflow(name="document-qa", agents=[agent])
@@ -119,7 +119,7 @@ kinds = {e.get("event_kind") for e in result.trace_events}
 assert "MemoryRetrieved" in kinds, f"missing MemoryRetrieved; got {kinds}"
 ```
 
-SEC-1: trace payloads include chunk counts and byte totals, not chunk text.
+trace data policy: trace payloads include chunk counts and byte totals, not chunk text.
 
 ## Next
 

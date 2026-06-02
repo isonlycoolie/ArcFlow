@@ -32,18 +32,18 @@ arcflow init my-bot --lang typescript
 Force into existing folder:
 
 ```bash
-arcflow init ./existing --force
+arcflow init./existing --force
 ```
 
 ## Generated structure
 
 ```text
 my-arcflow-project/
-  arcflow.config.yaml
-  workflows/
-    example_workflow.py   # or .ts
-  agents/
-  tools/
+ arcflow.config.yaml
+ workflows/
+ example_workflow.py # or.ts
+ agents/
+ tools/
 ```
 
 **arcflow.config.yaml** (initial content):

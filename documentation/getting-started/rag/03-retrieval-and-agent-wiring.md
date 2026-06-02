@@ -12,11 +12,11 @@ Retrieval is automatic once an agent has vector memory config and the namespace 
 Wiring checklist:
 
 1. **Ingest** into namespace `N` with `VectorStore.ingest(N, key, text)`.
-2. **Configure** agent with `MemoryConfig(MemoryType.VECTOR, ..., namespace=N, embedding=...)`.
+2. **Configure** agent with `MemoryConfig(MemoryType.VECTOR,..., namespace=N, embedding=...)`.
 3. **Instruct** the agent to use retrieved context (e.g. "Answer using retrieved context.").
 4. **Run** `workflow.run(user_question)` and inspect `result.output` and `result.trace_events`.
 
-Trace event `MemoryRetrieved` confirms retrieval ran. Payload fields include `chunk_count` and `total_bytes`, not chunk text (SEC-1).
+Trace event `MemoryRetrieved` confirms retrieval ran. Payload fields include `chunk_count` and `total_bytes`, not chunk text (trace data policy).
 
 [RAG chatbot walkthrough](../../examples/rag-chatbot.md) on the current branch shows steps 2 through 4; ingest is left as a comment. The restructure branch `memory_guide_qa.py` runs ingest and query in one `main()`.
 
@@ -26,13 +26,13 @@ End-to-end script combining ingest and query:
 
 ```python
 from arcflow import (
-    Agent,
-    MemoryChunkingConfig,
-    MemoryConfig,
-    MemoryRetrievalConfig,
-    MemoryScope,
-    MemoryType,
-    Workflow,
+ Agent,
+ MemoryChunkingConfig,
+ MemoryConfig,
+ MemoryRetrievalConfig,
+ MemoryScope,
+ MemoryType,
+ Workflow,
 )
 from arcflow.memory import VectorStore
 
@@ -41,33 +41,33 @@ SAMPLE_DOC = """ArcFlow vector memory supports hybrid dense and sparse retrieval
 Chunk documents before ingest for better recall on long texts."""
 
 def main() -> None:
-    store = VectorStore()
-    store.ingest(NAMESPACE, "guide", SAMPLE_DOC)
+ store = VectorStore()
+ store.ingest(NAMESPACE, "guide", SAMPLE_DOC)
 
-    memory = MemoryConfig(
-        MemoryType.VECTOR,
-        MemoryScope.AGENT,
-        namespace=NAMESPACE,
-        embedding="stub/8",
-        retrieval=MemoryRetrievalConfig(mode="hybrid", top_k=3),
-        chunking=MemoryChunkingConfig(chunk_size=256, overlap=32),
-    )
-    agent = Agent(
-        name="researcher",
-        role="researcher",
-        instructions="Answer using retrieved context. If context is empty, say so.",
-        memory=memory,
-    )
-    workflow = Workflow(name="document-qa", agents=[agent])
-    result = workflow.run("What chunking advice does the guide give?")
-    print(result.output)
-    print(f"status={result.status} run_id={result.run_id}")
+ memory = MemoryConfig(
+ MemoryType.VECTOR,
+ MemoryScope.AGENT,
+ namespace=NAMESPACE,
+ embedding="stub/8",
+ retrieval=MemoryRetrievalConfig(mode="hybrid", top_k=3),
+ chunking=MemoryChunkingConfig(chunk_size=256, overlap=32),
+ )
+ agent = Agent(
+ name="researcher",
+ role="researcher",
+ instructions="Answer using retrieved context. If context is empty, say so.",
+ memory=memory,
+ )
+ workflow = Workflow(name="document-qa", agents=[agent])
+ result = workflow.run("What chunking advice does the guide give?")
+ print(result.output)
+ print(f"status={result.status} run_id={result.run_id}")
 
-    kinds = {e.get("event_kind") for e in result.trace_events}
-    print("trace events:", sorted(kinds))
+ kinds = {e.get("event_kind") for e in result.trace_events}
+ print("trace events:", sorted(kinds))
 
 if __name__ == "__main__":
-    main()
+ main()
 ```
 
 Run:

@@ -6,37 +6,37 @@ This page walks through a single chat message from the browser to the ArcFlow en
 ## Sequence
 
 ```text
-  Browser                Relay                  Server              Engine
-     |                      |                      |                   |
-     | POST /v1/sites/s/runs|                      |                   |
-     | Bearer site_token    |                      |                   |
-     | Origin: https://app  |                      |                   |
-     |--------------------->|                      |                   |
-     |                      | validate token       |                   |
-     |                      | check Origin         |                   |
-     |                      | check rate limit     |                   |
-     |                      | POST /v1/runs        |                   |
-     |                      | Bearer scoped key    |                   |
-     |                      |--------------------->|                   |
-     |                      |                      | auth + validate   |
-     |                      |                      |------------------>|
-     |                      |                      | execute workflow  |
-     |                      |                      |<------------------|
-     |                      | 201 run_id, status   |                   |
-     |                      |<---------------------|                   |
-     | 201 run_id, status   |                      |                   |
-     |<---------------------|                      |                   |
-     |                      |                      |                   |
-     | GET .../runs/{id}    |                      |                   |
-     | (poll loop)          | GET /v1/runs/{id}    |                   |
-     |--------------------->|--------------------->|                   |
-     | status: Completed    |                      |                   |
-     |<---------------------|<---------------------|                   |
-     |                      |                      |                   |
-     | GET .../trace        | GET .../trace        |                   |
-     |--------------------->|--------------------->|                   |
-     | TokenEmitted (meta)  |                      |                   |
-     |<---------------------|<---------------------|                   |
+ Browser Relay Server Engine
+ | | | |
+ | POST /v1/sites/s/runs| | |
+ | Bearer site_token | | |
+ | Origin: https://app | | |
+ |--------------------->| | |
+ | | validate token | |
+ | | check Origin | |
+ | | check rate limit | |
+ | | POST /v1/runs | |
+ | | Bearer scoped key | |
+ | |--------------------->| |
+ | | | auth + validate |
+ | | |------------------>|
+ | | | execute workflow |
+ | | |<------------------|
+ | | 201 run_id, status | |
+ | |<---------------------| |
+ | 201 run_id, status | | |
+ |<---------------------| | |
+ | | | |
+ | GET.../runs/{id} | | |
+ | (poll loop) | GET /v1/runs/{id} | |
+ |--------------------->|--------------------->| |
+ | status: Completed | | |
+ |<---------------------|<---------------------| |
+ | | | |
+ | GET.../trace | GET.../trace | |
+ |--------------------->|--------------------->| |
+ | TokenEmitted (meta) | | |
+ |<---------------------|<---------------------| |
 ```
 
 ## Step 1: Browser create run
@@ -45,10 +45,10 @@ The static SDK posts to Relay with the site token (not the server master key):
 
 ```typescript
 const client = new ArcFlowClient({
-  baseUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
-  apiKey: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
-  mode: "relay",
-  siteId: import.meta.env.VITE_ARCFLOW_SITE_ID,
+ baseUrl: import.meta.env.VITE_ARCFLOW_RELAY_URL,
+ apiKey: import.meta.env.VITE_ARCFLOW_SITE_TOKEN,
+ mode: "relay",
+ siteId: import.meta.env.VITE_ARCFLOW_SITE_ID,
 });
 
 const result = await client.runPublished("chat", "^1.0.0", userMessage);
@@ -58,10 +58,10 @@ HTTP equivalent:
 
 ```bash
 curl -s -X POST "http://localhost:8090/v1/sites/s_dev/runs" \
-  -H "Authorization: Bearer st_live_devtoken" \
-  -H "Origin: http://localhost:5173" \
-  -H "Content-Type: application/json" \
-  -d '{"workflow_ref":{"name":"chat","version":"^1.0.0"},"input":"Hello"}'
+ -H "Authorization: Bearer st_live_devtoken" \
+ -H "Origin: http://localhost:5173" \
+ -H "Content-Type: application/json" \
+ -d '{"workflow_ref":{"name":"chat","version":"^1.0.0"},"input":"Hello"}'
 ```
 
 Payload uses `workflow_ref` so agent definitions stay on the server registry, not in the JS bundle.
@@ -89,18 +89,18 @@ The static SDK polls until terminal status. Each poll hits Relay, which proxies 
 
 ```bash
 curl -s "http://localhost:8090/v1/sites/s_dev/runs/RUN_ID" \
-  -H "Authorization: Bearer st_live_devtoken" \
-  -H "Origin: http://localhost:5173"
+ -H "Authorization: Bearer st_live_devtoken" \
+ -H "Origin: http://localhost:5173"
 ```
 
 ## Step 5: Trace for streaming UX
 
-For progressive UI, poll trace and read `TokenEmitted` events (byte/token counts only, SEC-1). No server SSE until FP-2.
+For progressive UI, poll trace and read `TokenEmitted` events (byte/token counts only, trace data policy). No server SSE until streaming ships.
 
 ```bash
 curl -s "http://localhost:8090/v1/sites/s_dev/runs/RUN_ID/trace" \
-  -H "Authorization: Bearer st_live_devtoken" \
-  -H "Origin: http://localhost:5173"
+ -H "Authorization: Bearer st_live_devtoken" \
+ -H "Origin: http://localhost:5173"
 ```
 
 See [guides/streaming/streaming-in-the-browser.md](../guides/streaming/streaming-in-the-browser.md).
