@@ -34,7 +34,12 @@ impl TimelineState {
     }
 }
 
-pub fn render_timeline(frame: &mut Frame, area: Rect, trace: &ExecutionTrace, state: &mut TimelineState) {
+pub fn render_timeline(
+    frame: &mut Frame,
+    area: Rect,
+    trace: &ExecutionTrace,
+    state: &mut TimelineState,
+) {
     let block = Block::default().title(" Timeline ").borders(Borders::ALL);
     let items: Vec<ListItem> = trace
         .steps

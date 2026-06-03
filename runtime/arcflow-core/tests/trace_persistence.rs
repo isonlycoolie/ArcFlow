@@ -11,7 +11,10 @@ async fn persisted_trace_loads_after_store_eviction() {
     let url = std::env::var("ARCFLOW_POSTGRESQL_URL").expect("ARCFLOW_POSTGRESQL_URL");
     let pool = sqlx::PgPool::connect(&url).await.expect("connect postgres");
     let migration = include_str!("../migrations/005_trace_events.sql");
-    for stmt in migration.split(';').filter(|s| s.trim().starts_with("CREATE")) {
+    for stmt in migration
+        .split(';')
+        .filter(|s| s.trim().starts_with("CREATE"))
+    {
         sqlx::query(stmt).execute(&pool).await.expect("migrate");
     }
 

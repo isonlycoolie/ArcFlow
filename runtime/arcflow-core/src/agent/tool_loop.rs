@@ -109,33 +109,37 @@ impl ToolLoop {
                 temperature,
                 tools: schemas.clone(),
             };
-            ctx.sprint5
-                .emit(crate::tracing::events::TraceEventKind::ProviderRequestSent {
+            ctx.sprint5.emit(
+                crate::tracing::events::TraceEventKind::ProviderRequestSent {
                     run_id: ctx.run_id.clone(),
                     step_id: step_id_str.clone(),
                     provider_id: provider.provider_id().to_string(),
                     model_id: provider.model_id().to_string(),
                     max_tokens: request.max_tokens,
                     prompt_size_bytes: request.prompt_size_bytes(),
-                });
+                },
+            );
             let started = std::time::Instant::now();
-            let response = provider.complete(request).await.map_err(|e| {
-                RuntimeError::ProviderCallFailed {
-                    provider_id: provider.provider_id().to_string(),
-                    step_id,
-                    reason: e.to_string(),
-                }
-            })?;
+            let response =
+                provider
+                    .complete(request)
+                    .await
+                    .map_err(|e| RuntimeError::ProviderCallFailed {
+                        provider_id: provider.provider_id().to_string(),
+                        step_id,
+                        reason: e.to_string(),
+                    })?;
             let latency_ms = started.elapsed().as_millis() as u64;
-            ctx.sprint5
-                .emit(crate::tracing::events::TraceEventKind::ProviderResponseReceived {
+            ctx.sprint5.emit(
+                crate::tracing::events::TraceEventKind::ProviderResponseReceived {
                     run_id: ctx.run_id.clone(),
                     step_id: step_id_str.clone(),
                     provider_id: provider.provider_id().to_string(),
                     model_id: response.model_id.clone(),
                     tokens: response.tokens.clone(),
                     latency_ms,
-                });
+                },
+            );
             total_tokens.prompt_tokens += response.tokens.prompt_tokens;
             total_tokens.completion_tokens += response.tokens.completion_tokens;
             total_tokens.total_tokens += response.tokens.total_tokens;

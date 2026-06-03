@@ -77,15 +77,17 @@ impl AnthropicProvider {
                     if !m.content.is_empty() {
                         blocks.push(json!({"type": "text", "text": m.content}));
                     }
-                    for call in m.tool_calls.as_ref().unwrap() {
-                        let input: Value =
-                            serde_json::from_str(&call.arguments).unwrap_or_else(|_| json!({}));
-                        blocks.push(json!({
-                            "type": "tool_use",
-                            "id": call.id,
-                            "name": call.name,
-                            "input": input,
-                        }));
+                    if let Some(calls) = m.tool_calls.as_ref() {
+                        for call in calls {
+                            let input: Value =
+                                serde_json::from_str(&call.arguments).unwrap_or_else(|_| json!({}));
+                            blocks.push(json!({
+                                "type": "tool_use",
+                                "id": call.id,
+                                "name": call.name,
+                                "input": input,
+                            }));
+                        }
                     }
                     json!({"role": "assistant", "content": blocks})
                 }
@@ -200,12 +202,14 @@ impl ModelProvider for AnthropicProvider {
                 sanitized_message: "api error".into(),
             });
         }
-        let parsed: AnthropicResponse = response.json().await.map_err(|e| {
-            ProviderCallError::ResponseParseError {
-                provider_id: "anthropic".into(),
-                reason: e.to_string(),
-            }
-        })?;
+        let parsed: AnthropicResponse =
+            response
+                .json()
+                .await
+                .map_err(|e| ProviderCallError::ResponseParseError {
+                    provider_id: "anthropic".into(),
+                    reason: e.to_string(),
+                })?;
         let mut text_parts = Vec::new();
         let mut tool_calls = Vec::new();
         for block in parsed.content {
@@ -255,10 +259,7 @@ impl ModelProvider for AnthropicProvider {
         })
     }
 
-    async fn stream(
-        &self,
-        _request: ProviderRequest,
-    ) -> Result<ProviderStream, ProviderCallError> {
+    async fn stream(&self, _request: ProviderRequest) -> Result<ProviderStream, ProviderCallError> {
         Err(ProviderCallError::ApiError {
             provider_id: "anthropic".into(),
             status_code: 501,

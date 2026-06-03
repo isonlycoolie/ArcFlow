@@ -42,7 +42,9 @@ pub struct DebugStateResponse {
     pub state: Option<arcflow_core::debug::DebugStateView>,
 }
 
-fn reject_non_loopback(ConnectInfo(addr): ConnectInfo<SocketAddr>) -> Result<(), (StatusCode, String)> {
+fn reject_non_loopback(
+    ConnectInfo(addr): ConnectInfo<SocketAddr>,
+) -> Result<(), (StatusCode, String)> {
     if !addr.ip().is_loopback() {
         return Err((
             StatusCode::FORBIDDEN,

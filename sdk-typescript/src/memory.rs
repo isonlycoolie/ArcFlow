@@ -55,7 +55,10 @@ impl JsVectorStore {
         let run_key = self.run_id.to_string();
         let mut legacy = TraceEmitter::new(self.run_id);
         let mut sprint5 = TraceEventEmitter::new(run_key.clone(), &mut store);
-        let coord = self.coord.lock().map_err(|e| Error::from_reason(e.to_string()))?;
+        let coord = self
+            .coord
+            .lock()
+            .map_err(|e| Error::from_reason(e.to_string()))?;
         let count = coord
             .write_vector_document(
                 &config,
@@ -78,7 +81,10 @@ impl JsVectorStore {
         let run_key = self.run_id.to_string();
         let mut legacy = TraceEmitter::new(self.run_id);
         let mut sprint5 = TraceEventEmitter::new(run_key.clone(), &mut store);
-        let coord = self.coord.lock().map_err(|e| Error::from_reason(e.to_string()))?;
+        let coord = self
+            .coord
+            .lock()
+            .map_err(|e| Error::from_reason(e.to_string()))?;
         let hits = coord
             .search_vector(
                 &config,

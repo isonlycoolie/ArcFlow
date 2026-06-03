@@ -34,14 +34,7 @@ pub async fn publish_chat(
 
     if let Some(instructions) = body.instructions.as_deref() {
         site = sites
-            .patch(
-                &site_id,
-                None,
-                None,
-                None,
-                None,
-                Some(Some(instructions)),
-            )
+            .patch(&site_id, None, None, None, None, Some(Some(instructions)))
             .await
             .map_err(internal)?
             .unwrap_or(site);
@@ -101,13 +94,7 @@ pub async fn publish_chat(
     let bundle = serde_json::json!({ "workflow": workflow, "agents": [agent] });
     let schema_hash = hash::schema_hash(&bundle);
     let published = registry
-        .publish(
-            &wf_name,
-            version,
-            &schema_hash,
-            bundle,
-            Some("admin"),
-        )
+        .publish(&wf_name, version, &schema_hash, bundle, Some("admin"))
         .await
         .map_err(internal)?;
 

@@ -18,5 +18,7 @@ async fn migrate_up_creates_sites_table() {
     .await
     .expect("query");
     assert!(exists);
-    arcflow_core::migrate::validate(&pool).await.expect("validate");
+    arcflow_core::migrate::validate(&pool)
+        .await
+        .expect("validate");
 }

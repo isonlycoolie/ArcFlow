@@ -4,7 +4,9 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use arcflow_core::rcs::types::{AgentDefinition, ExecutionMode, StepDefinition, WorkflowDefinition};
+use arcflow_core::rcs::types::{
+    AgentDefinition, ExecutionMode, StepDefinition, WorkflowDefinition,
+};
 use arcflow_core::workflow::WorkflowEngine;
 
 fn ag(id: Uuid) -> AgentDefinition {
@@ -37,7 +39,7 @@ fn one_step_produces_one_output() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
-            external_bindings: None,
+        external_bindings: None,
     };
     let mut m = HashMap::new();
     m.insert(a, ag(a));
@@ -59,27 +61,27 @@ fn execution_order_sorts_by_step_order_field() {
                 agent_id: a,
                 order: 3,
                 fallback_step_id: None,
-            hitl: None,
+                hitl: None,
             },
             StepDefinition {
                 id: s1,
                 agent_id: a,
                 order: 1,
                 fallback_step_id: None,
-            hitl: None,
+                hitl: None,
             },
             StepDefinition {
                 id: s2,
                 agent_id: a,
                 order: 2,
                 fallback_step_id: None,
-            hitl: None,
+                hitl: None,
             },
         ],
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
-            external_bindings: None,
+        external_bindings: None,
     };
     let mut m = HashMap::new();
     m.insert(a, ag(a));

@@ -29,10 +29,7 @@ impl TestConfig {
             if attempt <= fail_times {
                 return None;
             }
-            return step
-                .then_output
-                .clone()
-                .or_else(|| step.output.clone());
+            return step.then_output.clone().or_else(|| step.output.clone());
         }
         step.output.clone()
     }

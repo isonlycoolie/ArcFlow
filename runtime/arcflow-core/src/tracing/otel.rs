@@ -23,10 +23,7 @@ pub fn otlp_configured() -> bool {
 }
 
 fn build_resource() -> Resource {
-    let mut attrs = vec![KeyValue::new(
-        "service.name",
-        otel_config::service_name(),
-    )];
+    let mut attrs = vec![KeyValue::new("service.name", otel_config::service_name())];
     for (key, value) in otel_config::resource_attributes() {
         attrs.push(KeyValue::new(key, value));
     }
@@ -74,8 +71,8 @@ pub fn init_otlp_exporter() -> Result<(), String> {
 /// SDK tracer for live `tracing-opentelemetry` instrumentation.
 pub fn sdk_tracer(instrumentation: &'static str) -> opentelemetry_sdk::trace::Tracer {
     let _ = init_otlp_exporter();
-    PROVIDER
-        .get()
-        .expect("otlp provider not initialized")
-        .tracer(instrumentation)
+    if let Some(provider) = PROVIDER.get() {
+        return provider.tracer(instrumentation);
+    }
+    TracerProvider::builder().build().tracer(instrumentation)
 }

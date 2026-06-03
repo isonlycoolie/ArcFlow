@@ -60,7 +60,17 @@ impl SiteStore {
         upstream_runtime_key: &str,
         chat_instructions: Option<&str>,
     ) -> Result<(SiteRecord, String), sqlx::Error> {
-        persistence::create(self, display_name, allowed_origins, rate_limit_rpm, allow_inline, default_workflow_name, upstream_runtime_key, chat_instructions).await
+        persistence::create(
+            self,
+            display_name,
+            allowed_origins,
+            rate_limit_rpm,
+            allow_inline,
+            default_workflow_name,
+            upstream_runtime_key,
+            chat_instructions,
+        )
+        .await
     }
 
     pub async fn get(&self, site_id: &str) -> Result<Option<SiteRecord>, sqlx::Error> {
@@ -88,7 +98,16 @@ impl SiteStore {
         allow_inline: Option<bool>,
         chat_instructions: Option<Option<&str>>,
     ) -> Result<Option<SiteRecord>, sqlx::Error> {
-        maintenance::patch(self, site_id, display_name, allowed_origins, rate_limit_rpm, allow_inline, chat_instructions).await
+        maintenance::patch(
+            self,
+            site_id,
+            display_name,
+            allowed_origins,
+            rate_limit_rpm,
+            allow_inline,
+            chat_instructions,
+        )
+        .await
     }
 
     pub async fn increment_usage(&self, site_id: &str) -> Result<(), sqlx::Error> {

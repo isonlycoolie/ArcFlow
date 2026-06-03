@@ -33,10 +33,7 @@ pub enum ProviderCallError {
     },
 
     #[error("provider '{provider_id}' response could not be parsed: {reason}")]
-    ResponseParseError {
-        provider_id: String,
-        reason: String,
-    },
+    ResponseParseError { provider_id: String, reason: String },
 
     #[error("provider '{provider_id}' is not configured — set {key_env_var} environment variable")]
     NotConfigured {

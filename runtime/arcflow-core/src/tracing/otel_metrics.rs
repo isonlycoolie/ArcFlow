@@ -23,10 +23,7 @@ static RECOVERY_RESUMES: OnceLock<Counter<u64>> = OnceLock::new();
 static GRAPH_ITERATIONS: OnceLock<Counter<u64>> = OnceLock::new();
 
 fn metrics_resource() -> Resource {
-    let mut attrs = vec![KeyValue::new(
-        "service.name",
-        otel_config::service_name(),
-    )];
+    let mut attrs = vec![KeyValue::new("service.name", otel_config::service_name())];
     for (key, value) in otel_config::resource_attributes() {
         attrs.push(KeyValue::new(key, value));
     }
@@ -97,7 +94,9 @@ pub fn init_metrics() -> Result<(), String> {
     GRAPH_ITERATIONS
         .set(meter.u64_counter("arcflow.graph.iterations").build())
         .ok();
-    METER.set(meter).map_err(|_| "metrics meter already set".to_string())
+    METER
+        .set(meter)
+        .map_err(|_| "metrics meter already set".to_string())
 }
 
 pub fn record_workflow_duration_ms(duration_ms: u64, status: &str, workflow_name: &str) {

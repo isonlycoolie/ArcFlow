@@ -126,7 +126,13 @@ impl RecursiveCharacterSplitter {
                 with_overlap.push(chunk);
                 continue;
             }
-            let prev = with_overlap.last().expect("previous chunk");
+            let prev = match with_overlap.last() {
+                Some(chunk) => chunk,
+                None => {
+                    with_overlap.push(chunk);
+                    continue;
+                }
+            };
             let prefix = prev
                 .chars()
                 .rev()

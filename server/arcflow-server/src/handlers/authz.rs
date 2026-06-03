@@ -2,7 +2,7 @@
 
 use axum::http::StatusCode;
 
-use crate::middleware::{AuthPrincipal, workflow_allowed};
+use crate::middleware::{workflow_allowed, AuthPrincipal};
 
 pub fn deny_publish(principal: &AuthPrincipal) -> Result<(), (StatusCode, String)> {
     if let AuthPrincipal::Runtime(policy) = principal {
@@ -24,9 +24,7 @@ pub fn ensure_run_workflow(
         if !workflow_allowed(policy, workflow_name) {
             return Err((
                 StatusCode::FORBIDDEN,
-                format!(
-                    "[ArcFlow] Runtime key is not allowed to run workflow '{workflow_name}'."
-                ),
+                format!("[ArcFlow] Runtime key is not allowed to run workflow '{workflow_name}'."),
             ));
         }
     }

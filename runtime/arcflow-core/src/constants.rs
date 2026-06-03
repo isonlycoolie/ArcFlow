@@ -17,8 +17,7 @@ pub const GEMINI_API_KEY_ENV: &str = "GEMINI_API_KEY";
 /// Default provider HTTP endpoints.
 pub const OPENAI_API_ENDPOINT: &str = "https://api.openai.com/v1/chat/completions";
 pub const ANTHROPIC_API_ENDPOINT: &str = "https://api.anthropic.com/v1/messages";
-pub const GEMINI_API_ENDPOINT: &str =
-    "https://generativelanguage.googleapis.com/v1beta/models";
+pub const GEMINI_API_ENDPOINT: &str = "https://generativelanguage.googleapis.com/v1beta/models";
 
 /// Optional endpoint overrides for CI mock servers (never credentials).
 pub const OPENAI_API_ENDPOINT_ENV: &str = "ARCFLOW_OPENAI_API_ENDPOINT";

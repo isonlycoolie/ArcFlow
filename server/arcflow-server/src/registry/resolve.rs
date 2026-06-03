@@ -19,7 +19,12 @@ mod tests {
 
     #[test]
     fn caret_range_picks_highest_match() {
-        let versions = vec!["1.0.0".into(), "1.2.0".into(), "1.3.1".into(), "2.0.0".into()];
+        let versions = vec![
+            "1.0.0".into(),
+            "1.2.0".into(),
+            "1.3.1".into(),
+            "2.0.0".into(),
+        ];
         assert_eq!(
             pick_matching_version(&versions, "^1.2.0").as_deref(),
             Some("1.3.1")

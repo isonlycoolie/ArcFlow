@@ -2,9 +2,7 @@
 
 use arcflow_core::providers::anthropic::AnthropicProvider;
 use arcflow_core::providers::model_provider::ModelProvider;
-use arcflow_core::providers::request::{
-    MessageRole, ProviderMessage, ProviderRequest, ToolSchema,
-};
+use arcflow_core::providers::request::{MessageRole, ProviderMessage, ProviderRequest, ToolSchema};
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
@@ -28,9 +26,12 @@ async fn anthropic_complete_parses_tool_use_blocks() {
         .await;
 
     let url = format!("{}/v1/messages", server.uri());
-    let provider =
-        AnthropicProvider::with_endpoint("claude-3-5-sonnet-20241022".into(), "test-key".into(), url)
-            .unwrap();
+    let provider = AnthropicProvider::with_endpoint(
+        "claude-3-5-sonnet-20241022".into(),
+        "test-key".into(),
+        url,
+    )
+    .unwrap();
     let response = provider
         .complete(ProviderRequest {
             messages: vec![ProviderMessage {

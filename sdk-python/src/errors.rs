@@ -169,7 +169,9 @@ fn raise_for_runtime_error(
                 let kwargs = pyo3::types::PyDict::new_bound(py);
                 kwargs.set_item("approval_key", approval_key)?;
                 cls.call(
-                    (prefix(&format!("Human rejected approval '{approval_key}'.")),),
+                    (prefix(&format!(
+                        "Human rejected approval '{approval_key}'."
+                    )),),
                     Some(&kwargs),
                 )
             })();
@@ -220,7 +222,7 @@ fn runtime_config_message(err: &RuntimeError) -> String {
         } => format!("Provider '{provider_id}' failed for step '{step_id}': {reason}."),
         RuntimeError::StepTimeout { .. }
         | RuntimeError::WorkflowTimeout { .. }
-        |         RuntimeError::RetryExhausted { .. }
+        | RuntimeError::RetryExhausted { .. }
         | RuntimeError::RecoveryStorageError { .. } => format!("{err}."),
         RuntimeError::HumanRejected { approval_key } => {
             format!("Human rejected approval '{approval_key}'.")
@@ -269,9 +271,11 @@ fn runtime_execution_message(err: &RuntimeError) -> String {
             reason,
             ..
         } => format!("Provider '{provider_id}' failed: {reason}."),
-        RuntimeError::StepTimeout { step_id, configured_ms, .. } => format!(
-            "Step '{step_id}' timed out (limit {configured_ms}ms)."
-        ),
+        RuntimeError::StepTimeout {
+            step_id,
+            configured_ms,
+            ..
+        } => format!("Step '{step_id}' timed out (limit {configured_ms}ms)."),
         RuntimeError::WorkflowTimeout { configured_ms, .. } => {
             format!("Workflow timed out (limit {configured_ms}ms).")
         }
@@ -279,9 +283,7 @@ fn runtime_execution_message(err: &RuntimeError) -> String {
             step_id,
             attempts_made,
             last_error_code,
-        } => format!(
-            "Step '{step_id}' failed after {attempts_made} attempts: {last_error_code}."
-        ),
+        } => format!("Step '{step_id}' failed after {attempts_made} attempts: {last_error_code}."),
         RuntimeError::RecoveryStorageError { reason } => {
             format!("Recovery storage error: {reason}.")
         }
@@ -405,13 +407,7 @@ fn raise_retry_exhausted(
     let built: PyResult<Bound<'_, PyAny>> = (|| {
         let exc_mod = import_exceptions(py)?;
         let cls = exc_mod.getattr("RetryExhaustedError")?;
-        cls.call1((
-            message,
-            attempts_made,
-            run_id,
-            failed_step,
-            last_error_code,
-        ))
+        cls.call1((message, attempts_made, run_id, failed_step, last_error_code))
     })();
     match built {
         Ok(value) => PyErr::from_value(value),

@@ -86,11 +86,7 @@ fn load_trace_file(path: &PathBuf) -> Result<ExecutionTrace, i32> {
         eprintln!("[ArcFlow] Invalid trace JSON: {e}");
         1
     })?;
-    Ok(ExecutionTraceBuilder::build(
-        "file-import",
-        &events,
-        0,
-    ))
+    Ok(ExecutionTraceBuilder::build("file-import", &events, 0))
 }
 
 fn load_trace_server(server: &str, run_id: &str) -> Result<ExecutionTrace, i32> {

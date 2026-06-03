@@ -35,7 +35,10 @@ pub fn build_app(state: Arc<RelayState>) -> Router {
         ))
         .layer(RequestBodyLimitLayer::new(512 * 1024));
 
-    public.merge(site_routes).with_state(state).layer(cors_layer())
+    public
+        .merge(site_routes)
+        .with_state(state)
+        .layer(cors_layer())
 }
 
 fn cors_layer() -> CorsLayer {

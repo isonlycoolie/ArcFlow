@@ -5,8 +5,8 @@ use uuid::Uuid;
 use arcflow_core::agent::AgentRuntime;
 use arcflow_core::memory::MemoryCoordinator;
 use arcflow_core::rcs::types::{
-    AgentDefinition, ExecutionStatus, MemoryConfig, MemoryRetrievalConfig, MemoryScope,
-    MemoryType, RetrievalModeSpec,
+    AgentDefinition, ExecutionStatus, MemoryConfig, MemoryRetrievalConfig, MemoryScope, MemoryType,
+    RetrievalModeSpec,
 };
 use arcflow_core::state::StateSnapshot;
 use arcflow_core::tracing::{

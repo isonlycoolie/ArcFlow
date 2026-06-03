@@ -1,7 +1,7 @@
 //! PostgreSQL schema migrations (`sqlx` embedded).
 
-use sqlx::postgres::PgPool;
 use sqlx::migrate::MigrateError;
+use sqlx::postgres::PgPool;
 
 /// Embedded migrations from `runtime/arcflow-core/migrations/`.
 pub static MIGRATOR: sqlx::migrate::Migrator = sqlx::migrate!();

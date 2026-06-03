@@ -39,7 +39,10 @@ fn extract_api_key(headers: &axum::http::HeaderMap) -> &str {
             return v;
         }
     }
-    if let Some(v) = headers.get(header::AUTHORIZATION).and_then(|v| v.to_str().ok()) {
+    if let Some(v) = headers
+        .get(header::AUTHORIZATION)
+        .and_then(|v| v.to_str().ok())
+    {
         if let Some(token) = v.strip_prefix("Bearer ") {
             if !token.is_empty() {
                 return token;
@@ -49,14 +52,21 @@ fn extract_api_key(headers: &axum::http::HeaderMap) -> &str {
     ""
 }
 
-fn resolve_principal(provided: &str, master: &str, static_keys: &StaticKeyMap) -> Option<AuthPrincipal> {
+fn resolve_principal(
+    provided: &str,
+    master: &str,
+    static_keys: &StaticKeyMap,
+) -> Option<AuthPrincipal> {
     if provided.is_empty() {
         return None;
     }
     if provided.as_bytes().ct_eq(master.as_bytes()).into() {
         return Some(AuthPrincipal::Master);
     }
-    static_keys.get(provided).cloned().map(AuthPrincipal::Runtime)
+    static_keys
+        .get(provided)
+        .cloned()
+        .map(AuthPrincipal::Runtime)
 }
 
 fn unauthorized() -> (StatusCode, Json<serde_json::Value>) {

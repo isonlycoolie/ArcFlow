@@ -23,7 +23,9 @@ use super::chunking::{
     extract_chunk_metadata, ChunkMetadata, ChunkStrategy, RecursiveCharacterSplitter,
 };
 use super::error::MemoryError;
-use super::hybrid::{sparse_lexical_score, HybridHit, HybridRetriever, DEFAULT_DENSE_WEIGHT, DEFAULT_SPARSE_WEIGHT};
+use super::hybrid::{
+    sparse_lexical_score, HybridHit, HybridRetriever, DEFAULT_DENSE_WEIGHT, DEFAULT_SPARSE_WEIGHT,
+};
 use super::namespace::durable_key;
 use super::provider::VectorStoreProvider;
 use super::rerank::resolve_rerank_provider;
@@ -343,7 +345,10 @@ impl VectorMemory {
     /// Uses `ARCFLOW_EMBEDDING_PROVIDER`, or explicit `stub` in tests/dev mode.
     pub fn new() -> Self {
         Self::from_env().unwrap_or_else(|_| {
-            Self::from_provider_spec("stub").expect("stub provider always available")
+            Self::from_provider_spec("stub").unwrap_or_else(|err| {
+                eprintln!("arcflow: stub embedding provider unavailable: {err}");
+                std::process::exit(1);
+            })
         })
     }
     pub fn from_provider_spec(spec: &str) -> Result<Self, EmbeddingError> {
@@ -364,10 +369,8 @@ impl VectorMemory {
     }
 
     fn with_provider(provider: Arc<dyn EmbeddingProvider>, config: VectorMemoryConfig) -> Self {
-        let splitter = RecursiveCharacterSplitter::new(
-            config.chunking.chunk_size,
-            config.chunking.overlap,
-        );
+        let splitter =
+            RecursiveCharacterSplitter::new(config.chunking.chunk_size, config.chunking.overlap);
         let hybrid = HybridRetriever::new(
             config.retrieval.dense_weight,
             config.retrieval.sparse_weight,
@@ -451,19 +454,19 @@ impl VectorMemory {
         let Some(rerank_spec) = self.config.rerank.as_deref() else {
             return Ok(hits.into_iter().take(top_k).collect());
         };
-        let provider = resolve_rerank_provider(rerank_spec).map_err(|e| MemoryError::OperationFailed {
-            reason: e.to_string(),
-        })?;
+        let provider =
+            resolve_rerank_provider(rerank_spec).map_err(|e| MemoryError::OperationFailed {
+                reason: e.to_string(),
+            })?;
         let docs: Vec<String> = hits
             .iter()
             .map(|b| String::from_utf8_lossy(b).into_owned())
             .collect();
-        let ranked = provider
-            .rerank(query, &docs, top_k)
-            .await
-            .map_err(|e| MemoryError::OperationFailed {
+        let ranked = provider.rerank(query, &docs, top_k).await.map_err(|e| {
+            MemoryError::OperationFailed {
                 reason: e.to_string(),
-            })?;
+            }
+        })?;
         Ok(ranked.into_iter().map(|r| r.text.into_bytes()).collect())
     }
 
@@ -474,10 +477,7 @@ impl VectorMemory {
                 reason: "memory_type must be Vector".into(),
             });
         }
-        let spec = config
-            .embedding
-            .as_deref()
-            .unwrap_or("stub/8");
+        let spec = config.embedding.as_deref().unwrap_or("stub/8");
         Self::with_config(spec, vector_config_from_memory(config))
     }
 
@@ -491,9 +491,7 @@ impl VectorMemory {
         let _ = namespace;
         let vector = self.embed_text(query).await?;
         match self.config.mode {
-            RetrievalMode::Dense => {
-                self.store.search(COLLECTION, &vector, top_k).await
-            }
+            RetrievalMode::Dense => self.store.search(COLLECTION, &vector, top_k).await,
             RetrievalMode::Hybrid => {
                 let candidates = self
                     .store
@@ -513,9 +511,7 @@ impl VectorMemory {
                     .into_iter()
                     .filter_map(|(id, _)| {
                         id.parse::<usize>().ok().and_then(|i| {
-                            candidates
-                                .get(i)
-                                .map(|(_, text)| text.as_bytes().to_vec())
+                            candidates.get(i).map(|(_, text)| text.as_bytes().to_vec())
                         })
                     })
                     .collect())

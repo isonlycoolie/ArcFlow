@@ -27,24 +27,17 @@ pub async fn create_run(
     headers: HeaderMap,
     Json(body): Json<CreateRunRequest>,
 ) -> Result<Json<CreateRunResponse>, (StatusCode, String)> {
-    let store = state
-        .runs
-        .as_ref()
-        .ok_or((
-            StatusCode::SERVICE_UNAVAILABLE,
-            "[ArcFlow] ARCFLOW_POSTGRESQL_URL is required for /v1/runs".into(),
-        ))?;
+    let store = state.runs.as_ref().ok_or((
+        StatusCode::SERVICE_UNAVAILABLE,
+        "[ArcFlow] ARCFLOW_POSTGRESQL_URL is required for /v1/runs".into(),
+    ))?;
 
     if let Some(key) = headers
         .get("Idempotency-Key")
         .and_then(|v| v.to_str().ok())
         .filter(|s| !s.is_empty())
     {
-        if let Some(existing) = store
-            .find_by_idempotency(key)
-            .await
-            .map_err(internal)?
-        {
+        if let Some(existing) = store.find_by_idempotency(key).await.map_err(internal)? {
             return Ok(Json(CreateRunResponse {
                 run_id: existing.run_id,
                 trace_id: existing.trace_id,
@@ -71,13 +64,10 @@ pub async fn create_run(
             StatusCode::SERVICE_UNAVAILABLE,
             "[ArcFlow] ARCFLOW_POSTGRESQL_URL is required for workflow_ref".into(),
         ))?;
-        let loaded = crate::registry::load_ref::load(
-            registry,
-            &workflow_ref.name,
-            &workflow_ref.version,
-        )
-        .await
-        .map_err(bad_request)?;
+        let loaded =
+            crate::registry::load_ref::load(registry, &workflow_ref.name, &workflow_ref.version)
+                .await
+                .map_err(bad_request)?;
         (loaded.workflow, loaded.agents, Some(loaded.version))
     } else {
         let workflow = body
@@ -99,9 +89,7 @@ pub async fn create_run(
     let run_id = Uuid::new_v4();
     let trace_id = Uuid::new_v4();
     let workflow_hash = workflow.id.to_string();
-    let idempotency_key = headers
-        .get("Idempotency-Key")
-        .and_then(|v| v.to_str().ok());
+    let idempotency_key = headers.get("Idempotency-Key").and_then(|v| v.to_str().ok());
 
     store
         .insert_pending(
@@ -122,8 +110,8 @@ pub async fn create_run(
         .await
         .map_err(internal)?;
 
-    let mut exec_config = parse_exec_config(body.exec_config, registry_version.as_deref())
-        .map_err(bad_request)?;
+    let mut exec_config =
+        parse_exec_config(body.exec_config, registry_version.as_deref()).map_err(bad_request)?;
     exec_config.run_id = Some(run_id);
     let agent_map: HashMap<Uuid, AgentDefinition> =
         agents.iter().map(|a| (a.id, a.clone())).collect();
@@ -178,18 +166,16 @@ pub async fn create_run(
             approval_key,
             expires_at,
             partial,
-        }) => {
-            (
-                ExecutionStatus::Interrupted,
-                Some(serde_json::json!({
-                    "approval_key": approval_key,
-                    "expires_at": expires_at.to_rfc3339(),
-                    "step_index": partial.step_outputs.len(),
-                    "run_id": partial.run_id.to_string(),
-                })),
-                None,
-            )
-        }
+        }) => (
+            ExecutionStatus::Interrupted,
+            Some(serde_json::json!({
+                "approval_key": approval_key,
+                "expires_at": expires_at.to_rfc3339(),
+                "step_index": partial.step_outputs.len(),
+                "run_id": partial.run_id.to_string(),
+            })),
+            None,
+        ),
         Err(WorkflowRunError::Aborted(err)) => {
             return Err(bad_request(err.to_string()));
         }
@@ -218,13 +204,10 @@ pub async fn get_run(
     State(state): State<Arc<AppState>>,
     Path(run_id): Path<String>,
 ) -> Result<Json<RunStatusResponse>, (StatusCode, String)> {
-    let store = state
-        .runs
-        .as_ref()
-        .ok_or((
-            StatusCode::SERVICE_UNAVAILABLE,
-            "[ArcFlow] ARCFLOW_POSTGRESQL_URL is required".into(),
-        ))?;
+    let store = state.runs.as_ref().ok_or((
+        StatusCode::SERVICE_UNAVAILABLE,
+        "[ArcFlow] ARCFLOW_POSTGRESQL_URL is required".into(),
+    ))?;
     let stored = store
         .get(&run_id)
         .await
@@ -278,7 +261,10 @@ fn internal(err: sqlx::Error) -> (StatusCode, String) {
 }
 
 fn bad_request(message: impl Into<String>) -> (StatusCode, String) {
-    (StatusCode::BAD_REQUEST, format!("[ArcFlow] {}", message.into()))
+    (
+        StatusCode::BAD_REQUEST,
+        format!("[ArcFlow] {}", message.into()),
+    )
 }
 
 fn internal_json(err: serde_json::Error) -> (StatusCode, String) {
@@ -301,9 +287,7 @@ fn validate_hitl(
         .and_then(|b| b.as_bool())
         .unwrap_or(false);
     if !recovery {
-        return Err(
-            "workflows with HITL steps require exec_config.recovery_enabled=true".into(),
-        );
+        return Err("workflows with HITL steps require exec_config.recovery_enabled=true".into());
     }
     Ok(())
 }

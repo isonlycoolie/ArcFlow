@@ -44,7 +44,10 @@ pub fn validate_graph(
     }
     for join in &graph.join_nodes {
         if !node_ids.contains(&join.id) {
-            return Err(invalid(format!("join node '{}' not in graph nodes", join.id)));
+            return Err(invalid(format!(
+                "join node '{}' not in graph nodes",
+                join.id
+            )));
         }
         for branch in &join.wait_for {
             if !node_ids.contains(branch) {

@@ -27,10 +27,11 @@ pub struct GeminiProvider {
 
 impl GeminiProvider {
     pub fn new(model: String) -> Result<Self, ProviderCallError> {
-        let api_key = std::env::var(GEMINI_API_KEY_ENV).map_err(|_| ProviderCallError::NotConfigured {
-            provider_id: "gemini".into(),
-            key_env_var: GEMINI_API_KEY_ENV.into(),
-        })?;
+        let api_key =
+            std::env::var(GEMINI_API_KEY_ENV).map_err(|_| ProviderCallError::NotConfigured {
+                provider_id: "gemini".into(),
+                key_env_var: GEMINI_API_KEY_ENV.into(),
+            })?;
         Self::with_base_url(
             model,
             api_key,
@@ -89,17 +90,19 @@ impl GeminiProvider {
                                 function_response: None,
                             });
                         }
-                        for call in m.tool_calls.as_ref().unwrap() {
-                            let args: Value =
-                                serde_json::from_str(&call.arguments).unwrap_or_else(|_| json!({}));
-                            parts.push(GeminiPart {
-                                text: None,
-                                function_call: Some(GeminiFunctionCall {
-                                    name: call.name.clone(),
-                                    args,
-                                }),
-                                function_response: None,
-                            });
+                        if let Some(calls) = m.tool_calls.as_ref() {
+                            for call in calls {
+                                let args: Value = serde_json::from_str(&call.arguments)
+                                    .unwrap_or_else(|_| json!({}));
+                                parts.push(GeminiPart {
+                                    text: None,
+                                    function_call: Some(GeminiFunctionCall {
+                                        name: call.name.clone(),
+                                        args,
+                                    }),
+                                    function_response: None,
+                                });
+                            }
                         }
                         parts
                     }
@@ -241,9 +244,12 @@ impl ModelProvider for GeminiProvider {
     ) -> Result<ProviderResponse, ProviderCallError> {
         let body = GeminiRequest {
             contents: Self::build_contents(&request.messages),
-            system_instruction: request.system_prompt.as_ref().map(|s| GeminiSystemInstruction {
-                parts: vec![GeminiTextPart { text: s.clone() }],
-            }),
+            system_instruction: request
+                .system_prompt
+                .as_ref()
+                .map(|s| GeminiSystemInstruction {
+                    parts: vec![GeminiTextPart { text: s.clone() }],
+                }),
             generation_config: GeminiGenConfig {
                 max_output_tokens: request.max_tokens,
                 temperature: request.temperature,
@@ -290,12 +296,14 @@ impl ModelProvider for GeminiProvider {
                 sanitized_message: "api error".into(),
             });
         }
-        let parsed: GeminiResponse = response.json().await.map_err(|e| {
-            ProviderCallError::ResponseParseError {
-                provider_id: "gemini".into(),
-                reason: e.to_string(),
-            }
-        })?;
+        let parsed: GeminiResponse =
+            response
+                .json()
+                .await
+                .map_err(|e| ProviderCallError::ResponseParseError {
+                    provider_id: "gemini".into(),
+                    reason: e.to_string(),
+                })?;
         let candidate = parsed.candidates.into_iter().next().ok_or_else(|| {
             ProviderCallError::ResponseParseError {
                 provider_id: "gemini".into(),
@@ -343,10 +351,7 @@ impl ModelProvider for GeminiProvider {
         })
     }
 
-    async fn stream(
-        &self,
-        _request: ProviderRequest,
-    ) -> Result<ProviderStream, ProviderCallError> {
+    async fn stream(&self, _request: ProviderRequest) -> Result<ProviderStream, ProviderCallError> {
         Err(ProviderCallError::ApiError {
             provider_id: "gemini".into(),
             status_code: 501,

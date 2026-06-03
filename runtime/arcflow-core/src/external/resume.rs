@@ -59,20 +59,24 @@ pub fn resume_workflow_with_external_outcome(
             });
         }
         RecoveryAction::RequestHitl | RecoveryAction::RetryExternal => {
-            return Err(WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
-                reason: format!(
-                    "external recovery action {:?} requires server-side orchestration",
-                    decision.action
-                ),
-            }));
+            return Err(WorkflowRunError::Aborted(
+                RuntimeError::InvalidWorkflowDefinition {
+                    reason: format!(
+                        "external recovery action {:?} requires server-side orchestration",
+                        decision.action
+                    ),
+                },
+            ));
         }
         RecoveryAction::InjectToolResult | RecoveryAction::ResumeSuccess => {}
     }
 
     if !exec_config.recovery_enabled {
-        return Err(WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
-            reason: "recovery is not enabled for this run".into(),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::InvalidWorkflowDefinition {
+                reason: "recovery is not enabled for this run".into(),
+            },
+        ));
     }
 
     let rt = tokio::runtime::Runtime::new().map_err(|e| {
@@ -84,14 +88,18 @@ pub fn resume_workflow_with_external_outcome(
         .block_on(load_recovery(original_run_id))
         .map_err(WorkflowRunError::Aborted)?;
     let Some(recovery) = state else {
-        return Err(WorkflowRunError::Aborted(RuntimeError::RecoveryStorageError {
-            reason: format!("no recovery state for run_id '{original_run_id}'"),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::RecoveryStorageError {
+                reason: format!("no recovery state for run_id '{original_run_id}'"),
+            },
+        ));
     };
     if recovery.failure_error_code != EXTERNAL_INTERRUPT_CODE {
-        return Err(WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
-            reason: "run is not awaiting external callback".into(),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::InvalidWorkflowDefinition {
+                reason: "run is not awaiting external callback".into(),
+            },
+        ));
     }
 
     let approved = report.status == ExternalOutcomeStatus::Success;
@@ -110,10 +118,7 @@ pub fn resume_workflow_with_external_outcome(
         data["fields"] = fields.clone();
     }
 
-    let approval = ApprovalResult {
-        approved,
-        data,
-    };
+    let approval = ApprovalResult { approved, data };
 
     let precompleted: Vec<ExecutionStepOutput> = recovery
         .completed_steps
@@ -192,9 +197,11 @@ fn load_partial(original_run_id: &str) -> Result<WorkflowExecutionRecord, Workfl
         .block_on(load_recovery(original_run_id))
         .map_err(WorkflowRunError::Aborted)?;
     let Some(recovery) = state else {
-        return Err(WorkflowRunError::Aborted(RuntimeError::RecoveryStorageError {
-            reason: format!("no recovery state for run_id '{original_run_id}'"),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::RecoveryStorageError {
+                reason: format!("no recovery state for run_id '{original_run_id}'"),
+            },
+        ));
     };
     let run_id = Uuid::parse_str(&recovery.original_run_id).unwrap_or_else(|_| Uuid::new_v4());
     let workflow_id =

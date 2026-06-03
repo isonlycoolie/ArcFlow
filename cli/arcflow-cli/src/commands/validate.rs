@@ -12,7 +12,10 @@ pub fn run(args: ValidateArgs) -> i32 {
     let content = match fs::read_to_string(&args.workflow_file) {
         Ok(c) => c,
         Err(e) => {
-            eprintln!("[ArcFlow] Cannot read {}: {e}", args.workflow_file.display());
+            eprintln!(
+                "[ArcFlow] Cannot read {}: {e}",
+                args.workflow_file.display()
+            );
             return 1;
         }
     };
