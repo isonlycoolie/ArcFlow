@@ -38,7 +38,7 @@ Read the sample document constant from `document_qa.py`:
 
 ```python
 SAMPLE_DOC = """# ArcFlow Memory Guide
-Source: https://arcflow.dev/docs/memory
+Source: https://arcflows.vercel.com/docs/memory
 
 ArcFlow vector memory supports hybrid dense and sparse retrieval.
 Chunk documents before ingest for better recall on long texts.
