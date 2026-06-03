@@ -10,10 +10,12 @@ runtime/arcflow-core/src/agent/tool_loop.rs:run_async
 runtime/arcflow-core/src/embedding/onnx.rs:try_ort_embed
 runtime/arcflow-core/src/external/monitor.rs:emit_external_traces
 runtime/arcflow-core/src/external/resume.rs:resume_workflow_with_external_outcome
+runtime/arcflow-core/src/external/resume.rs:load_partial
 runtime/arcflow-core/src/human/approve.rs:resume_workflow_with_approval
 runtime/arcflow-core/src/human/storage.rs:resolve
 runtime/arcflow-core/src/human/wait.rs:interrupt_for_human
 runtime/arcflow-core/src/memory/coordinator.rs:search_vector
+runtime/arcflow-core/src/memory/coordinator.rs:write_vector_document
 runtime/arcflow-core/src/memory/rerank.rs:rerank
 runtime/arcflow-core/src/memory/vector.rs:upsert
 runtime/arcflow-core/src/providers/anthropic.rs:complete
@@ -31,6 +33,7 @@ runtime/arcflow-core/src/tracing/builder.rs:apply_event
 runtime/arcflow-core/src/tracing/builder.rs:build
 runtime/arcflow-core/src/tracing/otel_metrics.rs:init_metrics
 runtime/arcflow-core/src/workflow/engine.rs:execute_with_config
+runtime/arcflow-core/src/workflow/engine.rs:run_with_execution_mode
 runtime/arcflow-core/src/workflow/graph/checkpoint.rs:persist_graph_checkpoint
 runtime/arcflow-core/src/workflow/graph/scheduler.rs:run_graph_loop
 runtime/arcflow-core/src/workflow/graph/validation.rs:validate_graph
