@@ -41,10 +41,12 @@ if [[ "${1:-}" == "--commit" ]]; then
 fi
 
 # PR / branch mode: check all commits not on base
-BASE_REF="${GITHUB_BASE_REF:-main}"
+BASE_REF="${GITHUB_BASE_REF:-development}"
 RANGE=""
 if git rev-parse "origin/${BASE_REF}" >/dev/null 2>&1; then
   RANGE="origin/${BASE_REF}..HEAD"
+elif git rev-parse "origin/development" >/dev/null 2>&1; then
+  RANGE="origin/development..HEAD"
 elif git rev-parse "origin/master" >/dev/null 2>&1; then
   RANGE="origin/master..HEAD"
 elif [[ -n "${COMMIT_SIZE_BASE:-}" ]]; then
@@ -57,7 +59,7 @@ else
   # Without a remote tracking branch, `git rev-list HEAD` walks the entire
   # history (false failures on legacy commits). Check only the tip commit
   # unless COMMIT_SIZE_BASE is set above.
-  echo "Note: no origin/${BASE_REF} or origin/master; checking only HEAD (set COMMIT_SIZE_BASE=<sha> for a range)."
+  echo "Note: no origin/${BASE_REF}, origin/development, or origin/master; checking only HEAD (set COMMIT_SIZE_BASE=<sha> for a range)."
   COMMITS=$(git rev-list -n 1 HEAD 2>/dev/null || true)
 fi
 if [[ -z "$COMMITS" ]]; then

@@ -2,7 +2,7 @@ name: Integration Memory
 
 on:
   pull_request:
-    branches: [main, master]
+    branches: [development, master]
     paths:
       - "runtime/arcflow-core/**"
       - "sdk-python/**"
