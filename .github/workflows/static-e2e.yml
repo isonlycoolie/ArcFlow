@@ -19,6 +19,12 @@ concurrency:
 jobs:
   static-chat-rag:
     runs-on: ubuntu-latest
+    env:
+      POSTGRES_PASSWORD: arcflow
+      ARCFLOW_POSTGRESQL_URL: postgres://arcflow:arcflow@postgres:5432/arcflow
+      ARCFLOW_SERVER_API_KEY: dev-secret
+      ARCFLOW_ADMIN_API_KEY: dev-admin
+      ARCFLOW_DEFAULT_UPSTREAM_RUNTIME_KEY: dev-secret
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
