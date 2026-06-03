@@ -2,9 +2,9 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: arcflow
-      POSTGRES_PASSWORD: arcflow
-      POSTGRES_DB: arcflow
+      POSTGRES_USER: ${POSTGRES_USER:-arcflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-"<set-your-postgres-password>"}
+      POSTGRES_DB: ${POSTGRES_DB:-arcflow}
     ports:
       - "5432:5432"
     healthcheck:

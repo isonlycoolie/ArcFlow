@@ -1,3 +1,22 @@
+# Security policy
+
+Responsible disclosure
+
+If you discover a security vulnerability in ArcFlow, please disclose it privately to the maintainers so we can triage and remediate before public disclosure. Contact: security@arcflow.dev (placeholder) or open a private support ticket.
+
+We aim to acknowledge reports within 3 business days and provide a remediation timeline within 14 days for high-severity issues. For critical vulnerabilities that could cause data loss or remote code execution, we will prioritize fixes immediately and coordinate disclosure and rotation steps.
+
+What to include
+
+- A clear description of the vulnerability and the components affected
+- Steps to reproduce (PoC), including minimal code or requests where applicable
+- Any suggested mitigations or fixes
+
+If you need to provide sensitive proof-of-concept data, please use encrypted attachments (PGP) and share keys as needed.
+
+Public policy
+
+We will publish a security advisory for resolved vulnerabilities that materially affect users, subject to coordinated disclosure timelines.
 # Security
 
 ## Reporting a vulnerability
