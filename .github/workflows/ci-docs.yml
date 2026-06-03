@@ -2,7 +2,7 @@ name: CI Docs
 
 on:
   pull_request:
-    branches: [main, master]
+    branches: [development, master]
     paths:
       - "documentation/**"
       - "dashboard/spec/**"
