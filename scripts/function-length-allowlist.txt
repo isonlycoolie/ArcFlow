@@ -42,4 +42,6 @@ runtime/arcflow-core/src/workflow/run.rs:execute_agent_for_step
 runtime/arcflow-core/src/workflow/run.rs:commit_step_output
 runtime/arcflow-core/src/workflow/run.rs:run_sorted_steps
 runtime/arcflow-core/src/workflow/run.rs:run_one_step
+runtime/arcflow-core/src/workflow/run.rs:run_one_step_core
+runtime/arcflow-core/src/workflow/run.rs:try_hitl_step
 runtime/arcflow-core/src/workflow/validation.rs:validate_workflow
