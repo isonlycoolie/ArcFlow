@@ -2,7 +2,7 @@ name: static-e2e
 
 on:
   pull_request:
-    branches: [main, master]
+    branches: [development, master]
     paths:
       - "docker/**"
       - "examples/static/**"
