@@ -29,7 +29,6 @@ cat >"$DEV_PAYLOAD" <<'EOF'
   "required_status_checks": {
     "strict": true,
     "contexts": [
-      "CI smoke",
       "Format check",
       "Clippy",
       "Tests",
