@@ -2,9 +2,9 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: arcflow
-      POSTGRES_PASSWORD: arcflow
-      POSTGRES_DB: arcflow
+      POSTGRES_USER: ${POSTGRES_USER:-arcflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-"<set-your-postgres-password>"}
+      POSTGRES_DB: ${POSTGRES_DB:-arcflow}
     ports:
       - "5432:5432"
     healthcheck:
@@ -18,7 +18,8 @@ services:
       context: ..
       dockerfile: server/arcflow-server/Dockerfile.migrate
     environment:
-      ARCFLOW_POSTGRESQL_URL: postgres://arcflow:arcflow@postgres:5432/arcflow
+      # Provide ARCFLOW_POSTGRESQL_URL via environment; no production default in repo
+      ARCFLOW_POSTGRESQL_URL: ${ARCFLOW_POSTGRESQL_URL}
     depends_on:
       postgres:
         condition: service_healthy
@@ -31,13 +32,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      ARCFLOW_SERVER_API_KEY: dev-secret
-      ARCFLOW_ADMIN_API_KEY: dev-admin
-      ARCFLOW_DEFAULT_UPSTREAM_RUNTIME_KEY: dev-secret
-      ARCFLOW_POSTGRESQL_URL: postgres://arcflow:arcflow@postgres:5432/arcflow
+      # Required: set these in your environment or a local .env file (example only)
+      ARCFLOW_SERVER_API_KEY: ${ARCFLOW_SERVER_API_KEY:-"<set-your-server-api-key>"}
+      ARCFLOW_ADMIN_API_KEY: ${ARCFLOW_ADMIN_API_KEY:-"<set-your-admin-api-key>"}
+      ARCFLOW_DEFAULT_UPSTREAM_RUNTIME_KEY: ${ARCFLOW_DEFAULT_UPSTREAM_RUNTIME_KEY:-"<set-your-default-runtime-key>"}
+      ARCFLOW_POSTGRESQL_URL: ${ARCFLOW_POSTGRESQL_URL}
       ARCFLOW_PORT: "8080"
       ARCFLOW_PG_MAX_CONNECTIONS: "10"
-      ARCFLOW_STATIC_RUNTIME_KEYS: '{"dev-secret":{"publish":true,"workflows":["chat"]}}'
+      ARCFLOW_STATIC_RUNTIME_KEYS: ${ARCFLOW_STATIC_RUNTIME_KEYS:-"{}"}
     depends_on:
       postgres:
         condition: service_healthy
