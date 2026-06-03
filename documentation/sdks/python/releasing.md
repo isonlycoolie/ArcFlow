@@ -8,20 +8,19 @@ Three workflows share responsibility so PRs stay fast and releases stay complete
 
 | Workflow | When it runs | Purpose |
 |----------|----------------|---------|
-| [SDK Python](https://github.com/isonlycoolie/ArcFlow/actions/workflows/sdk-python.yml) | Every PR (path-filtered) and push to `master` | **Fast:** Ubuntu, Python 3.11, `maturin develop`, lint, pytest (~3 min) |
-| [SDK Python Compat](https://github.com/isonlycoolie/ArcFlow/actions/workflows/sdk-python-compat.yml) | Push to `master`, weekly schedule, manual dispatch | **Compat:** 3 OS × Python 3.9–3.12, release wheels |
+| [SDK Python](https://github.com/isonlycoolie/ArcFlow/actions/workflows/sdk-python.yml) | PR to `development` (path-filtered) | **Fast:** Ubuntu, Python 3.11, `maturin develop`, lint, pytest (~3 min) |
+| [SDK Python Compat](https://github.com/isonlycoolie/ArcFlow/actions/workflows/sdk-python-compat.yml) | Weekly schedule, manual dispatch | **Compat:** 3 OS × Python 3.9–3.12, release wheels |
 | [Publish Python SDK](https://github.com/isonlycoolie/ArcFlow/actions/workflows/publish-python-sdk.yml) | Tag `sdk-python/v*` only | **Release:** cibuildwheel, PyPI OIDC, GitHub Release |
 
 ```text
-PR / feature branch --> SDK Python (fast)
-merge to master --> SDK Python Compat (full matrix)
-tag sdk-python/v* --> Publish Python SDK (cibuildwheel + PyPI)
+feature branch --> PR to development --> SDK Python (fast)
+development --> PR to master (CI Full required) --> tag sdk-python/v* --> Publish Python SDK
 ```
 
 ### Branch protection (recommended)
 
-- **Pull requests:** require status check **SDK Python** / `Fast (Ubuntu, Python 3.11)`.
-- **`master`:** require **SDK Python Compat** (or monitor it after merge) before tagging a release.
+- **`development`:** require status check **SDK Python** / `Fast (Ubuntu, Python 3.11)` and fast **CI** jobs (see [`.github/BRANCH_POLICY.md`](../../../../.github/BRANCH_POLICY.md)).
+- **`master`:** require **CI Full** + **Release promotion gate** before merge; run **SDK Python Compat** (weekly or manual) before tagging a release.
 - **Publish:** `pypi` environment reviewers on tag push only.
 
 Future optimization: `sccache` with an org S3 bucket when `SCCACHE_BUCKET` and IAM OIDC are available (not configured today).
@@ -56,9 +55,9 @@ In the **ArcFlow** repository on GitHub:
 
 ## Release flow
 
-1. **Bump version** in [`sdk-python/pyproject.toml`](../../../sdk-python/pyproject.toml) only (semver). Open a PR; ensure [SDK Python](https://github.com/isonlycoolie/ArcFlow/actions/workflows/sdk-python.yml) (fast) is green on the PR.
-2. **Merge to `master`.** Wait for [SDK Python Compat](https://github.com/isonlycoolie/ArcFlow/actions/workflows/sdk-python-compat.yml) to pass on `master` before tagging.
-3. **Create and push an annotated tag** on that commit:
+1. **Bump version** in [`sdk-python/pyproject.toml`](../../../sdk-python/pyproject.toml) only (semver). Open a PR to **`development`**; ensure [SDK Python](https://github.com/isonlycoolie/ArcFlow/actions/workflows/sdk-python.yml) (fast) is green.
+2. **Promote to `master`:** merge **`development` → `master`** after **CI Full** passes on the promotion PR head commit. Optionally dispatch [SDK Python Compat](https://github.com/isonlycoolie/ArcFlow/actions/workflows/sdk-python-compat.yml) before tagging.
+3. **Create and push an annotated tag** on the `master` commit:
 
  ```bash
  git tag -a sdk-python/v0.3.0 -m "Python SDK 0.3.0"
