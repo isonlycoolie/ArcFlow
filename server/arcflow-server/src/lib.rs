@@ -1,5 +1,7 @@
 //! ArcFlow HTTP server library (Phase 2-Pro v2 — testable router).
 
+#![allow(clippy::too_many_arguments)]
+
 mod dto;
 mod exec_config;
 pub mod handlers;

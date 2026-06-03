@@ -17,6 +17,7 @@ use crate::state::AppState;
 use super::principal::{AuthPrincipal, StaticKeyMap};
 
 pub const API_KEY_HEADER: &str = "X-ArcFlow-Api-Key";
+#[allow(dead_code)]
 pub const AUTH_PRINCIPAL_EXTENSION: &str = "arcflow.auth.principal";
 
 pub async fn require_api_key(
