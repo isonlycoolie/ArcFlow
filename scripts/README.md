@@ -4,9 +4,22 @@ Helper scripts for contributors, maintainers, and operators. Run from the reposi
 
 ## Contributor and CI
 
+Two-tier CI: **fast** checks run automatically on every PR; **full** checks run via `workflow_dispatch` or locally before merge.
+
+| Tier | GitHub workflow | Local script |
+|------|-----------------|--------------|
+| Fast (PR) | [`ci.yml`](../.github/workflows/ci.yml), [`ci-docs.yml`](../.github/workflows/ci-docs.yml) | [`ci-local.sh`](ci-local.sh) |
+| Full (manual) | [`ci-full.yml`](../.github/workflows/ci-full.yml) | [`ci-local-full.sh`](ci-local-full.sh) |
+| SDK Python (PR, path filter) | [`sdk-python.yml`](../.github/workflows/sdk-python.yml) | last section of `ci-local-full.sh` |
+| SDK compat (weekly / manual) | [`sdk-python-compat.yml`](../.github/workflows/sdk-python-compat.yml) | — |
+| Static e2e (PR path filter / manual) | [`static-e2e.yml`](../.github/workflows/static-e2e.yml) | `ci-local-full.sh` (Docker) |
+| Integration memory (PR path filter / manual) | [`integration-memory.yml`](../.github/workflows/integration-memory.yml) | `ci-local-full.sh` (Postgres + Qdrant) |
+
 | Script | Purpose |
 |--------|---------|
-| [`ci-local.sh`](ci-local.sh) | Mirror main CI jobs locally (fmt, clippy, tests, audit) |
+| [`ci-local.sh`](ci-local.sh) | Mirror fast PR CI locally |
+| [`ci-local-full.sh`](ci-local-full.sh) | Fast + trace bench, audit, rustdoc, TS build, optional Docker/Postgres |
+| [`ci-local.ps1`](ci-local.ps1) | PowerShell wrapper (`-Full`, `-SkipPostgres`, etc.) |
 | [`check-no-unwrap.sh`](check-no-unwrap.sh) | Fail on `.unwrap()` in production Rust paths |
 | [`check-no-sql-interpolation.sh`](check-no-sql-interpolation.sh) | Fail on string-interpolated SQL |
 | [`check-function-length.sh`](check-function-length.sh) | Function length gate |
@@ -26,6 +39,12 @@ Before pushing, run:
 
 ```bash
 bash scripts/ci-local.sh
+```
+
+Before merge to `master`, run full CI locally or dispatch **CI Full** in GitHub Actions:
+
+```bash
+bash scripts/ci-local-full.sh
 ```
 
 ## Release and maintainers
