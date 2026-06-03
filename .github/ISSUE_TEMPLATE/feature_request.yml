@@ -1,0 +1,43 @@
+name: Feature request
+description: Propose a new capability or improvement
+title: "[feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the problem first; a feature is a proposed solution. Check [CONTRIBUTING.md](https://github.com/isonlycoolie/ArcFlow/blob/development/CONTRIBUTING.md) for contribution areas and gaps.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What pain does this solve? Who is affected?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - runtime (arcflow-core)
+        - server (arcflow-server)
+        - relay
+        - sdk-python
+        - sdk-typescript
+        - cli
+        - observability
+        - static / relay product
+        - documentation
+        - other
+    validations:
+      required: true
