@@ -24,4 +24,4 @@
 ### For documentation changes
 
 - [ ] `node scripts/verify-documentation-prose.mjs` passed
-- [ ] WebApp docs export / `docs:lint` updated if publishing to arcflow.dev
+- [ ] WebApp docs export / `docs:lint` updated if publishing to arcflows.vercel.com
