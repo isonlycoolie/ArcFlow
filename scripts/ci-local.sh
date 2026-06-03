@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# Mirror .github/workflows/ci.yml jobs that run on ubuntu-latest (no commit-size).
-# Run from repo root: bash scripts/ci-local.sh
+# Mirror .github/workflows/ci.yml (fast PR checks). Run from repo root:
+#   bash scripts/ci-local.sh
+#
+# Heavy jobs (trace bench, audit, rustdoc, TypeScript, Postgres) live in ci-local-full.sh
+# or GitHub Actions → CI Full → Run workflow.
 
 set -euo pipefail
 
@@ -23,19 +26,7 @@ run_step "lint" cargo clippy --workspace --all-targets -- -D warnings
 
 run_step "test" cargo test --workspace
 
-if ! command -v cargo-audit &>/dev/null; then
-  echo "Installing cargo-audit..."
-  cargo install cargo-audit
-fi
-run_step "audit" cargo audit
-
-run_step "doc" env RUSTDOCFLAGS=-D warnings cargo doc --workspace --no-deps
-
-run_step "no-unwrap" bash scripts/check-no-unwrap.sh
-
-run_step "no-sql-interpolation" bash scripts/check-no-sql-interpolation.sh
-
-run_step "function-length" bash scripts/check-function-length.sh
+run_step "commit-size" bash scripts/check-commit-size.sh
 
 run_step "secrets-scan" bash -c '
   set -euo pipefail
@@ -54,6 +45,12 @@ run_step "validate-contracts" bash scripts/validate-rcs-schema.sh
 
 run_step "documentation-prose" node scripts/verify-documentation-prose.mjs
 
+run_step "no-unwrap" bash scripts/check-no-unwrap.sh
+
+run_step "no-sql-interpolation" bash scripts/check-no-sql-interpolation.sh
+
+run_step "function-length" bash scripts/check-function-length.sh
+
 run_step "structure-check" bash -c '
   set -euo pipefail
   for dir in runtime/arcflow-core sdk-python sdk-typescript sdk-java sdk-go cli contracts; do
@@ -63,26 +60,8 @@ run_step "structure-check" bash -c '
   echo "OK: required directories present"
 '
 
-echo ""
-echo "=== sdk-python (mirror .github/workflows/sdk-python.yml) ==="
-(
-  set -euo pipefail
-  cd "$ROOT/sdk-python"
-  python -m pip install -q maturin pytest "mypy<1.19" black ruff pytest-httpserver
-  python -m maturin build --release --out dist
-  WHEEL="$(python -c 'from pathlib import Path; ws=sorted(Path("dist").glob("arcflow_sdk-*.whl")); print(ws[-1] if ws else "")')"
-  if [ -z "$WHEEL" ]; then
-    echo "ERROR: No wheel built in sdk-python/dist"
-    exit 1
-  fi
-  python -m pip install -q --force-reinstall "$WHEEL"
-  python -m ruff check arcflow tests
-  python -m black --check arcflow tests
-  python -m mypy arcflow
-  tmpdir="$(mktemp -d 2>/dev/null || python -c "import tempfile; print(tempfile.mkdtemp())")"
-  cd "$tmpdir"
-  PYTHONPATH="" python -m pytest "$ROOT/sdk-python/tests" -v
-)
+run_step "provider-security-audit" python scripts/assert_provider_no_credentials.py
 
 echo ""
-echo "ci-local: all steps passed"
+echo "ci-local: all fast CI steps passed"
+echo "Before merge to master, run: bash scripts/ci-local-full.sh (or Actions → CI Full)"
