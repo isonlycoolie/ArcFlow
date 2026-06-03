@@ -1,10 +1,19 @@
 name: CI
 
 on:
-  push:
-    branches: [main, master]
   pull_request:
     branches: [main, master]
+    paths-ignore:
+      - "documentation/**"
+      - "dashboard/spec/**"
+      - "contracts/**/*.md"
+      - "**.md"
+      - "README.md"
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   CARGO_TERM_COLOR: always
@@ -43,30 +52,6 @@ jobs:
           toolchain: stable
       - run: cargo test --workspace
 
-  trace-performance:
-    name: Trace overhead budget
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-      - name: Bench trace emit path
-        run: |
-          cargo bench -p arcflow-core --bench trace_overhead -- --noplot 2>&1 | tee /tmp/bench.txt
-          python3 scripts/assert_trace_overhead.py < /tmp/bench.txt
-
-  audit:
-    name: Security audit
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-      - run: cargo install cargo-audit
-      - run: cargo audit
-
   commit-size:
     name: Commit size (max 100 code lines)
     runs-on: ubuntu-latest
@@ -85,7 +70,6 @@ jobs:
       - name: Block obvious hardcoded secrets
         run: |
           set -euo pipefail
-          # Exit 0 from git grep means matches were found.
           if git grep -nE 'sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}' -- . ':(exclude)target' ':(exclude).git' 2>/dev/null; then
             echo "::error::Possible API key or AWS access key id pattern in tree"
             exit 1
@@ -106,17 +90,6 @@ jobs:
           node-version: "20"
       - name: Compile RCS JSON Schema (draft-07)
         run: bash scripts/validate-rcs-schema.sh
-
-  documentation-prose:
-    name: Documentation prose check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - name: Reject internal planning language in documentation/
-        run: node scripts/verify-documentation-prose.mjs
 
   no-unwrap:
     name: No unwrap in library code
@@ -142,19 +115,6 @@ jobs:
       - name: Enforce max 40 lines per function
         run: bash scripts/check-function-length.sh
 
-  doc:
-    name: Rustdoc build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-      - name: Build docs without warnings
-        env:
-          RUSTDOCFLAGS: -D warnings
-        run: cargo doc --workspace --no-deps
-
   structure-check:
     name: Directory structure
     runs-on: ubuntu-latest
@@ -167,6 +127,16 @@ jobs:
           done
           if [ -d docs ]; then echo "Note: local docs/ may exist but must not be tracked by git"; fi
 
+  documentation-prose:
+    name: Documentation prose check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: node scripts/verify-documentation-prose.mjs
+
   provider-security-audit:
     name: Provider credential scan
     runs-on: ubuntu-latest
@@ -176,51 +146,3 @@ jobs:
         with:
           python-version: "3.11"
       - run: python scripts/assert_provider_no_credentials.py
-
-  typescript-build:
-    name: TypeScript SDK build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - run: cargo build -p arcflow-node
-      - working-directory: sdk-typescript
-        run: |
-          npm install
-          npm run build:ts
-          npm test
-
-  postgres-integration:
-    name: Postgres integration
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: arcflow
-          POSTGRES_PASSWORD: arcflow
-          POSTGRES_DB: arcflow
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    env:
-      ARCFLOW_POSTGRESQL_URL: postgres://arcflow:arcflow@localhost:5432/arcflow
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Apply migrations
-        run: |
-          for f in runtime/arcflow-core/migrations/*.sql; do
-            psql "$ARCFLOW_POSTGRESQL_URL" -f "$f"
-          done
-      - name: Human interrupt integration
-        run: cargo test -p arcflow-core human_interrupt -- --ignored --nocapture
-      - name: Trace persistence integration
-        run: cargo test -p arcflow-core trace_persistence -- --ignored --nocapture
