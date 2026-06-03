@@ -6,7 +6,7 @@ ArcFlow uses a two-branch integration model. GitHub branch protection is authori
 
 | Branch | Purpose | Direct push |
 |--------|---------|-------------|
-| **`development`** | Default integration branch; all feature work merges here | Blocked |
+| **`development`** | Default integration branch, all feature work merges here | Blocked |
 | **`master`** | Production / release line | Blocked |
 | **feature/** | Short-lived contributor branches | Allowed (via PR only into `development`) |
 
@@ -16,6 +16,8 @@ ArcFlow uses a two-branch integration model. GitHub branch protection is authori
 2. Run `bash scripts/ci-local.sh` locally
 3. Open a **pull request → `development`** (fast **CI** or **CI Docs** must pass)
 4. Maintainers promote **`development` → `master`** via PR only after **CI Full** passed on the PR head commit
+
+> <p style="color:red"><strong>One engine, every surface.</strong> Orchestration lives in arcflow-core (Rust). SDKs serialize workflow definitions into the Runtime Contract Specification (RCS), invoke the engine, and deserialize results. A fix in retry policy or recovery ships once and applies everywhere. <br><strong>Warning:</strong> keep commits focused, a single commit must not exceed 200 insertions; split unrelated changes into separate branches; never commit directly to `master` or `development`.</p>
 
 ## CI Full (master promotion gate)
 
@@ -37,8 +39,9 @@ If new commits land on `development` after today's scheduled CI Full, wait for t
 
 ### `development` (fast PR CI)
 
-Configure these check names from [`.github/workflows/ci.yml`](workflows/ci.yml) and [`.github/workflows/ci-docs.yml`](workflows/ci-docs.yml):
+Configure these check names from [`.github/workflows/ci-smoke.yml`](workflows/ci-smoke.yml), [`.github/workflows/ci.yml`](workflows/ci.yml), and [`.github/workflows/ci-docs.yml`](workflows/ci-docs.yml):
 
+- **`CI smoke`** (always runs on every PR; sub-minute)
 - `Format check`
 - `Clippy`
 - `Tests`
@@ -83,7 +86,7 @@ bash scripts/setup-github-branch-policy.sh
 gh api repos/isonlycoolie/ArcFlow -X PATCH -f default_branch=development
 ```
 
-Optional: **Settings → Rules → Rulesets** — require PRs into `master` to use **`development`** as the head branch.
+Optional: **Settings → Rules → Rulesets**, require PRs into `master` to use **`development`** as the head branch.
 
 ## Local hooks
 

@@ -93,7 +93,7 @@ Recovery persists run state to Postgres and resumes from the failed step after r
 <td>
 <strong>Multi-agent steps</strong> with role, instructions, and optional tools<br>
 <strong>Structured tool loops</strong> with schema-validated OpenAI-compatible function calling<br>
-<strong>Provider boundary</strong> — swap OpenAI, Anthropic, Gemini at run time<br>
+<strong>Provider boundary</strong>, swap OpenAI, Anthropic, Gemini at run time<br>
 <strong>Stub and live paths</strong> for CI and production
 </td>
 </tr>
@@ -102,13 +102,13 @@ Recovery persists run state to Postgres and resumes from the failed step after r
 <td>
 <strong>Session, shared, and persistent memory</strong> scoped by the runtime<br>
 <strong>Vector memory (RAG)</strong> with Qdrant-backed retrieval<br>
-<strong>Dashboard-driven knowledge</strong> — documents and embedding keys stay server-side
+<strong>Dashboard-driven knowledge</strong>, documents and embedding keys stay server-side
 </td>
 </tr>
 <tr>
 <td><strong>Reliability and control</strong></td>
 <td>
-<strong>Postgres-backed recovery</strong> — <code>resume(run_id)</code> from failed step<br>
+<strong>Postgres-backed recovery</strong>, <code>resume(run_id)</code> from failed step<br>
 <strong>Retry and timeout policies</strong> per step and workflow<br>
 <strong>Human-in-the-loop</strong> with durable approval state<br>
 <strong>Intelligent retry triggers</strong> on classified transient failures
@@ -117,7 +117,7 @@ Recovery persists run state to Postgres and resumes from the failed step after r
 <tr>
 <td><strong>Observability</strong></td>
 <td>
-<strong>Metadata-only execution traces</strong> — step timing, tokens, tool/memory events<br>
+<strong>Metadata-only execution traces</strong>, step timing, tokens, tool/memory events<br>
 <strong>OpenTelemetry export</strong> for Grafana, Jaeger, Prometheus (<a href="docker/observability-otel.md">guide</a>)<br>
 <strong>CLI and VS Code extension</strong> for validate, trace, step-through debug
 </td>
@@ -125,9 +125,9 @@ Recovery persists run state to Postgres and resumes from the failed step after r
 <tr>
 <td><strong>Static and edge</strong></td>
 <td>
-<strong>ArcFlow Relay</strong> — origin-validated proxy; secrets off the CDN bundle<br>
-<strong><code>runPublished()</code></strong> — semver-pinned workflows from the browser<br>
-<strong>Edge WASM (alpha)</strong> — stub linear workflows on Cloudflare Workers
+<strong>ArcFlow Relay</strong>, origin-validated proxy; secrets off the CDN bundle<br>
+<strong><code>runPublished()</code></strong>, semver-pinned workflows from the browser<br>
+<strong>Edge WASM (alpha)</strong>, stub linear workflows on Cloudflare Workers
 </td>
 </tr>
 </table>
@@ -145,10 +145,10 @@ flowchart TB
     http[arcflow-server HTTP]
   end
   subgraph contract [Contract layer]
-    rcs[RCS — versioned JSON schema]
+    rcs[RCS, versioned JSON schema]
   end
   subgraph engine [Engine layer]
-    core[arcflow-core — agents, tools, memory, recovery]
+    core[arcflow-core, agents, tools, memory, recovery]
   end
   py --> rcs
   ts --> rcs
@@ -160,56 +160,45 @@ flowchart TB
 Fault tolerance, validation, and scheduling are implemented once in the engine layer. SDKs pass `ExecutionConfig` (retry, timeout, recovery flags) as JSON; they do not reimplement orchestration.
 
 ## Deployment modes
+Choose the deployment mode that fits your needs. Below are the common modes and when to prefer each.
 
-<table>
-<tr><th>Mode</th><th>When to use</th><th>Docs</th></tr>
-<tr>
-<td><strong>Self-hosted server</strong></td>
-<td>Graph workflows, Postgres recovery, vector memory, workflow registry, HTTP API for backend services</td>
-<td><a href="server/arcflow-server/README.md">arcflow-server</a></td>
-</tr>
-<tr>
-<td><strong>ArcFlow Relay</strong></td>
-<td>Static sites (Vite, Next.js export, CDN) — browser uses site token only; no LLM keys in the bundle</td>
-<td><a href="examples/static/README.md">Static examples</a></td>
-</tr>
-<tr>
-<td><strong>Edge WASM (alpha)</strong></td>
-<td>Low-latency stub linear workflows at the CDN edge while full edge parity matures</td>
-<td><a href="docker/edge-deployment-cloudflare.md">Cloudflare guide</a></td>
-</tr>
-</table>
+### Self-hosted server
+Use this when you need graph workflows, Postgres-backed recovery, vector memory, a workflow registry, or an HTTP API for backend services. See the arcflow-server docs for setup and operational notes: [arcflow-server](server/arcflow-server/README.md).
+
+### ArcFlow Relay
+Use Relay for static sites (Vite, Next.js exports, CDN). Relay validates site tokens and proxies requests so LLM API keys never ship in browser bundles. See the static examples for deployment patterns: [Static examples](examples/static/README.md).
+
+### Edge WASM (alpha)
+Edge WASM is an experimental mode for low-latency, linear-stub workflows at the CDN edge. It is not feature-complete, graph routing, RAG, and recovery are not supported. See the Cloudflare guide for an example: [Cloudflare guide](docker/edge-deployment-cloudflare.md).
 
 ## SDKs & Tools
 
-| Surface | Path | Purpose |
-|---------|------|---------|
-| Python SDK | [sdk-python](sdk-python/README.md) | Workflow definitions backed by the Rust runtime |
-| TypeScript SDK | [sdk-typescript](sdk-typescript/README.md) | Promise-native SDK with N-API bindings |
-| Browser client | [packages/arcflow-static](packages/arcflow-static) | Relay mode (`runPublished`) |
-| VS Code extension | [extensions/vscode-arcflow](extensions/vscode-arcflow/README.md) | Graph view, trace timeline, local debug |
-| CLI | [cli/arcflow-cli](cli/arcflow-cli) | `validate`, `run`, `trace`, TUI |
+ArcFlow exposes the same runtime through language SDKs, CLI tooling, and editor integrations. Pick the surface that matches your development and deployment needs.
+
+- **Python SDK:** Workflow definitions and runtime bindings for Python; use for scripts, services, and notebooks. See [sdk-python](sdk-python/README.md).
+- **TypeScript SDK:** N-API backed bindings for Node and tooling; powers VS Code integration and Node services. See [sdk-typescript](sdk-typescript/README.md).
+- **Browser client (arcflow-static):** Client for published workflows running via Relay; use `runPublished()` in production browser flows. See [packages/arcflow-static](packages/arcflow-static).
+- **VS Code extension:** Graph visualization, local runs, and trace timelines for authoring and debugging. See [extensions/vscode-arcflow](extensions/vscode-arcflow/README.md).
+- **CLI:** Local `arcflow` commands for `run`, `trace`, `migrate`, and lightweight validation during development. See [cli/arcflow-cli](cli/arcflow-cli).
 
 ## Examples
 
-| Example | Description |
-|---------|-------------|
-| [examples/static/chat-rag](examples/static/chat-rag/) | Landing-page support chat with RAG via relay |
-| [examples/static/online-application-chatbot](examples/static/online-application-chatbot/) | Multi-turn intake with external callback |
-| [examples/relay/byo-docker](examples/relay/byo-docker/) | Self-hosted relay with the same browser contract as managed relay |
+A few curated examples to explore:
+
+- **Static chat with RAG:** Landing-page support chat that uses Relay and RAG, see [examples/static/chat-rag](examples/static/chat-rag/).
+- **Online application chatbot:** Multi-turn intake with external callbacks, see [examples/static/online-application-chatbot](examples/static/online-application-chatbot/).
+- **Self-hosted Relay (BYO):** Example self-hosted Relay deployment, see [examples/relay/byo-docker](examples/relay/byo-docker/).
 
 ## Contracts & API
 
-Production wire formats live under [contracts/](contracts/README.md). Integrator-facing HTTP routes are documented in [HTTP API reference](documentation/server/http-api-reference.md).
+Normative wire formats, schemas, and integrator-facing routes live under the `contracts` and `documentation` folders. Key references:
 
-| Document | Purpose |
-|----------|---------|
-| [RCS v1 schema](contracts/normative/rcs/v1.schema.json) | Workflow and message data model |
-| [HTTP API reference](documentation/server/http-api-reference.md) | Self-hosted server routes (`/v1/runs`, admin, health) |
-| [Trace events v1](contracts/normative/observability/trace-events-v1.md) | Observability event schema and trace data policy |
-| [Provider API v1](contracts/normative/providers/api-v1.md) | LLM provider boundary |
+- **RCS v1 schema:** Workflow and message data model, [contracts/normative/rcs/v1.schema.json](contracts/normative/rcs/v1.schema.json)
+- **HTTP API reference:** Server routes and admin surfaces, [documentation/server/http-api-reference.md](documentation/server/http-api-reference.md)
+- **Trace events v1:** Observability event schema and trace data policy, [contracts/normative/observability/trace-events-v1.md](contracts/normative/observability/trace-events-v1.md)
+- **Provider API v1:** Provider-facing boundary for LLMs, [contracts/normative/providers/api-v1.md](contracts/normative/providers/api-v1.md)
 
-Validate the RCS schema: `bash scripts/validate-rcs-schema.sh`
+Validate the RCS schema with `bash scripts/validate-rcs-schema.sh`.
 
 ## Quick Start
 

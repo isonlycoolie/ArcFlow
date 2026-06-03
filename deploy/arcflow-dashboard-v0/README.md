@@ -14,12 +14,11 @@ Open http://localhost:5174. Requires `arcflow-server` with `ARCFLOW_ADMIN_API_KE
 
 ## API contract
 
-Admin routes (source of truth in OSS):
+Admin routes (source of truth in OSS documentation):
 
-- Meta-repo path: `arcflow/dashboard/spec/03-admin-api-contract.md`
-- OSS link: [dashboard/spec/03-admin-api-contract.md](../../dashboard/spec/03-admin-api-contract.md)
-
-Admin routes are documented in [dashboard/spec/03-admin-api-contract.md](../../dashboard/spec/03-admin-api-contract.md) and [HTTP API reference](../../documentation/server/http-api-reference.md).
+- [Dashboard spec](../../documentation/operator/dashboard-spec.md)
+- [Admin API reference](../../documentation/operator/admin-api-reference.md)
+- [HTTP API reference](../../documentation/server/http-api-reference.md)
 
 ## Meta-repo
 
