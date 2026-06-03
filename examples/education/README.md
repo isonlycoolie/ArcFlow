@@ -27,7 +27,8 @@ Email and Slack threads duplicate content that already exists in the official sy
 
 ## Prerequisites
 
-- Python SDK: `pip install -e sdk-python`
+- Python SDK: `pip install -e sdk-python` (editable, for developing examples)
+- Or install from PyPI for normal use: `pip install arcflow-sdk`
 - No Qdrant required for this demo (in-memory vector store)
 - Optional: set `OPENAI_API_KEY` if you replace stub with a live provider
 

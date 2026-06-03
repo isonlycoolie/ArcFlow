@@ -27,7 +27,12 @@ Manual approval threads get lost; the team wants a workflow that **pauses** unti
 ## Prerequisites
 
 ```bash
+# Install the SDK for development (editable)
 pip install -e sdk-python
+
+# Or install the published SDK from PyPI for normal use:
+pip install arcflow-sdk
+
 docker compose -f docker/docker-compose.server.yml up -d
 export ARCFLOW_RUNTIME=http://localhost:8080
 ```

@@ -22,8 +22,12 @@ ArcFlow provides adapters to import common LangChain shapes and heuristically ma
 ## Prerequisites
 
 ```bash
+# Install the SDK for development with LangChain extras
 pip install -e "sdk-python[langchain]"
 # or: pip install langchain-core langchain-community
+
+# Or install the published SDK from PyPI for normal use (no extras):
+pip install arcflow-sdk
 ```
 
 ## Run
