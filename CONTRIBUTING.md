@@ -9,7 +9,6 @@
 | [`contracts/`](contracts/) | Normative wire formats and operator guides |
 | [`docker/`](docker/) | Compose stacks for local dev and self-hosting — see [`docker/README.md`](docker/README.md) |
 | [`scripts/`](scripts/) | CI, release, and operator helpers — see [`scripts/README.md`](scripts/README.md) |
-| [`dashboard/spec/`](dashboard/spec/) | Operator dashboard specification (UI implementation lives in the private ArcFlow-Dashboard repo) |
 | [`sdk-python/`](sdk-python/) / [`sdk-typescript/`](sdk-typescript/) | Language SDKs |
 
 **Not tracked in this repository:** `docs/` (internal ADR pipeline), `webapp/` (separate [ArcFlow-WebApp](https://github.com/isonlycoolie/ArcFlow-WebApp) repo), sprint working plans, `.cursor/`, and local secrets such as `scripts/.pypi-token`.
