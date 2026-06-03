@@ -1,13 +1,6 @@
 name: Integration Memory
 
 on:
-  push:
-    branches: [main, master]
-    paths:
-      - "runtime/arcflow-core/**"
-      - "sdk-python/**"
-      - "docker/**"
-      - ".github/workflows/integration-memory.yml"
   pull_request:
     branches: [main, master]
     paths:
@@ -15,6 +8,11 @@ on:
       - "sdk-python/**"
       - "docker/**"
       - ".github/workflows/integration-memory.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: integration-memory-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   memory-backends:

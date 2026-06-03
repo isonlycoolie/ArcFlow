@@ -1,9 +1,20 @@
 name: static-e2e
 
 on:
-  push:
-    branches: [master, main]
   pull_request:
+    branches: [main, master]
+    paths:
+      - "docker/**"
+      - "examples/static/**"
+      - "scripts/static-*.sh"
+      - "server/**"
+      - "runtime/arcflow-core/**"
+      - ".github/workflows/static-e2e.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: static-e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   static-chat-rag:

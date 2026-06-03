@@ -1,16 +1,19 @@
 name: SDK Python
 
 on:
-  push:
-    branches: [master]
+  pull_request:
+    branches: [main, master]
     paths: &sdk_paths
       - "sdk-python/**"
       - "runtime/arcflow-core/**"
       - "Cargo.toml"
       - "Cargo.lock"
       - ".github/workflows/sdk-python.yml"
-  pull_request:
-    paths: *sdk_paths
+  workflow_dispatch:
+
+concurrency:
+  group: sdk-python-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   sdk-python-fast:

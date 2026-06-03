@@ -25,10 +25,22 @@ Public documentation at [arcflow.dev](https://arcflow.dev) is exported from a cu
 
 ## Before pushing
 
-From the repo root:
+From the repo root (Git Bash or WSL on Windows; or `.\scripts\ci-local.ps1` in PowerShell):
 
 ```bash
 bash scripts/ci-local.sh
 ```
 
-Static analysis gates: `bash scripts/check-no-unwrap.sh` and `bash scripts/check-no-sql-interpolation.sh`.
+This mirrors **fast PR checks** in [`.github/workflows/ci.yml`](.github/workflows/ci.yml): format, clippy, tests, commit size, secrets scan, contracts, documentation prose, static analysis gates, and provider credential audit.
+
+Before merging to `master`, run the **full** suite locally or in GitHub Actions:
+
+```bash
+bash scripts/ci-local-full.sh
+```
+
+Or open **Actions → CI Full → Run workflow** on your branch. Full CI adds trace bench, `cargo audit`, rustdoc, TypeScript SDK build, and optional Postgres / Docker jobs (see script header for env vars and skip flags).
+
+Doc-only PRs trigger [`.github/workflows/ci-docs.yml`](.github/workflows/ci-docs.yml) instead of the Rust matrix. When editing `documentation/`, also run in the WebApp repo: `cd webapp && npm run docs:lint` (after export).
+
+Individual gates: `bash scripts/check-no-unwrap.sh`, `bash scripts/check-no-sql-interpolation.sh`, `bash scripts/check-commit-size.sh`.

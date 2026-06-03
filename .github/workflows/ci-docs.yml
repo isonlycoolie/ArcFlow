@@ -1,0 +1,82 @@
+name: CI Docs
+
+on:
+  pull_request:
+    branches: [main, master]
+    paths:
+      - "documentation/**"
+      - "dashboard/spec/**"
+      - "contracts/**"
+      - "scripts/verify-documentation-prose.mjs"
+      - "scripts/normalize-documentation-prose.mjs"
+      - "scripts/fix-documentation-link-labels.mjs"
+      - "scripts/enterprise-prose-rules-*.mjs"
+      - "README.md"
+      - "CONTRIBUTING.md"
+  workflow_dispatch:
+
+concurrency:
+  group: ci-docs-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  documentation-prose:
+    name: Documentation prose check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Reject internal planning language in documentation/
+        run: node scripts/verify-documentation-prose.mjs
+
+  validate-contracts:
+    name: Validate RCS schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Compile RCS JSON Schema (draft-07)
+        run: bash scripts/validate-rcs-schema.sh
+
+  commit-size:
+    name: Commit size (max 100 code lines)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Enforce per-commit code line limit
+        run: bash scripts/check-commit-size.sh
+
+  secrets-scan:
+    name: Secret pattern scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Block obvious hardcoded secrets
+        run: |
+          set -euo pipefail
+          if git grep -nE 'sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}' -- . ':(exclude)target' ':(exclude).git' 2>/dev/null; then
+            echo "::error::Possible API key or AWS access key id pattern in tree"
+            exit 1
+          fi
+          if git grep -nE 'BEGIN (RSA|OPENSSH|EC) PRIVATE KEY' -- . ':(exclude)target' ':(exclude).git' 2>/dev/null; then
+            echo "::error::Possible PEM private key material in tree"
+            exit 1
+          fi
+          echo "OK: no blocked secret-like patterns"
+
+  structure-check:
+    name: Directory structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify required directories
+        run: |
+          for dir in runtime/arcflow-core sdk-python sdk-typescript sdk-java sdk-go cli contracts; do
+            test -d "$dir" || (echo "Missing required directory: $dir" && exit 1)
+          done
