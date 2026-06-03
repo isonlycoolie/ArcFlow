@@ -6,6 +6,7 @@
 
 param(
     [switch]$Full,
+    [switch]$Smoke,
     [switch]$SkipPostgres,
     [switch]$SkipStaticE2e,
     [switch]$SkipIntegrationMemory,
@@ -31,7 +32,7 @@ function Find-Bash {
 }
 
 $bash = Find-Bash
-$script = if ($Full) { "scripts/ci-local-full.sh" } else { "scripts/ci-local.sh" }
+$script = if ($Full) { "scripts/ci-local-full.sh" } elseif ($Smoke) { "scripts/ci-smoke.sh" } else { "scripts/ci-local.sh" }
 
 $envVars = @()
 if ($SkipPostgres) { $envVars += "CI_SKIP_POSTGRES=1" }
