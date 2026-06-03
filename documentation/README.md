@@ -1,6 +1,6 @@
 # ArcFlow documentation
 
-This folder is the tracked user-facing documentation site for ArcFlow. Normative wire formats and JSON schemas are published under [contracts/](contracts/rcs-schema.md) on this site. ADRs and the internal docs pipeline live in the gitignored `docs/` tree.
+This folder is the tracked user-facing documentation source for ArcFlow. The published site is at **https://arcflows.vercel.com** until **arcflow.dev** is configured. Normative wire formats and JSON schemas are published under [contracts/](contracts/rcs-schema.md) on this site. ADRs and the internal docs pipeline live in the gitignored `docs/` tree.
 
 ## Start here
 

@@ -13,7 +13,7 @@ Key top-level folders and their purpose:
 
 Not tracked in this repository: `docs/` (internal ADR pipeline), `webapp/` (separate ArcFlow-WebApp repo), sprint working plans, `.cursor/`, and local secrets such as `scripts/.pypi-token`.
 
-Public documentation at https://arcflow.dev is exported from a curated subset of `documentation/` in the WebApp repository.
+Public documentation at https://arcflows.vercel.com is exported from a curated subset of `documentation/` in the WebApp repository (until `arcflow.dev` is configured).
 
 ## Commits
 
