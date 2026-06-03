@@ -24,7 +24,7 @@ npm install && npm run dev
 
 Open http://localhost:5174 and set admin URL `http://localhost:8080` with `ARCFLOW_ADMIN_API_KEY` from compose.
 
-Admin API contract (in OSS submodule): `arcflow/dashboard/spec/03-admin-api-contract.md`.
+Admin API contract: [documentation/operator/dashboard-spec.md](https://github.com/isonlycoolie/ArcFlow/blob/master/documentation/operator/dashboard-spec.md) (OSS); detailed spec files live in the ArcFlow-Dashboard repo.
 
 ## Release tags
 

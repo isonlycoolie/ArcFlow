@@ -4,8 +4,10 @@
 
 ## Target branch
 
-- [ ] **`development`** — feature / fix (fast CI required)
-- [ ] **`master`** — release promotion from `development` only (CI Full required on head SHA)
+- [ ] **`development`**, feature / fix (fast CI required)
+- [ ] **`master`**, release promotion from `development` only (CI Full required on head SHA)
+
+> <p style="color:red"><strong>One engine, every surface.</strong> Orchestration lives in arcflow-core (Rust). SDKs serialize workflow definitions into the Runtime Contract Specification (RCS), invoke the engine, and deserialize results. A fix in retry policy or recovery ships once and applies everywhere. <br><strong>Warning:</strong> keep commits focused, a single commit must not exceed 200 insertions, split unrelated changes into separate branches, and do not commit directly to `master` or `development`.</p>
 
 ## Checklist
 
