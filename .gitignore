@@ -23,6 +23,8 @@ ArcFlow_Improvement_Plans/
 !.github/workflows/**
 !.github/BRANCH_POLICY.md
 !.github/pull_request_template.md
+!.github/ISSUE_TEMPLATE/
+!.github/ISSUE_TEMPLATE/**
 
 # Sprint acceptance evidence — not in git (share via Slack / internal tooling only)
 contracts/sprint1-acceptance-evidence.md
