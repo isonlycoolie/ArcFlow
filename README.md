@@ -39,6 +39,8 @@ ArcFlow targets teams that need **production-grade agent infrastructure on their
 
 Full system guide: [ARC-FLOW-SYSTEM-GUIDE.md](ARC-FLOW-SYSTEM-GUIDE.md)
 
+Origin story: [ARC-FLOW-STORY.md](ARC-FLOW-STORY.md)
+
 ## Why ArcFlow
 
 Most agent frameworks optimize for getting a demo running quickly. ArcFlow optimizes for **running the same workflow in production for months**: identical execution across languages, typed errors instead of silent degradation, and contracts that outlive any one SDK release.
