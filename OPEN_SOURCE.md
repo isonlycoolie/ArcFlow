@@ -17,14 +17,14 @@ ArcFlow is structured for public release: dual license, contributor guide, secur
 - [ ] Enable **Issues** and **Discussions** (optional)
 - [ ] Enable **Security → Private vulnerability reporting** and **Dependabot alerts**
 - [ ] Enable **Secret scanning** (GitHub Advanced Security if available)
-- [ ] Add license in GitHub UI: **MIT** (matches `LICENSE-MIT`; Apache-2.0 is also offered in-tree)
+- [ ] Add license in GitHub UI: **MIT** (matches root `LICENSE`; Apache-2.0 is also offered in-tree)
 - [ ] Default branch: `development` (see [`.github/BRANCH_POLICY.md`](.github/BRANCH_POLICY.md))
 
 ### 3. Files in this repo (should already be present)
 
 | Artifact | Path |
 |----------|------|
-| License (dual) | [`LICENSE`](LICENSE), [`LICENSE-MIT`](LICENSE-MIT), [`LICENSE-APACHE-2.0`](LICENSE-APACHE-2.0) |
+| License (dual) | [`LICENSE`](LICENSE) (MIT), [`LICENSE-APACHE-2.0`](LICENSE-APACHE-2.0) |
 | Contributing | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 | Code of conduct | [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) |
 | Security policy | [`SECURITY.md`](SECURITY.md) |
