@@ -17,10 +17,12 @@ ArcFlow_Improvement_Plans/
 # Cursor IDE — local agent skills, rules, settings (never commit)
 .cursor/
 
-# GitHub — only workflow YAML is tracked; templates, scripts, etc. stay local
+# GitHub — workflows + branch policy + PR template tracked
 .github/*
 !.github/workflows/
 !.github/workflows/**
+!.github/BRANCH_POLICY.md
+!.github/pull_request_template.md
 
 # Sprint acceptance evidence — not in git (share via Slack / internal tooling only)
 contracts/sprint1-acceptance-evidence.md
