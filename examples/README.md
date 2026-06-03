@@ -34,8 +34,11 @@ Most Python samples use `stub` embedding and run without live LLM keys. Swap `em
 ## Shared prerequisites
 
 ```bash
-# From repo root, Python SDK (dev install)
+# From repo root, Python SDK (developer / editable install)
 cd sdk-python && pip install -e .
+
+# Or install the published SDK from PyPI for normal use:
+pip install arcflow-sdk
 
 # Optional: full server stack for HITL, external callbacks, static admin
 docker compose -f docker/docker-compose.server.yml up -d
