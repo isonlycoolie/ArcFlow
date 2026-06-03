@@ -35,7 +35,7 @@ pub fn persist_graph_checkpoint(
             return;
         }
     };
-    let _ = rt.block_on(async {
+    rt.block_on(async {
         let pool = match sqlx::postgres::PgPoolOptions::new()
             .max_connections(2)
             .connect(&url)

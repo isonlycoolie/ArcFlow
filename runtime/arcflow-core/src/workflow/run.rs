@@ -34,6 +34,7 @@ fn try_emit_stream(tx: &Option<StreamChannelSender>, event: StreamEvent) {
 /// Parameters when resuming from PostgreSQL recovery state.
 pub struct ResumeParams {
     pub original_run_id: Uuid,
+    #[allow(dead_code)]
     pub recovery_id: String,
     pub precompleted: Vec<ExecutionStepOutput>,
     pub start_step_index: usize,

@@ -11,6 +11,8 @@
 // the SDK boundary. All other public items are for inter-crate use within
 // the runtime workspace.
 
+#![allow(clippy::too_many_arguments, clippy::result_large_err)]
+
 /// Runtime Contract Specification — types and serialization.
 /// This module is fully implemented in Sprint 1.
 pub mod rcs;

@@ -14,7 +14,7 @@ use crate::tracing::types::TokenUsage;
 
 use super::error::ProviderCallError;
 use super::model_provider::ModelProvider;
-use super::request::{MessageRole, ProviderRequest, ToolCallRequest, ToolSchema};
+use super::request::{MessageRole, ProviderRequest, ToolCallRequest};
 use super::response::{FinishReason, ProviderResponse, ProviderStream};
 
 pub struct OpenAIProvider {

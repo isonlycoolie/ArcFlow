@@ -26,10 +26,12 @@ impl GraphExecutor {
         self
     }
 
+    #[allow(dead_code)]
     pub fn entry_node(&self) -> &str {
         &self.graph.entry_node
     }
 
+    #[allow(dead_code)]
     pub fn max_iterations(&self) -> u32 {
         self.graph.max_iterations
     }

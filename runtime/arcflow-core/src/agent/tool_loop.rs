@@ -2,13 +2,10 @@
 
 use std::sync::Arc;
 
-use serde_json::Value;
 use uuid::Uuid;
 
 use crate::error::RuntimeError;
-use crate::providers::{
-    MessageRole, ModelProvider, ProviderMessage, ProviderRequest, ToolCallRequest, ToolSchema,
-};
+use crate::providers::{MessageRole, ModelProvider, ProviderMessage, ProviderRequest, ToolSchema};
 use crate::rcs::types::{AgentDefinition, ToolDefinition, ToolExecutionConfig};
 use crate::tracing::TokenUsage;
 use crate::workflow::ExecutionContext;

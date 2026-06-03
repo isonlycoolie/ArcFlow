@@ -101,6 +101,7 @@ fn react_cycle_respects_max_iterations() {
         retry_policy: None,
         execution_mode: ExecutionMode::Graph,
         graph: Some(graph),
+        external_bindings: None,
     };
 
     let mut agents = HashMap::new();

@@ -15,6 +15,7 @@ const DEFAULT_DIM: usize = 384;
 
 /// Offline embedder matching `local/all-MiniLM-L6-v2` registry id (384 dimensions).
 pub struct LocalEmbeddingProvider {
+    #[allow(dead_code)]
     model: String,
     dimensions: usize,
 }

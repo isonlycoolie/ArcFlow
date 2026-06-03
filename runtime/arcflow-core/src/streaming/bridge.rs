@@ -163,8 +163,10 @@ mod tests {
         let provider = Arc::new(MockStreamProvider {
             chunks: vec!["hello".into(), " world".into()],
         });
-        let mut exec_config = ExecutionConfig::default();
-        exec_config.stream = Some(StreamConfig { enabled: true });
+        let exec_config = ExecutionConfig {
+            stream: Some(StreamConfig { enabled: true }),
+            ..ExecutionConfig::default()
+        };
 
         let bridge = StreamRunBridge::spawn(move |stream_tx| {
             let engine = WorkflowEngine::new();
