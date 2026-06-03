@@ -22,7 +22,11 @@ The SDK streaming path lets a backend or embedded runner emit partial tokens whi
 ## Prerequisites
 
 ```bash
+# Install the SDK for development (editable)
 pip install -e sdk-python
+
+# Or install the published SDK from PyPI for normal use:
+pip install arcflow-sdk
 ```
 
 ## Run (Python)

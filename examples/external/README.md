@@ -26,7 +26,12 @@ When the portal rejects a name format, the workflow must branch to ask the user 
 ## Prerequisites
 
 ```bash
+# Install the SDK for development (editable)
 pip install -e sdk-python
+
+# Or install the published SDK from PyPI for normal use:
+pip install arcflow-sdk
+
 docker compose -f docker/docker-compose.server.yml up -d
 export ARCFLOW_WEBHOOK_SECRET=dev-webhook-secret
 export ARCFLOW_BASE_URL=http://localhost:8080

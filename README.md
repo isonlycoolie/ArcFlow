@@ -134,30 +134,31 @@ Recovery persists run state to Postgres and resumes from the failed step after r
 
 ## Architecture
 
-ArcFlow stacks three layers. SDKs and the HTTP server are adapters; the engine and contract sit below.
+ArcFlow's power comes from concentrating orchestration in a single, feature-rich engine while exposing that behavior through multiple language surfaces. The engine in `runtime/arcflow-core` implements the core primitives you need to run production AI workflows:
 
-```mermaid
-flowchart TB
-  subgraph adapters [Adapters]
-    py[Python SDK]
-    ts[TypeScript SDK]
-    cli[CLI]
-    http[arcflow-server HTTP]
-  end
-  subgraph contract [Contract layer]
-    rcs[RCS, versioned JSON schema]
-  end
-  subgraph engine [Engine layer]
-    core[arcflow-core, agents, tools, memory, recovery]
-  end
-  py --> rcs
-  ts --> rcs
-  cli --> rcs
-  http --> rcs
-  rcs --> core
-```
+- Agents: first-class agent identities and execution contexts that encapsulate prompts, tools, and provider bindings.
+- Workflows: ordered pipelines and directed graphs (DAGs) with conditional routing, joins, and re-entry semantics.
+- Graph execution: native support for graphs (not just linear chains), with graph-state coordination, checkpoint persistence, and resume semantics.
+- RAG / Vector memory: embedding, vector store retrieval, and memory coordination lives adjacent to the engine so retrieval-augmented generation integrates cleanly into step execution.
+- Tools & loops: structured tool-calling and deterministic tool loops that produce typed outputs and integrate with retry/compensation logic.
+- Human-in-the-loop (HITL) and external callbacks: durable approval state, HMAC-verified callbacks, and external outcome routing.
 
-Fault tolerance, validation, and scheduling are implemented once in the engine layer. SDKs pass `ExecutionConfig` (retry, timeout, recovery flags) as JSON; they do not reimplement orchestration.
+Adapters (the SDKs, CLI, server, and edge proxies) are intentionally thin: they serialize workflow definitions and `ExecutionConfig` into the Runtime Contract Specification (RCS), call the engine, and surface typed results. This makes the engine the single place where scheduling, retries, timeouts, state commits, trace emission, and recovery are implemented — a fix in core behavior fixes all SDKs at once.
+
+Multi-language surfaces: ArcFlow supports and maintains SDKs across languages (Python, TypeScript), and is actively extended to additional languages (Java, Go), plus a CLI and VS Code integration for local development and debugging. Language SDKs do not reimplement orchestration — they translate developer intent into RCS and forward it to the engine.
+
+Persistence and observability:
+- Recovery and checkpoints: Postgres-backed recovery state and graph checkpoint upsert (see `contracts/normative/runtime/recovery-schema-v2.sql` and `runtime/arcflow-core/src/workflow/graph/checkpoint.rs`). Linear resume and structured replay are implemented via `runtime/arcflow-core/src/recovery/resume.rs` and `runtime/arcflow-core/src/workflow/run.rs`.
+- Trace events and metrics: metadata-first execution traces are emitted from the engine and can be exported via OpenTelemetry for metrics, tracing, and monitoring.
+
+Deployment surfaces:
+- Self-hosted server (`server/arcflow-server`) provides admin APIs, run endpoints, and trace persistence for long-running workloads.
+- ArcFlow Relay and `arcflow-static` act as edge/proxy surfaces that validate tokens and either proxy to a full engine or run constrained stub workflows for low-latency paths.
+- Edge WASM is experimental for stubbed linear workflows where full graph and recovery features are not required.
+
+Implementation notes and current gaps: graph checkpoint persistence exists and is invoked from the scheduler (`runtime/arcflow-core/src/workflow/graph/checkpoint.rs`, scheduler call sites in `runtime/arcflow-core/src/workflow/graph/scheduler.rs`). Resume for sorted/linear runs is implemented via the recovery module (`runtime/arcflow-core/src/recovery/resume.rs` → `run_sorted_steps`). The HTTP server currently exposes POST and GET run endpoints (`server/arcflow-server/src/handlers/runs.rs`); a streaming SSE `/v1/runs/{id}/events` endpoint is not implemented and SDKs either stream in-process or poll the server for updates.
+
+This arrangement — a single, authoritative engine with multi-language adapters and versioned contracts — is what makes ArcFlow suitable for long-lived, auditable, and recoverable AI workflows in production.
 
 ## Deployment modes
 Choose the deployment mode that fits your needs. Below are the common modes and when to prefer each.

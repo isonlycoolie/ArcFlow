@@ -22,7 +22,7 @@ Public documentation at https://arcflow.dev is exported from a curated subset of
 - **No bundled concerns**, do not mix runtime wiring, SDK exports, and tests in a single commit unless they are inseparable.
 - **Authorship**, do not add `Co-authored-by: Cursor` (or other agent trailers). Run `bash scripts/install-git-hooks.sh` once per clone (installs commit-msg and pre-push hooks).
 
-> <p style="color:red"><strong>One engine, every surface.</strong> Orchestration lives in arcflow-core (Rust). SDKs serialize workflow definitions into the Runtime Contract Specification (RCS), invoke the engine, and deserialize results. A fix in retry policy or recovery ships once and applies everywhere. <br><strong>Warning:</strong> keep commits focused — a single commit must not exceed 200 insertions; split unrelated changes into separate branches; never commit directly to `master` or `development`.</p>
+> <p style="color:red"><strong>One engine, every surface.</strong> Orchestration lives in arcflow-core (Rust). SDKs serialize workflow definitions into the Runtime Contract Specification (RCS), invoke the engine, and deserialize results. A fix in retry policy or recovery ships once and applies everywhere. <br><strong>Warning:</strong> keep commits focused, a single commit must not exceed 200 insertions; split unrelated changes into separate branches; never commit directly to `master` or `development`.</p>
 
 ## Branching model
 

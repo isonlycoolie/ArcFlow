@@ -29,7 +29,12 @@ They want automation with a **hard human gate** before execution, and **no live 
 ## Prerequisites
 
 ```bash
+# Install the SDK for development (editable)
 pip install -e sdk-python
+
+# Or install the published SDK from PyPI for normal use:
+pip install arcflow-sdk
+
 export PAPER_TRADING=true   # default; never set false in this example
 ```
 
