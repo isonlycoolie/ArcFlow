@@ -19,4 +19,4 @@ If `webapp/` already exists as a nested repository under ArcFlow root, it is git
 
 ## Specs
 
-Dashboard behavior and admin API contracts: [`dashboard/spec/`](../../dashboard/spec/).
+Dashboard behavior and admin API contracts: [documentation/operator/dashboard-spec.md](../../documentation/operator/dashboard-spec.md).

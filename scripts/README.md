@@ -36,7 +36,7 @@ See [`.github/BRANCH_POLICY.md`](../.github/BRANCH_POLICY.md) and [`setup-github
 | [`normalize-documentation-prose.mjs`](normalize-documentation-prose.mjs) | One-shot enterprise prose rewrite for `documentation/` |
 | [`validate_documentation_claims.sh`](validate_documentation_claims.sh) | Cross-check doc claims (bash) |
 | [`validate_documentation_claims.ps1`](validate_documentation_claims.ps1) | Cross-check doc claims (PowerShell) |
-| [`install-git-hooks.sh`](install-git-hooks.sh) | Install prepare-commit-msg + pre-push (protected branches) |
+| [`install-git-hooks.sh`](install-git-hooks.sh) | Write prepare-commit-msg + pre-push into `.git/hooks` (sources not in git) |
 | [`setup-github-branch-policy.sh`](setup-github-branch-policy.sh) | Apply GitHub branch protection (maintainers, requires `gh`) |
 | [`assert_provider_no_credentials.py`](assert_provider_no_credentials.py) | Provider credential boundary test |
 | [`assert_trace_overhead.py`](assert_trace_overhead.py) | Trace overhead smoke check |
