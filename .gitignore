@@ -64,3 +64,6 @@ dist/
 .gradle/
 build/
 *.class
+
+deploy/
+
