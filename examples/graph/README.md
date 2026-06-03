@@ -23,7 +23,11 @@ Linear `step()` chains hide branching, fan-out, joins, and iteration limits. Gra
 ## Prerequisites
 
 ```bash
+# Install the SDK for development (editable)
 pip install -e sdk-python
+
+# Or install the published SDK from PyPI for normal use:
+pip install arcflow-sdk
 ```
 
 ## Run
