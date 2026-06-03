@@ -22,7 +22,7 @@ async fn chaos_non_retryable_fast_fail() {
     };
     let err = execute_with_retry(
         || async {
-            Err(ProviderCallError::ApiError {
+            Err::<(), ProviderCallError>(ProviderCallError::ApiError {
                 provider_id: "mock".into(),
                 status_code: 400,
                 sanitized_message: "bad request".into(),

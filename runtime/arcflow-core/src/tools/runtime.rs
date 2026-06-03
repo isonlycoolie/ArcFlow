@@ -70,6 +70,7 @@ impl ToolRuntime {
             });
         };
         validate_tool_input(name, &tool.input_schema, &input)?;
+        #[allow(unused_variables)]
         let step_key = step_id.map(|s| s.to_string()).unwrap_or_default();
         #[cfg(feature = "otel")]
         let _tool_span = crate::tracing::otel_live::tool_span(run_id, &step_key, name);

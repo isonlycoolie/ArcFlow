@@ -16,5 +16,5 @@ pub use test_config::{resolve_key, TestConfig, TestStubStep};
 
 pub use engine::WorkflowEngine;
 pub use record::WorkflowExecutionRecord;
-pub(crate) use run::{partial_record, run_one_step, run_sorted_steps, ResumeParams, RunLoop};
+pub(crate) use run::{partial_record, run_sorted_steps, ResumeParams, RunLoop};
 pub use run_error::WorkflowRunError;

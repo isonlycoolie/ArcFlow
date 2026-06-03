@@ -4,7 +4,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 
 use arcflow_core::providers::error::ProviderCallError;
 use arcflow_core::retry::config::{BackoffStrategy, RetryConfig};
-use arcflow_core::retry::{execute_with_retry, Retryable};
+use arcflow_core::retry::execute_with_retry;
 use arcflow_core::tracing::sprint5_emitter::TraceEventEmitter;
 use arcflow_core::tracing::store::TraceStore;
 

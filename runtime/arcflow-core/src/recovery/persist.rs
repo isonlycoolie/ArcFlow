@@ -30,7 +30,7 @@ pub fn persist_if_enabled(
             return;
         }
     };
-    let _ = rt.block_on(async {
+    rt.block_on(async {
         let pool = if let Some(p) = super::pool::shared_pool() {
             p.clone()
         } else {

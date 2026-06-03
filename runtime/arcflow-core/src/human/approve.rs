@@ -169,7 +169,7 @@ pub fn resume_workflow_with_approval(
                 reason: e.to_string(),
             })
         })?;
-        let _ = rt.block_on(async {
+        rt.block_on(async {
             if let Ok(pool) = sqlx::postgres::PgPoolOptions::new()
                 .max_connections(2)
                 .connect(&url)

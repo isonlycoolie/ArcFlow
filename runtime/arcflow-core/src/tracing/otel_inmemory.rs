@@ -2,6 +2,7 @@
 #![cfg(feature = "otel")]
 
 use opentelemetry::global;
+#[cfg(test)]
 use opentelemetry::trace::Tracer;
 use opentelemetry_sdk::export::trace::SpanData;
 use opentelemetry_sdk::testing::trace::InMemorySpanExporter;

@@ -19,7 +19,7 @@ async fn chaos_retry_exhausted() {
     };
     let err = execute_with_retry(
         || async {
-            Err(ProviderCallError::RateLimited {
+            Err::<(), ProviderCallError>(ProviderCallError::RateLimited {
                 provider_id: "mock".into(),
                 retry_after_seconds: None,
             })

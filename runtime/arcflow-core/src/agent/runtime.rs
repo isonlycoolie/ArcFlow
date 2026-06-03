@@ -612,12 +612,9 @@ impl AgentRuntime {
         if matches!(mode, ToolExecutionMode::LlmSelect) && ctx.provider.is_some() {
             return Ok(None);
         }
-        let Some(runtime) = ctx.tool_runtime else {
+        if ctx.tool_runtime.is_none() || ctx.tool_invoker.is_none() {
             return Ok(None);
-        };
-        let Some(invoker) = ctx.tool_invoker.clone() else {
-            return Ok(None);
-        };
+        }
         let rt = tokio::runtime::Runtime::new().map_err(|e| RuntimeError::ToolExecutionFailed {
             tool_name: "runtime".into(),
             step_id,
@@ -761,7 +758,7 @@ impl AgentRuntime {
             }
             MemoryType::Vector => {
                 if config.retrieval.is_some() {
-                    let ns = require_namespace(config, step_id)?;
+                    let _ns = require_namespace(config, step_id)?;
                     let top_k = config
                         .retrieval
                         .as_ref()
@@ -890,6 +887,7 @@ impl AgentRuntime {
     }
 }
 
+#[allow(dead_code)]
 fn map_tool_error(name: String, step_id: Uuid, err: ToolError) -> RuntimeError {
     RuntimeError::ToolExecutionFailed {
         tool_name: name,

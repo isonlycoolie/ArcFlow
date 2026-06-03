@@ -14,13 +14,10 @@ use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
 use crate::embedding::{resolve_from_env, resolve_provider, EmbeddingError, EmbeddingProvider};
-use crate::rcs::types::{
-    MemoryChunkingConfig, MemoryConfig, MemoryRetrievalConfig, MemoryType, RerankProviderSpec,
-    RetrievalModeSpec,
-};
+use crate::rcs::types::{MemoryConfig, MemoryType, RerankProviderSpec, RetrievalModeSpec};
 
 use super::chunking::{
-    extract_chunk_metadata, ChunkMetadata, ChunkStrategy, RecursiveCharacterSplitter,
+    extract_chunk_metadata, ChunkStrategy, RecursiveCharacterSplitter,
 };
 use super::error::MemoryError;
 use super::hybrid::{sparse_lexical_score, HybridHit, HybridRetriever, DEFAULT_DENSE_WEIGHT, DEFAULT_SPARSE_WEIGHT};
@@ -544,8 +541,10 @@ mod tests {
 
     #[test]
     fn vector_memory_hybrid_mode_configured() {
-        let mut cfg = VectorMemoryConfig::default();
-        cfg.mode = RetrievalMode::Hybrid;
+        let cfg = VectorMemoryConfig {
+            mode: RetrievalMode::Hybrid,
+            ..VectorMemoryConfig::default()
+        };
         let mem = VectorMemory::with_config("stub/8", cfg).expect("stub");
         assert_eq!(mem.config().mode, RetrievalMode::Hybrid);
     }
