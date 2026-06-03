@@ -205,9 +205,15 @@ Validate the RCS schema with `bash scripts/validate-rcs-schema.sh`.
 
 For a first run, start dev dependencies (`docker compose -f docker/docker-compose.dev.yml up -d`), then follow [server/arcflow-server/README.md](server/arcflow-server/README.md) or the [Python SDK guide](sdk-python/README.md). Static-site production paths start at [examples/static/README.md](examples/static/README.md).
 
+## Open source
+
+ArcFlow is **MIT OR Apache-2.0** (see [LICENSE](LICENSE)). Before publishing or cloning for production, read [OPEN_SOURCE.md](OPEN_SOURCE.md) for the maintainer release checklist, [SECURITY.md](SECURITY.md) for vulnerability reporting, and [TRADEMARK.md](TRADEMARK.md) for name/logo use.
+
+Copy [`.env.example`](.env.example) to `.env` for local server and provider keys (never commit `.env`).
+
 ## Contributing
 
-Contributions are welcome.
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 <details>
 <summary>Pre-push checks</summary>
@@ -224,4 +230,4 @@ Keep commits focused. Local check for commit size: `bash scripts/check-commit-si
 
 ## License
 
-ArcFlow is licensed under **MIT OR Apache-2.0** at your option. See [Cargo.toml](Cargo.toml) for workspace metadata.
+ArcFlow is licensed under **MIT OR Apache-2.0** at your option. See [LICENSE](LICENSE), [LICENSE-MIT](LICENSE-MIT), and [LICENSE-APACHE-2.0](LICENSE-APACHE-2.0). Workspace crates declare the same license in [Cargo.toml](Cargo.toml).
