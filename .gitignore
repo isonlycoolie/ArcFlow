@@ -37,6 +37,11 @@ scripts/hooks/
 # Local PyPI upload token (scripts/publish-pypi.ps1)
 scripts/.pypi-token
 
+# Local security scan outputs (can contain sensitive findings)
+.secrets.baseline
+history-secrets.txt
+trufflehog.json
+
 # Local smoke harness (not part of the product)
 /test-app/
 
