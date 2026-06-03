@@ -24,6 +24,14 @@ while IFS= read -r -d '' file; do
     total=$(echo "$slice" | wc -l)
     while [[ "$end" -le "$total" ]]; do
       body=$(echo "$slice" | sed -n "${end}p")
+      if echo "$line $body" | grep -q '{'; then
+        break
+      fi
+      end=$((end + 1))
+    done
+    end=$((end + 1))
+    while [[ "$end" -le "$total" ]]; do
+      body=$(echo "$slice" | sed -n "${end}p")
       count=$((count + 1))
       if echo "$body" | grep -qE '^[[:space:]]*\}'; then
         break
