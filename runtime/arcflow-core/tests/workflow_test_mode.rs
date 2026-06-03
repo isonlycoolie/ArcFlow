@@ -38,7 +38,7 @@ fn test_stub_overrides_step_output() {
         retry_policy: None,
         execution_mode: arcflow_core::rcs::types::ExecutionMode::Linear,
         graph: None,
-            external_bindings: None,
+        external_bindings: None,
     };
     let mut agents = HashMap::new();
     agents.insert(agent_id, agent(agent_id));
@@ -60,7 +60,18 @@ fn test_stub_overrides_step_output() {
     };
 
     let record = WorkflowEngine::new()
-        .execute_with_config(&workflow, &agents, "hello", None, None, None, 1024, 0.7, &exec_config, None)
+        .execute_with_config(
+            &workflow,
+            &agents,
+            "hello",
+            None,
+            None,
+            None,
+            1024,
+            0.7,
+            &exec_config,
+            None,
+        )
         .expect("run");
     assert_eq!(record.step_outputs[0].content, "fixed-output");
 }

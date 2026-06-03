@@ -1,0 +1,50 @@
+name: Bug report
+description: Something is broken or incorrect in ArcFlow
+title: "[bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Do **not** paste API keys, webhook secrets, or production URLs with embedded tokens.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you expected vs what you saw.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Minimal workflow, command, or HTTP call. Include versions if known.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - runtime (arcflow-core)
+        - server (arcflow-server)
+        - relay
+        - sdk-python
+        - sdk-typescript
+        - cli
+        - contracts / RCS
+        - documentation
+        - ci / tooling
+        - other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: e.g. 0.1.0 or abc1234
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or errors
+      description: Redact secrets. Metadata-only traces are preferred over full prompt text.

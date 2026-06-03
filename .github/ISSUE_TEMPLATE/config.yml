@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/isonlycoolie/ArcFlow/security/advisories/new
+    about: Report security issues privately (do not open a public issue with exploit details).
+  - name: Documentation
+    url: https://github.com/isonlycoolie/ArcFlow/tree/development/documentation
+    about: User and operator docs in the monorepo.

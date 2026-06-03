@@ -4,7 +4,9 @@ use std::collections::HashMap;
 
 use arcflow_core::agent::STUB_FAIL_ROLE;
 use arcflow_core::get_execution_trace;
-use arcflow_core::rcs::types::{AgentDefinition, ExecutionMode, StepDefinition, WorkflowDefinition};
+use arcflow_core::rcs::types::{
+    AgentDefinition, ExecutionMode, StepDefinition, WorkflowDefinition,
+};
 use arcflow_core::tracing::events::TraceEventKind;
 use arcflow_core::workflow::{WorkflowEngine, WorkflowRunError};
 use uuid::Uuid;
@@ -22,20 +24,20 @@ fn failed_step_emits_step_failed_then_workflow_failed() {
                 agent_id: a_ok,
                 order: 1,
                 fallback_step_id: None,
-            hitl: None,
+                hitl: None,
             },
             StepDefinition {
                 id: s2,
                 agent_id: a_fail,
                 order: 2,
                 fallback_step_id: None,
-            hitl: None,
+                hitl: None,
             },
         ],
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
-            external_bindings: None,
+        external_bindings: None,
     };
     let mut agents = HashMap::new();
     agents.insert(
@@ -47,8 +49,8 @@ fn failed_step_emits_step_failed_then_workflow_failed() {
             instructions: "i".into(),
             tools: None,
             memory_config: None,
-        context: None,
-        tool_execution: None,
+            context: None,
+            tool_execution: None,
         },
     );
     agents.insert(
@@ -60,8 +62,8 @@ fn failed_step_emits_step_failed_then_workflow_failed() {
             instructions: "i".into(),
             tools: None,
             memory_config: None,
-        context: None,
-        tool_execution: None,
+            context: None,
+            tool_execution: None,
         },
     );
 

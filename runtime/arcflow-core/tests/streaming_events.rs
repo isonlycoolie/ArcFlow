@@ -6,10 +6,10 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use uuid::Uuid;
 
+use arcflow_core::providers::response::{FinishReason, ProviderStream, StreamChunk};
 use arcflow_core::providers::{
     ModelProvider, ProviderCallError, ProviderRequest, ProviderResponse,
 };
-use arcflow_core::providers::response::{FinishReason, ProviderStream, StreamChunk};
 use arcflow_core::rcs::types::{
     AgentDefinition, ExecutionMode, StepDefinition, WorkflowDefinition,
 };
@@ -44,10 +44,7 @@ impl ModelProvider for MockStreamProvider {
         })
     }
 
-    async fn stream(
-        &self,
-        _request: ProviderRequest,
-    ) -> Result<ProviderStream, ProviderCallError> {
+    async fn stream(&self, _request: ProviderRequest) -> Result<ProviderStream, ProviderCallError> {
         let chunks = self.chunks.clone();
         let len = chunks.len();
         let items: Vec<Result<StreamChunk, ProviderCallError>> = chunks
@@ -65,7 +62,10 @@ impl ModelProvider for MockStreamProvider {
     }
 }
 
-fn single_step_workflow(agent_id: Uuid, step_id: Uuid) -> (WorkflowDefinition, HashMap<Uuid, AgentDefinition>) {
+fn single_step_workflow(
+    agent_id: Uuid,
+    step_id: Uuid,
+) -> (WorkflowDefinition, HashMap<Uuid, AgentDefinition>) {
     let agent = AgentDefinition {
         id: agent_id,
         name: "writer".into(),
@@ -91,7 +91,7 @@ fn single_step_workflow(agent_id: Uuid, step_id: Uuid) -> (WorkflowDefinition, H
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
-            external_bindings: None,
+        external_bindings: None,
     };
     (workflow, agents)
 }
@@ -141,16 +141,12 @@ fn mock_provider_emits_five_token_events() {
         .filter(|e| matches!(e, StreamEvent::Token { .. }))
         .collect();
     assert_eq!(token_events.len(), 5);
-    assert!(
-        events
-            .iter()
-            .any(|e| matches!(e, StreamEvent::StepStart { .. }))
-    );
-    assert!(
-        events
-            .iter()
-            .any(|e| matches!(e, StreamEvent::StepComplete { .. }))
-    );
+    assert!(events
+        .iter()
+        .any(|e| matches!(e, StreamEvent::StepStart { .. })));
+    assert!(events
+        .iter()
+        .any(|e| matches!(e, StreamEvent::StepComplete { .. })));
 }
 
 #[test]

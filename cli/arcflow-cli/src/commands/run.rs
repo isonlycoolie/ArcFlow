@@ -17,7 +17,9 @@ pub fn run(args: RunArgs) -> i32 {
         args.workflow_file.display()
     );
     if args.input.is_some() {
-        eprintln!("[ArcFlow] --input is accepted; wire your workflow entrypoint to call workflow.run().");
+        eprintln!(
+            "[ArcFlow] --input is accepted; wire your workflow entrypoint to call workflow.run()."
+        );
     }
     2
 }

@@ -48,7 +48,7 @@ run_step "structure-check" bash -c '
   echo "OK: required directories present"
 '
 
-run_step "provider-security-audit" python scripts/assert_provider_no_credentials.py
+run_step "provider-security-audit" python3 scripts/assert_provider_no_credentials.py
 
 echo ""
 echo "ci-smoke: all fast gates passed"

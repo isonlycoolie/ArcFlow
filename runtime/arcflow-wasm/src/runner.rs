@@ -2,9 +2,7 @@
 
 use std::collections::HashMap;
 
-use crate::types::{
-    AgentDefinition, ExecutionMode, RunResult, WasmRunError, WorkflowBundle,
-};
+use crate::types::{AgentDefinition, ExecutionMode, RunResult, WasmRunError, WorkflowBundle};
 
 pub fn run_linear_stub(bundle: &WorkflowBundle, input: &str) -> Result<RunResult, WasmRunError> {
     if bundle.workflow.execution_mode != ExecutionMode::Linear {
@@ -17,18 +15,19 @@ pub fn run_linear_stub(bundle: &WorkflowBundle, input: &str) -> Result<RunResult
         return Err(WasmRunError::EmptyWorkflow);
     }
 
-    let agents: HashMap<_, &AgentDefinition> =
-        bundle.agents.iter().map(|a| (a.id, a)).collect();
+    let agents: HashMap<_, &AgentDefinition> = bundle.agents.iter().map(|a| (a.id, a)).collect();
 
     let mut steps = bundle.workflow.steps.clone();
     steps.sort_by_key(|s| s.order);
 
     let mut content = input.to_string();
     for step in &steps {
-        let agent = agents.get(&step.agent_id).ok_or(WasmRunError::MissingAgent {
-            step_id: step.id,
-            agent_id: step.agent_id,
-        })?;
+        let agent = agents
+            .get(&step.agent_id)
+            .ok_or(WasmRunError::MissingAgent {
+                step_id: step.id,
+                agent_id: step.agent_id,
+            })?;
         content = format!(
             "[edge-stub:{}] role={} input={}",
             agent.name, agent.role, content

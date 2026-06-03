@@ -67,9 +67,15 @@ pub async fn get_run_trace(
 async fn proxy_json(
     req: reqwest::RequestBuilder,
 ) -> Result<(StatusCode, Json<Value>), (StatusCode, String)> {
-    let res = req.send().await.map_err(|e| upstream_error(&e.to_string()))?;
+    let res = req
+        .send()
+        .await
+        .map_err(|e| upstream_error(&e.to_string()))?;
     let status = StatusCode::from_u16(res.status().as_u16()).unwrap_or(StatusCode::BAD_GATEWAY);
-    let body = res.text().await.map_err(|e| upstream_error(&e.to_string()))?;
+    let body = res
+        .text()
+        .await
+        .map_err(|e| upstream_error(&e.to_string()))?;
     let json: Value = serde_json::from_str(&body).unwrap_or(Value::String(body));
     Ok((status, Json(json)))
 }
@@ -79,5 +85,8 @@ fn bad_request(msg: &str) -> (StatusCode, String) {
 }
 
 fn upstream_error(msg: &str) -> (StatusCode, String) {
-    (StatusCode::BAD_GATEWAY, format!("[ArcFlow Relay] Upstream error: {msg}"))
+    (
+        StatusCode::BAD_GATEWAY,
+        format!("[ArcFlow Relay] Upstream error: {msg}"),
+    )
 }

@@ -12,6 +12,7 @@ mod session;
 mod shared;
 mod vector;
 
+pub use crate::embedding::stub_embedding;
 pub use chunking::{
     extract_chunk_metadata, ChunkMetadata, ChunkStrategy, RecursiveCharacterSplitter,
 };
@@ -27,7 +28,6 @@ pub use rerank::{resolve_rerank_provider, RankedChunk, RerankError, RerankProvid
 pub use session::SessionMemory;
 pub use shared::SharedMemory;
 pub use vector::{
-    vector_config_from_memory, ChunkingConfig, HybridRetrievalConfig, RetrievalMode,
-    VectorMemory, VectorMemoryConfig,
+    vector_config_from_memory, ChunkingConfig, HybridRetrievalConfig, RetrievalMode, VectorMemory,
+    VectorMemoryConfig,
 };
-pub use crate::embedding::stub_embedding;

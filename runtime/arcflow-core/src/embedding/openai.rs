@@ -27,11 +27,13 @@ pub struct OpenAIEmbeddingProvider {
 
 impl OpenAIEmbeddingProvider {
     pub fn new(model: &str) -> Result<Self, EmbeddingError> {
-        let api_key = std::env::var(OPENAI_API_KEY_ENV).map_err(|_| EmbeddingError::NotConfigured {
-            reason: format!("{OPENAI_API_KEY_ENV} is not set"),
-        })?;
+        let api_key =
+            std::env::var(OPENAI_API_KEY_ENV).map_err(|_| EmbeddingError::NotConfigured {
+                reason: format!("{OPENAI_API_KEY_ENV} is not set"),
+            })?;
         let dimensions = dimensions_for_model(model)?;
-        let endpoint = endpoint_from_env(OPENAI_EMBEDDINGS_ENDPOINT_ENV, OPENAI_EMBEDDINGS_ENDPOINT);
+        let endpoint =
+            endpoint_from_env(OPENAI_EMBEDDINGS_ENDPOINT_ENV, OPENAI_EMBEDDINGS_ENDPOINT);
         let client = Client::builder()
             .timeout(Duration::from_secs(PROVIDER_REQUEST_TIMEOUT_SECS))
             .user_agent(ARCFLOW_USER_AGENT)
@@ -105,17 +107,16 @@ impl EmbeddingProvider for OpenAIEmbeddingProvider {
             })?;
         let status = response.status();
         if !status.is_success() {
-            let reason = response
-                .text()
-                .await
-                .unwrap_or_else(|_| status.to_string());
+            let reason = response.text().await.unwrap_or_else(|_| status.to_string());
             return Err(EmbeddingError::RequestFailed { reason });
         }
-        let parsed: EmbeddingsResponse = response.json().await.map_err(|e| {
-            EmbeddingError::ParseError {
-                reason: e.to_string(),
-            }
-        })?;
+        let parsed: EmbeddingsResponse =
+            response
+                .json()
+                .await
+                .map_err(|e| EmbeddingError::ParseError {
+                    reason: e.to_string(),
+                })?;
         if parsed.data.is_empty() {
             return Err(EmbeddingError::EmptyBatch);
         }

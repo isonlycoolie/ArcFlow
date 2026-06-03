@@ -3,8 +3,8 @@
 //! Stub linear workflow execution for Cloudflare Workers and similar hosts.
 //! Full `arcflow-core` linkage is deferred until native deps are wasm-gated.
 
-pub mod types;
 pub mod runner;
+pub mod types;
 
 use wasm_bindgen::prelude::*;
 
@@ -36,7 +36,9 @@ fn js_error(message: String) -> JsValue {
     } else {
         "execution_failed"
     };
-    JsValue::from_str(&format!("{{\"code\":\"{code}\",\"message\":\"{message}\"}}"))
+    JsValue::from_str(&format!(
+        "{{\"code\":\"{code}\",\"message\":\"{message}\"}}"
+    ))
 }
 
 #[cfg(test)]

@@ -14,10 +14,7 @@ pub fn enforce_policy(ctx: &SiteContext, payload: &Value) -> Result<(), (StatusC
         ));
     }
     if let Some(wf_ref) = payload.get("workflow_ref") {
-        let name = wf_ref
-            .get("name")
-            .and_then(|v| v.as_str())
-            .unwrap_or("");
+        let name = wf_ref.get("name").and_then(|v| v.as_str()).unwrap_or("");
         if let Some(expected) = &ctx.site.default_workflow_name {
             if !expected.is_empty() && name != expected {
                 return Err((

@@ -2,14 +2,14 @@
 
 use std::sync::Arc;
 
-use arcflow_core::constants::{
-    ANTHROPIC_API_KEY_ENV, GEMINI_API_KEY_ENV, OPENAI_API_KEY_ENV,
-};
+use arcflow_core::constants::{ANTHROPIC_API_KEY_ENV, GEMINI_API_KEY_ENV, OPENAI_API_KEY_ENV};
 use arcflow_core::get_execution_trace;
 use arcflow_core::providers::{ModelProvider, ProviderRuntime};
 use arcflow_core::rcs::types::{ProviderConfig, ProviderId};
-use arcflow_core::workflow::{ExecutionConfig, StreamConfig, WorkflowEngine, WorkflowExecutionRecord};
 use arcflow_core::streaming::{default_stream_pair, StreamEvent};
+use arcflow_core::workflow::{
+    ExecutionConfig, StreamConfig, WorkflowEngine, WorkflowExecutionRecord,
+};
 use napi::bindgen_prelude::*;
 use napi::Error;
 use napi_derive::napi;
@@ -98,15 +98,15 @@ fn execute_with_config_sync(
     exec_config_json: Option<String>,
     graph_json: Option<String>,
 ) -> std::result::Result<JsWorkflowResult, Error> {
-    let wf_id = Uuid::parse_str(&workflow_id)
-        .map_err(|_| configuration_error("Invalid workflow id."))?;
+    let wf_id =
+        Uuid::parse_str(&workflow_id).map_err(|_| configuration_error("Invalid workflow id."))?;
     let (mut workflow, agent_map) = build_workflow(workflow_name, wf_id, &agents, &steps)?;
     if let Some(raw) = graph_json {
         crate::graph::apply_graph_json(&mut workflow, &raw).map_err(configuration_error)?;
     }
     let (provider, max_tokens, temperature) = provider_from_js(provider)?;
-    let exec_config = parse_execution_config(exec_config_json.as_deref())
-        .map_err(configuration_error)?;
+    let exec_config =
+        parse_execution_config(exec_config_json.as_deref()).map_err(configuration_error)?;
     let engine = WorkflowEngine::new();
     let record = engine
         .execute_with_config(
@@ -134,9 +134,7 @@ pub struct JsStreamWorkflowResult {
     pub trace_events_json: String,
 }
 
-fn drain_stream_events(
-    mut rx: tokio::sync::mpsc::Receiver<StreamEvent>,
-) -> Vec<StreamEvent> {
+fn drain_stream_events(mut rx: tokio::sync::mpsc::Receiver<StreamEvent>) -> Vec<StreamEvent> {
     let mut events = Vec::new();
     while let Ok(event) = rx.try_recv() {
         events.push(event);
@@ -155,15 +153,15 @@ fn execute_with_config_stream_sync(
     exec_config_json: Option<String>,
     graph_json: Option<String>,
 ) -> std::result::Result<JsStreamWorkflowResult, Error> {
-    let wf_id = Uuid::parse_str(&workflow_id)
-        .map_err(|_| configuration_error("Invalid workflow id."))?;
+    let wf_id =
+        Uuid::parse_str(&workflow_id).map_err(|_| configuration_error("Invalid workflow id."))?;
     let (mut workflow, agent_map) = build_workflow(workflow_name, wf_id, &agents, &steps)?;
     if let Some(raw) = graph_json {
         crate::graph::apply_graph_json(&mut workflow, &raw).map_err(configuration_error)?;
     }
     let (provider, max_tokens, temperature) = provider_from_js(provider)?;
-    let mut exec_config = parse_execution_config(exec_config_json.as_deref())
-        .map_err(configuration_error)?;
+    let mut exec_config =
+        parse_execution_config(exec_config_json.as_deref()).map_err(configuration_error)?;
     exec_config.stream = Some(StreamConfig { enabled: true });
     let (tx, rx) = default_stream_pair();
     let engine = WorkflowEngine::new();
@@ -182,8 +180,7 @@ fn execute_with_config_stream_sync(
         )
         .map_err(workflow_run_error_to_napi)?;
     let events = drain_stream_events(rx);
-    let events_json =
-        serde_json::to_string(&events).unwrap_or_else(|_| "[]".to_string());
+    let events_json = serde_json::to_string(&events).unwrap_or_else(|_| "[]".to_string());
     let base = record_to_js(record);
     Ok(JsStreamWorkflowResult {
         events_json,
@@ -275,8 +272,8 @@ pub async fn execute_resume_workflow(
             .map_err(|_| configuration_error("Invalid workflow id."))?;
         let (workflow, agent_map) = build_workflow(workflow_name, wf_id, &agents, &steps)?;
         let (provider, max_tokens, temperature) = provider_from_js(provider)?;
-        let exec_config = parse_execution_config(exec_config_json.as_deref())
-            .map_err(configuration_error)?;
+        let exec_config =
+            parse_execution_config(exec_config_json.as_deref()).map_err(configuration_error)?;
         let engine = WorkflowEngine::new();
         let record = engine
             .resume_with_config(
@@ -306,9 +303,8 @@ pub async fn execute_resume_workflow(
 #[napi]
 pub fn get_execution_trace_json(run_id: String) -> Result<String> {
     match get_execution_trace(&run_id) {
-        Some(trace) => serde_json::to_string(&trace).map_err(|e| {
-            Error::from_reason(format!("[ArcFlow] Failed to serialize trace: {e}"))
-        }),
+        Some(trace) => serde_json::to_string(&trace)
+            .map_err(|e| Error::from_reason(format!("[ArcFlow] Failed to serialize trace: {e}"))),
         None => Err(trace_not_found(&run_id)),
     }
 }

@@ -10,12 +10,57 @@ use crate::providers::{default_max_tokens, default_temperature, ModelProvider};
 use crate::rcs::types::{AgentDefinition, ExecutionMode, WorkflowDefinition};
 use crate::tools::{ToolInvoker, ToolRuntime};
 
-use super::record::WorkflowExecutionRecord;
 use super::execution_config::ExecutionConfig;
 use super::graph::run_graph_loop;
+use super::record::WorkflowExecutionRecord;
 use super::run::run_sorted_steps;
 use super::run_error::WorkflowRunError;
 use super::validation::validate_workflow;
+
+#[allow(clippy::too_many_arguments)]
+fn run_with_execution_mode(
+    agent_runtime: &AgentRuntime,
+    workflow: &WorkflowDefinition,
+    agents: &HashMap<Uuid, AgentDefinition>,
+    run_input: &str,
+    tool_runtime: Option<&ToolRuntime>,
+    tool_invoker: Option<Arc<dyn ToolInvoker>>,
+    provider: Option<Arc<dyn ModelProvider>>,
+    provider_max_tokens: u32,
+    provider_temperature: f32,
+    exec_config: &ExecutionConfig,
+    stream_tx: Option<crate::streaming::StreamChannelSender>,
+) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
+    match workflow.execution_mode {
+        ExecutionMode::Graph => run_graph_loop(
+            agent_runtime,
+            workflow,
+            agents,
+            run_input,
+            tool_runtime,
+            tool_invoker,
+            provider,
+            provider_max_tokens,
+            provider_temperature,
+            exec_config,
+            stream_tx,
+        ),
+        ExecutionMode::Linear => run_sorted_steps(
+            agent_runtime,
+            workflow,
+            agents,
+            run_input,
+            tool_runtime,
+            tool_invoker,
+            provider,
+            provider_max_tokens,
+            provider_temperature,
+            exec_config,
+            None,
+            stream_tx,
+        ),
+    }
+}
 
 /// Runs a workflow definition sequentially with state handoff between steps.
 pub struct WorkflowEngine {
@@ -112,35 +157,19 @@ impl WorkflowEngine {
         stream_tx: Option<crate::streaming::StreamChannelSender>,
     ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
         validate_workflow(workflow, agents)?;
-        match workflow.execution_mode {
-            ExecutionMode::Graph => run_graph_loop(
-                &self.agent_runtime,
-                workflow,
-                agents,
-                run_input,
-                tool_runtime,
-                tool_invoker,
-                provider,
-                provider_max_tokens,
-                provider_temperature,
-                exec_config,
-                stream_tx,
-            ),
-            ExecutionMode::Linear => run_sorted_steps(
-                &self.agent_runtime,
-                workflow,
-                agents,
-                run_input,
-                tool_runtime,
-                tool_invoker,
-                provider,
-                provider_max_tokens,
-                provider_temperature,
-                exec_config,
-                None,
-                stream_tx,
-            ),
-        }
+        run_with_execution_mode(
+            &self.agent_runtime,
+            workflow,
+            agents,
+            run_input,
+            tool_runtime,
+            tool_invoker,
+            provider,
+            provider_max_tokens,
+            provider_temperature,
+            exec_config,
+            stream_tx,
+        )
     }
 
     /// Resumes a failed run from PostgreSQL recovery state (Sprint 7).
@@ -335,14 +364,14 @@ mod tests {
                     agent_id: aid,
                     order: 1,
                     fallback_step_id: None,
-                hitl: None,
+                    hitl: None,
                 },
                 StepDefinition {
                     id: dup,
                     agent_id: aid,
                     order: 2,
                     fallback_step_id: None,
-                hitl: None,
+                    hitl: None,
                 },
             ],
             retry_policy: None,

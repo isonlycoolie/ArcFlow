@@ -91,10 +91,7 @@ impl ToolRuntime {
         let ok = result.is_ok();
         let duration_ms = started.elapsed().as_millis() as u64;
         #[cfg(feature = "otel")]
-        crate::tracing::otel_live::record_tool_result(
-            duration_ms,
-            if ok { "ok" } else { "error" },
-        );
+        crate::tracing::otel_live::record_tool_result(duration_ms, if ok { "ok" } else { "error" });
         let out_len = result.as_ref().map(|s| s.len()).unwrap_or(0);
         tool_finished(
             legacy,

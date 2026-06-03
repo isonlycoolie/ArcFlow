@@ -19,9 +19,8 @@ use crate::workflow::{provider_from_js, record_to_js, JsProviderInput, JsWorkflo
 type RunResult = std::result::Result<WorkflowExecutionRecord, WorkflowRunError>;
 
 fn stream_event_to_json(event: StreamEvent) -> Result<String> {
-    serde_json::to_string(&event).map_err(|e| {
-        Error::from_reason(format!("[ArcFlow] Failed to serialize stream event: {e}"))
-    })
+    serde_json::to_string(&event)
+        .map_err(|e| Error::from_reason(format!("[ArcFlow] Failed to serialize stream event: {e}")))
 }
 
 #[napi]
@@ -45,9 +44,9 @@ impl JsWorkflowStreamIterator {
             .bridge
             .lock()
             .map_err(|_| Error::from_reason("[ArcFlow] Stream lock poisoned."))?;
-        let bridge = guard.as_mut().ok_or_else(|| {
-            configuration_error("Stream iterator already finalized.")
-        })?;
+        let bridge = guard
+            .as_mut()
+            .ok_or_else(|| configuration_error("Stream iterator already finalized."))?;
         match bridge.recv_event() {
             Some(event) => stream_event_to_json(event).map(Some),
             None => {
@@ -63,9 +62,9 @@ impl JsWorkflowStreamIterator {
             .bridge
             .lock()
             .map_err(|_| Error::from_reason("[ArcFlow] Stream lock poisoned."))?;
-        let bridge = guard.take().ok_or_else(|| {
-            configuration_error("Stream iterator already finalized.")
-        })?;
+        let bridge = guard
+            .take()
+            .ok_or_else(|| configuration_error("Stream iterator already finalized."))?;
         let mut exhausted = self
             .events_exhausted
             .lock()
@@ -90,15 +89,15 @@ pub fn start_workflow_stream(
     exec_config_json: Option<String>,
     graph_json: Option<String>,
 ) -> Result<JsWorkflowStreamIterator> {
-    let wf_id = Uuid::parse_str(&workflow_id)
-        .map_err(|_| configuration_error("Invalid workflow id."))?;
+    let wf_id =
+        Uuid::parse_str(&workflow_id).map_err(|_| configuration_error("Invalid workflow id."))?;
     let (mut workflow, agent_map) = build_workflow(workflow_name, wf_id, &agents, &steps)?;
     if let Some(raw) = graph_json {
         crate::graph::apply_graph_json(&mut workflow, &raw).map_err(configuration_error)?;
     }
     let (provider, max_tokens, temperature) = provider_from_js(provider)?;
-    let mut exec_config = parse_execution_config(exec_config_json.as_deref())
-        .map_err(configuration_error)?;
+    let mut exec_config =
+        parse_execution_config(exec_config_json.as_deref()).map_err(configuration_error)?;
     exec_config.stream = Some(StreamConfig { enabled: true });
     let engine = WorkflowEngine::new();
     let bridge = StreamRunBridge::spawn(move |stream_tx| {

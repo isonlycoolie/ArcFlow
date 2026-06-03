@@ -23,7 +23,10 @@ pub fn internal(err: sqlx::Error) -> (StatusCode, String) {
 }
 
 pub fn bad_request(message: impl Into<String>) -> (StatusCode, String) {
-    (StatusCode::BAD_REQUEST, format!("[ArcFlow] {}", message.into()))
+    (
+        StatusCode::BAD_REQUEST,
+        format!("[ArcFlow] {}", message.into()),
+    )
 }
 
 pub fn not_found(message: &str) -> (StatusCode, String) {

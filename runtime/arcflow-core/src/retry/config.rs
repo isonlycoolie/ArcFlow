@@ -142,7 +142,9 @@ impl BackoffStrategy {
                     });
                 }
             }
-            Self::Linear { base_ms, max_ms, .. } => {
+            Self::Linear {
+                base_ms, max_ms, ..
+            } => {
                 if *base_ms == 0 {
                     return Err(RuntimeError::InvalidWorkflowDefinition {
                         reason: "LinearBackoff base_ms must be at least 1".into(),

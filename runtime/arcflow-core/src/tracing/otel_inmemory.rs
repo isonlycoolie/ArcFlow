@@ -20,9 +20,7 @@ pub fn install_inmemory_provider() -> (InMemorySpanExporter, TracerProvider) {
 
 /// Returns finished spans captured by the in-memory exporter.
 pub fn finished_spans(exporter: &InMemorySpanExporter) -> Vec<SpanData> {
-    exporter
-        .get_finished_spans()
-        .expect("in-memory span read")
+    exporter.get_finished_spans().unwrap_or_default()
 }
 
 #[cfg(test)]

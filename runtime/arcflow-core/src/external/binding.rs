@@ -10,7 +10,11 @@ pub fn find_binding<'a>(
     workflow: &'a WorkflowDefinition,
     binding_id: &str,
 ) -> Option<&'a ExternalBinding> {
-    workflow.external_bindings.as_ref()?.iter().find(|b| b.id == binding_id)
+    workflow
+        .external_bindings
+        .as_ref()?
+        .iter()
+        .find(|b| b.id == binding_id)
 }
 
 /// Validates binding step references and unique ids.

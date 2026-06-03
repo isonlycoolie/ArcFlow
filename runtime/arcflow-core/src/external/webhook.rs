@@ -8,8 +8,9 @@ type HmacSha256 = Hmac<Sha256>;
 
 /// Computes hex-encoded HMAC-SHA256 of `body` with `secret`.
 pub fn compute_hmac_sha256_hex(secret: &str, body: &[u8]) -> String {
-    let mut mac =
-        HmacSha256::new_from_slice(secret.as_bytes()).expect("HMAC accepts any key length");
+    let Ok(mut mac) = HmacSha256::new_from_slice(secret.as_bytes()) else {
+        return String::new();
+    };
     mac.update(body);
     hex::encode(mac.finalize().into_bytes())
 }

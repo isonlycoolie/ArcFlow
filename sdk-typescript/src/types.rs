@@ -2,9 +2,7 @@
 
 use std::collections::HashMap;
 
-use arcflow_core::rcs::types::{
-    AgentDefinition, HitlConfig, StepDefinition, WorkflowDefinition,
-};
+use arcflow_core::rcs::types::{AgentDefinition, HitlConfig, StepDefinition, WorkflowDefinition};
 use napi::Error;
 use napi_derive::napi;
 use uuid::Uuid;
@@ -90,10 +88,7 @@ fn parse_hitl_json(raw: &str) -> Result<HitlConfig, Error> {
         .get("timeout_seconds")
         .and_then(|x| x.as_u64())
         .unwrap_or(3600);
-    let interrupt = v
-        .get("interrupt")
-        .and_then(|x| x.as_bool())
-        .unwrap_or(true);
+    let interrupt = v.get("interrupt").and_then(|x| x.as_bool()).unwrap_or(true);
     Ok(HitlConfig {
         approval_key,
         timeout_seconds,

@@ -126,7 +126,13 @@ impl RecursiveCharacterSplitter {
                 with_overlap.push(chunk);
                 continue;
             }
-            let prev = with_overlap.last().expect("previous chunk");
+            let prev = match with_overlap.last() {
+                Some(chunk) => chunk,
+                None => {
+                    with_overlap.push(chunk);
+                    continue;
+                }
+            };
             let prefix = prev
                 .chars()
                 .rev()
@@ -232,10 +238,10 @@ mod tests {
 
     #[test]
     fn extract_metadata_from_markdown_header() {
-        let text = "# ArcFlow Guide\nSource: https://arcflow.dev\nPage: 3\n\nBody text.";
+        let text = "# ArcFlow Guide\nSource: https://arcflows.vercel.com\nPage: 3\n\nBody text.";
         let meta = extract_chunk_metadata(text);
         assert_eq!(meta.title.as_deref(), Some("ArcFlow Guide"));
-        assert_eq!(meta.source.as_deref(), Some("https://arcflow.dev"));
+        assert_eq!(meta.source.as_deref(), Some("https://arcflows.vercel.com"));
         assert_eq!(meta.page, Some(3));
     }
 }

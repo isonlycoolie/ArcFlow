@@ -22,7 +22,8 @@ impl PostgresTracePersistence {
         events: &[TraceEvent],
     ) -> Result<(), sqlx::Error> {
         for event in events {
-            let json = serde_json::to_value(event).map_err(|e| sqlx::Error::Protocol(e.to_string()))?;
+            let json =
+                serde_json::to_value(event).map_err(|e| sqlx::Error::Protocol(e.to_string()))?;
             sqlx::query(
                 "INSERT INTO arcflow_trace_events (run_id, seq, event_json)
                  VALUES ($1, $2, $3)
@@ -57,7 +58,10 @@ impl PostgresTracePersistence {
     }
 
     /// Builds an execution trace from persisted events.
-    pub async fn load_execution_trace(&self, run_id: &str) -> Result<Option<ExecutionTrace>, sqlx::Error> {
+    pub async fn load_execution_trace(
+        &self,
+        run_id: &str,
+    ) -> Result<Option<ExecutionTrace>, sqlx::Error> {
         let events = self.load_events(run_id).await?;
         if events.is_empty() {
             return Ok(None);

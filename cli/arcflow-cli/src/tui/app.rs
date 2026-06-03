@@ -3,7 +3,9 @@
 use std::io;
 
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen};
+use crossterm::terminal::{
+    disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
+};
 use crossterm::ExecutableCommand;
 use ratatui::prelude::*;
 use ratatui::widgets::{Block, Borders, Paragraph};
@@ -41,7 +43,9 @@ pub fn run_tui(trace: ExecutionTrace) -> io::Result<()> {
                 }
                 match key.code {
                     KeyCode::Char('q') | KeyCode::Esc => break Ok(()),
-                    KeyCode::Char('j') | KeyCode::Down => timeline_state.select_next(trace.steps.len()),
+                    KeyCode::Char('j') | KeyCode::Down => {
+                        timeline_state.select_next(trace.steps.len())
+                    }
                     KeyCode::Char('k') | KeyCode::Up => timeline_state.select_prev(),
                     KeyCode::Char('g') => tab = ViewTab::Graph,
                     KeyCode::Char('t') => tab = ViewTab::Timeline,
@@ -57,7 +61,12 @@ pub fn run_tui(trace: ExecutionTrace) -> io::Result<()> {
     result
 }
 
-fn render(frame: &mut Frame, trace: &ExecutionTrace, timeline_state: &mut TimelineState, tab: ViewTab) {
+fn render(
+    frame: &mut Frame,
+    trace: &ExecutionTrace,
+    timeline_state: &mut TimelineState,
+    tab: ViewTab,
+) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -75,7 +84,11 @@ fn render(frame: &mut Frame, trace: &ExecutionTrace, timeline_state: &mut Timeli
         trace.duration_ms.unwrap_or(0)
     );
     frame.render_widget(
-        Paragraph::new(status).block(Block::default().title(" ArcFlow Trace ").borders(Borders::ALL)),
+        Paragraph::new(status).block(
+            Block::default()
+                .title(" ArcFlow Trace ")
+                .borders(Borders::ALL),
+        ),
         chunks[0],
     );
 

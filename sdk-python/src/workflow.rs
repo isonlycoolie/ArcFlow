@@ -2,9 +2,7 @@
 
 use std::sync::Arc;
 
-use arcflow_core::constants::{
-    ANTHROPIC_API_KEY_ENV, GEMINI_API_KEY_ENV, OPENAI_API_KEY_ENV,
-};
+use arcflow_core::constants::{ANTHROPIC_API_KEY_ENV, GEMINI_API_KEY_ENV, OPENAI_API_KEY_ENV};
 use arcflow_core::get_execution_trace;
 use arcflow_core::providers::ModelProvider;
 use arcflow_core::providers::ProviderRuntime;
@@ -16,11 +14,11 @@ use uuid::Uuid;
 
 use crate::errors::{configuration_error, workflow_run_error_to_py};
 use crate::execution_config::parse_execution_config;
-use arcflow_core::workflow::ExecutionConfig;
 use crate::tools::{register_tool_callables, PyToolInvoker};
 use crate::types::{
     build_tool_runtime, build_workflow, parse_agent_tuple, parse_step_tuple, AgentInput,
 };
+use arcflow_core::workflow::ExecutionConfig;
 
 #[pyclass(name = "WorkflowResult")]
 #[derive(Clone)]
@@ -141,8 +139,8 @@ pub fn execute_workflow(
         None
     };
     let (provider, max_tokens, temperature) = provider_from_tuple(provider)?;
-    let exec_config: ExecutionConfig = parse_execution_config(exec_config_json.as_deref())
-        .map_err(configuration_error)?;
+    let exec_config: ExecutionConfig =
+        parse_execution_config(exec_config_json.as_deref()).map_err(configuration_error)?;
     let record = py.allow_threads(|| {
         engine.execute_with_config(
             &workflow,
@@ -214,8 +212,8 @@ pub fn execute_resume_workflow(
         None
     };
     let (provider, max_tokens, temperature) = provider_from_tuple(provider)?;
-    let exec_config: ExecutionConfig = parse_execution_config(exec_config_json.as_deref())
-        .map_err(configuration_error)?;
+    let exec_config: ExecutionConfig =
+        parse_execution_config(exec_config_json.as_deref()).map_err(configuration_error)?;
     let record = py.allow_threads(|| {
         engine.resume_with_config(
             &workflow,
@@ -289,8 +287,8 @@ pub fn execute_resume_with_approval(
         None
     };
     let (provider, max_tokens, temperature) = provider_from_tuple(provider)?;
-    let exec_config: ExecutionConfig = parse_execution_config(exec_config_json.as_deref())
-        .map_err(configuration_error)?;
+    let exec_config: ExecutionConfig =
+        parse_execution_config(exec_config_json.as_deref()).map_err(configuration_error)?;
     let data: serde_json::Value = serde_json::from_str(&data_json)
         .map_err(|e| configuration_error(format!("Invalid approval data JSON: {e}")))?;
     let approval = arcflow_core::human::ApprovalResult { approved, data };

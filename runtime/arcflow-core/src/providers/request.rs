@@ -53,10 +53,6 @@ impl ProviderRequest {
     /// Byte size safe for trace metadata (SEC-2).
     pub fn prompt_size_bytes(&self) -> usize {
         self.messages.iter().map(|m| m.content.len()).sum::<usize>()
-            + self
-                .system_prompt
-                .as_ref()
-                .map(|s| s.len())
-                .unwrap_or(0)
+            + self.system_prompt.as_ref().map(|s| s.len()).unwrap_or(0)
     }
 }

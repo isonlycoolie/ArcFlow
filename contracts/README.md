@@ -1,6 +1,6 @@
 # ArcFlow contracts
 
-Versioned wire formats and runtime boundaries. Integrator-facing narrative documentation lives under [documentation/](../documentation/README.md).
+Versioned wire formats and runtime boundaries. JSON Schema `$id` URIs use **https://arcflows.vercel.com** as the canonical host until **arcflow.dev** is live. Integrator-facing narrative documentation lives under [documentation/](../documentation/README.md).
 
 ```
 contracts/

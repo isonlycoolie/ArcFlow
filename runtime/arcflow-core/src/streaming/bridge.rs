@@ -71,10 +71,8 @@ mod tests {
     use async_trait::async_trait;
     use uuid::Uuid;
 
-    use crate::providers::{
-        ModelProvider, ProviderCallError, ProviderRequest, ProviderResponse,
-    };
     use crate::providers::response::{FinishReason, ProviderStream, StreamChunk};
+    use crate::providers::{ModelProvider, ProviderCallError, ProviderRequest, ProviderResponse};
     use crate::rcs::types::{AgentDefinition, ExecutionMode, StepDefinition, WorkflowDefinition};
     use crate::tracing::types::TokenUsage;
     use crate::workflow::{ExecutionConfig, StreamConfig, WorkflowEngine, WorkflowRunError};

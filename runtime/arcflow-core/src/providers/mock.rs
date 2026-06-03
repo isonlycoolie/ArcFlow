@@ -63,16 +63,16 @@ impl ModelProvider for MockToolProvider {
                 tool_calls: None,
             });
         }
-        let has_tool_result = request
-            .messages
-            .iter()
-            .any(|m| m.role == MessageRole::Tool);
+        let has_tool_result = request.messages.iter().any(|m| m.role == MessageRole::Tool);
         if !has_tool_result {
-            let tool = request.tools.first().ok_or_else(|| ProviderCallError::ApiError {
-                provider_id: "mock".into(),
-                status_code: 400,
-                sanitized_message: "no tools".into(),
-            })?;
+            let tool = request
+                .tools
+                .first()
+                .ok_or_else(|| ProviderCallError::ApiError {
+                    provider_id: "mock".into(),
+                    status_code: 400,
+                    sanitized_message: "no tools".into(),
+                })?;
             return Ok(ProviderResponse {
                 content: String::new(),
                 tokens: tokens.clone(),

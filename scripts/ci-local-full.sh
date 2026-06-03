@@ -55,7 +55,7 @@ if [[ "${CI_SKIP_SDK_PYTHON:-}" == "1" ]]; then
 else
   echo ""; echo "=== sdk-python ==="
   ( cd "$ROOT/sdk-python"
-    python -m pip install -q maturin pytest "mypy<1.19" black ruff pytest-httpserver
+    python -m pip install -q maturin pytest "mypy<1.19" black ruff pytest-httpserve
     python -m maturin develop
     python -m ruff check arcflow tests && python -m black --check arcflow tests && python -m mypy arcflow
     tmpdir="$(mktemp -d)" && cd "$tmpdir"

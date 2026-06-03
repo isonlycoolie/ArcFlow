@@ -27,8 +27,7 @@ async fn openai_complete_uses_mock_server() {
         .await;
 
     let url = format!("{}/v1/chat/completions", server.uri());
-    let provider =
-        OpenAIProvider::with_endpoint("gpt-4o".into(), "test-key".into(), url).unwrap();
+    let provider = OpenAIProvider::with_endpoint("gpt-4o".into(), "test-key".into(), url).unwrap();
     let response = provider
         .complete(ProviderRequest {
             messages: vec![ProviderMessage {

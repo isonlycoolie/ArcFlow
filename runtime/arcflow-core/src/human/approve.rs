@@ -39,9 +39,11 @@ pub fn resume_workflow_with_approval(
     resolve_in_db: bool,
 ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
     if !exec_config.recovery_enabled {
-        return Err(WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
-            reason: "recovery is not enabled for this run".into(),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::InvalidWorkflowDefinition {
+                reason: "recovery is not enabled for this run".into(),
+            },
+        ));
     }
 
     if resolve_in_db {
@@ -88,24 +90,32 @@ pub fn resume_workflow_with_approval(
         .block_on(load_recovery(original_run_id))
         .map_err(WorkflowRunError::Aborted)?;
     let Some(recovery) = state else {
-        return Err(WorkflowRunError::Aborted(RuntimeError::RecoveryStorageError {
-            reason: format!("no recovery state for run_id '{original_run_id}'"),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::RecoveryStorageError {
+                reason: format!("no recovery state for run_id '{original_run_id}'"),
+            },
+        ));
     };
     if !recovery.is_resumable() {
-        return Err(WorkflowRunError::Aborted(RuntimeError::RecoveryStorageError {
-            reason: "recovery state has already been consumed".into(),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::RecoveryStorageError {
+                reason: "recovery state has already been consumed".into(),
+            },
+        ));
     }
     if recovery.failure_error_code != HUMAN_INTERRUPT_CODE {
-        return Err(WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
-            reason: "run is not in human interrupt state".into(),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::InvalidWorkflowDefinition {
+                reason: "run is not in human interrupt state".into(),
+            },
+        ));
     }
     if recovery.workflow_definition_id != workflow.id.to_string() {
-        return Err(WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
-            reason: "workflow definition id does not match recovery state".into(),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::InvalidWorkflowDefinition {
+                reason: "workflow definition id does not match recovery state".into(),
+            },
+        ));
     }
 
     if !approval.approved {
@@ -184,7 +194,9 @@ pub fn resume_workflow_with_approval(
     Ok(record)
 }
 
-fn build_partial_from_recovery(recovery: &crate::recovery::state::RecoveryState) -> WorkflowExecutionRecord {
+fn build_partial_from_recovery(
+    recovery: &crate::recovery::state::RecoveryState,
+) -> WorkflowExecutionRecord {
     let run_id = Uuid::parse_str(&recovery.original_run_id).unwrap_or_else(|_| Uuid::new_v4());
     let workflow_id =
         Uuid::parse_str(&recovery.workflow_definition_id).unwrap_or_else(|_| Uuid::new_v4());

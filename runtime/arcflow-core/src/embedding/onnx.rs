@@ -53,9 +53,10 @@ async fn try_ort_embed(
         let outputs = session
             .run(ort::inputs![input])
             .map_err(|e| onnx_err(format!("run: {e}")))?;
-        let (_name, value) = outputs.iter().next().ok_or_else(|| {
-            onnx_err("model returned no outputs".into())
-        })?;
+        let (_name, value) = outputs
+            .iter()
+            .next()
+            .ok_or_else(|| onnx_err("model returned no outputs".into()))?;
         let (_shape, slice) = value
             .try_extract_tensor::<f32>()
             .map_err(|e| onnx_err(format!("extract: {e}")))?;
@@ -73,7 +74,8 @@ fn onnx_err(reason: String) -> EmbeddingError {
     EmbeddingError::RequestFailed { reason }
 }
 
-#[cfg(all(test, feature = "embedding-local"))]
+#[cfg(test)]
+#[cfg(feature = "embedding-local")]
 mod onnx_tests {
     use super::*;
 

@@ -9,8 +9,10 @@ use crate::providers::async_bridge::block_on_provider;
 use crate::providers::{
     build_agent_request, default_max_tokens, default_temperature, ProviderCallError,
 };
+use crate::rcs::types::{
+    AgentDefinition, ExecutionStatus, MemoryScope, MemoryType, ToolExecutionMode,
+};
 use crate::retry::engine::{execute_with_retry, RetryError};
-use crate::rcs::types::{AgentDefinition, ExecutionStatus, MemoryScope, MemoryType, ToolExecutionMode};
 use crate::state::{ExecutionStepOutput, StateSnapshot};
 use crate::streaming::StreamEvent;
 use crate::tools::ToolError;
@@ -20,12 +22,10 @@ use crate::tracing::TokenUsage;
 use crate::workflow::ExecutionContext;
 
 use super::context::{ContextAssembler, ContextExtras};
-use super::tool_loop::ToolLoop;
 use super::stub::STUB_FAIL_ROLE;
+use super::tool_loop::ToolLoop;
 
-fn effective_provider_timeout(
-    ctx: &ExecutionContext<'_, '_>,
-) -> Option<std::time::Duration> {
+fn effective_provider_timeout(ctx: &ExecutionContext<'_, '_>) -> Option<std::time::Duration> {
     let mut limit = ctx.step_timeout;
     if let Some(deadline) = ctx.workflow_deadline {
         let remaining = deadline.saturating_duration_since(std::time::Instant::now());
@@ -121,21 +121,14 @@ impl AgentRuntime {
             graph_state,
             ..ContextExtras::default()
         };
-        let mut agent_context =
-            ContextAssembler::assemble(run_input, state, &policy, &extras);
+        let mut agent_context = ContextAssembler::assemble(run_input, state, &policy, &extras);
 
         if let Some(ctx) = ctx.as_mut() {
-            let tool_results = self.run_tools_if_configured(
-                agent,
-                step_id,
-                run_input,
-                &agent_context,
-                ctx,
-            )?;
+            let tool_results =
+                self.run_tools_if_configured(agent, step_id, run_input, &agent_context, ctx)?;
             if let Some(results) = tool_results {
                 extras.tool_results = Some(results);
-                agent_context =
-                    ContextAssembler::assemble(run_input, state, &policy, &extras);
+                agent_context = ContextAssembler::assemble(run_input, state, &policy, &extras);
             }
             tokens_consumed(ctx.sprint5, &ctx.run_id, step_id, &agent.name);
         }
@@ -148,11 +141,7 @@ impl AgentRuntime {
 
         if let Some(ctx) = ctx.as_ref() {
             if let Some(ref test) = ctx.test_config {
-                let key = crate::workflow::resolve_key(
-                    ctx.step_order,
-                    &step_id.to_string(),
-                    test,
-                );
+                let key = crate::workflow::resolve_key(ctx.step_order, &step_id.to_string(), test);
                 if let Some(stub_key) = key {
                     let max_attempts = test
                         .stub_responses
@@ -185,13 +174,7 @@ impl AgentRuntime {
 
         let step_tokens = if let Some(ctx) = ctx.as_mut() {
             if let Some(provider) = ctx.provider.clone() {
-                Some(self.execute_with_provider(
-                    agent,
-                    step_id,
-                    &agent_context,
-                    ctx,
-                    provider,
-                )?)
+                Some(self.execute_with_provider(agent, step_id, &agent_context, ctx, provider)?)
             } else {
                 None
             }
@@ -249,10 +232,7 @@ impl AgentRuntime {
         } else {
             default_temperature()
         };
-        let use_tool_loop = agent
-            .tools
-            .as_ref()
-            .is_some_and(|t| !t.is_empty())
+        let use_tool_loop = agent.tools.as_ref().is_some_and(|t| !t.is_empty())
             && agent
                 .tool_execution
                 .as_ref()
@@ -347,21 +327,16 @@ impl AgentRuntime {
                     }
                 })
             } else {
-                provider
-                    .complete(request)
-                    .await
-                    .map_err(|err| {
-                        emit_provider_error(ctx, &step_id_str, &err);
-                        map_provider_error(step_id, err)
-                    })
+                provider.complete(request).await.map_err(|err| {
+                    emit_provider_error(ctx, &step_id_str, &err);
+                    map_provider_error(step_id, err)
+                })
             }
         };
 
         let result = if let Some(limit) = limit {
             let configured_ms = limit.as_millis() as u64;
-            match block_on_provider(async {
-                tokio::time::timeout(limit, provider_call).await
-            }) {
+            match block_on_provider(async { tokio::time::timeout(limit, provider_call).await }) {
                 Ok(Ok(response)) => Ok(response),
                 Ok(Err(err)) if is_deadline_elapsed(&err) => {
                     let elapsed_ms = started.elapsed().as_millis() as u64;
@@ -792,13 +767,7 @@ impl AgentRuntime {
                         Some(
                             hits.iter()
                                 .enumerate()
-                                .map(|(i, h)| {
-                                    format!(
-                                        "[{}] {}",
-                                        i + 1,
-                                        String::from_utf8_lossy(h)
-                                    )
-                                })
+                                .map(|(i, h)| format!("[{}] {}", i + 1, String::from_utf8_lossy(h)))
                                 .collect::<Vec<_>>()
                                 .join("\n"),
                         )
@@ -864,10 +833,8 @@ impl AgentRuntime {
                 reason: "tool invoker not configured".into(),
             });
         };
-        let input: serde_json::Value =
-            serde_json::from_str(&call.arguments).unwrap_or_else(|_| {
-                serde_json::json!({ "raw": call.arguments })
-            });
+        let input: serde_json::Value = serde_json::from_str(&call.arguments)
+            .unwrap_or_else(|_| serde_json::json!({ "raw": call.arguments }));
         runtime
             .execute_tool(
                 &def.name,
@@ -939,14 +906,11 @@ fn map_provider_error(step_id: Uuid, err: ProviderCallError) -> RuntimeError {
     }
 }
 
-fn emit_provider_error(
-    ctx: &mut ExecutionContext<'_, '_>,
-    step_id: &str,
-    err: &ProviderCallError,
-) {
+fn emit_provider_error(ctx: &mut ExecutionContext<'_, '_>, step_id: &str, err: &ProviderCallError) {
     match err {
         ProviderCallError::RateLimited {
-            retry_after_seconds, ..
+            retry_after_seconds,
+            ..
         } => {
             ctx.sprint5.emit(TraceEventKind::ProviderRateLimited {
                 run_id: ctx.run_id.clone(),

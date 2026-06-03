@@ -1,6 +1,0 @@
-[submodule "arcflow"]
-	path = arcflow
-	url = https://github.com/isonlycoolie/ArcFlow.git
-[submodule "dashboard"]
-	path = dashboard
-	url = https://github.com/isonlycoolie/ArcFlow-Dashboard.git

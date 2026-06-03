@@ -95,7 +95,8 @@ impl EmbeddingProvider for LocalEmbeddingProvider {
         }
         if let Ok(path) = std::env::var("ARCFLOW_EMBEDDING_ONNX_PATH") {
             if !path.trim().is_empty() {
-                if let Ok(vecs) = super::onnx::embed_batch(path.trim(), texts, self.dimensions).await
+                if let Ok(vecs) =
+                    super::onnx::embed_batch(path.trim(), texts, self.dimensions).await
                 {
                     return Ok(vecs);
                 }

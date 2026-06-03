@@ -52,11 +52,21 @@ fn validate_manifest(path: &PathBuf) -> i32 {
         }
     };
     for (i, entry) in schedules.iter().enumerate() {
-        if entry.get("id").and_then(|v| v.as_str()).unwrap_or("").is_empty() {
+        if entry
+            .get("id")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .is_empty()
+        {
             eprintln!("[ArcFlow] schedules[{i}] missing id");
             return 1;
         }
-        if entry.get("cron").and_then(|v| v.as_str()).unwrap_or("").is_empty() {
+        if entry
+            .get("cron")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .is_empty()
+        {
             eprintln!("[ArcFlow] schedules[{i}] missing cron");
             return 1;
         }
@@ -70,7 +80,10 @@ fn validate_manifest(path: &PathBuf) -> i32 {
             return 1;
         }
     }
-    println!("[ArcFlow] schedule manifest valid ({} schedule(s))", schedules.len());
+    println!(
+        "[ArcFlow] schedule manifest valid ({} schedule(s))",
+        schedules.len()
+    );
     0
 }
 

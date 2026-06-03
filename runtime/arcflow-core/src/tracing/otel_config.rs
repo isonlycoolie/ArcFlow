@@ -125,19 +125,13 @@ mod tests {
         with_env(|| {
             std::env::set_var("ARCFLOW_OTLP_ENDPOINT", "http://localhost:4317");
             assert!(export_requested());
-            assert_eq!(
-                otlp_endpoint().as_deref(),
-                Some("http://localhost:4317")
-            );
+            assert_eq!(otlp_endpoint().as_deref(), Some("http://localhost:4317"));
         });
 
         with_env(|| {
             std::env::set_var("ARCFLOW_OTLP_ENDPOINT", "http://legacy:4317");
             std::env::set_var("OTEL_EXPORTER_OTLP_ENDPOINT", "http://collector:4318");
-            assert_eq!(
-                otlp_endpoint().as_deref(),
-                Some("http://collector:4318")
-            );
+            assert_eq!(otlp_endpoint().as_deref(), Some("http://collector:4318"));
         });
 
         with_env(|| {
@@ -146,10 +140,7 @@ mod tests {
                 "deployment.environment=prod,service.version=1.0",
             );
             let attrs = resource_attributes();
-            assert!(attrs.contains(&(
-                "deployment.environment".into(),
-                "prod".into()
-            )));
+            assert!(attrs.contains(&("deployment.environment".into(), "prod".into())));
             assert!(attrs.contains(&("service.version".into(), "1.0".into())));
         });
     }

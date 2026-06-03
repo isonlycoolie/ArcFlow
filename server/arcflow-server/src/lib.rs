@@ -53,10 +53,7 @@ pub fn build_app(state: Arc<AppState>) -> Router {
         .route("/v1/workflows/run", post(handlers::workflow::run_workflow))
         .route("/v1/runs", post(handlers::runs::create_run))
         .route("/v1/runs/:run_id", get(handlers::runs::get_run))
-        .route(
-            "/v1/runs/:run_id/trace",
-            get(handlers::runs::get_run_trace),
-        )
+        .route("/v1/runs/:run_id/trace", get(handlers::runs::get_run_trace))
         .route(
             "/v1/runs/:run_id/approve/:approval_key",
             post(handlers::approve::approve_run),
@@ -67,8 +64,7 @@ pub fn build_app(state: Arc<AppState>) -> Router {
         )
         .route(
             "/v1/workflows/:name/versions/:version",
-            get(handlers::registry::get_workflow_version)
-                .put(handlers::registry::publish_workflow),
+            get(handlers::registry::get_workflow_version).put(handlers::registry::publish_workflow),
         )
         .route(
             "/v1/workflows/:name/resolve",
@@ -108,5 +104,9 @@ pub fn build_app(state: Arc<AppState>) -> Router {
         ))
         .layer(RequestBodyLimitLayer::new(1024 * 1024));
 
-    public.merge(protected).merge(admin).with_state(state).layer(cors_layer())
+    public
+        .merge(protected)
+        .merge(admin)
+        .with_state(state)
+        .layer(cors_layer())
 }

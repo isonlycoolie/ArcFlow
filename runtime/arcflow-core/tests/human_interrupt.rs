@@ -23,7 +23,14 @@ fn agent(id: Uuid, name: &str) -> AgentDefinition {
     }
 }
 
-fn expense_workflow(a1: Uuid, a2: Uuid, a3: Uuid, s1: Uuid, s2: Uuid, s3: Uuid) -> WorkflowDefinition {
+fn expense_workflow(
+    a1: Uuid,
+    a2: Uuid,
+    a3: Uuid,
+    s1: Uuid,
+    s2: Uuid,
+    s3: Uuid,
+) -> WorkflowDefinition {
     WorkflowDefinition {
         id: Uuid::new_v4(),
         name: "expense".into(),
@@ -57,7 +64,7 @@ fn expense_workflow(a1: Uuid, a2: Uuid, a3: Uuid, s1: Uuid, s2: Uuid, s3: Uuid) 
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
-            external_bindings: None,
+        external_bindings: None,
     }
 }
 
@@ -72,12 +79,26 @@ fn hitl_without_recovery_returns_invalid_definition() {
     agents.insert(a3, agent(a3, "accounting"));
     let wf = expense_workflow(a1, a2, a3, Uuid::new_v4(), Uuid::new_v4(), Uuid::new_v4());
     let err = WorkflowEngine::new()
-        .execute_with_config(&wf, &agents, "request", None, None, None, 1024, 0.7, &ExecutionConfig::default(), None)
+        .execute_with_config(
+            &wf,
+            &agents,
+            "request",
+            None,
+            None,
+            None,
+            1024,
+            0.7,
+            &ExecutionConfig::default(),
+            None,
+        )
         .unwrap_err();
     assert!(matches!(
         err,
-        WorkflowRunError::Aborted(arcflow_core::error::RuntimeError::InvalidWorkflowDefinition { .. })
-            | WorkflowRunError::Aborted(arcflow_core::error::RuntimeError::RecoveryStorageError { .. })
+        WorkflowRunError::Aborted(
+            arcflow_core::error::RuntimeError::InvalidWorkflowDefinition { .. }
+        ) | WorkflowRunError::Aborted(
+            arcflow_core::error::RuntimeError::RecoveryStorageError { .. }
+        )
     ));
 }
 
@@ -105,7 +126,18 @@ fn hitl_interrupt_and_resume_completes() {
     };
     let engine = WorkflowEngine::new();
     let interrupted = engine
-        .execute_with_config(&wf, &agents, "expense:100", None, None, None, 1024, 0.7, &exec_config, None)
+        .execute_with_config(
+            &wf,
+            &agents,
+            "expense:100",
+            None,
+            None,
+            None,
+            1024,
+            0.7,
+            &exec_config,
+            None,
+        )
         .unwrap_err();
     let (partial, approval_key) = match interrupted {
         WorkflowRunError::Interrupted {
@@ -140,10 +172,8 @@ fn hitl_interrupt_and_resume_completes() {
     )
     .expect("resume after approval");
     assert_eq!(record.step_outputs.len(), 3);
-    assert!(
-        record
-            .step_outputs
-            .iter()
-            .all(|s| s.status == ExecutionStatus::Completed)
-    );
+    assert!(record
+        .step_outputs
+        .iter()
+        .all(|s| s.status == ExecutionStatus::Completed));
 }

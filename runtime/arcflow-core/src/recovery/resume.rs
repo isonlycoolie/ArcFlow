@@ -33,9 +33,11 @@ pub fn resume_workflow(
     exec_config: &ExecutionConfig,
 ) -> Result<WorkflowExecutionRecord, WorkflowRunError> {
     if !exec_config.recovery_enabled {
-        return Err(WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
-            reason: "recovery is not enabled for this run".into(),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::InvalidWorkflowDefinition {
+                reason: "recovery is not enabled for this run".into(),
+            },
+        ));
     }
     let rt = tokio::runtime::Runtime::new().map_err(|e| {
         WorkflowRunError::Aborted(RuntimeError::RecoveryStorageError {
@@ -46,19 +48,25 @@ pub fn resume_workflow(
         .block_on(load_recovery(original_run_id))
         .map_err(WorkflowRunError::Aborted)?;
     let Some(recovery) = state else {
-        return Err(WorkflowRunError::Aborted(RuntimeError::RecoveryStorageError {
-            reason: format!("no recovery state for run_id '{original_run_id}'"),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::RecoveryStorageError {
+                reason: format!("no recovery state for run_id '{original_run_id}'"),
+            },
+        ));
     };
     if !recovery.is_resumable() {
-        return Err(WorkflowRunError::Aborted(RuntimeError::RecoveryStorageError {
-            reason: "recovery state has already been consumed".into(),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::RecoveryStorageError {
+                reason: "recovery state has already been consumed".into(),
+            },
+        ));
     };
     if recovery.workflow_definition_id != workflow.id.to_string() {
-        return Err(WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
-            reason: "workflow definition id does not match recovery state".into(),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::InvalidWorkflowDefinition {
+                reason: "workflow definition id does not match recovery state".into(),
+            },
+        ));
     }
 
     #[cfg(feature = "otel")]

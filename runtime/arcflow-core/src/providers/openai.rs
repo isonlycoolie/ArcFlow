@@ -26,10 +26,11 @@ pub struct OpenAIProvider {
 
 impl OpenAIProvider {
     pub fn new(model: String) -> Result<Self, ProviderCallError> {
-        let api_key = std::env::var(OPENAI_API_KEY_ENV).map_err(|_| ProviderCallError::NotConfigured {
-            provider_id: "openai".into(),
-            key_env_var: OPENAI_API_KEY_ENV.into(),
-        })?;
+        let api_key =
+            std::env::var(OPENAI_API_KEY_ENV).map_err(|_| ProviderCallError::NotConfigured {
+                provider_id: "openai".into(),
+                key_env_var: OPENAI_API_KEY_ENV.into(),
+            })?;
         Self::with_endpoint(
             model,
             api_key,
@@ -249,12 +250,14 @@ impl ModelProvider for OpenAIProvider {
         if !response.status().is_success() {
             return Err(self.map_http_error(status, None));
         }
-        let parsed: OpenAIChatResponse = response.json().await.map_err(|e| {
-            ProviderCallError::ResponseParseError {
-                provider_id: "openai".into(),
-                reason: e.to_string(),
-            }
-        })?;
+        let parsed: OpenAIChatResponse =
+            response
+                .json()
+                .await
+                .map_err(|e| ProviderCallError::ResponseParseError {
+                    provider_id: "openai".into(),
+                    reason: e.to_string(),
+                })?;
         let choice = parsed.choices.into_iter().next().ok_or_else(|| {
             ProviderCallError::ResponseParseError {
                 provider_id: "openai".into(),
@@ -295,10 +298,7 @@ impl ModelProvider for OpenAIProvider {
         })
     }
 
-    async fn stream(
-        &self,
-        _request: ProviderRequest,
-    ) -> Result<ProviderStream, ProviderCallError> {
+    async fn stream(&self, _request: ProviderRequest) -> Result<ProviderStream, ProviderCallError> {
         Err(ProviderCallError::ApiError {
             provider_id: "openai".into(),
             status_code: 501,
