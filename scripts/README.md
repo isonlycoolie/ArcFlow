@@ -4,12 +4,19 @@ Helper scripts for contributors, maintainers, and operators. Run from the reposi
 
 ## Contributor and CI
 
-Two-tier CI: **fast** checks run automatically on every PR; **full** checks run via `workflow_dispatch` or locally before merge.
+Two-tier CI: **fast** checks on PRs to **`development`**; **full** checks daily + manual for **`master`** promotion.
+
+| Branch flow | GitHub checks |
+|-------------|---------------|
+| feature → **`development`** | [`ci.yml`](../.github/workflows/ci.yml), [`ci-docs.yml`](../.github/workflows/ci-docs.yml) |
+| **`development` → `master`** | [`ci-full.yml`](../.github/workflows/ci-full.yml) + [`merge-gate-master.yml`](../.github/workflows/merge-gate-master.yml) |
+
+See [`.github/BRANCH_POLICY.md`](../.github/BRANCH_POLICY.md) and [`setup-github-branch-policy.sh`](setup-github-branch-policy.sh) for branch protection.
 
 | Tier | GitHub workflow | Local script |
 |------|-----------------|--------------|
 | Fast (PR) | [`ci.yml`](../.github/workflows/ci.yml), [`ci-docs.yml`](../.github/workflows/ci-docs.yml) | [`ci-local.sh`](ci-local.sh) |
-| Full (manual) | [`ci-full.yml`](../.github/workflows/ci-full.yml) | [`ci-local-full.sh`](ci-local-full.sh) |
+| Full (daily + manual) | [`ci-full.yml`](../.github/workflows/ci-full.yml) | [`ci-local-full.sh`](ci-local-full.sh) |
 | SDK Python (PR, path filter) | [`sdk-python.yml`](../.github/workflows/sdk-python.yml) | last section of `ci-local-full.sh` |
 | SDK compat (weekly / manual) | [`sdk-python-compat.yml`](../.github/workflows/sdk-python-compat.yml) | — |
 | Static e2e (PR path filter / manual) | [`static-e2e.yml`](../.github/workflows/static-e2e.yml) | `ci-local-full.sh` (Docker) |
@@ -29,7 +36,8 @@ Two-tier CI: **fast** checks run automatically on every PR; **full** checks run 
 | [`normalize-documentation-prose.mjs`](normalize-documentation-prose.mjs) | One-shot enterprise prose rewrite for `documentation/` |
 | [`validate_documentation_claims.sh`](validate_documentation_claims.sh) | Cross-check doc claims (bash) |
 | [`validate_documentation_claims.ps1`](validate_documentation_claims.ps1) | Cross-check doc claims (PowerShell) |
-| [`install-git-hooks.sh`](install-git-hooks.sh) | Install prepare-commit-msg hook |
+| [`install-git-hooks.sh`](install-git-hooks.sh) | Install prepare-commit-msg + pre-push (protected branches) |
+| [`setup-github-branch-policy.sh`](setup-github-branch-policy.sh) | Apply GitHub branch protection (maintainers, requires `gh`) |
 | [`assert_provider_no_credentials.py`](assert_provider_no_credentials.py) | Provider credential boundary test |
 | [`assert_trace_overhead.py`](assert_trace_overhead.py) | Trace overhead smoke check |
 | [`build-wasm.sh`](build-wasm.sh) | Build WASM alpha artifact |
@@ -41,7 +49,7 @@ Before pushing, run:
 bash scripts/ci-local.sh
 ```
 
-Before merge to `master`, run full CI locally or dispatch **CI Full** in GitHub Actions:
+Before merge **`development` → `master`**, ensure CI Full passed on the PR head commit (daily 06:00 UTC or manual dispatch):
 
 ```bash
 bash scripts/ci-local-full.sh
