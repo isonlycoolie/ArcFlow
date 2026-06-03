@@ -12,6 +12,6 @@ pub use memory::JsVectorStore;
 
 pub use stream::{start_workflow_stream, JsWorkflowStreamIterator};
 pub use workflow::{
-    execute_resume_workflow, execute_workflow, execute_workflow_stream,
-    get_execution_trace_json, get_version, JsStreamWorkflowResult, JsWorkflowResult,
+    execute_resume_workflow, execute_workflow, execute_workflow_stream, get_execution_trace_json,
+    get_version, JsStreamWorkflowResult, JsWorkflowResult,
 };

@@ -36,7 +36,8 @@ impl AppState {
             .ok()
             .and_then(|s| s.parse().ok())
             .unwrap_or(10);
-        let (pg_pool, runs, registry, sites, traces) = match std::env::var("ARCFLOW_POSTGRESQL_URL") {
+        let (pg_pool, runs, registry, sites, traces) = match std::env::var("ARCFLOW_POSTGRESQL_URL")
+        {
             Ok(url) => match sqlx::postgres::PgPoolOptions::new()
                 .max_connections(max_pg)
                 .connect(&url)
@@ -52,7 +53,8 @@ impl AppState {
                             if let Ok(handle) = tokio::runtime::Handle::try_current() {
                                 handle.spawn(async move {
                                     let persistence = PostgresTracePersistence::new(pool);
-                                    if let Err(e) = persistence.persist_events(&run_id, &[event]).await
+                                    if let Err(e) =
+                                        persistence.persist_events(&run_id, &[event]).await
                                     {
                                         tracing::warn!(error = %e, %run_id, "trace persist failed");
                                     }
@@ -79,7 +81,8 @@ impl AppState {
         Self {
             api_key,
             admin_api_key: std::env::var("ARCFLOW_ADMIN_API_KEY").ok(),
-            default_upstream_runtime_key: std::env::var("ARCFLOW_DEFAULT_UPSTREAM_RUNTIME_KEY").ok(),
+            default_upstream_runtime_key: std::env::var("ARCFLOW_DEFAULT_UPSTREAM_RUNTIME_KEY")
+                .ok(),
             static_runtime_keys: load_static_keys_from_env(),
             webhook_secret,
             pg_pool,

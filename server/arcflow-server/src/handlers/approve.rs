@@ -23,13 +23,10 @@ pub async fn approve_run(
     Path((run_id, approval_key)): Path<(String, String)>,
     Json(body): Json<ApproveRequest>,
 ) -> Result<Json<ApproveResponse>, (StatusCode, String)> {
-    let store = state
-        .runs
-        .as_ref()
-        .ok_or((
-            StatusCode::SERVICE_UNAVAILABLE,
-            "[ArcFlow] ARCFLOW_POSTGRESQL_URL is required".into(),
-        ))?;
+    let store = state.runs.as_ref().ok_or((
+        StatusCode::SERVICE_UNAVAILABLE,
+        "[ArcFlow] ARCFLOW_POSTGRESQL_URL is required".into(),
+    ))?;
 
     let stored = store
         .get(&run_id)
@@ -40,7 +37,10 @@ pub async fn approve_run(
     if stored.status != ExecutionStatus::Interrupted {
         return Err((
             StatusCode::BAD_REQUEST,
-            format!("[ArcFlow] run '{run_id}' is not awaiting approval (status={:?})", stored.status),
+            format!(
+                "[ArcFlow] run '{run_id}' is not awaiting approval (status={:?})",
+                stored.status
+            ),
         ));
     }
 
@@ -167,7 +167,9 @@ fn internal(err: sqlx::Error) -> (StatusCode, String) {
     )
 }
 
-fn map_aborted(err: arcflow_core::error::RuntimeError) -> Result<Json<ApproveResponse>, (StatusCode, String)> {
+fn map_aborted(
+    err: arcflow_core::error::RuntimeError,
+) -> Result<Json<ApproveResponse>, (StatusCode, String)> {
     match err {
         arcflow_core::error::RuntimeError::HumanTimeout { approval_key } => Err((
             StatusCode::GONE,

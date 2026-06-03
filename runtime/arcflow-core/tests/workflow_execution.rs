@@ -6,7 +6,9 @@ use uuid::Uuid;
 
 use arcflow_core::agent::STUB_FAIL_ROLE;
 use arcflow_core::error::RuntimeError;
-use arcflow_core::rcs::types::{AgentDefinition, ExecutionMode, StepDefinition, WorkflowDefinition};
+use arcflow_core::rcs::types::{
+    AgentDefinition, ExecutionMode, StepDefinition, WorkflowDefinition,
+};
 use arcflow_core::workflow::{WorkflowEngine, WorkflowRunError};
 
 fn ag(id: Uuid, role: &str) -> AgentDefinition {
@@ -35,27 +37,27 @@ fn three_steps_with_distinct_agents_run_in_order() {
                 agent_id: a3,
                 order: 3,
                 fallback_step_id: None,
-            hitl: None,
+                hitl: None,
             },
             StepDefinition {
                 id: s1,
                 agent_id: a1,
                 order: 1,
                 fallback_step_id: None,
-            hitl: None,
+                hitl: None,
             },
             StepDefinition {
                 id: s2,
                 agent_id: a2,
                 order: 2,
                 fallback_step_id: None,
-            hitl: None,
+                hitl: None,
             },
         ],
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
-            external_bindings: None,
+        external_bindings: None,
     };
     let mut m = HashMap::new();
     m.insert(a1, ag(a1, "A"));
@@ -84,27 +86,27 @@ fn workflow_halts_on_failed_step_with_partial_record() {
                 agent_id: a_ok,
                 order: 1,
                 fallback_step_id: None,
-            hitl: None,
+                hitl: None,
             },
             StepDefinition {
                 id: s2,
                 agent_id: a_fail,
                 order: 2,
                 fallback_step_id: None,
-            hitl: None,
+                hitl: None,
             },
             StepDefinition {
                 id: s3,
                 agent_id: a_ok,
                 order: 3,
                 fallback_step_id: None,
-            hitl: None,
+                hitl: None,
             },
         ],
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
-            external_bindings: None,
+        external_bindings: None,
     };
     let mut m = HashMap::new();
     m.insert(a_ok, ag(a_ok, "ok"));

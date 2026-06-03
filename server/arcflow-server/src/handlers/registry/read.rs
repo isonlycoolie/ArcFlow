@@ -50,7 +50,8 @@ pub async fn set_workflow_alias(
     Path((name, alias)): Path<(String, String)>,
     Json(body): Json<SetAliasRequest>,
 ) -> Result<StatusCode, (StatusCode, String)> {
-    semver::Version::parse(&body.version).map_err(|_| bad_request("version must be valid semver"))?;
+    semver::Version::parse(&body.version)
+        .map_err(|_| bad_request("version must be valid semver"))?;
     let store = registry_store(&state)?;
     store
         .get(&name, &body.version)

@@ -4,7 +4,9 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use arcflow_core::rcs::types::{AgentDefinition, ExecutionMode, StepDefinition, WorkflowDefinition};
+use arcflow_core::rcs::types::{
+    AgentDefinition, ExecutionMode, StepDefinition, WorkflowDefinition,
+};
 use arcflow_core::workflow::WorkflowEngine;
 
 fn ag(id: Uuid, role: &str) -> AgentDefinition {
@@ -46,12 +48,14 @@ fn second_step_context_includes_first_step_output() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
-            external_bindings: None,
+        external_bindings: None,
     };
     let mut agents = HashMap::new();
     agents.insert(a1, ag(a1, "researcher"));
     agents.insert(a2, ag(a2, "analyst"));
-    let record = WorkflowEngine::new().execute(&wf, &agents, "AAPL swing trade").unwrap();
+    let record = WorkflowEngine::new()
+        .execute(&wf, &agents, "AAPL swing trade")
+        .unwrap();
     let first = record
         .step_outputs
         .iter()

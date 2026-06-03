@@ -101,7 +101,10 @@ impl StoredRun {
                 Some(RunInterruptDto {
                     approval_key: v.get("approval_key")?.as_str()?.to_string(),
                     expires_at: v.get("expires_at")?.as_str()?.to_string(),
-                    step_index: v.get("step_index").and_then(|s| s.as_u64()).map(|n| n as usize),
+                    step_index: v
+                        .get("step_index")
+                        .and_then(|s| s.as_u64())
+                        .map(|n| n as usize),
                 })
             })
         } else {

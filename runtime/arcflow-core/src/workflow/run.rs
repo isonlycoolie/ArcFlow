@@ -150,7 +150,10 @@ fn fail_step(
     })
 }
 
-pub(crate) fn partial_record(loop_ctx: &RunLoop<'_>, legacy: &TraceEmitter) -> WorkflowExecutionRecord {
+pub(crate) fn partial_record(
+    loop_ctx: &RunLoop<'_>,
+    legacy: &TraceEmitter,
+) -> WorkflowExecutionRecord {
     WorkflowExecutionRecord {
         run_id: loop_ctx.run_id,
         workflow_id: loop_ctx.workflow_id,
@@ -210,6 +213,72 @@ fn execute_agent_for_step(
     )
 }
 
+#[allow(clippy::too_many_arguments)]
+fn try_hitl_step(
+    loop_ctx: &mut RunLoop<'_>,
+    legacy: &mut TraceEmitter,
+    sprint5: &mut TraceEventEmitter<'_>,
+    run_key: &str,
+    step: &StepDefinition,
+    step_index: usize,
+    agent: &AgentDefinition,
+    workflow_started: Instant,
+    recovery_enabled: bool,
+    approval: Option<&ApprovalResult>,
+    stream_tx: &Option<StreamChannelSender>,
+) -> Option<Result<(), WorkflowRunError>> {
+    let hitl = step.hitl.as_ref()?;
+    if let Some(result) = approval {
+        if !result.approved {
+            return Some(fail_step(
+                loop_ctx,
+                legacy,
+                sprint5,
+                run_key,
+                step,
+                step_index,
+                workflow_started,
+                Instant::now(),
+                recovery_enabled,
+                RuntimeError::HumanRejected {
+                    approval_key: hitl.approval_key.clone(),
+                },
+                stream_tx,
+            ));
+        }
+        let content = serde_json::json!({
+            "approved": true,
+            "data": result.data,
+        })
+        .to_string();
+        let out = ExecutionStepOutput {
+            step_id: step.id,
+            agent_id: agent.id,
+            content,
+            status: ExecutionStatus::Completed,
+        };
+        return Some(commit_step_output(
+            loop_ctx,
+            legacy,
+            sprint5,
+            run_key,
+            step,
+            step_index,
+            Instant::now(),
+            out,
+            stream_tx,
+        ));
+    }
+    Some(interrupt_for_human(
+        loop_ctx,
+        legacy,
+        step,
+        step_index,
+        hitl,
+        recovery_enabled,
+    ))
+}
+
 #[allow(clippy::result_large_err)]
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn run_one_step(
@@ -246,58 +315,78 @@ pub(crate) fn run_one_step(
         "step execution started"
     );
 
-    if let Some(ref hitl) = step.hitl {
-        if let Some(result) = approval {
-            if !result.approved {
-                return fail_step(
-                    loop_ctx,
-                    legacy,
-                    sprint5,
-                    run_key,
-                    step,
-                    step_index,
-                    workflow_started,
-                    Instant::now(),
-                    recovery_enabled,
-                    RuntimeError::HumanRejected {
-                        approval_key: hitl.approval_key.clone(),
-                    },
-                    &stream_tx,
-                );
-            }
-            let content = serde_json::json!({
-                "approved": true,
-                "data": result.data,
-            })
-            .to_string();
-            let out = ExecutionStepOutput {
-                step_id: step.id,
-                agent_id: agent.id,
-                content,
-                status: ExecutionStatus::Completed,
-            };
-            return commit_step_output(
-                loop_ctx,
-                legacy,
-                sprint5,
-                run_key,
-                step,
-                step_index,
-                Instant::now(),
-                out,
-                &stream_tx,
-            );
-        }
-        return interrupt_for_human(
-            loop_ctx,
-            legacy,
-            step,
-            step_index,
-            hitl,
-            recovery_enabled,
-        );
+    if let Some(result) = try_hitl_step(
+        loop_ctx,
+        legacy,
+        sprint5,
+        run_key,
+        step,
+        step_index,
+        agent,
+        workflow_started,
+        recovery_enabled,
+        approval,
+        &stream_tx,
+    ) {
+        return result;
     }
 
+    run_one_step_core(
+        agent_runtime,
+        loop_ctx,
+        step,
+        step_index,
+        agent,
+        all_steps,
+        agents,
+        memory,
+        legacy,
+        sprint5,
+        run_key,
+        tool_runtime,
+        tool_invoker,
+        workflow_started,
+        provider,
+        provider_max_tokens,
+        provider_temperature,
+        retry_config,
+        step_timeout,
+        workflow_deadline,
+        recovery_enabled,
+        stream_tx,
+        node_id,
+        debug_session,
+    )
+}
+
+#[allow(clippy::result_large_err)]
+#[allow(clippy::too_many_arguments)]
+fn run_one_step_core(
+    agent_runtime: &AgentRuntime,
+    loop_ctx: &mut RunLoop<'_>,
+    step: &StepDefinition,
+    step_index: usize,
+    agent: &AgentDefinition,
+    all_steps: &[StepDefinition],
+    agents: &HashMap<Uuid, AgentDefinition>,
+    memory: &mut MemoryCoordinator,
+    legacy: &mut TraceEmitter,
+    sprint5: &mut TraceEventEmitter<'_>,
+    run_key: &str,
+    tool_runtime: Option<&ToolRuntime>,
+    tool_invoker: Option<Arc<dyn ToolInvoker>>,
+    workflow_started: Instant,
+    provider: Option<Arc<dyn ModelProvider>>,
+    provider_max_tokens: u32,
+    provider_temperature: f32,
+    retry_config: Option<RetryConfig>,
+    step_timeout: Option<std::time::Duration>,
+    workflow_deadline: Option<Instant>,
+    recovery_enabled: bool,
+    stream_tx: Option<StreamChannelSender>,
+    node_id: Option<String>,
+    debug_session: Option<std::sync::Arc<crate::debug::DebugSession>>,
+) -> Result<(), WorkflowRunError> {
     sprint5.emit(TraceEventKind::StepStarted {
         run_id: run_key.to_string(),
         step_id: step.id.to_string(),
@@ -323,12 +412,7 @@ pub(crate) fn run_one_step(
     );
 
     if let Some(session) = debug_session.as_ref() {
-        session.pause_before_step(
-            run_key,
-            step.id,
-            step_index,
-            &loop_ctx.state.snapshot(),
-        );
+        session.pause_before_step(run_key, step.id, step_index, &loop_ctx.state.snapshot());
     }
 
     let step_started = Instant::now();
@@ -534,12 +618,7 @@ pub(crate) fn run_sorted_steps(
     let retry_config = exec_config
         .retry
         .clone()
-        .or_else(|| {
-            workflow
-                .retry_policy
-                .as_ref()
-                .map(RetryConfig::from_rcs)
-        });
+        .or_else(|| workflow.retry_policy.as_ref().map(RetryConfig::from_rcs));
     if let Some(ref r) = retry_config {
         r.validate().map_err(WorkflowRunError::Aborted)?;
     }
@@ -622,12 +701,9 @@ pub(crate) fn run_sorted_steps(
             if step_index < start_index {
                 continue;
             }
-            if let Err(err) = check_workflow_timeout(
-                workflow_timeout,
-                workflow_started,
-                &run_key,
-                &mut sprint5,
-            ) {
+            if let Err(err) =
+                check_workflow_timeout(workflow_timeout, workflow_started, &run_key, &mut sprint5)
+            {
                 sprint5.emit(TraceEventKind::WorkflowFailed {
                     run_id: run_key.clone(),
                     duration_ms: workflow_started.elapsed().as_millis() as u64,

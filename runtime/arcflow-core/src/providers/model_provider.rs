@@ -15,8 +15,5 @@ pub trait ModelProvider: Send + Sync + 'static {
         &self,
         request: ProviderRequest,
     ) -> Result<ProviderResponse, ProviderCallError>;
-    async fn stream(
-        &self,
-        request: ProviderRequest,
-    ) -> Result<ProviderStream, ProviderCallError>;
+    async fn stream(&self, request: ProviderRequest) -> Result<ProviderStream, ProviderCallError>;
 }

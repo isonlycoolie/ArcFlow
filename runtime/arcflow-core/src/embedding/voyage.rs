@@ -26,9 +26,10 @@ pub struct VoyageEmbeddingProvider {
 
 impl VoyageEmbeddingProvider {
     pub fn new(model: &str) -> Result<Self, EmbeddingError> {
-        let api_key = std::env::var(VOYAGE_API_KEY_ENV).map_err(|_| EmbeddingError::NotConfigured {
-            reason: format!("{VOYAGE_API_KEY_ENV} is not set"),
-        })?;
+        let api_key =
+            std::env::var(VOYAGE_API_KEY_ENV).map_err(|_| EmbeddingError::NotConfigured {
+                reason: format!("{VOYAGE_API_KEY_ENV} is not set"),
+            })?;
         let dimensions = dimensions_for_model(model)?;
         let endpoint = std::env::var(VOYAGE_EMBEDDINGS_ENDPOINT_ENV)
             .unwrap_or_else(|_| VOYAGE_EMBEDDINGS_ENDPOINT.to_string());
@@ -105,17 +106,16 @@ impl EmbeddingProvider for VoyageEmbeddingProvider {
             })?;
         let status = response.status();
         if !status.is_success() {
-            let reason = response
-                .text()
-                .await
-                .unwrap_or_else(|_| status.to_string());
+            let reason = response.text().await.unwrap_or_else(|_| status.to_string());
             return Err(EmbeddingError::RequestFailed { reason });
         }
-        let parsed: EmbeddingsResponse = response.json().await.map_err(|e| {
-            EmbeddingError::ParseError {
-                reason: e.to_string(),
-            }
-        })?;
+        let parsed: EmbeddingsResponse =
+            response
+                .json()
+                .await
+                .map_err(|e| EmbeddingError::ParseError {
+                    reason: e.to_string(),
+                })?;
         if parsed.data.is_empty() {
             return Err(EmbeddingError::EmptyBatch);
         }
@@ -137,7 +137,10 @@ mod tests {
     async fn voyage_embed_parses_response() {
         let mock = MockServer::start().await;
         std::env::set_var(VOYAGE_API_KEY_ENV, "test-key");
-        std::env::set_var(VOYAGE_EMBEDDINGS_ENDPOINT_ENV, format!("{}/v1/embeddings", mock.uri()));
+        std::env::set_var(
+            VOYAGE_EMBEDDINGS_ENDPOINT_ENV,
+            format!("{}/v1/embeddings", mock.uri()),
+        );
 
         Mock::given(method("POST"))
             .and(path("/v1/embeddings"))

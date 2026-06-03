@@ -35,11 +35,16 @@ pub fn run(args: InitArgs) -> i32 {
             return 3;
         }
     }
-    let ext = if args.lang == "typescript" { "ts" } else { "py" };
-    let workflow = format!(
-        "# Example workflow — run with: arcflow run workflows/example_workflow.{ext}\n"
-    );
-    let wf_path = args.output_dir.join(format!("workflows/example_workflow.{ext}"));
+    let ext = if args.lang == "typescript" {
+        "ts"
+    } else {
+        "py"
+    };
+    let workflow =
+        format!("# Example workflow — run with: arcflow run workflows/example_workflow.{ext}\n");
+    let wf_path = args
+        .output_dir
+        .join(format!("workflows/example_workflow.{ext}"));
     if let Err(e) = fs::write(&wf_path, workflow) {
         eprintln!("[ArcFlow] Failed to write workflow: {e}");
         return 3;

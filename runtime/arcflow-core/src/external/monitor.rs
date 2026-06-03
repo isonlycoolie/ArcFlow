@@ -2,7 +2,7 @@
 
 use crate::rcs::types::{ExternalBinding, ExternalOutcomeReport, ExternalOutcomeStatus};
 use crate::tracing::events::TraceEventKind;
-use crate::tracing::{TraceEventEmitter, with_store};
+use crate::tracing::{with_store, TraceEventEmitter};
 
 use super::recovery::{RecoveryAction, RecoveryDecision};
 
@@ -52,7 +52,10 @@ pub fn emit_external_traces(
                     run_id: ctx.run_id.clone(),
                     binding_id: binding.id.clone(),
                     step_id: ctx.step_id.clone(),
-                    error_code: report.error_code.clone().unwrap_or_else(|| "UNKNOWN".into()),
+                    error_code: report
+                        .error_code
+                        .clone()
+                        .unwrap_or_else(|| "UNKNOWN".into()),
                     status: status.into(),
                 });
             }

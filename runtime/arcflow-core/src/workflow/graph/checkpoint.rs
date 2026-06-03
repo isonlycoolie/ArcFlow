@@ -5,9 +5,9 @@ use std::collections::HashMap;
 use chrono::Utc;
 use uuid::Uuid;
 
+use crate::rcs::types::ExecutionMode;
 use crate::recovery::state::{CompletedStepSnapshot, RecoveryState};
 use crate::recovery::storage::RecoveryStorage;
-use crate::rcs::types::ExecutionMode;
 use crate::state::ExecutionStepOutput;
 
 /// Best-effort upsert of graph execution progress when recovery is enabled.

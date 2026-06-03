@@ -4,11 +4,11 @@ use chrono::{Duration, Utc};
 
 use crate::error::RuntimeError;
 use crate::rcs::types::HitlConfig;
+use crate::rcs::types::{ExecutionMode, StepDefinition};
 use crate::recovery::state::{CompletedStepSnapshot, RecoveryState};
 use crate::recovery::storage::RecoveryStorage;
 use crate::tracing::emitter::TraceEmitter;
 use crate::workflow::{partial_record, RunLoop, WorkflowRunError};
-use crate::rcs::types::{ExecutionMode, StepDefinition};
 
 use super::interrupt::HUMAN_INTERRUPT_CODE;
 use super::storage::HumanApprovalStorage;
@@ -23,19 +23,25 @@ pub(crate) fn interrupt_for_human(
     recovery_enabled: bool,
 ) -> Result<(), WorkflowRunError> {
     if !recovery_enabled {
-        return Err(WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
-            reason: "HITL steps require recovery_enabled".into(),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::InvalidWorkflowDefinition {
+                reason: "HITL steps require recovery_enabled".into(),
+            },
+        ));
     }
     if !hitl.interrupt {
-        return Err(WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
-            reason: "HITL step requires interrupt=true".into(),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::InvalidWorkflowDefinition {
+                reason: "HITL step requires interrupt=true".into(),
+            },
+        ));
     }
     if hitl.approval_key.trim().is_empty() {
-        return Err(WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
-            reason: "HITL approval_key must be non-empty".into(),
-        }));
+        return Err(WorkflowRunError::Aborted(
+            RuntimeError::InvalidWorkflowDefinition {
+                reason: "HITL approval_key must be non-empty".into(),
+            },
+        ));
     }
 
     let expires_at = Utc::now() + Duration::seconds(hitl.timeout_seconds as i64);
@@ -84,15 +90,9 @@ pub(crate) fn interrupt_for_human(
             graph_iteration_count: 0,
             pending_join: None,
         };
-        RecoveryStorage::new(pool.clone())
-            .upsert(&state)
-            .await?;
+        RecoveryStorage::new(pool.clone()).upsert(&state).await?;
         HumanApprovalStorage::new(pool)
-            .insert_pending(
-                &loop_ctx.run_id.to_string(),
-                &hitl.approval_key,
-                expires_at,
-            )
+            .insert_pending(&loop_ctx.run_id.to_string(), &hitl.approval_key, expires_at)
             .await
     })
     .map_err(WorkflowRunError::Aborted)?;

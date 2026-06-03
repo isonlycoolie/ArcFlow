@@ -41,8 +41,11 @@ fn try_init_live_tracing() {
 pub fn init_tracing_subscriber(default_directive: &str) {
     use tracing_subscriber::util::SubscriberInitExt;
 
-    let filter = tracing_subscriber::EnvFilter::from_default_env()
-        .add_directive(default_directive.parse().expect("valid tracing directive"));
+    let filter = tracing_subscriber::EnvFilter::from_default_env();
+    let filter = match default_directive.parse() {
+        Ok(directive) => filter.add_directive(directive),
+        Err(_) => filter,
+    };
     let fmt_layer = tracing_subscriber::fmt::layer();
 
     if otel_config::otel_enabled() && init_otlp_exporter().is_ok() {
@@ -126,12 +129,7 @@ pub fn llm_span(run_id: &str, step_id: &str, provider: &str, model: &str) -> Spa
 }
 
 /// Records token counts on the active LLM span and metrics (SEC-1: counts only).
-pub fn record_llm_tokens(
-    provider: &str,
-    model: &str,
-    prompt_tokens: u32,
-    completion_tokens: u32,
-) {
+pub fn record_llm_tokens(provider: &str, model: &str, prompt_tokens: u32, completion_tokens: u32) {
     if !otel_config::otel_enabled() {
         return;
     }
@@ -139,12 +137,7 @@ pub fn record_llm_tokens(
     span.record("tokens.prompt", prompt_tokens);
     span.record("tokens.completion", completion_tokens);
     super::otel_metrics::record_llm_tokens(provider, model, "prompt", prompt_tokens as u64);
-    super::otel_metrics::record_llm_tokens(
-        provider,
-        model,
-        "completion",
-        completion_tokens as u64,
-    );
+    super::otel_metrics::record_llm_tokens(provider, model, "completion", completion_tokens as u64);
 }
 
 /// Opens an `arcflow.tool.execute` span under the active step span.

@@ -29,7 +29,10 @@ async fn main() {
         use axum::routing::{get, post};
         use axum::Router;
         let debug_routes = Router::new()
-            .route("/v1/debug/runs/start", post(arcflow_server::debug::start_debug_run))
+            .route(
+                "/v1/debug/runs/start",
+                post(arcflow_server::debug::start_debug_run),
+            )
             .route(
                 "/v1/debug/runs/:run_id/state",
                 get(arcflow_server::debug::get_debug_state),

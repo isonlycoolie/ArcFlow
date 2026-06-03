@@ -55,9 +55,10 @@ pub struct CohereRerankProvider {
 
 impl CohereRerankProvider {
     pub fn from_env() -> Result<Self, RerankError> {
-        let api_key = std::env::var(COHERE_API_KEY_ENV).map_err(|_| RerankError::NotConfigured {
-            reason: format!("{COHERE_API_KEY_ENV} is not set"),
-        })?;
+        let api_key =
+            std::env::var(COHERE_API_KEY_ENV).map_err(|_| RerankError::NotConfigured {
+                reason: format!("{COHERE_API_KEY_ENV} is not set"),
+            })?;
         let client = Client::builder()
             .timeout(Duration::from_secs(PROVIDER_REQUEST_TIMEOUT_SECS))
             .user_agent(ARCFLOW_USER_AGENT)
@@ -128,9 +129,10 @@ impl RerankProvider for CohereRerankProvider {
                 reason: format!("cohere rerank HTTP {}", response.status()),
             });
         }
-        let parsed: RerankResponse = response.json().await.map_err(|e| RerankError::ParseError {
-            reason: e.to_string(),
-        })?;
+        let parsed: RerankResponse =
+            response.json().await.map_err(|e| RerankError::ParseError {
+                reason: e.to_string(),
+            })?;
         if parsed.results.is_empty() {
             return Err(RerankError::EmptyResults);
         }
@@ -202,10 +204,7 @@ mod tests {
     #[tokio::test]
     async fn local_rerank_orders_by_overlap() {
         let provider = LocalLexicalRerankProvider;
-        let docs = vec![
-            "unrelated text".into(),
-            "rust memory vector search".into(),
-        ];
+        let docs = vec!["unrelated text".into(), "rust memory vector search".into()];
         let ranked = provider
             .rerank("rust vector", &docs, 2)
             .await

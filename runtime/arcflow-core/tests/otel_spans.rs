@@ -10,7 +10,9 @@ use arcflow_core::tracing::otel_live::{step_span, workflow_span};
 static ENV_LOCK: Mutex<()> = Mutex::new(());
 
 fn with_clean_env(test: impl FnOnce()) {
-    let _guard = ENV_LOCK.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+    let _guard = ENV_LOCK
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
     for key in [
         "ARCFLOW_OTEL_ENABLED",
         "ARCFLOW_OTLP_ENDPOINT",

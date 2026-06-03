@@ -17,11 +17,10 @@ impl RecoveryStorage {
     }
 
     pub async fn save(&self, state: &RecoveryState) -> Result<(), RuntimeError> {
-        let state_json = serde_json::to_value(state).map_err(|e| {
-            RuntimeError::RecoveryStorageError {
+        let state_json =
+            serde_json::to_value(state).map_err(|e| RuntimeError::RecoveryStorageError {
                 reason: format!("failed to serialize recovery state: {e}"),
-            }
-        })?;
+            })?;
 
         tokio::time::timeout(
             std::time::Duration::from_secs(RECOVERY_STORAGE_TIMEOUT_SECS),
@@ -64,11 +63,10 @@ impl RecoveryStorage {
     }
 
     pub async fn upsert(&self, state: &RecoveryState) -> Result<(), RuntimeError> {
-        let state_json = serde_json::to_value(state).map_err(|e| {
-            RuntimeError::RecoveryStorageError {
+        let state_json =
+            serde_json::to_value(state).map_err(|e| RuntimeError::RecoveryStorageError {
                 reason: format!("failed to serialize recovery state: {e}"),
-            }
-        })?;
+            })?;
 
         tokio::time::timeout(
             std::time::Duration::from_secs(RECOVERY_STORAGE_TIMEOUT_SECS),

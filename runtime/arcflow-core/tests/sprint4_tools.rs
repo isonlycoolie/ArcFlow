@@ -4,8 +4,8 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use arcflow_core::rcs::types::{
-    AgentDefinition, ExecutionMode, ExecutionStatus, MemoryConfig, MemoryScope, MemoryType, StepDefinition,
-    ToolDefinition, TraceEventKind, WorkflowDefinition,
+    AgentDefinition, ExecutionMode, ExecutionStatus, MemoryConfig, MemoryScope, MemoryType,
+    StepDefinition, ToolDefinition, TraceEventKind, WorkflowDefinition,
 };
 use arcflow_core::tools::{RegisteredTool, ToolError, ToolInvoker, ToolRuntime};
 use arcflow_core::workflow::WorkflowEngine;
@@ -45,8 +45,8 @@ fn workflow_runs_agent_with_tool() {
                 permissions: None,
             }]),
             memory_config: None,
-        context: None,
-        tool_execution: None,
+            context: None,
+            tool_execution: None,
         },
     );
     let wf = WorkflowDefinition {
@@ -62,7 +62,7 @@ fn workflow_runs_agent_with_tool() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
-            external_bindings: None,
+        external_bindings: None,
     };
     let mut runtime = ToolRuntime::new();
     runtime
@@ -77,7 +77,16 @@ fn workflow_runs_agent_with_tool() {
         .unwrap();
     let invoker = Arc::new(EchoInvoker);
     let record = WorkflowEngine::new()
-        .execute_with_tools(&wf, &agents, "hi", Some(&runtime), Some(invoker), None, 0, 0.0)
+        .execute_with_tools(
+            &wf,
+            &agents,
+            "hi",
+            Some(&runtime),
+            Some(invoker),
+            None,
+            0,
+            0.0,
+        )
         .unwrap();
     assert_eq!(record.step_outputs.len(), 1);
     assert_eq!(record.step_outputs[0].status, ExecutionStatus::Completed);
@@ -122,7 +131,7 @@ fn workflow_with_session_memory_records_trace_events() {
         retry_policy: None,
         execution_mode: ExecutionMode::Linear,
         graph: None,
-            external_bindings: None,
+        external_bindings: None,
     };
     let record = WorkflowEngine::new()
         .execute_with_tools(&wf, &agents, "remember", None, None, None, 0, 0.0)

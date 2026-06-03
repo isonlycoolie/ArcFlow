@@ -110,7 +110,10 @@ mod tests {
     fn local_only_blocks_openai() {
         std::env::set_var(LOCAL_ONLY_ENV, "true");
         let err = resolve_provider("openai/text-embedding-3-small");
-        assert!(matches!(err, Err(EmbeddingError::LocalOnlyViolation { .. })));
+        assert!(matches!(
+            err,
+            Err(EmbeddingError::LocalOnlyViolation { .. })
+        ));
         std::env::remove_var(LOCAL_ONLY_ENV);
     }
 
@@ -118,7 +121,10 @@ mod tests {
     fn local_only_blocks_voyage() {
         std::env::set_var(LOCAL_ONLY_ENV, "true");
         let err = resolve_provider("voyage/voyage-3");
-        assert!(matches!(err, Err(EmbeddingError::LocalOnlyViolation { .. })));
+        assert!(matches!(
+            err,
+            Err(EmbeddingError::LocalOnlyViolation { .. })
+        ));
         std::env::remove_var(LOCAL_ONLY_ENV);
     }
 }

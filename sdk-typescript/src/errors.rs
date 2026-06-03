@@ -25,23 +25,19 @@ pub fn trace_not_found(run_id: &str) -> Error {
 }
 
 pub fn parse_uuid(field: &str, value: &str) -> Result<Uuid, Error> {
-    Uuid::parse_str(value).map_err(|_| {
-        configuration_error(format!("Invalid UUID for {field}: '{value}'."))
-    })
+    Uuid::parse_str(value)
+        .map_err(|_| configuration_error(format!("Invalid UUID for {field}: '{value}'.")))
 }
 
 pub fn workflow_run_error_to_napi(err: WorkflowRunError) -> Error {
     match err {
-        WorkflowRunError::Aborted(inner) => {
-            configuration_error(runtime_config_message(&inner))
-        }
+        WorkflowRunError::Aborted(inner) => configuration_error(runtime_config_message(&inner)),
         WorkflowRunError::Failed { error, partial } => {
             raise_for_runtime_error(&error, partial.run_id.to_string(), &partial)
         }
         WorkflowRunError::Interrupted { partial, .. } => Error::from_reason(format!(
             "WorkflowInterruptedError|{}|{}",
-            partial.run_id,
-            "Workflow paused for human approval."
+            partial.run_id, "Workflow paused for human approval."
         )),
     }
 }
@@ -69,7 +65,11 @@ fn raise_for_runtime_error(
             let _failed = partial.step_outputs.last().map(|o| o.agent_id.to_string());
             Error::from_reason(format!(
                 "WorkflowExecutionError|{run_id}|{}|{}",
-                partial.step_outputs.last().map(|o| o.agent_id.to_string()).unwrap_or_default(),
+                partial
+                    .step_outputs
+                    .last()
+                    .map(|o| o.agent_id.to_string())
+                    .unwrap_or_default(),
                 runtime_execution_message(err)
             ))
         }
@@ -112,7 +112,7 @@ fn runtime_config_message(err: &RuntimeError) -> String {
         RuntimeError::StepTimeout { .. }
         | RuntimeError::WorkflowTimeout { .. }
         | RuntimeError::RetryExhausted { .. }
-        |         RuntimeError::RecoveryStorageError { .. } => format!("{err}."),
+        | RuntimeError::RecoveryStorageError { .. } => format!("{err}."),
         RuntimeError::HumanRejected { approval_key } => {
             format!("Human approval rejected for key '{approval_key}'.")
         }
@@ -158,7 +158,11 @@ fn runtime_execution_message(err: &RuntimeError) -> String {
             reason,
             ..
         } => format!("Provider '{provider_id}' failed: {reason}."),
-        RuntimeError::StepTimeout { step_id, configured_ms, .. } => {
+        RuntimeError::StepTimeout {
+            step_id,
+            configured_ms,
+            ..
+        } => {
             format!("Step '{step_id}' timed out (limit {configured_ms}ms).")
         }
         RuntimeError::WorkflowTimeout { configured_ms, .. } => {
@@ -168,9 +172,7 @@ fn runtime_execution_message(err: &RuntimeError) -> String {
             step_id,
             attempts_made,
             last_error_code,
-        } => format!(
-            "Step '{step_id}' failed after {attempts_made} attempts: {last_error_code}."
-        ),
+        } => format!("Step '{step_id}' failed after {attempts_made} attempts: {last_error_code}."),
         RuntimeError::RecoveryStorageError { reason } => {
             format!("Recovery storage error: {reason}.")
         }

@@ -4,19 +4,18 @@ Helper scripts for contributors, maintainers, and operators. Run from the reposi
 
 ## Contributor and CI
 
-Two-tier CI: **fast** checks on PRs to **`development`**; **full** checks daily + manual for **`master`** promotion.
+Two-tier CI: **smoke** on every PR; **fast Rust** on code paths; **full** daily + manual for **`master`** promotion.
 
 | Branch flow | GitHub checks |
 |-------------|---------------|
-| feature → **`development`** | [`ci.yml`](../.github/workflows/ci.yml), [`ci-docs.yml`](../.github/workflows/ci-docs.yml) |
+| any PR → **`development`** | [`ci-smoke.yml`](../.github/workflows/ci-smoke.yml) always |
+| feature → **`development`** (code) | [`ci.yml`](../.github/workflows/ci.yml), [`ci-docs.yml`](../.github/workflows/ci-docs.yml) |
 | **`development` → `master`** | [`ci-full.yml`](../.github/workflows/ci-full.yml) + [`merge-gate-master.yml`](../.github/workflows/merge-gate-master.yml) |
 
-See [`.github/BRANCH_POLICY.md`](../.github/BRANCH_POLICY.md) and [`setup-github-branch-policy.sh`](setup-github-branch-policy.sh) for branch protection.
-
-| Tier | GitHub workflow | Local script |
-|------|-----------------|--------------|
-| Fast (PR) | [`ci.yml`](../.github/workflows/ci.yml), [`ci-docs.yml`](../.github/workflows/ci-docs.yml) | [`ci-local.sh`](ci-local.sh) |
-| Full (daily + manual) | [`ci-full.yml`](../.github/workflows/ci-full.yml) | [`ci-local-full.sh`](ci-local-full.sh) |
+| Script | Purpose |
+|--------|---------|
+| [`ci-smoke.sh`](ci-smoke.sh) | Sub-minute smoke checks (no Rust compile) |
+| [`ci-docker.sh`](ci-docker.sh) | Smoke + Rust gates in Linux Docker containers |
 | SDK Python (PR, path filter) | [`sdk-python.yml`](../.github/workflows/sdk-python.yml) | last section of `ci-local-full.sh` |
 | SDK compat (weekly / manual) | [`sdk-python-compat.yml`](../.github/workflows/sdk-python-compat.yml) | — |
 | Static e2e (PR path filter / manual) | [`static-e2e.yml`](../.github/workflows/static-e2e.yml) | `ci-local-full.sh` (Docker) |

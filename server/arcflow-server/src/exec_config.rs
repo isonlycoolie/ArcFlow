@@ -2,8 +2,8 @@
 
 use std::time::Duration;
 
-use arcflow_core::retry::{BackoffStrategy, RetryConfig};
 use arcflow_core::retry::TimeoutConfig as RetryTimeoutConfig;
+use arcflow_core::retry::{BackoffStrategy, RetryConfig};
 use arcflow_core::workflow::{ExecutionConfig, StreamConfig};
 use serde::Deserialize;
 
@@ -77,7 +77,10 @@ impl BackoffJson {
             BackoffJson::Constant {
                 delay_ms,
                 jitter_ms,
-            } => BackoffStrategy::Constant { delay_ms, jitter_ms },
+            } => BackoffStrategy::Constant {
+                delay_ms,
+                jitter_ms,
+            },
         }
     }
 }
@@ -109,12 +112,8 @@ pub fn parse_exec_config(
         run_id: None,
         workflow_version: workflow_version.map(str::to_string),
         test: None,
-        stream: parsed.stream.map(|s| StreamConfig {
-            enabled: s.enabled,
-        }),
+        stream: parsed.stream.map(|s| StreamConfig { enabled: s.enabled }),
         debug: None,
-        initial_state: parsed
-            .initial_state
-            .and_then(|v| v.as_object().cloned()),
+        initial_state: parsed.initial_state.and_then(|v| v.as_object().cloned()),
     })
 }

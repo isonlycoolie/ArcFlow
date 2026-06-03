@@ -17,7 +17,9 @@ impl std::fmt::Display for EnvelopeError {
             Self::BindingMismatch { expected, got } => {
                 write!(f, "binding_id mismatch: expected '{expected}', got '{got}'")
             }
-            Self::SchemaValidation { reason } => write!(f, "outcome schema validation failed: {reason}"),
+            Self::SchemaValidation { reason } => {
+                write!(f, "outcome schema validation failed: {reason}")
+            }
         }
     }
 }
@@ -79,9 +81,7 @@ fn validate_against_schema(schema: &Value, payload: &Value) -> Result<(), Envelo
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rcs::types::{
-        ExternalBindingKind, ExternalBindingMode, ExternalOutcomeStatus,
-    };
+    use crate::rcs::types::{ExternalBindingKind, ExternalBindingMode, ExternalOutcomeStatus};
     use serde_json::json;
     use uuid::Uuid;
 

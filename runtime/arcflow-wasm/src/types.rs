@@ -69,7 +69,9 @@ impl WasmRunError {
     pub fn message(&self) -> String {
         match self {
             Self::InvalidJson(e) => format!("invalid workflow JSON: {e}"),
-            Self::UnsupportedMode(mode) => format!("execution mode '{mode}' is not supported on edge"),
+            Self::UnsupportedMode(mode) => {
+                format!("execution mode '{mode}' is not supported on edge")
+            }
             Self::MissingAgent { step_id, agent_id } => {
                 format!("agent '{agent_id}' not found for step '{step_id}'")
             }

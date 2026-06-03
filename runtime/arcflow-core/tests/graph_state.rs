@@ -83,25 +83,13 @@ fn graph_state_passes_observation_to_next_node() {
     agents.insert(a_think, agent(a_think, "think"));
 
     let mut initial = serde_json::Map::new();
-    initial.insert(
-        "seed".into(),
-        serde_json::Value::String("context".into()),
-    );
+    initial.insert("seed".into(), serde_json::Value::String("context".into()));
     let mut exec = ExecutionConfig::default();
     exec.initial_state = Some(initial);
 
     let record = WorkflowEngine::new()
         .execute_with_config(
-            &workflow,
-            &agents,
-            "task",
-            None,
-            None,
-            None,
-            256,
-            0.0,
-            &exec,
-            None,
+            &workflow, &agents, "task", None, None, None, 256, 0.0, &exec, None,
         )
         .unwrap();
 

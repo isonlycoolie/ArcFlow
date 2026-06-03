@@ -1,13 +1,17 @@
 //! Local-only step-through debugging (Phase 2.4).
 
 use std::collections::HashSet;
-use std::sync::{Arc, Condvar, Mutex};
+use std::sync::{Arc, Condvar, Mutex, MutexGuard, PoisonError};
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::state::StateSnapshot;
+
+fn lock_unpoisoned<'a, T>(mutex: &'a Mutex<T>) -> MutexGuard<'a, T> {
+    mutex.lock().unwrap_or_else(PoisonError::into_inner)
+}
 
 /// Masked workflow state exposed to debug clients (values redacted).
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -88,7 +92,7 @@ impl DebugSession {
     }
 
     pub fn set_breakpoints(&self, step_ids: impl IntoIterator<Item = String>) {
-        let mut bp = self.breakpoints.lock().expect("breakpoints lock");
+        let mut bp = lock_unpoisoned(&self.breakpoints);
         bp.clear();
         bp.extend(step_ids);
     }
@@ -100,44 +104,38 @@ impl DebugSession {
         step_index: usize,
         snapshot: &StateSnapshot,
     ) {
-        let should_pause = self
-            .breakpoints
-            .lock()
-            .expect("breakpoints lock")
-            .contains(&step_id.to_string());
+        let should_pause = lock_unpoisoned(&self.breakpoints).contains(&step_id.to_string());
         if !should_pause {
             return;
         }
         {
-            let mut paused = self.paused.lock().expect("paused lock");
+            let mut paused = lock_unpoisoned(&self.paused);
             *paused = Some(PausedState {
                 view: state_view(run_id, step_id, step_index, snapshot),
             });
         }
         let (lock, cv) = &*self.gate;
-        let mut ready = lock.lock().expect("gate lock");
+        let mut ready = lock_unpoisoned(lock);
         *ready = false;
         while !*ready {
-            ready = cv
-                .wait_timeout(ready, Duration::from_millis(200))
-                .expect("gate wait")
-                .0;
+            ready = match cv.wait_timeout(ready, Duration::from_millis(200)) {
+                Ok((guard, _)) => guard,
+                Err(poison) => poison.into_inner().0,
+            };
         }
-        let mut paused = self.paused.lock().expect("paused lock");
+        let mut paused = lock_unpoisoned(&self.paused);
         *paused = None;
     }
 
     pub fn continue_run(&self) {
         let (lock, cv) = &*self.gate;
-        let mut ready = lock.lock().expect("gate lock");
+        let mut ready = lock_unpoisoned(lock);
         *ready = true;
         cv.notify_all();
     }
 
     pub fn state_view(&self) -> Option<DebugStateView> {
-        self.paused
-            .lock()
-            .expect("paused lock")
+        lock_unpoisoned(&self.paused)
             .as_ref()
             .map(|p| p.view.clone())
     }
@@ -163,12 +161,7 @@ mod tests {
         session.set_breakpoints([step_id.to_string()]);
         let session_bg = session.clone();
         let handle = thread::spawn(move || {
-            session_bg.pause_before_step(
-                "run",
-                step_id,
-                0,
-                &StateSnapshot { steps: vec![] },
-            );
+            session_bg.pause_before_step("run", step_id, 0, &StateSnapshot { steps: vec![] });
         });
         thread::sleep(Duration::from_millis(50));
         assert!(session.state_view().is_some());
@@ -190,6 +183,8 @@ mod tests {
         };
         let view = state_view("run", step_id, 1, &snap);
         assert!(view.masked_outputs[0].content_preview.contains("***"));
-        assert!(!view.masked_outputs[0].content_preview.contains("secret-api-key"));
+        assert!(!view.masked_outputs[0]
+            .content_preview
+            .contains("secret-api-key"));
     }
 }

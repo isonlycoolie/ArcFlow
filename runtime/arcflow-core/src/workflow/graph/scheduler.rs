@@ -166,12 +166,9 @@ pub fn run_graph_loop(
                 continue;
             }
 
-            if let Err(err) = check_workflow_timeout(
-                workflow_timeout,
-                workflow_started,
-                &run_key,
-                &mut sprint5,
-            ) {
+            if let Err(err) =
+                check_workflow_timeout(workflow_timeout, workflow_started, &run_key, &mut sprint5)
+            {
                 return Err(WorkflowRunError::Failed {
                     error: err,
                     partial: partial_record(&loop_ctx, &legacy),
@@ -183,9 +180,11 @@ pub fn run_graph_loop(
                 .map_err(WorkflowRunError::Aborted)?;
 
             let Some(step) = node_to_step.get(current.as_str()) else {
-                return Err(WorkflowRunError::Aborted(RuntimeError::InvalidWorkflowDefinition {
-                    reason: format!("graph node '{current}' has no step mapping"),
-                }));
+                return Err(WorkflowRunError::Aborted(
+                    RuntimeError::InvalidWorkflowDefinition {
+                        reason: format!("graph node '{current}' has no step mapping"),
+                    },
+                ));
             };
             let Some(agent) = agents.get(&step.agent_id) else {
                 return Err(WorkflowRunError::Aborted(RuntimeError::AgentNotFound {
@@ -226,10 +225,7 @@ pub fn run_graph_loop(
                 if let Some(keys) = &node.outputs {
                     if let Some(out) = loop_ctx.step_outputs.last() {
                         for key in keys {
-                            graph_state_map.insert(
-                                key.clone(),
-                                Value::String(out.content.clone()),
-                            );
+                            graph_state_map.insert(key.clone(), Value::String(out.content.clone()));
                         }
                     }
                 }

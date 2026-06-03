@@ -341,7 +341,10 @@ impl MemoryCoordinator {
         run_id: &str,
         step_id: Option<Uuid>,
     ) -> Result<usize, MemoryError> {
-        let namespace = config.namespace.as_deref().ok_or(MemoryError::NamespaceRequired)?;
+        let namespace = config
+            .namespace
+            .as_deref()
+            .ok_or(MemoryError::NamespaceRequired)?;
         if namespace.is_empty() {
             return Err(MemoryError::NamespaceRequired);
         }
@@ -355,9 +358,9 @@ impl MemoryCoordinator {
             })?;
             *vector = rebuilt;
         }
-        let count = self
-            .runtime()?
-            .block_on(vector.write_document(namespace, logical_key, text))?;
+        let count =
+            self.runtime()?
+                .block_on(vector.write_document(namespace, logical_key, text))?;
         memory_write(
             legacy,
             sprint5,
@@ -383,7 +386,10 @@ impl MemoryCoordinator {
         run_id: &str,
         step_id: Option<Uuid>,
     ) -> Result<Vec<Vec<u8>>, MemoryError> {
-        let namespace = config.namespace.as_deref().ok_or(MemoryError::NamespaceRequired)?;
+        let namespace = config
+            .namespace
+            .as_deref()
+            .ok_or(MemoryError::NamespaceRequired)?;
         if namespace.is_empty() {
             return Err(MemoryError::NamespaceRequired);
         }
@@ -397,11 +403,9 @@ impl MemoryCoordinator {
             })?;
             *vector = rebuilt;
         }
-        let hits = self.runtime()?.block_on(vector.search_reranked(
-            namespace,
-            query,
-            top_k,
-        ))?;
+        let hits = self
+            .runtime()?
+            .block_on(vector.search_reranked(namespace, query, top_k))?;
         memory_read(
             legacy,
             sprint5,

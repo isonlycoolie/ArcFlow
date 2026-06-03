@@ -1,6 +1,7 @@
 //! LLM provider abstraction layer (Sprint 6).
 
 pub mod anthropic;
+pub mod async_bridge;
 pub mod error;
 pub mod gemini;
 pub mod mock;
@@ -9,10 +10,9 @@ pub mod openai;
 pub mod request;
 pub mod response;
 pub mod runtime;
-pub mod async_bridge;
 
-pub use mock::MockToolProvider;
 pub use error::ProviderCallError;
+pub use mock::MockToolProvider;
 pub use model_provider::ModelProvider;
 pub use request::{MessageRole, ProviderMessage, ProviderRequest, ToolCallRequest, ToolSchema};
 pub use response::{FinishReason, ProviderResponse, StreamChunk};

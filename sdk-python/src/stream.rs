@@ -3,7 +3,9 @@
 use std::sync::{Arc, Mutex};
 
 use arcflow_core::streaming::{StreamEvent, StreamRunBridge};
-use arcflow_core::workflow::{ExecutionConfig, StreamConfig, WorkflowEngine, WorkflowExecutionRecord};
+use arcflow_core::workflow::{
+    ExecutionConfig, StreamConfig, WorkflowEngine, WorkflowExecutionRecord,
+};
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 use uuid::Uuid;
@@ -27,13 +29,11 @@ fn stream_event_to_dict(py: Python<'_>, event: StreamEvent) -> PyResult<Py<PyAny
             "[ArcFlow] Failed to parse stream event: {e}"
         ))
     })?;
-    let dict = parsed
-        .as_object()
-        .ok_or_else(|| {
-            PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                "[ArcFlow] Stream event must be a JSON object.",
-            )
-        })?;
+    let dict = parsed.as_object().ok_or_else(|| {
+        PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
+            "[ArcFlow] Stream event must be a JSON object.",
+        )
+    })?;
     let out = pyo3::types::PyDict::new_bound(py);
     for (key, value) in dict {
         out.set_item(key, json_value_to_py(py, value)?)?;
@@ -76,7 +76,13 @@ fn json_value_to_py(py: Python<'_>, value: &serde_json::Value) -> PyResult<Py<Py
 
 #[pyclass(name = "WorkflowStreamIterator")]
 pub struct PyWorkflowStreamIterator {
-    bridge: Option<Mutex<StreamRunBridge<Result<WorkflowExecutionRecord, arcflow_core::workflow::WorkflowRunError>>>>,
+    bridge: Option<
+        Mutex<
+            StreamRunBridge<
+                Result<WorkflowExecutionRecord, arcflow_core::workflow::WorkflowRunError>,
+            >,
+        >,
+    >,
     events_exhausted: bool,
 }
 
@@ -90,9 +96,10 @@ impl PyWorkflowStreamIterator {
         if self.events_exhausted {
             return Ok(None);
         }
-        let bridge = self.bridge.as_ref().ok_or_else(|| {
-            configuration_error("Stream iterator already finalized.")
-        })?;
+        let bridge = self
+            .bridge
+            .as_ref()
+            .ok_or_else(|| configuration_error("Stream iterator already finalized."))?;
         let event = py.allow_threads(|| bridge.lock().expect("stream lock").recv_event());
         match event {
             Some(ev) => stream_event_to_dict(py, ev).map(Some),
@@ -109,9 +116,10 @@ impl PyWorkflowStreamIterator {
                 "stream finished",
             ));
         }
-        let bridge = self.bridge.as_ref().ok_or_else(|| {
-            PyErr::new::<pyo3::exceptions::PyStopIteration, _>("stream finished")
-        })?;
+        let bridge = self
+            .bridge
+            .as_ref()
+            .ok_or_else(|| PyErr::new::<pyo3::exceptions::PyStopIteration, _>("stream finished"))?;
         let event = py.allow_threads(|| bridge.lock().expect("stream lock").recv_event());
         match event {
             Some(ev) => stream_event_to_dict(py, ev),
@@ -153,8 +161,8 @@ pub fn start_workflow_stream(
     exec_config_json: Option<String>,
     graph_json: Option<String>,
 ) -> PyResult<PyWorkflowStreamIterator> {
-    let wf_id = Uuid::parse_str(&workflow_id)
-        .map_err(|_| configuration_error("Invalid workflow id."))?;
+    let wf_id =
+        Uuid::parse_str(&workflow_id).map_err(|_| configuration_error("Invalid workflow id."))?;
     let mut agent_inputs: Vec<AgentInput> = Vec::new();
     for item in agents.iter() {
         agent_inputs.push(parse_agent_tuple(item)?);
@@ -186,8 +194,8 @@ pub fn start_workflow_stream(
         None
     };
     let (provider, max_tokens, temperature) = provider_from_tuple(provider)?;
-    let mut exec_config: ExecutionConfig = parse_execution_config(exec_config_json.as_deref())
-        .map_err(configuration_error)?;
+    let mut exec_config: ExecutionConfig =
+        parse_execution_config(exec_config_json.as_deref()).map_err(configuration_error)?;
     exec_config.stream = Some(StreamConfig { enabled: true });
     let engine = WorkflowEngine::new();
 

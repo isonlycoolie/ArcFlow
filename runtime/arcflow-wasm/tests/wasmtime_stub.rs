@@ -74,8 +74,8 @@ fn wasm_module_exports_execute_workflow() {
 
     let engine = Engine::default();
     let module = Module::from_file(&engine, &path).expect("load wasm module");
-    let has_export = module.exports().any(|export| {
-        export.name() == "executeWorkflow" || export.name() == "execute_workflow"
-    });
+    let has_export = module
+        .exports()
+        .any(|export| export.name() == "executeWorkflow" || export.name() == "execute_workflow");
     assert!(has_export, "executeWorkflow export not found");
 }

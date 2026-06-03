@@ -53,9 +53,8 @@ async fn resolve_version(
             .list_versions(name)
             .await
             .map_err(|e| format!("database error: {e}"))?;
-        return resolve::pick_matching_version(&versions, version_or_range).ok_or_else(|| {
-            format!("no workflow '{name}' version matching '{version_or_range}'")
-        });
+        return resolve::pick_matching_version(&versions, version_or_range)
+            .ok_or_else(|| format!("no workflow '{name}' version matching '{version_or_range}'"));
     }
     Err(format!(
         "invalid workflow version or alias '{version_or_range}'"

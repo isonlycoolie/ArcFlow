@@ -68,10 +68,7 @@ pub enum RuntimeError {
 
     /// Workflow exceeded configured wall-clock timeout (Sprint 7).
     #[error("workflow timed out after {elapsed_ms}ms (configured: {configured_ms}ms)")]
-    WorkflowTimeout {
-        configured_ms: u64,
-        elapsed_ms: u64,
-    },
+    WorkflowTimeout { configured_ms: u64, elapsed_ms: u64 },
 
     /// All retry attempts exhausted for a step (Sprint 7).
     #[error(

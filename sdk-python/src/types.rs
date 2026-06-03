@@ -122,15 +122,24 @@ fn parse_retrieval_json(v: &Value) -> Option<MemoryRetrievalConfig> {
         "hybrid" => RetrievalModeSpec::Hybrid,
         _ => return None,
     };
-    let rerank = v.get("rerank").and_then(|x| x.as_str()).and_then(|s| match s {
-        "cohere" => Some(RerankProviderSpec::Cohere),
-        "local" => Some(RerankProviderSpec::Local),
-        _ => None,
-    });
+    let rerank = v
+        .get("rerank")
+        .and_then(|x| x.as_str())
+        .and_then(|s| match s {
+            "cohere" => Some(RerankProviderSpec::Cohere),
+            "local" => Some(RerankProviderSpec::Local),
+            _ => None,
+        });
     Some(MemoryRetrievalConfig {
         mode,
-        dense_weight: v.get("dense_weight").and_then(|x| x.as_f64()).unwrap_or(0.7) as f32,
-        sparse_weight: v.get("sparse_weight").and_then(|x| x.as_f64()).unwrap_or(0.3) as f32,
+        dense_weight: v
+            .get("dense_weight")
+            .and_then(|x| x.as_f64())
+            .unwrap_or(0.7) as f32,
+        sparse_weight: v
+            .get("sparse_weight")
+            .and_then(|x| x.as_f64())
+            .unwrap_or(0.3) as f32,
         rerank,
         top_k: v.get("top_k").and_then(|x| x.as_u64()).map(|n| n as u32),
     })
@@ -179,10 +188,13 @@ fn parse_context_json(raw: &str) -> PyResult<ContextPolicy> {
 }
 
 fn parse_tool_execution_json(raw: &str) -> PyResult<ToolExecutionConfig> {
-    let v: Value = serde_json::from_str(raw).map_err(|e| {
-        configuration_error(format!("Invalid tool_execution JSON: {e}"))
-    })?;
-    let mode = match v.get("mode").and_then(|x| x.as_str()).unwrap_or("llm_select") {
+    let v: Value = serde_json::from_str(raw)
+        .map_err(|e| configuration_error(format!("Invalid tool_execution JSON: {e}")))?;
+    let mode = match v
+        .get("mode")
+        .and_then(|x| x.as_str())
+        .unwrap_or("llm_select")
+    {
         "legacy_eager" => ToolExecutionMode::LegacyEager,
         "llm_select" => ToolExecutionMode::LlmSelect,
         other => {
@@ -283,10 +295,7 @@ fn parse_hitl_json(raw: &str) -> PyResult<HitlConfig> {
         .get("timeout_seconds")
         .and_then(|x| x.as_u64())
         .unwrap_or(3600);
-    let interrupt = v
-        .get("interrupt")
-        .and_then(|x| x.as_bool())
-        .unwrap_or(true);
+    let interrupt = v.get("interrupt").and_then(|x| x.as_bool()).unwrap_or(true);
     Ok(HitlConfig {
         approval_key,
         timeout_seconds,

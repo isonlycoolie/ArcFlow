@@ -115,7 +115,14 @@ fn vector_store_and_search_stub() {
         let coord = MemoryCoordinator::new(run);
         coord
             .write_vector(
-                &ns, "chunk-1", b"search me", "agent", legacy, sprint5, run_key, None,
+                &ns,
+                "chunk-1",
+                b"search me",
+                "agent",
+                legacy,
+                sprint5,
+                run_key,
+                None,
             )
             .unwrap();
         let got = coord

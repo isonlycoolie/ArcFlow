@@ -15,7 +15,9 @@ use arcflow_core::external::{
     decide_recovery, emit_external_traces, find_binding, validate_outcome_envelope, MonitorContext,
     RecoveryAction,
 };
-use arcflow_core::rcs::types::{AgentDefinition, ExecutionStatus, ExternalOutcomeReport, WorkflowDefinition};
+use arcflow_core::rcs::types::{
+    AgentDefinition, ExecutionStatus, ExternalOutcomeReport, WorkflowDefinition,
+};
 use arcflow_core::workflow::{WorkflowEngine, WorkflowRunError};
 
 use crate::dto::external::ExternalCallbackResponse;
@@ -48,7 +50,10 @@ pub async fn external_callback(
         ));
     }
 
-    if let Some(key) = headers.get("X-Idempotency-Key").and_then(|v| v.to_str().ok()) {
+    if let Some(key) = headers
+        .get("X-Idempotency-Key")
+        .and_then(|v| v.to_str().ok())
+    {
         let mut guard = state.external_idempotency.lock().map_err(|_| {
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -74,13 +79,10 @@ pub async fn external_callback(
         )
     })?;
 
-    let store = state
-        .runs
-        .as_ref()
-        .ok_or((
-            StatusCode::SERVICE_UNAVAILABLE,
-            "[ArcFlow] ARCFLOW_POSTGRESQL_URL is required".into(),
-        ))?;
+    let store = state.runs.as_ref().ok_or((
+        StatusCode::SERVICE_UNAVAILABLE,
+        "[ArcFlow] ARCFLOW_POSTGRESQL_URL is required".into(),
+    ))?;
 
     let stored = store
         .get(&run_id)
@@ -119,12 +121,8 @@ pub async fn external_callback(
         format!("external binding '{binding_id}' not found on workflow"),
     ))?;
 
-    validate_outcome_envelope(binding, &report).map_err(|e| {
-        (
-            StatusCode::UNPROCESSABLE_ENTITY,
-            format!("[ArcFlow] {e}"),
-        )
-    })?;
+    validate_outcome_envelope(binding, &report)
+        .map_err(|e| (StatusCode::UNPROCESSABLE_ENTITY, format!("[ArcFlow] {e}")))?;
 
     let policy = binding.recovery.clone().unwrap_or_default();
     let decision = decide_recovery(&report, &policy, 0);

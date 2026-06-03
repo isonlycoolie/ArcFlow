@@ -15,7 +15,9 @@ use super::request::ProviderRequest;
 pub struct ProviderRuntime;
 
 impl ProviderRuntime {
-    pub fn from_config(config: &ProviderConfig) -> Result<Arc<dyn ModelProvider>, ProviderCallError> {
+    pub fn from_config(
+        config: &ProviderConfig,
+    ) -> Result<Arc<dyn ModelProvider>, ProviderCallError> {
         match config.provider_id {
             ProviderId::OpenAI => Ok(Arc::new(OpenAIProvider::new(config.model.clone())?)),
             ProviderId::Anthropic => Ok(Arc::new(AnthropicProvider::new(config.model.clone())?)),

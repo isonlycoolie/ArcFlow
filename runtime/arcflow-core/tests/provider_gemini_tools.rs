@@ -2,9 +2,7 @@
 
 use arcflow_core::providers::gemini::GeminiProvider;
 use arcflow_core::providers::model_provider::ModelProvider;
-use arcflow_core::providers::request::{
-    MessageRole, ProviderMessage, ProviderRequest, ToolSchema,
-};
+use arcflow_core::providers::request::{MessageRole, ProviderMessage, ProviderRequest, ToolSchema};
 use wiremock::matchers::{method, path_regex};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
