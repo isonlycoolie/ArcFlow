@@ -1,6 +1,8 @@
 //! PyO3 bindings for ArcFlow — translate only; orchestration lives in `arcflow_core`.
 
 #![allow(clippy::useless_conversion)] // PyO3 `PyResult<T>` triggers a false positive on some toolchains
+#![allow(deprecated)] // PyO3 0.24 migration in progress
+#![allow(clippy::result_large_err)]
 
 mod errors;
 mod execution_config;
