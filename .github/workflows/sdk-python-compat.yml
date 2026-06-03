@@ -1,17 +1,13 @@
 name: SDK Python Compat
 
 on:
-  push:
-    branches: [master]
-    paths: &sdk_paths
-      - "sdk-python/**"
-      - "runtime/arcflow-core/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
-      - ".github/workflows/sdk-python-compat.yml"
   schedule:
     - cron: "0 6 * * 1"
   workflow_dispatch:
+
+concurrency:
+  group: sdk-python-compat-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   sdk-python-compat:

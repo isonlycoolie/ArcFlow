@@ -1,0 +1,86 @@
+name: CI Full
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Why running full CI (optional note)
+        required: false
+        type: string
+
+concurrency:
+  group: ci-full-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  trace-performance:
+    name: Trace overhead budget
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: |
+          cargo bench -p arcflow-core --bench trace_overhead -- --noplot 2>&1 | tee /tmp/bench.txt
+          python3 scripts/assert_trace_overhead.py < /tmp/bench.txt
+
+  audit:
+    name: Security audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo install cargo-audit && cargo audit
+
+  doc:
+    name: Rustdoc build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo doc --workspace --no-deps
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+  typescript-build:
+    name: TypeScript SDK build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: cargo build -p arcflow-node
+      - working-directory: sdk-typescript
+        run: npm install && npm run build:ts && npm test
+
+  postgres-integration:
+    name: Postgres integration
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: arcflow
+          POSTGRES_PASSWORD: arcflow
+          POSTGRES_DB: arcflow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      ARCFLOW_POSTGRESQL_URL: postgres://arcflow:arcflow@localhost:5432/arcflow
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: |
+          for f in runtime/arcflow-core/migrations/*.sql; do psql "$ARCFLOW_POSTGRESQL_URL" -f "$f"; done
+          cargo test -p arcflow-core human_interrupt -- --ignored --nocapture
+          cargo test -p arcflow-core trace_persistence -- --ignored --nocapture
