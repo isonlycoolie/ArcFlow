@@ -1,5 +1,7 @@
 # Contributing to ArcFlow
 
+Maintainers preparing a **public** release should complete [`OPEN_SOURCE.md`](OPEN_SOURCE.md) first.
+
 ## Repository map
 
 Key top-level folders and their purpose:
