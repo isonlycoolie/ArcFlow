@@ -80,7 +80,7 @@ curl -X POST "http://localhost:8080/v1/admin/sites/{site_id}/workflows/chat/publ
 
 [`kb.txt`](kb.txt) is sample content for dashboard upload testing, **do not** embed or ingest it from frontend code.
 
-## Advanced: direct mode (internal only)
+## Advanced: direct mode (local development only)
 
 [`src/main-dev-direct.ts`](src/main-dev-direct.ts) defines inline `Agent` + `MemoryConfig` for local engine debugging with CORS. Not for production, keys and workflow shape belong in dashboard/Relay, not the static bundle.
 
