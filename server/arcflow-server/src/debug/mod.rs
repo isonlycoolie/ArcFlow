@@ -75,9 +75,11 @@ pub async fn start_debug_run(
     let input = body.input;
     let run_id_spawn = run_id.clone();
     tokio::spawn(async move {
-        let mut exec_config = ExecutionConfig::default();
-        exec_config.run_id = Uuid::parse_str(&run_id_spawn).ok();
-        exec_config.debug = Some(session);
+        let exec_config = ExecutionConfig {
+            run_id: Uuid::parse_str(&run_id_spawn).ok(),
+            debug: Some(session),
+            ..ExecutionConfig::default()
+        };
         let _ = WorkflowEngine::new().execute_with_config(
             &workflow,
             &agent_map,
