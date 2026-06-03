@@ -37,7 +37,7 @@ run_step "no-unwrap" bash scripts/check-no-unwrap.sh
 
 run_step "no-sql-interpolation" bash scripts/check-no-sql-interpolation.sh
 
-run_step "function-length" bash scripts/check-function-length.sh
+run_step "function-length" python3 scripts/check_function_length.py
 
 run_step "structure-check" bash -c '
   set -euo pipefail
