@@ -1,6 +1,8 @@
 name: CI Full
 
 on:
+  schedule:
+    - cron: "0 6 * * *"
   workflow_dispatch:
     inputs:
       reason:
@@ -15,6 +17,7 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
+  CHECKOUT_REF: ${{ github.event_name == 'schedule' && 'development' || github.ref }}
 
 jobs:
   trace-performance:
@@ -22,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
       - uses: dtolnay/rust-toolchain@stable
       - run: |
           cargo bench -p arcflow-core --bench trace_overhead -- --noplot 2>&1 | tee /tmp/bench.txt
@@ -32,6 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo install cargo-audit && cargo audit
 
@@ -40,6 +47,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo doc --workspace --no-deps
         env:
@@ -50,6 +59,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
       - uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-node@v4
         with:
@@ -79,6 +90,8 @@ jobs:
       ARCFLOW_POSTGRESQL_URL: postgres://arcflow:arcflow@localhost:5432/arcflow
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
       - uses: dtolnay/rust-toolchain@stable
       - run: |
           for f in runtime/arcflow-core/migrations/*.sql; do psql "$ARCFLOW_POSTGRESQL_URL" -f "$f"; done

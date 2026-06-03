@@ -1,0 +1,57 @@
+name: Merge gate (master)
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, edited]
+
+concurrency:
+  group: merge-gate-master-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  pull-requests: read
+  contents: read
+
+jobs:
+  release-promotion-gate:
+    name: Release promotion gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require head branch development
+        if: github.head_ref != 'development'
+        run: |
+          echo "::error::Only pull requests from development into master are allowed (head: ${{ github.head_ref }})"
+          exit 1
+
+      - name: Require successful CI Full on PR head SHA
+        uses: actions/github-script@v7
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        with:
+          script: |
+            const headSha = process.env.HEAD_SHA;
+            const { owner, repo } = context.repo;
+            const workflows = await github.rest.actions.listRepoWorkflows({ owner, repo });
+            const ciFull = workflows.data.workflows.find((w) => w.name === "CI Full");
+            if (!ciFull) {
+              core.setFailed("CI Full workflow not found in repository");
+              return;
+            }
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner,
+              repo,
+              workflow_id: ciFull.id,
+              head_sha: headSha,
+              status: "completed",
+              per_page: 30,
+            });
+            const ok = runs.data.workflow_runs.some((r) => r.conclusion === "success");
+            if (!ok) {
+              core.setFailed(
+                "CI Full has not passed on commit " +
+                  headSha.slice(0, 7) +
+                  ". Wait for the daily run (06:00 UTC on development) or dispatch CI Full manually on this ref."
+              );
+            }
